@@ -385,9 +385,9 @@ export class LivePeerBenchmarking {
     const cohortAverage = cohort.cohortStatistics.averageScore;
     const topPerformerAverage = cohort.bestPractices.topPerformers.reduce((sum, p) => sum + p.overallScore, 0) / cohort.bestPractices.topPerformers.length;
 
-    const strengthsVsPeers = [];
-    const improvementOpportunities = [];
-    const competitiveAdvantages = [];
+    const strengthsVsPeers: string[] = [];
+    const improvementOpportunities: string[] = [];
+    const competitiveAdvantages: string[] = [];
 
     if (targetScore > cohortAverage) {
       strengthsVsPeers.push(`Overall performance exceeds peer average by ${((targetScore - cohortAverage) * 100 / cohortAverage).toFixed(1)}%`);

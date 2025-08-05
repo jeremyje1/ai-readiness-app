@@ -145,9 +145,13 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   console.log('Processing payment succeeded:', invoice.id);
   
-  if (invoice.subscription) {
+  const subscription = (invoice as any).subscription;
+  if (subscription) {
     // Ensure subscription remains active
-    await updateCustomerAccess(invoice.subscription as string, {
+    const subscriptionId = typeof subscription === 'string' 
+      ? subscription 
+      : subscription.id;
+    await updateCustomerAccess(subscriptionId, {
       status: 'active',
       lastPaymentDate: new Date().toISOString()
     });
@@ -157,9 +161,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   console.log('Processing payment failed:', invoice.id);
   
-  if (invoice.subscription) {
+  const subscription = (invoice as any).subscription;
+  if (subscription) {
     // Mark as payment issue but don't immediately deactivate
-    await updateCustomerAccess(invoice.subscription as string, {
+    const subscriptionId = typeof subscription === 'string' 
+      ? subscription 
+      : subscription.id;
+    await updateCustomerAccess(subscriptionId, {
       status: 'payment_failed',
       lastPaymentAttempt: new Date().toISOString()
     });

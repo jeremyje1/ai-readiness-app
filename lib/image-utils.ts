@@ -85,7 +85,7 @@ export function getOptimalImageSize(usage: string, deviceType = 'desktop') {
     : 'desktop';
   
   // Return the size or a default if usage is not found
-  return sizes[usage]?.[device] || { width: 800, height: 600 };
+  return (sizes as any)[usage]?.[device] || { width: 800, height: 600 };
 }
 
 /**

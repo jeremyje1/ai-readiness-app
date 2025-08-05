@@ -1029,7 +1029,7 @@ export class PDFReportGenerator {
   }
 
   private addPageNumbers() {
-    const pageCount = this.pdf.getNumberOfPages();
+    const pageCount = (this.pdf as any).getNumberOfPages();
     
     for (let i = 1; i <= pageCount; i++) {
       this.pdf.setPage(i);
@@ -1174,15 +1174,15 @@ function generateAIImplementationPhases(tier: string): string[] {
 
 function getInstitutionType(orgType: string): InstitutionType | undefined {
   const mapping: Record<string, InstitutionType> = {
-    'higher-education': 'community-college',
-    'community_college': 'community-college',
-    'public_university': 'public-university',
-    'private_university': 'private-university',
-    'hospital_healthcare': 'healthcare',
-    'nonprofit': 'nonprofit',
-    'government_agency': 'government',
-    'company_business': 'corporate',
-    'trade_technical': 'community-college'
+    'higher-education': 'HigherEd',
+    'community_college': 'HigherEd',
+    'public_university': 'HigherEd',
+    'private_university': 'HigherEd',
+    'hospital_healthcare': 'HealthcareEducation',
+    'nonprofit': 'default',
+    'government_agency': 'Government',
+    'company_business': 'CorporateTraining',
+    'trade_technical': 'HigherEd'
   };
   
   return mapping[orgType];

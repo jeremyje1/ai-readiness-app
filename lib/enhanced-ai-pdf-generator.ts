@@ -260,10 +260,9 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
       addSectionHeader('LONGITUDINAL PERFORMANCE ANALYSIS', colors.accent);
       addSubHeader('Historical Performance Trends');
       
-      const historicalInsights = await historicalAnalyzer.analyzeInstitutionalTrends(
+      const historicalInsights = await historicalAnalyzer.generateHistoricalAIInsights(
         analysis.submissionDetails?.institution_name || '',
-        organizationType,
-        analysis.score
+        analysis
       );
       
       addText(historicalInsights);
@@ -273,10 +272,16 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
       addSectionHeader('LIVE INDUSTRY INTELLIGENCE', colors.warning);
       addSubHeader('Current Market Conditions & Trends');
       
-      const industryData = await industryIntegrator.getRealtimeInsights(
-        organizationType,
-        analysis.score,
-        Object.keys(analysis.sectionScores || {})
+      // First get the live benchmarks
+      const liveBenchmarks = await industryIntegrator.getLiveBenchmarks(
+        (organizationType as any) || 'higher_education',
+        'medium', // institution size 
+        'mixed' // geographic region
+      );
+      
+      const industryData = await industryIntegrator.generateIndustryContextAI(
+        analysis,
+        liveBenchmarks
       );
       
       addText(industryData);
@@ -286,11 +291,30 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
       addSectionHeader('COMPETITIVE INTELLIGENCE ANALYSIS', colors.success);
       addSubHeader('Live Peer Performance Benchmarking');
       
-      const peerAnalysis = await peerBenchmarking.generateCompetitiveAnalysis(
-        analysis.submissionDetails?.institution_name || '',
-        organizationType,
-        analysis.score,
-        analysis.sectionScores || {}
+      // First find similar peers
+      const targetInstitution = {
+        name: analysis.submissionDetails?.institution_name || '',
+        type: organizationType,
+        size: 'medium', // default size
+        score: analysis.score
+      };
+      
+      const similarPeers = await peerBenchmarking.findSimilarPeers(
+        targetInstitution,
+        25, // max cohort size
+        0.7 // similarity threshold
+      );
+      
+      // Generate competitive intelligence
+      const competitiveIntel = await peerBenchmarking.generateCompetitiveIntelligence(
+        targetInstitution,
+        similarPeers
+      );
+      
+      const peerAnalysis = await peerBenchmarking.generatePeerBenchmarkingAI(
+        targetInstitution,
+        similarPeers,
+        competitiveIntel
       );
       
       addText(peerAnalysis);
