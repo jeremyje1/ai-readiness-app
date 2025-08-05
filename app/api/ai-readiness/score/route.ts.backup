@@ -1,0 +1,53 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { AIReadinessEngine } from '@/lib/aiReadinessEngine';
+import { aiReadinessDatabase, formatAssessmentForDatabase, formatTeamAssessmentForDatabase } from '@/lib/aiReadinessDatabase';
+import type { AIReadinessResults } from '@/lib/aiReadinessEngine';ort { NextRequest, NextResponse } from 'next/server';
+import { aiReadinessEngine } from '@/lib/aiReadinessEngine';
+import type { AIReadinessResponse } from '@/lib/aiReadinessEngine';
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { responses, institutionName } = body;
+
+    // Validate input
+    if (!responses || !Array.isArray(responses)) {
+      return NextResponse.json(
+        { error: 'Invalid responses format' },
+        { status: 400 }
+      );
+    }
+
+    // Validate that responses have the correct structure
+    const validResponses = responses.every((response: any) => 
+      response.questionId && 
+      response.value && 
+      typeof response.score === 'number'
+    );
+
+    if (!validResponses) {
+      return NextResponse.json(
+        { error: 'Invalid response structure' },
+        { status: 400 }
+      );
+    }
+
+    // Calculate the assessment results (now async due to proprietary algorithms)
+    const results = await aiReadinessEngine.assessReadiness(
+      responses as AIReadinessResponse[],
+      institutionName
+    );
+
+    return NextResponse.json({
+      success: true,
+      results
+    });
+
+  } catch (error) {
+    console.error('Error calculating AI readiness scores:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

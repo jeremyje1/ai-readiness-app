@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Blueprint™ - Implementation Guide & User Manual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto 0;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://northpathstrategies.org/wp-content/uploads/2025/07/—Pngtree—intriguingly-dark-geometric-backdrop-perfect_11036843.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            text-align: center;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin: 0;
+            font-weight: 300;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .section {
+            background: white;
+            margin-bottom: 30px;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+        }
+
+        .section h4 {
+            color: #555;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .step-list {
+            counter-reset: step-counter;
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            margin: 15px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            position: relative;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            background: #28a745;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .step-list li strong {
+            color: #28a745;
+            margin-left: 35px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .step-list li p {
+            margin-left: 35px;
+            color: #666;
+        }
+
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .domain-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .domain-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .domain-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .domain-card .weight {
+            background: #667eea;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            float: right;
+        }
+
+        .tier-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .tier-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tier-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+        }
+
+        .tier-card.premium {
+            border-color: #ffd700;
+            background: linear-gradient(145deg, #fff9e6, #ffffff);
+        }
+
+        .tier-card h4 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .tier-card .price {
+            font-size: 2em;
+            color: #28a745;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .tier-card .features {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .tier-card .features li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .tier-card .features li::before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .alert {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .alert.warning {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .alert.info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .alert h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .alert.warning h4 {
+            color: #856404;
+        }
+
+        .alert.info h4 {
+            color: #0c5460;
+        }
+
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .button:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .button.secondary {
+            background: #28a745;
+        }
+
+        .button.secondary:hover {
+            background: #218838;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .faq {
+            margin: 30px 0;
+        }
+
+        .faq-item {
+            margin: 15px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .faq-question {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .faq-answer {
+            padding: 15px 20px;
+            border-top: 1px solid #e9ecef;
+            background: white;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .timeline {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #667eea;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin: 20px 0;
+            padding-left: 80px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 5px;
+            width: 14px;
+            height: 14px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        .timeline-item h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header {
+                background-attachment: scroll;
+                padding: 40px 20px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .header .subtitle {
+                font-size: 1.1em;
+                padding: 0 20px;
+            }
+            
+            .section {
+                padding: 25px;
+            }
+            
+            .step-list li {
+                padding: 15px;
+            }
+            
+            .step-list li strong,
+            .step-list li p {
+                margin-left: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI Blueprint™</h1>
+        <p class="subtitle">Implementation Guide & User Manual - 100% Autonomous Implementation in 150 Days</p>
+        <div style="background: rgba(255, 196, 0, 0.9); color: black; padding: 15px; margin: 20px auto; border-radius: 10px; max-width: 600px; font-weight: bold;">
+            🚀 NEW: Fully Autonomous Implementation - No Manual Work Required!
+        </div>
+    </div>
+    
+    <div class="container">
+
+        <!-- Overview Section -->
+        <div class="section">
+            <h2>🎯 Overview</h2>
+            <p>The AI Blueprint™ is the world's first <strong>100% autonomous AI transformation system</strong> for both K12 and higher education institutions. Unlike traditional assessments that simply diagnose problems, our revolutionary Blueprint methodology delivers complete end-to-end implementation with zero manual work required.</p>
+            
+            <div class="alert info">
+                <h4>🚀 Revolutionary Autonomous Implementation</h4>
+                <p><strong>No consulting calls. No manual work. No waiting.</strong> Our AI system generates all documents, policies, training materials, and implementation plans automatically. Get complete AI transformation in 150 days with full transparency and real-time progress tracking.</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>� 100% Autonomous Delivery</h4>
+                    <p>AI generates all reports, policies, training curricula, and implementation plans automatically. No human intervention required.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🏛️ Dual Education Focus</h4>
+                    <p>Specifically designed for both K12 districts and higher education institutions with separate autonomous implementation tracks.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📋 Complete Implementation System</h4>
+                    <p>We don't just diagnose—we deliver complete transformation with all documentation, training, and monitoring systems included.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📄 Comprehensive Documentation</h4>
+                    <p>11+ automatically generated documents including strategies, policies, training curricula, and compliance frameworks.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Domains Section -->
+        <div class="section">
+            <h2>🏗️ Autonomous Implementation Tracks</h2>
+            <p>Choose your education sector for 100% autonomous implementation tailored to your specific needs:</p>
+            
+            <div class="tier-comparison">
+                <div class="tier-card premium">
+                    <h4>🎓 Higher Education Track</h4>
+                    <div class="price">150 Days</div>
+                    <p style="text-align: center; margin: 15px 0;"><a href="https://ai-readiness-app.vercel.app/highered-implementation" class="button">Start Higher Ed Implementation</a></p>
+                    <ul class="features">
+                        <li>Institutional AI readiness assessment</li>
+                        <li>Faculty development needs analysis</li>
+                        <li>Academic department integration planning</li>
+                        <li>FERPA compliance framework</li>
+                        <li>Student services AI integration</li>
+                        <li>Research enhancement platform</li>
+                        <li>Campus-wide deployment strategy</li>
+                        <li>Ongoing excellence monitoring</li>
+                    </ul>
+                </div>
+                
+                <div class="tier-card premium">
+                    <h4>🏫 K12 Education Track</h4>
+                    <div class="price">120 Days</div>
+                    <p style="text-align: center; margin: 15px 0;"><a href="https://ai-readiness-app.vercel.app/k12-implementation" class="button">Start K12 Implementation</a></p>
+                    <ul class="features">
+                        <li>District-wide AI readiness assessment</li>
+                        <li>Teacher professional development</li>
+                        <li>Curriculum integration strategies</li>
+                        <li>Student safety and privacy protocols</li>
+                        <li>Parent and community engagement</li>
+                        <li>Administrative efficiency optimization</li>
+                        <li>School-by-school deployment</li>
+                        <li>Continuous improvement framework</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>Revolutionary Autonomous Implementation Process</h3>
+            <p>Both tracks deliver complete implementation through fully automated AI systems:</p>
+            
+            <div class="domain-grid">
+                <div class="domain-card">
+                    <span class="weight">Phase 1</span>
+                    <h4>Autonomous Assessment</h4>
+                    <p>AI conducts comprehensive institutional analysis, generates baseline reports, and creates customized implementation roadmaps.</p>
+                </div>
+                <div class="domain-card">
+                    <span class="weight">Phase 2</span>
+                    <h4>Strategy & Policy Generation</h4>
+                    <p>AI creates complete policy frameworks, strategic plans, budget allocations, and compliance documentation automatically.</p>
+                </div>
+                <div class="domain-card">
+                    <span class="weight">Phase 3</span>
+                    <h4>Infrastructure Deployment</h4>
+                    <p>Automated platform integration, security implementation, and system configuration with real-time progress monitoring.</p>
+                </div>
+                <div class="domain-card">
+                    <span class="weight">Phase 4</span>
+                    <h4>Training & Development</h4>
+                    <p>AI generates complete training curricula, learning materials, and professional development programs for all stakeholders.</p>
+                </div>
+                <div class="domain-card">
+                    <span class="weight">Phase 5</span>
+                    <h4>Deployment & Excellence</h4>
+                    <p>Autonomous deployment orchestration with ongoing monitoring, optimization, and continuous improvement systems.</p>
+                </div>
+            </div>
+            
+            <h3>Autonomous Documents Generated (11+ Per Track)</h3>
+            
+            <h4>Higher Education Autonomous Deliverables:</h4>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>📊 Institutional AI Readiness Report</h4>
+                    <p>Comprehensive analysis of institutional AI readiness across all departments and functions.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>👨‍🏫 Faculty Development Assessment</h4>
+                    <p>Detailed faculty training requirements and personalized development plans.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🏛️ Academic Department Analysis</h4>
+                    <p>Department-by-department AI integration strategies and implementation timelines.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📋 AI Strategy Document</h4>
+                    <p>Complete institutional AI strategy aligned with mission and accreditation requirements.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚖️ Academic AI Policies</h4>
+                    <p>Comprehensive policy framework for faculty, staff, and student AI usage.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔒 FERPA Compliance Framework</h4>
+                    <p>Complete compliance guide for AI implementations in higher education.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>💰 Budget & Resource Plan</h4>
+                    <p>Detailed budget breakdown and ROI projections for AI implementation.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📚 Faculty Training Curriculum</h4>
+                    <p>Complete training program for faculty AI integration and best practices.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔧 Platform Integration Guide</h4>
+                    <p>Step-by-step integration instructions for LMS, SIS, and research systems.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>� Campus Deployment Report</h4>
+                    <p>Analysis of campus-wide deployment success and impact measurement.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔬 Research Enhancement Report</h4>
+                    <p>AI impact analysis on research productivity and collaboration opportunities.</p>
+                </div>
+            </div>
+            
+            <h4>K12 Education Autonomous Deliverables:</h4>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🏫 District AI Readiness Assessment</h4>
+                    <p>Comprehensive district-wide AI readiness analysis and capability evaluation.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>👩‍🏫 Teacher Development Strategy</h4>
+                    <p>Professional development plans and AI literacy programs for educators.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📖 Curriculum Integration Plan</h4>
+                    <p>Subject-specific AI integration strategies aligned with academic standards.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📋 District AI Strategy</h4>
+                    <p>Comprehensive AI strategy aligned with district mission and state requirements.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚖️ Student AI Usage Policies</h4>
+                    <p>Age-appropriate AI usage policies and digital citizenship frameworks.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔒 Student Privacy Framework</h4>
+                    <p>COPPA and FERPA compliant privacy protection protocols for K12 AI use.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>💰 Implementation Budget Plan</h4>
+                    <p>Detailed budget and funding strategies for district AI implementation.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📚 Professional Development Curriculum</h4>
+                    <p>Complete teacher training program with lesson plans and resources.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔧 Technology Integration Guide</h4>
+                    <p>Step-by-step integration with existing district technology systems.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📈 School Deployment Framework</h4>
+                    <p>School-by-school deployment strategy with success metrics and monitoring.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>👥 Community Engagement Plan</h4>
+                    <p>Parent and community communication strategies for AI implementation.</p>
+                </div>
+            </div>
+            
+            <div class="alert info">
+                <h4>🔬 Powered by Advanced AI Algorithms</h4>
+                <p>Both implementation tracks are powered by our proprietary AIRIX™, AIRS™, AICS™, AIMS™, AIPS™, and AIBS™ algorithms, specifically calibrated for educational environments and compliance requirements.</p>
+            </div>
+        </div>
+
+        <!-- Getting Started Section -->
+        <div class="section">
+            <h2>🚀 Getting Started with Autonomous AI Implementation</h2>
+            <p>Choose your education sector and start your 100% autonomous AI transformation:</p>
+            
+            <div class="alert info">
+                <h4>⚡ Instant Implementation Start</h4>
+                <p><strong>No setup meetings. No consulting calls. No delays.</strong> Simply choose your education track, provide basic institutional details, and watch as AI immediately begins generating your complete implementation plan.</p>
+            </div>
+            
+            <ol class="step-list">
+                <li>
+                    <strong>Choose Your Education Track</strong>
+                    <p>Select Higher Education or K12 implementation track based on your institution type. Each track includes specialized autonomous systems tailored to your sector's unique requirements.</p>
+                </li>
+                <li>
+                    <strong>Select Your Monthly Subscription</strong>
+                    <p>Choose AI Blueprint Essentials ($199/month) for core autonomous features or Professional ($499/month) for advanced capabilities. Both include 7-day free trials.</p>
+                </li>
+                <li>
+                    <strong>Provide Basic Institution Details</strong>
+                    <p>Simple 5-minute form provides institutional context for AI customization. No lengthy interviews or document preparation required.</p>
+                </li>
+                <li>
+                    <strong>Watch Autonomous Implementation Begin</strong>
+                    <p>AI immediately starts Phase 1 activities: comprehensive assessment, stakeholder analysis, and baseline document generation with real-time progress updates.</p>
+                </li>
+                <li>
+                    <strong>Monitor Real-Time Progress</strong>
+                    <p>Dashboard provides live updates on all implementation phases, document generation status, and milestone completion with transparent timelines.</p>
+                </li>
+                <li>
+                    <strong>Download All Generated Documents</strong>
+                    <p>Access board-ready reports, policies, training materials, and implementation guides as they're generated—no waiting for consulting deliverables.</p>
+                </li>
+            </ol>
+            
+            <div style="text-align: center; margin: 40px 0; padding: 30px; background: linear-gradient(145deg, #f8f9fa, #e9ecef); border-radius: 15px;">
+                <h3 style="color: #667eea; margin-bottom: 20px;">🚀 Start Your Autonomous Implementation</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
+                    <a href="https://ai-readiness-app.vercel.app/highered-implementation" class="button" style="display: block; text-decoration: none;">🎓 Higher Education Track</a>
+                    <a href="https://ai-readiness-app.vercel.app/k12-implementation" class="button" style="display: block; text-decoration: none;">🏫 K12 Education Track</a>
+                </div>
+                <p style="color: #666; font-size: 0.9em; margin-top: 15px;">Choose your track to start immediate autonomous implementation</p>
+            </div>
+        </div>
+
+        <!-- Tier Comparison Section -->
+        <div class="section">
+            <h2>📊 AI Blueprint™ Tiers</h2>
+            <p>Choose the transformation path that best fits your institution's needs and strategic priorities:</p>
+            
+            <div class="tier-comparison">
+                <div class="tier-card">
+                    <h4>AI Blueprint Essentials</h4>
+                    <div class="price">$199<span style="font-size: 0.6em; color: #666;">/month</span></div>
+                    <div style="background: #28a745; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8em; margin: 10px 0; display: inline-block;">7-Day Free Trial</div>
+                    <ul class="features">
+                        <li>Choose Higher Ed or K12 autonomous track</li>
+                        <li>Unlimited AI readiness assessments</li>
+                        <li>Real-time stakeholder feedback integration</li>
+                        <li>Dynamic report generation (8-12 pages)</li>
+                        <li>Basic autonomous implementation</li>
+                        <li>Core document generation (5 documents)</li>
+                        <li>Progress tracking dashboard</li>
+                        <li>Monthly assessment iterations</li>
+                        <li>Up to 5 users</li>
+                        <li>Email support</li>
+                        <li>Policy template library</li>
+                    </ul>
+                </div>
+                
+                <div class="tier-card premium">
+                    <h4>AI Blueprint Professional</h4>
+                    <div class="price">$499<span style="font-size: 0.6em; color: #666;">/month</span></div>
+                    <div style="background: #28a745; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8em; margin: 10px 0; display: inline-block;">7-Day Free Trial</div>
+                    <ul class="features">
+                        <li>Everything in Essentials, plus:</li>
+                        <li>Full autonomous implementation suite</li>
+                        <li>Complete document generation (11+ documents)</li>
+                        <li>Advanced real-time dashboard</li>
+                        <li>Comprehensive 150-question assessments</li>
+                        <li>Advanced AI-enhanced analysis (25-40 pages)</li>
+                        <li>Full algorithm suite: AIRIX™, AIRS™, AICS™, AIMS™</li>
+                        <li>Compliance frameworks (FERPA/COPPA)</li>
+                        <li>Training curriculum generation</li>
+                        <li>Up to 15 users</li>
+                        <li>Priority support</li>
+                    </ul>
+                </div>
+                
+                <div class="tier-card premium">
+                    <h4>AI Transformation Blueprint™</h4>
+                    <div class="price">Contact for Quote</div>
+                    <ul class="features">
+                        <li>Premium autonomous implementation</li>
+                        <li>150-question institutional assessment</li>
+                        <li>AI-generated narrative reports</li>
+                        <li>40-page board-ready Blueprint™</li>
+                        <li>Multi-model algorithmic analysis</li>
+                        <li>Advanced scenario builder (10 models)</li>
+                        <li>Customized AI policy framework</li>
+                        <li>Segmented implementation roadmap</li>
+                        <li>Secure collaboration workspace (15 users)</li>
+                        <li>Priority advisory support</li>
+                        <li>Executive AI consultation (60 min)</li>
+                    </ul>
+                </div>
+                
+                <div class="tier-card">
+                    <h4>AI Blueprint Enterprise</h4>
+                    <div class="price">Contact for Quote</div>
+                    <ul class="features">
+                        <li>Everything in Professional, plus:</li>
+                        <li>Multi-institution autonomous deployment</li>
+                        <li>White-label solution</li>
+                        <li>Custom branding and domain</li>
+                        <li>Full algorithm suite: AIRIX™, AIRS™, AICS™, AIMS™, AIPS™, AIBS™</li>
+                        <li>Dedicated success manager</li>
+                        <li>Custom integration development</li>
+                        <li>Multi-campus/district support</li>
+                        <li>Advanced reporting & analytics</li>
+                        <li>Unlimited users</li>
+                        <li>24/7 priority support</li>
+                        <li>Quarterly strategy sessions</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Coupon Code Section -->
+            <div class="alert info" style="text-align: center; margin: 30px 0;">
+                <h4>🎯 Special Launch Offer</h4>
+                <p>Use code <strong>AIREADY2025</strong> for 50% off your first month on any subscription plan!</p>
+                <p style="font-size: 0.9em; opacity: 0.8;">Limited time offer. Cannot be combined with free trial.</p>
+                <div style="background: rgba(255, 196, 0, 0.9); color: black; padding: 15px; margin: 15px auto; border-radius: 10px; max-width: 500px; font-weight: bold;">
+                    🚀 Plus: Get full autonomous implementation at no extra cost!
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Subscription Value -->
+        <div class="section">
+            <h2>🔄 Continuous Autonomous AI Transformation</h2>
+            <p>Our monthly subscription model ensures your AI transformation is always evolving through autonomous systems:</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🤖 Autonomous Evolution</h4>
+                    <p>AI systems continuously refine your implementation based on progress data, institutional changes, and best practice updates.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📊 Real-Time Implementation Tracking</h4>
+                    <p>Live dashboards monitor autonomous task completion, document generation, and implementation milestones across all phases.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>👥 Automated Stakeholder Integration</h4>
+                    <p>System automatically incorporates feedback and progress updates from all stakeholders to refine implementation strategies.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📈 Continuous Optimization</h4>
+                    <p>Monthly autonomous analysis identifies optimization opportunities and generates updated recommendations and strategies.</p>
+                </div>
+            </div>
+            
+            <h3>Why Autonomous Monthly Subscriptions Accelerate AI Transformation</h3>
+            <ul>
+                <li><strong>Zero Wait Time:</strong> No scheduling conflicts or consultant availability issues—autonomous systems work 24/7</li>
+                <li><strong>Continuous Improvement:</strong> AI best practices evolve rapidly—autonomous systems stay current automatically</li>
+                <li><strong>Consistent Quality:</strong> Standardized autonomous processes eliminate consultant variability and human error</li>
+                <li><strong>Transparent Progress:</strong> Real-time dashboards provide complete visibility into all implementation activities</li>
+                <li><strong>Complete Documentation:</strong> All deliverables generated automatically with no gaps or delays</li>
+                <li><strong>Risk Mitigation:</strong> Cancel anytime with 7-day free trial, plus complete autonomous delivery guarantee</li>
+            </ul>
+            
+            <div class="alert warning">
+                <h4>⚡ Revolutionary Advantage: 100% Autonomous vs. Traditional Consulting</h4>
+                <p><strong>Traditional consulting:</strong> 12+ month timelines, consultant dependency, inconsistent quality, high costs, limited availability.<br>
+                <strong>Autonomous AI Blueprint:</strong> 120-150 day completion, 24/7 operation, consistent quality, predictable costs, unlimited availability.</p>
+            </div>
+        </div>
+        <div class="section">
+            <h2>📁 Document Upload Guide</h2>
+            <p>Enhance your assessment analysis by uploading relevant institutional documents:</p>
+            
+            <h3>Recommended Document Categories</h3>
+            
+            <h4>1. Student Success & Academic Outcomes</h4>
+            <ul>
+                <li>Student retention and persistence reports</li>
+                <li>Graduation rate analyses by demographic</li>
+                <li>Student learning outcome assessments</li>
+                <li>Course success rate data</li>
+                <li>Student satisfaction surveys</li>
+            </ul>
+            
+            <h4>2. Faculty Teaching & Learning Support</h4>
+            <ul>
+                <li>Faculty development program records</li>
+                <li>Teaching evaluation data</li>
+                <li>Curriculum maps and learning objectives</li>
+                <li>Technology adoption statistics</li>
+                <li>Professional development participation rates</li>
+            </ul>
+            
+            <h4>3. Strategic Planning & Governance</h4>
+            <ul>
+                <li>Institutional strategic plans</li>
+                <li>Technology roadmaps</li>
+                <li>Current AI or technology policies</li>
+                <li>Governance structure documents</li>
+                <li>Committee charters and responsibilities</li>
+            </ul>
+            
+            <h4>4. Technology Infrastructure</h4>
+            <ul>
+                <li>IT infrastructure assessments</li>
+                <li>Data security policies</li>
+                <li>System integration documentation</li>
+                <li>Technology budget allocations</li>
+                <li>Cybersecurity frameworks</li>
+            </ul>
+            
+            <div class="alert info">
+                <h4>📋 Document Upload Tips</h4>
+                <p>Upload documents in PDF format when possible. Ensure sensitive information is redacted. Documents should be recent (within 2 years) for most accurate analysis.</p>
+            </div>
+        </div>
+
+        <!-- Using Assessment Results -->
+        <div class="section">
+            <h2>📈 Using Your Assessment Results</h2>
+            
+            <h3>Understanding Your Scores</h3>
+            <p>Your assessment results include several key components:</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Overall Readiness Score</h4>
+                    <p>Composite score from 0-100 indicating your institution's overall AI readiness level.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Domain-Specific Scores</h4>
+                    <p>Individual scores for each of the 8 assessment domains, highlighting strengths and improvement areas.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Maturity Level</h4>
+                    <p>Classification of your institution's AI maturity: Beginning, Developing, Advancing, or Leading.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Priority Recommendations</h4>
+                    <p>Specific, actionable recommendations ranked by impact and implementation feasibility.</p>
+                </div>
+            </div>
+            
+            <h3>Implementation Timeline</h3>
+            <p>Your report includes a suggested implementation timeline:</p>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h4>Immediate Actions (0-30 days)</h4>
+                    <p>Quick wins and foundational steps to begin your AI readiness journey.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Short-term Goals (1-6 months)</h4>
+                    <p>Policy development, stakeholder engagement, and infrastructure preparations.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Medium-term Objectives (6-12 months)</h4>
+                    <p>Pilot programs, training initiatives, and system implementations.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Long-term Vision (1-2 years)</h4>
+                    <p>Full AI integration, outcome measurement, and continuous improvement processes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Policy Implementation -->
+        <div class="section">
+            <h2>📋 Policy Implementation Guide</h2>
+            
+            <p>Your assessment generates custom AI policies tailored to your institution. Here's how to implement them effectively:</p>
+            
+            <h3>Generated Policy Types</h3>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Faculty AI Integration Policies</h4>
+                    <p>Guidelines for faculty use of AI in teaching, research, and administrative tasks.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Student AI Use Guidelines</h4>
+                    <p>Academic integrity frameworks and acceptable use policies for student AI interaction.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Employee AI Workplace Policies</h4>
+                    <p>Professional standards and guidelines for staff AI use in administrative and support functions.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Institutional AI Governance</h4>
+                    <p>High-level governance frameworks for institutional AI oversight and decision-making.</p>
+                </div>
+            </div>
+            
+            <h3>Policy Implementation Steps</h3>
+            
+            <ol class="step-list">
+                <li>
+                    <strong>Review Generated Policies</strong>
+                    <p>Carefully review all generated policy documents and customize them to reflect your institution's specific context and values.</p>
+                </li>
+                <li>
+                    <strong>Stakeholder Consultation</strong>
+                    <p>Engage faculty senate, student government, staff councils, and other stakeholders in policy review and refinement.</p>
+                </li>
+                <li>
+                    <strong>Legal and Compliance Review</strong>
+                    <p>Have your legal counsel and compliance officers review policies for alignment with institutional policies and regulations.</p>
+                </li>
+                <li>
+                    <strong>Approval Process</strong>
+                    <p>Follow your institution's policy approval process, which may include committee review and administrative approval.</p>
+                </li>
+                <li>
+                    <strong>Communication and Training</strong>
+                    <p>Develop comprehensive communication plans and training programs to ensure stakeholder understanding and adoption.</p>
+                </li>
+                <li>
+                    <strong>Implementation and Monitoring</strong>
+                    <p>Deploy policies with clear enforcement mechanisms and establish regular review cycles for updates and improvements.</p>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Best Practices -->
+        <div class="section">
+            <h2>✅ Best Practices</h2>
+            
+            <h3>For Assessment Completion</h3>
+            <ul>
+                <li><strong>Involve Multiple Stakeholders:</strong> Include representatives from academic affairs, IT, student services, and faculty leadership</li>
+                <li><strong>Be Honest and Realistic:</strong> Accurate responses lead to more valuable recommendations</li>
+                <li><strong>Gather Supporting Data:</strong> Have relevant metrics and documentation readily available</li>
+                <li><strong>Consider Future Goals:</strong> Think about where your institution wants to be in 2-3 years</li>
+                <li><strong>Document Current State:</strong> Take detailed notes about your current AI-related activities and policies</li>
+            </ul>
+            
+            <h3>For Implementation Success</h3>
+            <ul>
+                <li><strong>Start with Quick Wins:</strong> Implement easy, high-impact recommendations first to build momentum</li>
+                <li><strong>Engage Champions:</strong> Identify and support AI advocates across different stakeholder groups</li>
+                <li><strong>Communicate Clearly:</strong> Develop clear messaging about AI benefits and guardrails</li>
+                <li><strong>Pilot Before Scaling:</strong> Test AI initiatives with small groups before institution-wide deployment</li>
+                <li><strong>Monitor and Adjust:</strong> Regularly assess progress and adjust strategies based on outcomes</li>
+            </ul>
+            
+            <div class="alert warning">
+                <h4>⚠️ Common Implementation Pitfalls</h4>
+                <p>Avoid these common mistakes: rushing into AI adoption without proper planning, neglecting stakeholder engagement, failing to address academic integrity concerns, and implementing technology without adequate training and support.</p>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="section">
+            <h2>❓ Frequently Asked Questions</h2>
+            
+            <div class="faq">
+                <div class="faq-item">
+                    <div class="faq-question">How does the 7-day free trial work?</div>
+                    <div class="faq-answer">Start any subscription with a 7-day free trial. You'll have full access to all features during the trial period. If you don't cancel before the trial ends, you'll be automatically charged for your first month. Cancel anytime during the trial with no charges.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Can I use coupon codes with my subscription?</div>
+                    <div class="faq-answer">Yes! Enter coupon codes during the Stripe checkout process. Current offer: Use AIREADY2025 for 50% off your first month. Coupon codes cannot be combined with the free trial - choose one or the other.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">What happens each month with my subscription?</div>
+                    <div class="faq-answer">Your AI Blueprint continuously evolves! Each month you can run new assessments, upload updated documents, incorporate stakeholder feedback, and receive refreshed recommendations. The platform adapts based on your implementation progress and changing institutional needs.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Can I cancel my subscription anytime?</div>
+                    <div class="faq-answer">Yes, you can cancel your subscription at any time. You'll retain access to all features and data through the end of your current billing period. All generated reports and policies remain accessible for download during your active subscription.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">How long does each assessment take to complete?</div>
+                    <div class="faq-answer">Assessment length varies by subscription tier: Essentials includes streamlined assessments (30-45 minutes), while Professional includes comprehensive assessments (60-90 minutes). You can save progress and return later, and team members can collaborate on responses.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Can multiple people collaborate on assessments?</div>
+                    <div class="faq-answer">Yes! Both subscription tiers include team collaboration features. Invite colleagues to contribute their expertise to specific sections, ensuring comprehensive and accurate responses across all domains. Essentials supports up to 5 users, Professional supports up to 15 users.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">How often should we run new assessments?</div>
+                    <div class="faq-answer">With monthly subscriptions, we recommend running assessments quarterly to track progress and identify new opportunities. However, you can run unlimited assessments each month to capture rapid changes during active implementation phases.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Are the generated policies legally binding?</div>
+                    <div class="faq-answer">Generated policies are templates and recommendations that require customization and legal review before implementation. They provide a strong foundation but must be adapted to your institution's specific context and legal requirements.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">What support is available after completing the assessment?</div>
+                    <div class="faq-answer">Support varies by tier. All assessments include the comprehensive report and recommendations. Higher tiers include consultation calls, implementation support, and ongoing guidance. Additional consulting services are available separately.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">How does this assessment differ from other AI readiness tools?</div>
+                    <div class="faq-answer">Our assessment is specifically designed for higher education and includes unique features like automated policy generation, academic integrity focus, student success alignment, and learning outcome preservation. It's the most comprehensive assessment available for colleges and universities.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Requirements -->
+        <div class="section">
+            <h2>💻 Technical Requirements</h2>
+            
+            <h3>System Requirements</h3>
+            <ul>
+                <li><strong>Browser:</strong> Modern web browser (Chrome, Firefox, Safari, Edge)</li>
+                <li><strong>Internet:</strong> Stable internet connection for assessment completion and document upload</li>
+                <li><strong>Documents:</strong> PDF format preferred for document uploads (max 50MB per file)</li>
+                <li><strong>JavaScript:</strong> Must be enabled for full functionality</li>
+            </ul>
+            
+            <h3>Data Security & Privacy</h3>
+            <div class="alert info">
+                <h4>🔒 Your Data is Secure</h4>
+                <p>All assessment data is encrypted in transit and at rest. We follow FERPA guidelines and higher education privacy standards. Your institutional data is never shared with third parties and is used solely for generating your customized analysis and recommendations.</p>
+            </div>
+        </div>
+
+        <!-- Support & Contact -->
+        <div class="section">
+            <h2>📞 Support & Contact</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>📧 Email Support</h4>
+                    <p>Get help via email at support@northpathstrategies.org</p>
+                    <p><em>Response time: 24-48 hours</em></p>
+                </div>
+                <div class="feature-card">
+                    <h4>📞 Phone Consultation</h4>
+                    <p>Schedule a consultation call for personalized guidance</p>
+                    <p><em>Available for Advanced and Comprehensive tiers</em></p>
+                </div>
+                <div class="feature-card">
+                    <h4>📚 Implementation Resources</h4>
+                    <p>Access additional guides, templates, and best practice resources</p>
+                    <p><em>Available in your assessment results portal</em></p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔄 Assessment Updates</h4>
+                    <p>Receive notifications about assessment updates and new features</p>
+                    <p><em>Automatic for all assessment tiers</em></p>
+                </div>
+            </div>
+            
+            <div class="alert">
+                <h4>🎯 Ready to Begin?</h4>
+                <p>Start your institution's AI readiness journey today. Choose your assessment tier and begin the most comprehensive evaluation of your AI readiness available in higher education.</p>
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+                <h3 style="color: #667eea; margin-bottom: 20px;">🚀 Start Your Autonomous Implementation</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                    <a href="https://ai-readiness-app.vercel.app/highered-implementation" class="button">🎓 Higher Education Autonomous Implementation</a>
+                    <a href="https://ai-readiness-app.vercel.app/k12-implementation" class="button">🏫 K12 Autonomous Implementation</a>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                    <a href="https://ai-readiness-app.vercel.app/api/ai-blueprint/stripe/create-checkout?tier=ai-blueprint-essentials&price_id=price_1Rsp7LGrA5DxvwDNHgskPPpl&trial_days=7" class="button">Start AI Blueprint Essentials - $199/month (7-Day Free Trial)</a>
+                    <a href="https://ai-readiness-app.vercel.app/api/ai-blueprint/stripe/create-checkout?tier=ai-blueprint-professional&price_id=price_1Rsp7MGrA5DxvwDNUNqx3Lsf&trial_days=7" class="button">Start AI Blueprint Professional - $499/month (7-Day Free Trial)</a>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                    <a href="https://northpathstrategies.org/contact/" class="button">Get AI Blueprint Enterprise Quote</a>
+                    <a href="https://calendly.com/jeremyestrella/30min?month=2025-08" class="button secondary">Schedule Strategy Consultation</a>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; border: 2px dashed #667eea;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">💡 Have a Coupon Code?</h4>
+                    <p style="margin-bottom: 15px; color: #666;">Enter coupon code <strong>AIREADY2025</strong> during checkout for 50% off your first month!</p>
+                    <p style="font-size: 0.9em; color: #888;">Coupon codes can be applied on the Stripe checkout page before completing your subscription.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; padding: 40px 0; color: #666; border-top: 1px solid #e9ecef; margin-top: 40px;">
+            <p><strong>AI Blueprint™</strong> | Powered by North Path Strategies</p>
+            <p>100% Autonomous Implementation - From Assessment to Action in 120-150 Days</p>
+            <p style="font-size: 0.9em; margin-top: 10px; color: #28a745;">🚀 The world's first autonomous AI transformation system for education</p>
+            <p style="font-size: 0.9em; margin-top: 20px;">
+                © 2025 North Path Strategies. All rights reserved. | 
+                <a href="https://northpathstrategies.org/privacy" style="color: #667eea;">Privacy Policy</a> | 
+                <a href="https://northpathstrategies.org/terms" style="color: #667eea;">Terms of Service</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Simple FAQ toggle functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const answer = this.nextElementSibling;
+                const isVisible = answer.style.display === 'block';
+                
+                // Hide all answers
+                document.querySelectorAll('.faq-answer').forEach(ans => {
+                    ans.style.display = 'none';
+                });
+                
+                // Show clicked answer if it wasn't visible
+                if (!isVisible) {
+                    answer.style.display = 'block';
+                }
+            });
+        });
+
+        // Initialize FAQ (hide all answers)
+        document.querySelectorAll('.faq-answer').forEach(answer => {
+            answer.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
