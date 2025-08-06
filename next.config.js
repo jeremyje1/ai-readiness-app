@@ -11,12 +11,12 @@ const nextConfig = {
     return [
       {
         source: '/ai-readiness',
-        destination: '/ai-readiness/start',
+        destination: '/highered-implementation',
         permanent: false,
       },
       {
         source: '/',
-        destination: '/ai-readiness/start',
+        destination: '/highered-implementation',
         permanent: false,
       },
     ];
