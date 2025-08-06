@@ -121,18 +121,6 @@ export default function K12ImplementationPage() {
       setLoading(false);
     }
   };
-        const data = await response.json();
-        setHasImplementation(!!data.status);
-      } else {
-        setHasImplementation(false);
-      }
-    } catch (error) {
-      console.error('Failed to check implementation status:', error);
-      setHasImplementation(false);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const startNewImplementation = async () => {
     try {
