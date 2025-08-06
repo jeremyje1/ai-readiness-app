@@ -65,6 +65,18 @@ export default function HigherEdImplementationPage() {
             localStorage.setItem('higheredInstitutionId', result.institutionId);
             setCurrentStep('dashboard');
             
+            // Send welcome email
+            fetch('/api/send-welcome-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: institutionData.contactEmail,
+                name: institutionData.contactName,
+                implementationType: 'highered',
+                subscriptionTier: institutionData.subscriptionTier
+              })
+            }).catch(err => console.error('Failed to send welcome email:', err));
+            
             // Clean up
             sessionStorage.removeItem('higherEdInstitutionData');
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -171,6 +183,11 @@ export default function HigherEdImplementationPage() {
             <div className="flex items-center space-x-3">
               <GraduationCap className="h-8 w-8 text-indigo-600" />
               <h1 className="text-xl font-semibold">Higher Ed AI Blueprint Implementation</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <a href="/auth/signin" className="text-indigo-600 hover:text-indigo-800 font-medium">
+                Already have an account? Sign In
+              </a>
             </div>
           </div>
         </div>
