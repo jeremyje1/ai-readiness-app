@@ -50,16 +50,24 @@ export async function GET(request: NextRequest) {
 
     // Handle new monthly subscription tiers
     if (tier === 'ai-blueprint-essentials' || tier === 'ai-blueprint-professional') {
-      // Verify price ID matches environment
+      // Verify price ID matches environment (but allow hardcoded fallbacks)
       const expectedPriceId = tier === 'ai-blueprint-essentials' 
-        ? process.env.STRIPE_PRICE_AI_BLUEPRINT_ESSENTIALS_MONTHLY
-        : process.env.STRIPE_PRICE_AI_BLUEPRINT_PROFESSIONAL_MONTHLY;
+        ? process.env.STRIPE_PRICE_AI_BLUEPRINT_ESSENTIALS_MONTHLY || 'price_1Rsp7LGrA5DxvwDNHgskPPpl'
+        : process.env.STRIPE_PRICE_AI_BLUEPRINT_PROFESSIONAL_MONTHLY || 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf';
 
       if (priceId !== expectedPriceId) {
-        return NextResponse.json(
-          { error: 'Price ID does not match tier' },
-          { status: 400 }
-        );
+        console.warn(`Price ID mismatch: provided ${priceId}, expected ${expectedPriceId} for tier ${tier}`);
+        // Still allow if it matches the hardcoded fallback
+        const fallbackPriceId = tier === 'ai-blueprint-essentials' 
+          ? 'price_1Rsp7LGrA5DxvwDNHgskPPpl'
+          : 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf';
+        
+        if (priceId !== fallbackPriceId) {
+          return NextResponse.json(
+            { error: 'Price ID does not match tier' },
+            { status: 400 }
+          );
+        }
       }
 
       sessionParams = {
