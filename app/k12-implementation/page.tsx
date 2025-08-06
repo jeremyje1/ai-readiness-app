@@ -41,6 +41,15 @@ export default function K12ImplementationPage() {
 
   useEffect(() => {
     checkExistingImplementation();
+    
+    // Check if returning from successful Stripe checkout
+    const urlParams = new URLSearchParams(window.location.search);
+    const setupComplete = urlParams.get('setup');
+    
+    if (setupComplete === 'complete') {
+      // Complete the implementation setup
+      completeImplementationSetup();
+    }
   }, []);
 
   const checkExistingImplementation = async () => {
@@ -49,7 +58,7 @@ export default function K12ImplementationPage() {
       const response = await fetch('/api/k12-implementation?action=status&schoolId=current');
       if (response.ok) {
         const data = await response.json();
-        setHasImplementation(!!data.status);
+        setHasImplementation(data.hasImplementation);
       } else {
         setHasImplementation(false);
       }
@@ -61,9 +70,17 @@ export default function K12ImplementationPage() {
     }
   };
 
-  const startNewImplementation = async () => {
+  const completeImplementationSetup = async () => {
     try {
       setLoading(true);
+      
+      // Get the stored onboarding data
+      const storedData = sessionStorage.getItem('k12_onboarding_data');
+      if (!storedData) {
+        throw new Error('No onboarding data found');
+      }
+      
+      const onboardingData = JSON.parse(storedData);
       
       const schoolData = {
         id: `school-${Date.now()}`,
@@ -91,13 +108,58 @@ export default function K12ImplementationPage() {
 
       if (response.ok) {
         setHasImplementation(true);
-        setShowOnboarding(false);
+        // Clear the stored data
+        sessionStorage.removeItem('k12_onboarding_data');
+        // Remove the setup parameter from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
       } else {
         throw new Error('Failed to start implementation');
       }
     } catch (error) {
-      console.error('Failed to start implementation:', error);
-      alert('Failed to start implementation. Please try again.');
+      console.error('Failed to complete implementation setup:', error);
+      alert('Failed to complete setup. Please contact support.');
+      setLoading(false);
+    }
+  };
+        const data = await response.json();
+        setHasImplementation(!!data.status);
+      } else {
+        setHasImplementation(false);
+      }
+    } catch (error) {
+      console.error('Failed to check implementation status:', error);
+      setHasImplementation(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startNewImplementation = async () => {
+    try {
+      setLoading(true);
+      
+      // Redirect to Stripe checkout based on subscription tier
+      const priceId = onboardingData.subscriptionTier === 'basic' 
+        ? 'price_1Rsp7LGrA5DxvwDNHgskPPpl' // Essentials
+        : 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf'; // Professional
+      
+      const tier = onboardingData.subscriptionTier === 'basic' 
+        ? 'ai-blueprint-essentials' 
+        : 'ai-blueprint-professional';
+      
+      // Store the school data in sessionStorage for after payment
+      sessionStorage.setItem('k12_onboarding_data', JSON.stringify(onboardingData));
+      
+      // Redirect to Stripe checkout with trial
+      const checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=${tier}&price_id=${priceId}&trial_days=7&success_url=${encodeURIComponent(window.location.origin + '/k12-implementation?setup=complete')}&cancel_url=${encodeURIComponent(window.location.origin + '/k12-implementation')}`;
+      window.location.href = checkoutUrl;
+      
+    } catch (error) {
+      console.error('Failed to start checkout:', error);
+      alert('Failed to start checkout. Please try again.');
+      setLoading(false);
+    }
+  };
     } finally {
       setLoading(false);
     }

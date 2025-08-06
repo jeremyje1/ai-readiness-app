@@ -13,14 +13,24 @@ export default function AIBlueprintPricingPage() {
       return;
     }
     
+    // Use correct price IDs for monthly subscriptions
     const priceIds = {
-      'higher-ed-ai-pulse-check': 'price_1RomXAELd2WOuqIWUJT4cY29',
-      'ai-readiness-comprehensive': 'price_1Ro4tAELd2WOuqIWaDPEWxX3',
-      'ai-transformation-blueprint': 'price_1RomY5ELd2WOuqIWd3wUhiQm',
-      'ai-enterprise-partnership': 'price_1RomYtELd2WOuqIWKdsStKyQ'
+      'higher-ed-ai-pulse-check': 'price_1Rsp7LGrA5DxvwDNHgskPPpl', // Essentials
+      'ai-readiness-comprehensive': 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf', // Professional
+      'ai-transformation-blueprint': 'price_1RrRwZGrA5DxvwDNIzZhKycn',
+      'ai-enterprise-partnership': 'price_1RrRwaGrA5DxvwDNWIKHpG2q'
     };
     
-    const checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=${tier}&price_id=${priceIds[tier]}`;
+    // Map to subscription tiers for pulse check and comprehensive
+    let checkoutUrl: string;
+    if (tier === 'higher-ed-ai-pulse-check') {
+      checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=ai-blueprint-essentials&price_id=${priceIds[tier]}&trial_days=7`;
+    } else if (tier === 'ai-readiness-comprehensive') {
+      checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=ai-blueprint-professional&price_id=${priceIds[tier]}&trial_days=7`;
+    } else {
+      checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=${tier}&price_id=${priceIds[tier]}`;
+    }
+    
     window.location.href = checkoutUrl;
   };
 
@@ -92,9 +102,18 @@ export default function AIBlueprintPricingPage() {
                 <div className="text-3xl font-bold text-blue-600 mb-2">
                   {tierKey === 'ai-transformation-blueprint' || tierKey === 'ai-enterprise-partnership' 
                     ? 'Contact for Pricing' 
+                    : tierKey === 'higher-ed-ai-pulse-check'
+                    ? '$199/month'
+                    : tierKey === 'ai-readiness-comprehensive'
+                    ? '$499/month'
                     : `$${config.price.toLocaleString()}`}
                 </div>
                 <p className="text-gray-600 text-sm">{config.targetCustomer}</p>
+                {(tierKey === 'higher-ed-ai-pulse-check' || tierKey === 'ai-readiness-comprehensive') && (
+                  <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium mt-2 inline-block">
+                    7-Day Free Trial
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4 mb-8">
