@@ -148,10 +148,6 @@ export default function K12ImplementationPage() {
       setLoading(false);
     }
   };
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
