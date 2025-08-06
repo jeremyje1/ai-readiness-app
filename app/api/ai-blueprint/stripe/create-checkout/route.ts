@@ -160,8 +160,14 @@ export async function GET(request: NextRequest) {
     
   } catch (error) {
     console.error('AI Blueprint Stripe checkout error:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json(
-      { error: 'Failed to create AI Blueprint checkout session' },
+      { 
+        error: 'Failed to create AI Blueprint checkout session',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        errorType: error instanceof Error ? error.constructor.name : typeof error
+      },
       { status: 500 }
     );
   }
