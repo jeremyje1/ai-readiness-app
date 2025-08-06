@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 
 interface SchoolOnboarding {
+  contactName: string;
+  contactEmail: string;
   schoolName: string;
   schoolType: 'elementary' | 'middle' | 'high' | 'k12_district';
   studentCount: number;
@@ -30,6 +32,8 @@ export default function K12ImplementationPage() {
   const [hasImplementation, setHasImplementation] = useState<boolean | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingData, setOnboardingData] = useState<SchoolOnboarding>({
+    contactName: '',
+    contactEmail: '',
     schoolName: '',
     schoolType: 'elementary',
     studentCount: 0,
@@ -123,6 +127,12 @@ export default function K12ImplementationPage() {
   };
 
   const startNewImplementation = async () => {
+    // Validate required fields
+    if (!onboardingData.contactName || !onboardingData.contactEmail || !onboardingData.schoolName || !onboardingData.studentCount || !onboardingData.teacherCount) {
+      alert('Please fill in all required fields including contact name and email.');
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -267,6 +277,34 @@ export default function K12ImplementationPage() {
             </div>
 
             <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contact Name *
+                </label>
+                <input
+                  type="text"
+                  value={onboardingData.contactName}
+                  onChange={(e) => setOnboardingData({...onboardingData, contactName: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., John Smith"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contact Email *
+                </label>
+                <input
+                  type="email"
+                  value={onboardingData.contactEmail}
+                  onChange={(e) => setOnboardingData({...onboardingData, contactEmail: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., john.smith@school.edu"
+                  required
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   School Name *
