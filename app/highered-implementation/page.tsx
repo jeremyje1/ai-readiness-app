@@ -398,9 +398,11 @@ export default function HigherEdImplementationPage() {
                   <SelectContent>
                     <SelectItem value="essentials">AI Blueprint Essentials ($199/month)</SelectItem>
                     <SelectItem value="professional">AI Blueprint Professional ($499/month)</SelectItem>
-                    <SelectItem value="enterprise">Enterprise Partnership (Custom)</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-sm text-gray-600 mt-1">
+                  For custom enterprise solutions, contact us at <a href="mailto:info@northpathstrategies.org" className="text-blue-600 hover:underline">info@northpathstrategies.org</a>
+                </p>
               </div>
 
               <div className="space-y-2">
