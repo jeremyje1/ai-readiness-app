@@ -17,7 +17,17 @@ export async function GET(request: NextRequest) {
     const cancelUrl = searchParams.get('cancel_url');
     const trialDays = searchParams.get('trial_days');
 
-    if (!tier || !priceId) {
+    // For new subscription tiers, only tier is required
+    if (!tier) {
+      return NextResponse.json(
+        { error: 'Missing required parameter: tier' },
+        { status: 400 }
+      );
+    }
+
+    // For legacy tiers, both tier and price_id are required
+    const legacyTiers = ['higher-ed-ai-pulse-check', 'ai-readiness-comprehensive', 'ai-transformation-blueprint', 'ai-enterprise-partnership'];
+    if (legacyTiers.includes(tier) && !priceId) {
       return NextResponse.json(
         { error: 'Missing required parameters: tier and price_id' },
         { status: 400 }
@@ -31,7 +41,9 @@ export async function GET(request: NextRequest) {
       'ai-transformation-blueprint',
       'ai-enterprise-partnership',
       'ai-blueprint-essentials',
-      'ai-blueprint-professional'
+      'ai-blueprint-professional',
+      'essentials', // Short form for essentials
+      'professional' // Short form for professional
     ];
 
     if (!validTiers.includes(tier)) {
@@ -49,48 +61,40 @@ export async function GET(request: NextRequest) {
     let tierMapping;
 
     // Handle new monthly subscription tiers
-    if (tier === 'ai-blueprint-essentials' || tier === 'ai-blueprint-professional') {
-      // Verify price ID matches environment (but allow hardcoded fallbacks)
-      const expectedPriceId = tier === 'ai-blueprint-essentials' 
+    if (tier === 'ai-blueprint-essentials' || tier === 'ai-blueprint-professional' || tier === 'essentials' || tier === 'professional') {
+      // Normalize tier names
+      const normalizedTier = tier === 'essentials' ? 'ai-blueprint-essentials' : 
+                            tier === 'professional' ? 'ai-blueprint-professional' : tier;
+                            
+      // Determine price ID from tier and environment variables
+      const tierPriceId = normalizedTier === 'ai-blueprint-essentials' 
         ? process.env.STRIPE_PRICE_AI_BLUEPRINT_ESSENTIALS_MONTHLY || 'price_1Rsp7LGrA5DxvwDNHgskPPpl'
         : process.env.STRIPE_PRICE_AI_BLUEPRINT_PROFESSIONAL_MONTHLY || 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf';
 
-      if (priceId !== expectedPriceId) {
-        console.warn(`Price ID mismatch: provided ${priceId}, expected ${expectedPriceId} for tier ${tier}`);
-        // Still allow if it matches the hardcoded fallback
-        const fallbackPriceId = tier === 'ai-blueprint-essentials' 
-          ? 'price_1Rsp7LGrA5DxvwDNHgskPPpl'
-          : 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf';
-        
-        if (priceId !== fallbackPriceId) {
-          return NextResponse.json(
-            { error: 'Price ID does not match tier' },
-            { status: 400 }
-          );
-        }
-      }
+      // Use provided price_id if available, otherwise use tier-based price_id
+      const finalPriceId = priceId || tierPriceId;
 
       sessionParams = {
         mode: 'subscription',
         payment_method_types: ['card'],
         line_items: [
           {
-            price: priceId,
+            price: finalPriceId,
             quantity: 1,
           },
         ],
-        success_url: successUrl || `${baseUrl}/success?status=success&tier=${tier}&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: cancelUrl || `${baseUrl}/?status=cancelled&tier=${tier}`,
+        success_url: successUrl || `${baseUrl}/success?status=success&tier=${normalizedTier}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: cancelUrl || `${baseUrl}/?status=cancelled&tier=${normalizedTier}`,
         metadata: {
-          tier: tier,
+          tier: normalizedTier,
           service: 'ai-blueprint',
-          tier_name: tier === 'ai-blueprint-essentials' ? 'AI Blueprint Essentials' : 'AI Blueprint Professional',
-          tier_price: tier === 'ai-blueprint-essentials' ? '199' : '499',
+          tier_name: normalizedTier === 'ai-blueprint-essentials' ? 'AI Blueprint Essentials' : 'AI Blueprint Professional',
+          tier_price: normalizedTier === 'ai-blueprint-essentials' ? '199' : '499',
           subscription_type: 'monthly'
         },
         subscription_data: {
           metadata: {
-            tier: tier,
+            tier: normalizedTier,
             service: 'ai-blueprint'
           }
         }
