@@ -53,9 +53,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+    const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 
                     process.env.NEXT_PUBLIC_APP_URL || 
-                    'https://ai-readiness-app.vercel.app';
+                    'https://aireadiness.northpathstrategies.org').trim();
 
     let sessionParams: Stripe.Checkout.SessionCreateParams;
     let tierMapping;
