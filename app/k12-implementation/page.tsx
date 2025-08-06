@@ -153,8 +153,8 @@ export default function K12ImplementationPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your implementation dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-900">Loading your implementation dashboard...</p>
         </div>
       </div>
     );
@@ -163,21 +163,21 @@ export default function K12ImplementationPage() {
   // Show onboarding form if no implementation exists
   if (!hasImplementation && !showOnboarding) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div className="text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
                 Autonomous K12 AI Implementation
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-4xl mx-auto opacity-90">
+              <p className="text-xl md:text-2xl mb-8 max-w-4xl mx-auto text-white">
                 Complete 90-day AI integration delivered automatically without phone calls or manual intervention
               </p>
               <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-6">
                 <Button 
                   onClick={() => setShowOnboarding(true)}
-                  className="bg-white text-pink-600 px-8 py-4 text-lg font-semibold hover:bg-gray-100"
+                  className="bg-yellow-500 text-black px-8 py-4 text-lg font-bold hover:bg-yellow-400 shadow-lg"
                 >
                   <Play className="h-5 w-5 mr-2" />
                   Start Autonomous Implementation
@@ -195,28 +195,28 @@ export default function K12ImplementationPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="p-8 text-center">
-              <div className="bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Zap className="h-8 w-8 text-pink-600" />
+            <Card className="p-8 text-center border-2 border-blue-100 hover:border-blue-300 transition-colors">
+              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Zap className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Zero Manual Work</h3>
-              <p className="text-gray-600">All assessments, reports, and deliverables generated automatically using AI</p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Zero Manual Work</h3>
+              <p className="text-gray-700">All assessments, reports, and deliverables generated automatically using AI</p>
             </Card>
 
-            <Card className="p-8 text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Settings className="h-8 w-8 text-purple-600" />
+            <Card className="p-8 text-center border-2 border-blue-100 hover:border-blue-300 transition-colors">
+              <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Settings className="h-8 w-8 text-yellow-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Intelligent Automation</h3>
-              <p className="text-gray-600">AI monitors progress and automatically moves through implementation phases</p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Intelligent Automation</h3>
+              <p className="text-gray-700">AI monitors progress and automatically moves through implementation phases</p>
             </Card>
 
-            <Card className="p-8 text-center">
-              <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-indigo-600" />
+            <Card className="p-8 text-center border-2 border-blue-100 hover:border-blue-300 transition-colors">
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Complete Deliverables</h3>
-              <p className="text-gray-600">Receive all 20+ implementation deliverables without any manual intervention</p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Complete Deliverables</h3>
+              <p className="text-gray-700">Receive all 20+ implementation deliverables without any manual intervention</p>
             </Card>
           </div>
 
@@ -261,7 +261,7 @@ export default function K12ImplementationPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="p-8">
             <div className="text-center mb-8">
-              <School className="h-12 w-12 text-pink-600 mx-auto mb-4" />
+              <School className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900">Setup Your Autonomous Implementation</h2>
               <p className="text-gray-600 mt-2">Tell us about your school to customize your AI implementation</p>
             </div>
@@ -275,7 +275,7 @@ export default function K12ImplementationPage() {
                   type="text"
                   value={onboardingData.schoolName}
                   onChange={(e) => setOnboardingData({...onboardingData, schoolName: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your school name"
                   required
                 />
@@ -288,7 +288,7 @@ export default function K12ImplementationPage() {
                 <select
                   value={onboardingData.schoolType}
                   onChange={(e) => setOnboardingData({...onboardingData, schoolType: e.target.value as any})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="elementary">Elementary School (K-5)</option>
                   <option value="middle">Middle School (6-8)</option>
@@ -306,7 +306,7 @@ export default function K12ImplementationPage() {
                     type="number"
                     value={onboardingData.studentCount}
                     onChange={(e) => setOnboardingData({...onboardingData, studentCount: parseInt(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Number of students"
                     min="1"
                     required
@@ -321,7 +321,7 @@ export default function K12ImplementationPage() {
                     type="number"
                     value={onboardingData.teacherCount}
                     onChange={(e) => setOnboardingData({...onboardingData, teacherCount: parseInt(e.target.value) || 0})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Number of teachers"
                     min="1"
                     required
@@ -336,7 +336,7 @@ export default function K12ImplementationPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div 
                     className={`p-4 border-2 rounded-lg cursor-pointer ${
-                      onboardingData.subscriptionTier === 'basic' ? 'border-pink-500 bg-pink-50' : 'border-gray-200'
+                      onboardingData.subscriptionTier === 'basic' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
                     }`}
                     onClick={() => setOnboardingData({...onboardingData, subscriptionTier: 'basic'})}
                   >
@@ -345,7 +345,7 @@ export default function K12ImplementationPage() {
                   </div>
                   <div 
                     className={`p-4 border-2 rounded-lg cursor-pointer ${
-                      onboardingData.subscriptionTier === 'comprehensive' ? 'border-pink-500 bg-pink-50' : 'border-gray-200'
+                      onboardingData.subscriptionTier === 'comprehensive' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200'
                     }`}
                     onClick={() => setOnboardingData({...onboardingData, subscriptionTier: 'comprehensive'})}
                   >
