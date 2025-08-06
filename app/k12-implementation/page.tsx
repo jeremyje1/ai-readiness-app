@@ -156,7 +156,7 @@ export default function K12ImplementationPage() {
       // Store the school data in sessionStorage for after payment
       sessionStorage.setItem('k12_onboarding_data', JSON.stringify(onboardingData));
       
-      // Redirect to Stripe checkout with trial
+      // Redirect to Stripe checkout (7-day free trial)
       const checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=${tier}&price_id=${priceId}&trial_days=7&success_url=${encodeURIComponent(window.location.origin + '/k12-implementation?setup=complete')}&cancel_url=${encodeURIComponent(window.location.origin + '/k12-implementation')}`;
       window.location.href = checkoutUrl;
       
@@ -388,6 +388,7 @@ export default function K12ImplementationPage() {
                   >
                     <h4 className="font-semibold">Basic Implementation</h4>
                     <p className="text-sm text-gray-600">$199/month • Essential AI integration</p>
+                    <p className="text-xs text-green-600 font-medium">🎉 7-Day Free Trial</p>
                   </div>
                   <div 
                     className={`p-4 border-2 rounded-lg cursor-pointer ${
@@ -397,6 +398,7 @@ export default function K12ImplementationPage() {
                   >
                     <h4 className="font-semibold">Comprehensive Implementation</h4>
                     <p className="text-sm text-gray-600">$499/month • Full support & training</p>
+                    <p className="text-xs text-green-600 font-medium">🎉 7-Day Free Trial</p>
                   </div>
                 </div>
               </div>
@@ -419,7 +421,7 @@ export default function K12ImplementationPage() {
                   ) : (
                     <Play className="h-4 w-4 mr-2" />
                   )}
-                  Start Autonomous Implementation
+                  Start 7-Day Free Trial
                 </Button>
               </div>
             </div>
@@ -427,6 +429,7 @@ export default function K12ImplementationPage() {
             <div className="mt-8 p-4 bg-blue-50 rounded-lg">
               <h4 className="font-semibold text-blue-900 mb-2">What happens next?</h4>
               <ul className="text-sm text-blue-800 space-y-1">
+                <li>• <strong>7-Day Free Trial</strong> starts immediately - no charge until trial ends</li>
                 <li>• AI immediately begins your infrastructure assessment</li>
                 <li>• Automated teacher readiness survey is deployed</li>
                 <li>• COPPA compliance review starts automatically</li>

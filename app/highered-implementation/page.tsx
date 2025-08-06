@@ -110,7 +110,7 @@ export default function HigherEdImplementationPage() {
       // Store the institution data in sessionStorage for after payment
       sessionStorage.setItem('higherEdInstitutionData', JSON.stringify(formData));
 
-      // Redirect to Stripe checkout with trial
+      // Redirect to Stripe checkout (7-day free trial)
       const checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=${tier}&price_id=${priceId}&trial_days=7&success_url=${encodeURIComponent(window.location.origin + '/highered-implementation?setup=complete')}&cancel_url=${encodeURIComponent(window.location.origin + '/highered-implementation')}`;
       window.location.href = checkoutUrl;
 
@@ -466,6 +466,9 @@ export default function HigherEdImplementationPage() {
                     <SelectItem value="professional">AI Blueprint Professional ($499/month)</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-sm text-green-600 font-medium mt-1">
+                  🎉 7-Day Free Trial - No charge until trial ends
+                </p>
                 <p className="text-sm text-gray-600 mt-1">
                   For custom enterprise solutions, contact us at <a href="mailto:info@northpathstrategies.org" className="text-blue-600 hover:underline">info@northpathstrategies.org</a>
                 </p>
@@ -508,16 +511,17 @@ export default function HigherEdImplementationPage() {
                 ) : (
                   <span className="flex items-center">
                     <Zap className="h-4 w-4 mr-2" />
-                    Start Autonomous Implementation
+                    Start 7-Day Free Trial
                   </span>
                 )}
               </Button>
             </div>
 
             <div className="text-center text-sm text-gray-500">
-              <p>🚀 Implementation begins immediately with AI-generated deliverables</p>
+              <p>🎉 <strong className="text-green-600">7-Day Free Trial</strong> - Start immediately with full access</p>
+              <p>🚀 Implementation begins right away with AI-generated deliverables</p>
               <p>📊 All reports, policies, and training materials created autonomously</p>
-              <p>⚡ No manual work or consulting calls required</p>
+              <p>💳 No charge until your trial period ends</p>
             </div>
           </CardContent>
         </Card>
