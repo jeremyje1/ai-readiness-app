@@ -17,6 +17,8 @@ export default function HigherEdImplementationPage() {
   const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
+    contactName: '',
+    contactEmail: '',
     name: '',
     type: '',
     size: '',
@@ -31,6 +33,48 @@ export default function HigherEdImplementationPage() {
     if (savedInstitutionId) {
       setInstitutionId(savedInstitutionId);
       setCurrentStep('dashboard');
+      return;
+    }
+
+    // Check if returning from successful Stripe checkout
+    const urlParams = new URLSearchParams(window.location.search);
+    const setupComplete = urlParams.get('setup');
+    
+    if (setupComplete === 'complete') {
+      const storedData = sessionStorage.getItem('higherEdInstitutionData');
+      if (storedData) {
+        const institutionData = JSON.parse(storedData);
+        
+        // Start the implementation with the stored data
+        fetch('/api/highered-implementation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'start',
+            institutionData: {
+              ...institutionData,
+              studentCount: parseInt(institutionData.studentCount),
+              facultyCount: parseInt(institutionData.facultyCount)
+            }
+          })
+        })
+        .then(response => response.json())
+        .then(result => {
+          if (result.institutionId) {
+            setInstitutionId(result.institutionId);
+            localStorage.setItem('higheredInstitutionId', result.institutionId);
+            setCurrentStep('dashboard');
+            
+            // Clean up
+            sessionStorage.removeItem('higherEdInstitutionData');
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        })
+        .catch(error => {
+          console.error('Failed to complete setup:', error);
+          setError('Failed to complete setup. Please contact support.');
+        });
+      }
     }
   }, []);
 
@@ -39,7 +83,7 @@ export default function HigherEdImplementationPage() {
   };
 
   const startImplementation = async () => {
-    if (!formData.name || !formData.type || !formData.size || !formData.studentCount || !formData.facultyCount) {
+    if (!formData.contactName || !formData.contactEmail || !formData.name || !formData.type || !formData.size || !formData.studentCount || !formData.facultyCount) {
       setError('Please fill in all required fields');
       return;
     }
@@ -48,32 +92,25 @@ export default function HigherEdImplementationPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/highered-implementation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'start',
-          institutionData: {
-            ...formData,
-            studentCount: parseInt(formData.studentCount),
-            facultyCount: parseInt(formData.facultyCount)
-          }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to start implementation');
-      }
-
-      const result = await response.json();
-      const newInstitutionId = result.institutionId;
+      // Get price IDs based on subscription tier
+      const priceId = formData.subscriptionTier === 'essentials' 
+        ? 'price_1Rsp7LGrA5DxvwDNHgskPPpl' // Essentials price ID
+        : 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf'; // Professional price ID
       
-      setInstitutionId(newInstitutionId);
-      localStorage.setItem('higheredInstitutionId', newInstitutionId);
-      setCurrentStep('dashboard');
+      const tier = formData.subscriptionTier === 'essentials' 
+        ? 'essentials' 
+        : 'professional';
 
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      // Store the institution data in sessionStorage for after payment
+      sessionStorage.setItem('higherEdInstitutionData', JSON.stringify(formData));
+
+      // Redirect to Stripe checkout with trial
+      const checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=${tier}&price_id=${priceId}&trial_days=7&success_url=${encodeURIComponent(window.location.origin + '/highered-implementation?setup=complete')}&cancel_url=${encodeURIComponent(window.location.origin + '/highered-implementation')}`;
+      window.location.href = checkoutUrl;
+
+    } catch (error) {
+      console.error('Failed to start checkout:', error);
+      setError('Failed to start checkout. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -84,6 +121,8 @@ export default function HigherEdImplementationPage() {
     setInstitutionId(null);
     setCurrentStep('onboarding');
     setFormData({
+      contactName: '',
+      contactEmail: '',
       name: '',
       type: '',
       size: '',
@@ -350,6 +389,27 @@ export default function HigherEdImplementationPage() {
             )}
 
             <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="contactName">Contact Name *</Label>
+                <Input
+                  id="contactName"
+                  value={formData.contactName}
+                  onChange={(e) => handleInputChange('contactName', e.target.value)}
+                  placeholder="e.g., John Smith"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contactEmail">Contact Email *</Label>
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  value={formData.contactEmail}
+                  onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                  placeholder="e.g., john.smith@university.edu"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="name">Institution Name *</Label>
                 <Input
