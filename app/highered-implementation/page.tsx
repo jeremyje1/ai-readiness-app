@@ -73,7 +73,13 @@ export default function HigherEdImplementationPage() {
         .catch(error => {
           console.error('Failed to complete setup:', error);
           setError('Failed to complete setup. Please contact support.');
+          // Clean up session data even on error to prevent infinite loop
+          sessionStorage.removeItem('higherEdInstitutionData');
+          window.history.replaceState({}, document.title, window.location.pathname);
         });
+      } else {
+        // No stored data, clean up URL and redirect to form
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
   }, []);

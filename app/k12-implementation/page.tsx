@@ -81,7 +81,11 @@ export default function K12ImplementationPage() {
       // Get the stored onboarding data
       const storedData = sessionStorage.getItem('k12_onboarding_data');
       if (!storedData) {
-        throw new Error('No onboarding data found');
+        console.error('No onboarding data found in session storage');
+        // Clean up URL and redirect to form
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setLoading(false);
+        return;
       }
       
       const onboardingData = JSON.parse(storedData);
@@ -122,6 +126,10 @@ export default function K12ImplementationPage() {
     } catch (error) {
       console.error('Failed to complete implementation setup:', error);
       alert('Failed to complete setup. Please contact support.');
+      // Clear the stored data even on error to prevent infinite loop
+      sessionStorage.removeItem('k12_onboarding_data');
+      // Remove the setup parameter from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
       setLoading(false);
     }
   };
