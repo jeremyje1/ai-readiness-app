@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 export const Select      = Radix.Root
 export const SelectValue = Radix.Value
 
-export const SelectTrigger = ({ className, ...rest }: Radix.SelectTriggerProps) => (
+export const SelectTrigger = ({ children, className, ...rest }: Radix.SelectTriggerProps & { children?: React.ReactNode }) => (
   <Radix.Trigger
     {...rest}
     className={cn(
@@ -13,7 +13,24 @@ export const SelectTrigger = ({ className, ...rest }: Radix.SelectTriggerProps) 
       className
     )}
   >
-    <SelectValue placeholder="Select…" />
+    {children}
+    <Radix.Icon className="h-4 w-4 opacity-50">
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 15 15"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m4.93179 5.43179 2.56817 2.56817 2.56817-2.56817"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </Radix.Icon>
   </Radix.Trigger>
 )
 
