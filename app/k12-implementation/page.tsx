@@ -359,14 +359,14 @@ export default function K12ImplementationPage() {
                 <Button
                   onClick={() => setShowOnboarding(false)}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={startNewImplementation}
                   disabled={!onboardingData.schoolName || !onboardingData.studentCount || !onboardingData.teacherCount || loading}
-                  className="flex-1"
+                  className="flex-1 bg-yellow-500 text-black font-bold hover:bg-yellow-400 disabled:bg-gray-300 disabled:text-gray-500"
                 >
                   {loading ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
