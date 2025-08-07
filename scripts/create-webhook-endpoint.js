@@ -9,7 +9,7 @@ async function createWebhookEndpoint() {
 
     // Create webhook endpoint
     const webhook = await stripe.webhookEndpoints.create({
-      url: 'https://app.northpathstrategies.org/api/stripe/webhooks',
+      url: 'https://aireadiness.northpathstrategies.org/api/stripe/webhooks',
       enabled_events: [
         'checkout.session.completed',
         'customer.subscription.created',

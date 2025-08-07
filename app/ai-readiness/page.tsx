@@ -1,13 +1,59 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { CheckCircle, ArrowRight, Upload, BookOpen, BarChart3, Users } from 'lucide-react';
+import { CheckCircle, ArrowRight, Upload, BookOpen, BarChart3, Users, LogIn } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AIReadinessPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session) {
+      // Redirect to sign in page if not authenticated
+      router.push('/auth/signin');
+      return;
+    }
+    
+    setIsLoading(false);
+  }, [session, status, router]);
+
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <Card className="p-8 text-center max-w-md w-full mx-4">
+          <LogIn className="w-16 h-16 mx-auto mb-4 text-blue-600" />
+          <h2 className="text-2xl font-bold mb-2">Authentication Required</h2>
+          <p className="text-gray-600 mb-6">Please sign in to access your AI readiness dashboard.</p>
+          <Link href="/auth/signin">
+            <Button className="w-full">
+              Sign In
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </Card>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Hero Section */}

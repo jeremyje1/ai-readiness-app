@@ -28,12 +28,12 @@ export const AI_SERVICE_COMPLETE = {
   pricing: {
     monthly: {
       price: 99.99,
-      priceId: process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY || 'price_1PqzPJJxvKJgq9zwSFnBKh2j',
+      priceId: process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY || 'price_1Rta8CGrA5DxvwDN5CwgmHj1',
       period: 'month'
     },
     yearly: {
       price: 999.99,
-      priceId: process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_YEARLY || 'price_1PqzPOJxvKJgq9zwJN4UgVhI',
+      priceId: process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_YEARLY || 'price_1Rta8CGrA5DxvwDN4tAF3N8w',
       period: 'year',
       discount: '16.7% off'
     }

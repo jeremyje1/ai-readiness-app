@@ -29,7 +29,7 @@ export default function AIReadinessPricingPage() {
   const handleGetStarted = (period: 'monthly' | 'yearly') => {
     // This will be updated when Stripe products are created
     const trialDays = AI_SERVICE_COMPLETE.trialDays;
-    const baseUrl = 'https://app.northpathstrategies.org/api/stripe/create-checkout';
+    const baseUrl = 'https://aireadiness.northpathstrategies.org/api/stripe/create-checkout';
     
     if (period === 'monthly') {
       window.location.href = `${baseUrl}?tier=ai-readiness-complete-monthly&trial_days=${trialDays}`;

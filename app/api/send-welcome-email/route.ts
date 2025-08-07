@@ -3,7 +3,7 @@ import sgMail from '@sendgrid/mail'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, implementationType, subscriptionTier, billingPeriod } = await request.json()
+    const { email, name, implementationType, subscriptionTier, billingPeriod, loginPassword, isNewAccount } = await request.json()
 
     sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
@@ -50,10 +50,26 @@ export async function POST(request: NextRequest) {
               </ul>
             </div>
             
+            ${isNewAccount && loginPassword ? `
+            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <h3 style="margin-top: 0; color: #92400e;">🔐 Your Login Credentials</h3>
+              <p style="color: #92400e; font-size: 14px; margin-bottom: 10px;">
+                We've created your account. Use these credentials to access your dashboard:
+              </p>
+              <div style="background: white; padding: 15px; border-radius: 5px; font-family: monospace;">
+                <p style="margin: 5px 0; color: #1f2937;"><strong>Email:</strong> ${email}</p>
+                <p style="margin: 5px 0; color: #1f2937;"><strong>Password:</strong> ${loginPassword}</p>
+              </div>
+              <p style="color: #92400e; font-size: 12px; margin-top: 10px; margin-bottom: 0;">
+                ⚠️ Please change your password after your first login for security.
+              </p>
+            </div>
+            ` : ''}
+            
             <div style="text-align: center; margin: 30px 0;">
               <a href="${process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org'}/${isUnifiedService ? 'ai-readiness' : (implementationType === 'highered' ? 'highered-implementation' : 'k12-implementation')}" 
                  style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-                Access Your Dashboard
+                ${isNewAccount ? 'Sign In to Your Dashboard' : 'Access Your Dashboard'}
               </a>
             </div>
             

@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { NextAuthOptions } from 'next-auth'
+import { validateUser } from '@/lib/user-management'
 
 const authOptions: NextAuthOptions = {
   providers: [
@@ -15,22 +16,9 @@ const authOptions: NextAuthOptions = {
           return null
         }
 
-        // For now, we'll check against localStorage/sessionStorage data
-        // In production, this should connect to your database
-        
-        // Check if this email has an active implementation
-        const higherEdId = 'higheredInstitutionId' // This would come from your database
-        const k12Id = 'k12SchoolId' // This would come from your database
-        
-        if (credentials.email && credentials.password) {
-          return {
-            id: credentials.email,
-            email: credentials.email,
-            name: credentials.email.split('@')[0],
-          }
-        }
-        
-        return null
+        // Validate user credentials
+        const user = validateUser(credentials.email, credentials.password)
+        return user
       }
     })
   ],
@@ -42,12 +30,15 @@ const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.email = user.email
+        token.id = user.id
       }
       return token
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.email = token.email as string
+        // @ts-ignore - extending the session type
+        session.user.id = token.id as string
       }
       return session
     },

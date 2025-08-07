@@ -74,6 +74,8 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   console.log('Checkout completed:', session.id)
+  console.log('Session metadata:', session.metadata)
+  console.log('Customer email:', session.customer_email)
   
   // Track analytics
   await trackAnalytics('checkout_completed', {
@@ -90,9 +92,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     await handleConsultationPurchase(session)
   }
 
-  // Send welcome email for main service
-  if (session.metadata?.service === 'ai-readiness-complete') {
+  // Send welcome email for main service - check multiple metadata fields
+  if (session.metadata?.service === 'ai-readiness-complete' || 
+      session.mode === 'subscription' || 
+      session.metadata?.billing_period) {
+    console.log('Triggering welcome email for AI service subscription')
     await sendWelcomeEmail(session)
+  } else {
+    console.log('Not triggering welcome email - metadata check failed:', {
+      service: session.metadata?.service,
+      mode: session.mode,
+      billing_period: session.metadata?.billing_period
+    })
   }
 }
 
@@ -190,12 +201,28 @@ async function handleTrialWillEnd(subscription: Stripe.Subscription) {
 async function sendWelcomeEmail(session: Stripe.Checkout.Session) {
   try {
     if (session.customer_email) {
+      // Create user account for the customer
+      const { createUserAccount } = await import('@/lib/user-management')
+      
+      // Create subscription object from session metadata
+      const subscription = {
+        status: 'trialing',
+        plan: session.metadata?.billing_period || 'monthly',
+        trial_end: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days from now
+      }
+      
+      const userAccount = createUserAccount(session.customer_email, subscription)
+      console.log('Created user account:', userAccount)
+      
+      // Send welcome email with login credentials
       await fetch(`${process.env.NEXTAUTH_URL}/api/send-welcome-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: session.customer_email,
-          billingPeriod: session.metadata?.billing_period || 'monthly'
+          billingPeriod: session.metadata?.billing_period || 'monthly',
+          loginPassword: userAccount.password,
+          isNewAccount: true
         })
       })
       console.log('Welcome email sent:', session.customer_email)
