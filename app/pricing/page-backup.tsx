@@ -91,105 +91,13 @@ export default function AIReadinessPricingPage() {
         </div>
       </section>
 
-      {/* Pricing Cards - New 4-Tier Structure */}
+      {/* Pricing Cards - Placeholder for old structure */}
       <section className="container mx-auto px-4 py-16 -mt-8">
-        <div className="grid lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {AI_READINESS_PRODUCTS.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.6 }}
-            >
-              <Card className={`relative h-full ${
-                product.isPopular 
-                  ? 'border-2 border-indigo-500 shadow-xl scale-105' 
-                  : product.name === 'Enterprise AI Partnership'
-                  ? 'bg-gradient-to-br from-gray-900 to-gray-800 text-white border-0'
-                  : 'border border-slate-200 shadow-lg'
-              }`}>
-                {product.isPopular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-indigo-500 text-white px-4 py-1 text-sm font-medium">
-                      <Star className="h-3 w-3 mr-1" />
-                      Most Popular
-                    </Badge>
-                  </div>
-                )}
-                
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className={`text-xl font-bold mb-2 ${
-                    product.name === 'Enterprise AI Partnership' ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {product.name}
-                  </CardTitle>
-                  <p className={`text-sm mb-4 ${
-                    product.name === 'Enterprise AI Partnership' ? 'text-gray-300' : 'text-gray-600'
-                  }`}>
-                    {product.goal}
-                  </p>
-                  <div className={`text-3xl font-bold mb-2 ${
-                    product.name === 'Enterprise AI Partnership' 
-                      ? 'text-yellow-400' 
-                      : 'text-indigo-600'
-                  }`}>
-                    ${product.price.toLocaleString()}
-                  </div>
-                  <p className={`text-sm ${
-                    product.name === 'Enterprise AI Partnership' ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
-                    {product.duration}
-                  </p>
-                </CardHeader>
-                
-                <CardContent className="px-6 pb-6">
-                  <ul className="space-y-2 mb-6">
-                    {product.features.slice(0, 8).map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start text-sm">
-                        <div className={`mr-2 mt-0.5 ${
-                          product.name === 'Enterprise AI Partnership' 
-                            ? 'text-yellow-400' 
-                            : 'text-green-500'
-                        }`}>
-                          {getFeatureIcon(feature)}
-                        </div>
-                        <span className={
-                          product.name === 'Enterprise AI Partnership' ? 'text-gray-100' : 'text-gray-700'
-                        }>
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                    {product.features.length > 8 && (
-                      <li className={`text-sm italic ${
-                        product.name === 'Enterprise AI Partnership' ? 'text-gray-300' : 'text-gray-500'
-                      }`}>
-                        + {product.features.length - 8} more features...
-                      </li>
-                    )}
-                  </ul>
-                  
-                  <Button
-                    onClick={() => handleSelectPlan(product)}
-                    className={`w-full ${
-                      product.isPopular
-                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                        : product.name === 'Enterprise AI Partnership'
-                        ? 'bg-yellow-400 hover:bg-yellow-300 text-gray-900'
-                        : product.name === 'AI Pulse Check'
-                        ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                        : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700'
-                    }`}
-                  >
-                    {product.name === 'Enterprise AI Partnership' 
-                      ? 'Contact Sales' 
-                      : `Start ${product.name.split(' ')[0]} ${product.name.split(' ')[1] || ''}`
-                    }
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+        <div className="text-center">
+          <p className="text-gray-600">This is a backup of the old pricing structure.</p>
+          <Link href="/pricing" className="text-blue-600 hover:underline">
+            View current pricing
+          </Link>
         </div>
       </section>
 
