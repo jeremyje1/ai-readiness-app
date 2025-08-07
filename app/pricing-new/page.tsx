@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,70 +18,20 @@ import {
   Zap,
   Target,
   BarChart3,
-  Clock,
-  Phone
+  Clock
 } from 'lucide-react';
 import { AI_SERVICE_COMPLETE, PRICING_DISPLAY, getAnnualSavings } from '@/lib/unified-pricing-config';
-import { useAnalytics } from '@/components/analytics-tracker';
 import Link from 'next/link';
 
 export default function UnifiedPricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
-  const analytics = useAnalytics();
 
-  useEffect(() => {
-    analytics.trackPricingPageView(billingPeriod);
-  }, [billingPeriod, analytics]);
-
-  const handleGetStarted = async (period: 'monthly' | 'yearly') => {
+  const handleGetStarted = (period: 'monthly' | 'yearly') => {
     const trialDays = AI_SERVICE_COMPLETE.trialDays;
-    const pricing = period === 'monthly' ? AI_SERVICE_COMPLETE.pricing.monthly : AI_SERVICE_COMPLETE.pricing.yearly;
+    const baseUrl = '/api/stripe/unified-checkout';
     
-    // Track checkout initiation
-    analytics.trackCheckoutInitiated(period, pricing.price);
-    
-    try {
-      const response = await fetch('/api/stripe/unified-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          billingPeriod: period,
-          userEmail: 'prospect@example.com' // This would come from a form or auth
-        })
-      });
-
-      const { url } = await response.json();
-      
-      if (url) {
-        // Track trial started before redirect
-        analytics.trackTrialStarted(period, pricing.price);
-        window.location.href = url;
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      // Fallback to old method
-      const baseUrl = '/api/stripe/unified-checkout';
-      window.location.href = `${baseUrl}?billing=${period}&trial_days=${trialDays}`;
-    }
-  };
-
-  const handleConsultationRequest = (serviceName: string) => {
-    analytics.trackConsultationRequested(serviceName);
-    
-    // Find the service details
-    const service = AI_SERVICE_COMPLETE.consultationServices.services.find(
-      s => s.name === serviceName
-    );
-    
-    if (service) {
-      // Create a URL with service details for consultation checkout
-      const serviceType = serviceName.toLowerCase().replace(/\s+/g, '_');
-      const checkoutUrl = `/consultation-checkout?service=${serviceType}&name=${encodeURIComponent(serviceName)}&price=${service.price}&type=${service.type}`;
-      window.location.href = checkoutUrl;
-    } else {
-      // Fallback to email
-      window.open('mailto:info@northpathstrategies.org?subject=Consultation Request: ' + serviceName, '_blank');
-    }
+    // Redirect to the new unified checkout API
+    window.location.href = `${baseUrl}?billing=${period}&trial_days=${trialDays}`;
   };
 
   const getFeatureIcon = (feature: string) => {
@@ -323,76 +273,6 @@ export default function UnifiedPricingPage() {
                 You can cancel anytime with no long-term commitments. Your access continues until the end of your current billing period.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Autonomous Service Note */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <div className="flex items-start space-x-3">
-              <Brain className="h-6 w-6 text-blue-600 mt-1" />
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">Fully Autonomous Implementation</h3>
-                <p className="text-blue-800 mb-3">
-                  {AI_SERVICE_COMPLETE.autonomousNote}
-                </p>
-                <p className="text-sm text-blue-700">
-                  Our AI system handles everything from analysis to implementation planning, requiring no human intervention for the core service.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Optional Consultation Services */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Optional Consultation Services</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Need human expertise? Add optional consultation services for personalized guidance and implementation support.
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              * {AI_SERVICE_COMPLETE.consultationServices.note}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {AI_SERVICE_COMPLETE.consultationServices.services.map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <Card className="h-full border-gray-200 hover:border-indigo-300 transition-colors">
-                  <CardHeader className="text-center pb-4">
-                    <div className="bg-gray-100 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4">
-                      <Phone className="w-8 h-8 text-gray-600" />
-                    </div>
-                    <CardTitle className="text-xl mb-2">{service.name}</CardTitle>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">
-                      ${service.price}
-                    </div>
-                    <p className="text-sm text-gray-500">{service.duration}</p>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-gray-600 text-center mb-6">
-                      {service.description}
-                    </p>
-                    <Button 
-                      onClick={() => handleConsultationRequest(service.name)}
-                      className="w-full bg-gray-600 hover:bg-gray-700"
-                    >
-                      Request Consultation
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
           </div>
         </div>
       </section>

@@ -449,55 +449,104 @@
     <section id="pricing" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h3 class="text-4xl font-bold text-gray-800 mb-4">Choose Your School's AI Journey</h3>
-                <p class="text-xl text-gray-600">Affordable options designed for K12 budgets and timelines</p>
+                <h3 class="text-4xl font-bold text-gray-800 mb-4">Complete AI Transformation for K12</h3>
+                <p class="text-xl text-gray-600">One comprehensive service that includes everything your school needs</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- Essentials -->
-                <div class="bg-white border-2 border-pink-500 rounded-lg p-6 text-center relative">
-                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-pink-500 text-white px-4 py-1 rounded-full text-sm">Most Popular</div>
-                    <h4 class="text-xl font-semibold mb-2">AI Blueprint Essentials</h4>
-                    <div class="text-3xl font-bold text-pink-600 mb-4">$199<span class="text-lg">/month</span></div>
-                    <p class="text-sm text-gray-500 mb-4">✨ Start with a 7-day free trial!</p>
-                    <ul class="text-sm text-gray-600 space-y-2 mb-6">
-                        <li>✓ Complete AI readiness assessment</li>
-                        <li>✓ Personalized implementation roadmap</li>
-                        <li>✓ Resource library access</li>
-                        <li>✓ Monthly progress tracking</li>
-                        <li>✓ Email support</li>
-                    </ul>
-                    <a href="https://aireadiness.northpathstrategies.org/k12-implementation" class="w-full btn-primary text-white py-2 rounded-lg">Start Assessment</a>
-                </div>
-                
-                <!-- Professional -->
-                <div class="bg-white border-2 border-gray-200 rounded-lg p-6 text-center">
-                    <h4 class="text-xl font-semibold mb-2">AI Blueprint Professional</h4>
-                    <div class="text-3xl font-bold text-pink-600 mb-4">$499<span class="text-lg">/month</span></div>
-                    <p class="text-sm text-gray-500 mb-4">✨ Start with a 7-day free trial!</p>
-                    <ul class="text-sm text-gray-600 space-y-2 mb-6">
-                        <li>✓ Everything in Essentials</li>
-                        <li>✓ Expert consultation calls</li>
-                        <li>✓ Custom policy templates</li>
-                        <li>✓ Staff training modules</li>
-                        <li>✓ Priority support</li>
-                    </ul>
-                    <a href="https://aireadiness.northpathstrategies.org/k12-implementation" class="w-full btn-primary text-white py-2 rounded-lg">Start Assessment</a>
-                </div>
-                
-                <!-- Enterprise -->
-                <div class="bg-white border-2 border-gray-200 rounded-lg p-6 text-center">
-                    <h4 class="text-xl font-semibold mb-2">Enterprise Partnership</h4>
-                    <div class="text-3xl font-bold text-pink-600 mb-4">Custom</div>
-                    <ul class="text-sm text-gray-600 space-y-2 mb-6">
-                        <li>Multi-district support</li>
-                        <li>White-label solution</li>
-                        <li>Custom integrations</li>
-                        <li>Dedicated success manager</li>
-                        <li>24/7 priority support</li>
-                    </ul>
-                    <a href="https://northpathstrategies.org/contact/" class="w-full btn-primary text-white py-2 rounded-lg">Contact Sales</a>
+            
+            <!-- Billing Toggle -->
+            <div class="flex justify-center mb-12">
+                <div class="bg-gray-100 rounded-lg p-2">
+                    <div class="flex space-x-1">
+                        <button onclick="showMonthlyK12()" id="monthlyBtnK12" class="px-6 py-2 rounded-md text-sm font-medium bg-pink-600 text-white">
+                            Monthly
+                        </button>
+                        <button onclick="showYearlyK12()" id="yearlyBtnK12" class="px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">
+                            Yearly
+                            <span class="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Save $200</span>
+                        </button>
+                    </div>
                 </div>
             </div>
+            
+            <!-- Single Pricing Card -->
+            <div class="max-w-lg mx-auto">
+                <div class="bg-white border-2 border-pink-500 rounded-lg p-8 text-center relative shadow-xl">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-pink-500 text-white px-6 py-2 rounded-full text-sm">
+                        ⭐ Everything Your School Needs
+                    </div>
+                    <h4 class="text-2xl font-semibold mb-2">AI Readiness Complete</h4>
+                    
+                    <!-- Monthly Pricing -->
+                    <div id="monthlyPricingK12" class="pricing-option">
+                        <div class="text-4xl font-bold text-pink-600 mb-4">$99.99<span class="text-lg">/month</span></div>
+                        <div class="bg-green-500 text-white px-4 py-2 rounded-full text-sm mb-6 inline-block">7-Day Free Trial</div>
+                    </div>
+                    
+                    <!-- Yearly Pricing -->
+                    <div id="yearlyPricingK12" class="pricing-option hidden">
+                        <div class="text-4xl font-bold text-pink-600 mb-2">$999.99<span class="text-lg">/year</span></div>
+                        <div class="text-sm text-green-600 font-medium mb-2">Only $83.33/month</div>
+                        <div class="bg-green-500 text-white px-4 py-2 rounded-full text-sm mb-6 inline-block">7-Day Free Trial • Save $200</div>
+                    </div>
+                    
+                    <div class="text-left mb-8">
+                        <h5 class="font-semibold text-gray-900 mb-4">Complete K12 AI Package:</h5>
+                        <ul class="text-sm text-gray-600 space-y-2">
+                            <li>✓ Unlimited AI readiness assessments</li>
+                            <li>✓ Age-appropriate AI policies & guidelines</li>
+                            <li>✓ COPPA-compliant implementation plans</li>
+                            <li>✓ Teacher training programs</li>
+                            <li>✓ Student safety protocols</li>
+                            <li>✓ Parent communication templates</li>
+                            <li>✓ Curriculum integration guides</li>
+                            <li>✓ Budget planning tools</li>
+                            <li>✓ Progress tracking dashboards</li>
+                            <li>✓ Monthly strategy sessions</li>
+                            <li>✓ Priority email support</li>
+                            <li>✓ Custom report generation</li>
+                            <li>✓ Implementation coaching</li>
+                            <li>✓ Quarterly assessments</li>
+                            <li>✓ Board presentation materials</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="#" id="startTrialBtnK12" class="w-full btn-primary text-white py-3 rounded-lg font-semibold text-lg">Start 7-Day Free Trial</a>
+                    <p class="text-xs text-gray-500 mt-3">No credit card required • COPPA compliant • Cancel anytime</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let currentBillingK12 = 'monthly';
+        
+        function showMonthlyK12() {
+            currentBillingK12 = 'monthly';
+            document.getElementById('monthlyPricingK12').classList.remove('hidden');
+            document.getElementById('yearlyPricingK12').classList.add('hidden');
+            document.getElementById('monthlyBtnK12').className = 'px-6 py-2 rounded-md text-sm font-medium bg-pink-600 text-white';
+            document.getElementById('yearlyBtnK12').className = 'px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900';
+            updateTrialButtonK12();
+        }
+        
+        function showYearlyK12() {
+            currentBillingK12 = 'yearly';
+            document.getElementById('monthlyPricingK12').classList.add('hidden');
+            document.getElementById('yearlyPricingK12').classList.remove('hidden');
+            document.getElementById('monthlyBtnK12').className = 'px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900';
+            document.getElementById('yearlyBtnK12').className = 'px-6 py-2 rounded-md text-sm font-medium bg-pink-600 text-white';
+            updateTrialButtonK12();
+        }
+        
+        function updateTrialButtonK12() {
+            const baseUrl = 'https://app.northpathstrategies.org/api/stripe/unified-checkout';
+            const trialUrl = `${baseUrl}?billing=${currentBillingK12}&trial_days=7`;
+            document.getElementById('startTrialBtnK12').href = trialUrl;
+        }
+        
+        // Initialize
+        updateTrialButtonK12();
+    </script>
             <!-- Coupon Code Section -->
             <div class="bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg p-8 text-center mt-12">
                 <h4 class="text-2xl font-bold text-gray-800 mb-4">🎯 Special Launch Offer</h4>

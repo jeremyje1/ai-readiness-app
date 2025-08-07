@@ -3,10 +3,15 @@ import sgMail from '@sendgrid/mail'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, implementationType, subscriptionTier } = await request.json()
+    const { email, name, implementationType, subscriptionTier, billingPeriod } = await request.json()
 
     sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
 
+    // Handle unified pricing structure
+    const isUnifiedService = implementationType === 'complete' || subscriptionTier === 'complete'
+    const planName = isUnifiedService ? 'Complete AI Implementation Service' : 
+                     (subscriptionTier === 'essentials' || subscriptionTier === 'basic' ? 'Essentials' : 'Professional')
+    
     const welcomeEmail = {
       to: email,
       from: 'info@northpathstrategies.org',
@@ -22,21 +27,31 @@ export async function POST(request: NextRequest) {
             <h2 style="color: #333; margin-top: 0;">Hi ${name || 'there'}!</h2>
             
             <p style="color: #666; line-height: 1.6;">
-              Congratulations! Your AI Blueprint ${implementationType === 'highered' ? 'Higher Education' : 'K-12'} implementation trial has been activated.
+              Congratulations! Your AI Blueprint ${isUnifiedService ? 'Complete Implementation' : (implementationType === 'highered' ? 'Higher Education' : 'K-12')} trial has been activated.
             </p>
+            
+            ${isUnifiedService ? `
+            <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
+              <h4 style="margin-top: 0; color: #0c4a6e; font-size: 16px;">🤖 Fully Autonomous Implementation</h4>
+              <p style="margin: 0; color: #075985; font-size: 14px;">
+                This service is completely AI-powered and requires no human intervention. All analysis, reporting, and implementation guidance is automated.
+              </p>
+            </div>
+            ` : ''}
             
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
               <h3 style="margin-top: 0; color: #333;">Your Trial Details:</h3>
               <ul style="color: #666; line-height: 1.8;">
-                <li><strong>Plan:</strong> ${subscriptionTier === 'essentials' || subscriptionTier === 'basic' ? 'Essentials' : 'Professional'}</li>
+                <li><strong>Plan:</strong> ${planName}</li>
                 <li><strong>Trial Period:</strong> 7 days (ends on ${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()})</li>
                 <li><strong>Full Access:</strong> All features unlocked during trial</li>
+                ${billingPeriod ? `<li><strong>Billing:</strong> ${billingPeriod === 'yearly' ? 'Annual ($999.99/year)' : 'Monthly ($99.99/month)'}</li>` : ''}
                 <li><strong>No Charge:</strong> Your card won't be charged until trial ends</li>
               </ul>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org'}/${implementationType === 'highered' ? 'highered-implementation' : 'k12-implementation'}" 
+              <a href="${process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org'}/${isUnifiedService ? 'ai-readiness' : (implementationType === 'highered' ? 'highered-implementation' : 'k12-implementation')}" 
                  style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                 Access Your Dashboard
               </a>
@@ -48,6 +63,7 @@ export async function POST(request: NextRequest) {
               <li>📊 All reports and policies are created autonomously</li>
               <li>📧 You'll receive progress updates via email</li>
               <li>💳 Billing starts after your 7-day trial (cancel anytime)</li>
+              ${isUnifiedService ? '<li>🤝 Optional human consultation available for additional fee</li>' : ''}
             </ul>
             
             <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">

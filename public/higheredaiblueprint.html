@@ -472,32 +472,105 @@
     <section id="pricing" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h3 class="text-4xl font-bold text-gray-800 mb-4">Choose Your AI Transformation Path</h3>
-                <p class="text-xl text-gray-600">Flexible options designed for higher education budgets and timelines</p>
+                <h3 class="text-4xl font-bold text-gray-800 mb-4">Complete AI Transformation Service</h3>
+                <p class="text-xl text-gray-600">One comprehensive package that includes everything you need for AI success</p>
             </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Pulse Check -->
-                <div class="bg-white border-2 border-gray-200 rounded-lg p-6 text-center">
-                    <h4 class="text-xl font-semibold mb-2">AI Blueprint Essentials</h4>
-                    <div class="text-3xl font-bold text-indigo-600 mb-4">$199<span class="text-lg">/mo</span></div>
-                    <div class="bg-green-500 text-white px-3 py-1 rounded-full text-sm mb-4 inline-block">7-Day Free Trial</div>
-                    <ul class="text-sm text-gray-600 space-y-2 mb-6">
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Unlimited AI readiness assessments</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Real-time stakeholder feedback</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Dynamic report generation</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Progress tracking dashboard</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Basic autonomous implementation</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Up to 5 users</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Email support</li>
-                    </ul>
-                    <a href="https://aireadiness.northpathstrategies.org/api/ai-blueprint/stripe/create-checkout?tier=essentials&trial_days=7" class="w-full btn-primary text-white py-2 rounded-lg">Start Free Trial</a>
+            
+            <!-- Billing Toggle -->
+            <div class="flex justify-center mb-12">
+                <div class="bg-gray-100 rounded-lg p-2">
+                    <div class="flex space-x-1">
+                        <button onclick="showMonthly()" id="monthlyBtn" class="px-6 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white">
+                            Monthly
+                        </button>
+                        <button onclick="showYearly()" id="yearlyBtn" class="px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">
+                            Yearly
+                            <span class="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Save $200</span>
+                        </button>
+                    </div>
                 </div>
-                
-                <!-- Comprehensive -->
-                <div class="bg-white border-2 border-indigo-500 rounded-lg p-6 text-center relative">
-                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-sm">Most Popular</div>
-                    <h4 class="text-xl font-semibold mb-2">AI Blueprint Professional</h4>
-                    <div class="text-3xl font-bold text-indigo-600 mb-4">$499<span class="text-lg">/mo</span></div>
+            </div>
+            
+            <!-- Single Pricing Card -->
+            <div class="max-w-lg mx-auto">
+                <div class="bg-white border-2 border-indigo-500 rounded-lg p-8 text-center relative shadow-xl">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-indigo-500 text-white px-6 py-2 rounded-full text-sm">
+                        ⭐ Everything Included
+                    </div>
+                    <h4 class="text-2xl font-semibold mb-2">AI Readiness Complete</h4>
+                    
+                    <!-- Monthly Pricing -->
+                    <div id="monthlyPricing" class="pricing-option">
+                        <div class="text-4xl font-bold text-indigo-600 mb-4">$99.99<span class="text-lg">/month</span></div>
+                        <div class="bg-green-500 text-white px-4 py-2 rounded-full text-sm mb-6 inline-block">7-Day Free Trial</div>
+                    </div>
+                    
+                    <!-- Yearly Pricing -->
+                    <div id="yearlyPricing" class="pricing-option hidden">
+                        <div class="text-4xl font-bold text-indigo-600 mb-2">$999.99<span class="text-lg">/year</span></div>
+                        <div class="text-sm text-green-600 font-medium mb-2">Only $83.33/month</div>
+                        <div class="bg-green-500 text-white px-4 py-2 rounded-full text-sm mb-6 inline-block">7-Day Free Trial • Save $200</div>
+                    </div>
+                    
+                    <div class="text-left mb-8">
+                        <h5 class="font-semibold text-gray-900 mb-4">Everything You Need:</h5>
+                        <ul class="text-sm text-gray-600 space-y-2">
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Unlimited AI readiness assessments</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>All assessment tiers (Pulse Check to Enterprise)</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Complete analysis with up to 85-page reports</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>All proprietary algorithms (AIRIX™, AIRS™, AICS™, etc.)</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Document upload & AI-enhanced analysis</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Custom policy generation</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Advanced scenario modeling</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Faculty enablement programs</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Implementation coaching & support</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Monthly strategy office hours</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Dedicated Slack support channel</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Quarterly re-assessments</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>ROI tracking & benchmarking</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Executive briefings</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>Complete transformation blueprint</li>
+                            <li><i class="fas fa-check text-green-500 mr-2"></i>12-month strategic partnership access</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="#" id="startTrialBtn" class="w-full btn-primary text-white py-3 rounded-lg font-semibold text-lg">Start 7-Day Free Trial</a>
+                    <p class="text-xs text-gray-500 mt-3">No credit card required • Cancel anytime</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let currentBilling = 'monthly';
+        
+        function showMonthly() {
+            currentBilling = 'monthly';
+            document.getElementById('monthlyPricing').classList.remove('hidden');
+            document.getElementById('yearlyPricing').classList.add('hidden');
+            document.getElementById('monthlyBtn').className = 'px-6 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white';
+            document.getElementById('yearlyBtn').className = 'px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900';
+            updateTrialButton();
+        }
+        
+        function showYearly() {
+            currentBilling = 'yearly';
+            document.getElementById('monthlyPricing').classList.add('hidden');
+            document.getElementById('yearlyPricing').classList.remove('hidden');
+            document.getElementById('monthlyBtn').className = 'px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900';
+            document.getElementById('yearlyBtn').className = 'px-6 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white';
+            updateTrialButton();
+        }
+        
+        function updateTrialButton() {
+            const baseUrl = 'https://app.northpathstrategies.org/api/stripe/unified-checkout';
+            const trialUrl = `${baseUrl}?billing=${currentBilling}&trial_days=7`;
+            document.getElementById('startTrialBtn').href = trialUrl;
+        }
+        
+        // Initialize
+        updateTrialButton();
+    </script>
                     <div class="bg-green-500 text-white px-3 py-1 rounded-full text-sm mb-4 inline-block">7-Day Free Trial</div>
                     <ul class="text-sm text-gray-600 space-y-2 mb-6">
                         <li><i class="fas fa-check text-green-500 mr-2"></i>Everything in Essentials, plus:</li>
