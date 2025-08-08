@@ -16,24 +16,32 @@ export default function SuccessPage() {
     const sessionId = urlParams.get('session_id');
     const tier = urlParams.get('tier');
     const status = urlParams.get('status');
+    const returnTo = urlParams.get('return_to');
 
-    if (status === 'success' && tier) {
+    // Unified checkout may not include status or tier
+    if (sessionId) {
       setPaymentDetails({
-        tier,
+        tier: tier || 'ai-readiness-complete',
         sessionId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        returnTo
       });
+    } else if (status === 'success' && tier) {
+      // Legacy flow support
+      setPaymentDetails({ tier, sessionId, timestamp: new Date().toISOString(), returnTo });
     }
     
     setLoading(false);
   }, []);
 
-  const getImplementationUrl = (tier: string) => {
-    // Determine which implementation track based on tier
-    if (tier.includes('k12') || tier.includes('school') || tier.includes('district')) {
-      return '/k12-implementation';
+  const getImplementationUrl = (tier: string, returnTo?: string | null) => {
+    if (returnTo === 'k12') return '/k12-implementation?setup=complete';
+    if (returnTo === 'highered') return '/highered-implementation?setup=complete';
+    // Determine which implementation track based on tier (legacy path)
+    if (tier && (tier.includes('k12') || tier.includes('school') || tier.includes('district'))) {
+      return '/k12-implementation?setup=complete';
     }
-    return '/highered-implementation';
+    return '/highered-implementation?setup=complete';
   };
 
   const getTierDisplayName = (tier: string) => {
@@ -45,7 +53,7 @@ export default function SuccessPage() {
       'ai-transformation-blueprint': 'AI Transformation Blueprint',
       'ai-enterprise-partnership': 'Enterprise AI Partnership'
     };
-    return tierMap[tier] || tier;
+    return tierMap[tier] || 'AI Readiness Complete';
   };
 
   if (loading) {
@@ -124,7 +132,7 @@ export default function SuccessPage() {
               className="w-full"
               size="lg"
             >
-              <a href={getImplementationUrl(paymentDetails.tier)}>
+              <a href={getImplementationUrl(paymentDetails.tier, paymentDetails.returnTo)}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Access Your Dashboard
               </a>

@@ -24,7 +24,8 @@ interface SchoolOnboarding {
   schoolType: 'elementary' | 'middle' | 'high' | 'k12_district';
   studentCount: number;
   teacherCount: number;
-  subscriptionTier: 'basic' | 'comprehensive';
+  subscriptionTier: 'basic' | 'comprehensive' | 'complete';
+  billingPeriod?: 'monthly' | 'yearly';
   hasExistingImplementation: boolean;
 }
 
@@ -38,7 +39,8 @@ export default function K12ImplementationPage() {
     schoolType: 'elementary',
     studentCount: 0,
     teacherCount: 0,
-    subscriptionTier: 'basic',
+    subscriptionTier: 'complete',
+    billingPeriod: 'monthly',
     hasExistingImplementation: false
   });
   const [loading, setLoading] = useState(true);
@@ -98,7 +100,7 @@ export default function K12ImplementationPage() {
         studentCount: onboardingData.studentCount,
         teacherCount: onboardingData.teacherCount,
         currentAIReadiness: 0,
-        subscriptionTier: onboardingData.subscriptionTier,
+        subscriptionTier: 'complete',
         implementationPhases: [],
         currentPhase: 1,
         startDate: new Date(),
@@ -144,20 +146,12 @@ export default function K12ImplementationPage() {
     try {
       setLoading(true);
       
-      // Redirect to Stripe checkout based on subscription tier
-      const priceId = onboardingData.subscriptionTier === 'basic' 
-        ? 'price_1Rsp7LGrA5DxvwDNHgskPPpl' // Essentials
-        : 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf'; // Professional
-      
-      const tier = onboardingData.subscriptionTier === 'basic' 
-        ? 'ai-blueprint-essentials' 
-        : 'ai-blueprint-professional';
-      
       // Store the school data in sessionStorage for after payment
       sessionStorage.setItem('k12_onboarding_data', JSON.stringify(onboardingData));
       
-      // Redirect to Stripe checkout (7-day free trial)
-      const checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=${tier}&price_id=${priceId}&trial_days=7&success_url=${encodeURIComponent(window.location.origin + '/k12-implementation?setup=complete')}&cancel_url=${encodeURIComponent(window.location.origin + '/k12-implementation')}`;
+      // Redirect to unified Stripe checkout (7-day free trial)
+      const billing = onboardingData.billingPeriod || 'monthly';
+      const checkoutUrl = `/api/stripe/unified-checkout?billing=${billing}&trial_days=7&return_to=k12`;
       window.location.href = checkoutUrl;
       
     } catch (error) {
@@ -198,93 +192,17 @@ export default function K12ImplementationPage() {
                   className="bg-yellow-500 text-black px-8 py-4 text-lg font-bold hover:bg-yellow-400 shadow-lg"
                 >
                   <Play className="h-5 w-5 mr-2" />
-                  Start Autonomous Implementation
+                  Start 7-Day Free Trial
                 </Button>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Features Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Fully Autonomous Implementation</h2>
-            <p className="text-xl text-gray-600">Everything delivered automatically through AI-powered systems</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="p-8 text-center border-2 border-blue-100 hover:border-blue-300 transition-colors">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Zap className="h-8 w-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Zero Manual Work</h3>
-              <p className="text-gray-700">All assessments, reports, and deliverables generated automatically using AI</p>
-            </Card>
-
-            <Card className="p-8 text-center border-2 border-blue-100 hover:border-blue-300 transition-colors">
-              <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Settings className="h-8 w-8 text-yellow-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Intelligent Automation</h3>
-              <p className="text-gray-700">AI monitors progress and automatically moves through implementation phases</p>
-            </Card>
-
-            <Card className="p-8 text-center border-2 border-blue-100 hover:border-blue-300 transition-colors">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900">Complete Deliverables</h3>
-              <p className="text-gray-700">Receive all 20+ implementation deliverables without any manual intervention</p>
-            </Card>
-          </div>
-
-          {/* What You Get */}
-          <div className="mt-16">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">What You Get Automatically</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                'AI Readiness Assessment',
-                'Infrastructure Gap Analysis',
-                'Teacher Training Materials',
-                'COPPA Compliance Checklist',
-                'Implementation Roadmap',
-                'AI Tool Recommendations',
-                'Security Setup Guides',
-                'Parent Communication Templates',
-                'Usage Analytics Dashboard',
-                'Deployment Success Reports',
-                'Policy Templates',
-                'Training Video Series',
-                'Workshop Materials',
-                'Progress Tracking',
-                'Automated Monitoring',
-                'Success Metrics'
-              ].map((item, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <span className="text-sm">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show onboarding form
-  if (showOnboarding) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="p-8">
-            <div className="text-center mb-8">
-              <School className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900">Setup Your Autonomous Implementation</h2>
-              <p className="text-gray-600 mt-2">Tell us about your school to customize your AI implementation</p>
-            </div>
-
-            <div className="space-y-6">
+        
+        {/* Onboarding Form */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Card className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Contact Name *
@@ -377,53 +295,48 @@ export default function K12ImplementationPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Implementation Level
+                  Billing Period
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div 
-                    className={`p-4 border-2 rounded-lg cursor-pointer ${
-                      onboardingData.subscriptionTier === 'basic' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
-                    }`}
-                    onClick={() => setOnboardingData({...onboardingData, subscriptionTier: 'basic'})}
+                <div className="inline-flex rounded-md shadow-sm" role="group">
+                  <button
+                    type="button"
+                    onClick={() => setOnboardingData({ ...onboardingData, billingPeriod: 'monthly' })}
+                    className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'monthly' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
                   >
-                    <h4 className="font-semibold">Basic Implementation</h4>
-                    <p className="text-sm text-gray-600">$199/month • Essential AI integration</p>
-                    <p className="text-xs text-green-600 font-medium">🎉 7-Day Free Trial</p>
-                  </div>
-                  <div 
-                    className={`p-4 border-2 rounded-lg cursor-pointer ${
-                      onboardingData.subscriptionTier === 'comprehensive' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200'
-                    }`}
-                    onClick={() => setOnboardingData({...onboardingData, subscriptionTier: 'comprehensive'})}
+                    Monthly ($99)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOnboardingData({ ...onboardingData, billingPeriod: 'yearly' })}
+                    className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'yearly' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
                   >
-                    <h4 className="font-semibold">Comprehensive Implementation</h4>
-                    <p className="text-sm text-gray-600">$499/month • Full support & training</p>
-                    <p className="text-xs text-green-600 font-medium">🎉 7-Day Free Trial</p>
-                  </div>
+                    Yearly ($999)
+                  </button>
                 </div>
+                <p className="text-xs text-green-700 mt-2">🎉 7-Day Free Trial • Cancel anytime</p>
               </div>
+            </div>
 
-              <div className="flex space-x-4">
-                <Button
-                  onClick={() => setShowOnboarding(false)}
-                  variant="outline"
-                  className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={startNewImplementation}
-                  disabled={!onboardingData.schoolName || !onboardingData.studentCount || !onboardingData.teacherCount || loading}
-                  className="flex-1 bg-yellow-500 text-black font-bold hover:bg-yellow-400 disabled:bg-gray-300 disabled:text-gray-500"
-                >
-                  {loading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  ) : (
-                    <Play className="h-4 w-4 mr-2" />
-                  )}
-                  Start 7-Day Free Trial
-                </Button>
-              </div>
+            <div className="flex space-x-4">
+              <Button
+                onClick={() => setShowOnboarding(false)}
+                variant="outline"
+                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={startNewImplementation}
+                disabled={!onboardingData.schoolName || !onboardingData.studentCount || !onboardingData.teacherCount || loading}
+                className="flex-1 bg-yellow-500 text-black font-bold hover:bg-yellow-400 disabled:bg-gray-300 disabled:text-gray-500"
+              >
+                {loading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                ) : (
+                  <Play className="h-4 w-4 mr-2" />
+                )}
+                Start 7-Day Free Trial
+              </Button>
             </div>
 
             <div className="mt-8 p-4 bg-blue-50 rounded-lg">

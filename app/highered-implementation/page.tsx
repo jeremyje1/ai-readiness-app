@@ -24,7 +24,8 @@ export default function HigherEdImplementationPage() {
     size: '',
     studentCount: '',
     facultyCount: '',
-    subscriptionTier: 'professional'
+    subscriptionTier: 'complete',
+    billingPeriod: 'monthly'
   });
 
   // Check if user already has an active implementation
@@ -73,7 +74,8 @@ export default function HigherEdImplementationPage() {
                 email: institutionData.contactEmail,
                 name: institutionData.contactName,
                 implementationType: 'highered',
-                subscriptionTier: institutionData.subscriptionTier
+                subscriptionTier: 'complete',
+                billingPeriod: institutionData.billingPeriod
               })
             }).catch(err => console.error('Failed to send welcome email:', err));
             
@@ -110,20 +112,11 @@ export default function HigherEdImplementationPage() {
     setError(null);
 
     try {
-      // Get price IDs based on subscription tier
-      const priceId = formData.subscriptionTier === 'essentials' 
-        ? 'price_1Rsp7LGrA5DxvwDNHgskPPpl' // Essentials price ID
-        : 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf'; // Professional price ID
-      
-      const tier = formData.subscriptionTier === 'essentials' 
-        ? 'essentials' 
-        : 'professional';
-
       // Store the institution data in sessionStorage for after payment
       sessionStorage.setItem('higherEdInstitutionData', JSON.stringify(formData));
 
-      // Redirect to Stripe checkout (7-day free trial)
-      const checkoutUrl = `/api/ai-blueprint/stripe/create-checkout?tier=${tier}&price_id=${priceId}&trial_days=7&success_url=${encodeURIComponent(window.location.origin + '/highered-implementation?setup=complete')}&cancel_url=${encodeURIComponent(window.location.origin + '/highered-implementation')}`;
+      // Redirect to unified Stripe checkout (7-day free trial)
+      const checkoutUrl = `/api/stripe/unified-checkout?billing=${formData.billingPeriod}&trial_days=7&return_to=highered`;
       window.location.href = checkoutUrl;
 
     } catch (error) {
@@ -146,7 +139,8 @@ export default function HigherEdImplementationPage() {
       size: '',
       studentCount: '',
       facultyCount: '',
-      subscriptionTier: 'professional'
+      subscriptionTier: 'complete',
+      billingPeriod: 'monthly'
     });
   };
 
@@ -182,227 +176,18 @@ export default function HigherEdImplementationPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <GraduationCap className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-xl font-semibold">Higher Ed AI Blueprint Implementation</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <a href="/auth/signin" className="text-indigo-600 hover:text-indigo-800 font-medium">
-                Already have an account? Sign In
-              </a>
+              <h1 className="text-xl font-semibold">Higher Ed AI Blueprint</h1>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 rounded-lg mb-8">
-            <h2 className="text-4xl font-bold mb-4">Transform Your Institution with AI</h2>
-            <p className="text-xl text-indigo-100 max-w-2xl mx-auto">
-              Get your comprehensive AI implementation plan with all deliverables generated autonomously - no manual work required.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <Card className="border-l-4 border-l-indigo-500">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-lg mx-auto mb-4">
-                  <Zap className="h-6 w-6 text-indigo-600" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Fully Autonomous</h3>
-                <p className="text-gray-600 text-sm">
-                  AI generates all reports, policies, and training materials automatically
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-l-green-500">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mx-auto mb-4">
-                  <BookOpen className="h-6 w-6 text-green-600" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Complete Documentation</h3>
-                <p className="text-gray-600 text-sm">
-                  All implementation guides, policies, and training curricula included
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-l-purple-500">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mx-auto mb-4">
-                  <Shield className="h-6 w-6 text-purple-600" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">FERPA Compliant</h3>
-                <p className="text-gray-600 text-sm">
-                  Built-in compliance framework and data protection protocols
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Implementation Features */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>What You Get - 100% Autonomous Delivery</span>
-            </CardTitle>
-            <CardDescription>
-              Every deliverable is generated automatically by AI - no manual work or consulting calls required
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-3 text-indigo-600">Phase 1: Assessment & Strategy (Days 1-21)</h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Comprehensive institutional AI readiness assessment</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Faculty development needs analysis</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Academic department integration analysis</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Student services enhancement opportunities</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Research infrastructure evaluation</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-3 text-indigo-600">Phase 2: Policy & Planning (Days 22-42)</h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Institutional AI strategy document</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Academic AI usage policies</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>FERPA compliance framework</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Budget and resource allocation plan</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Student AI ethics framework</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-3 text-indigo-600">Phase 3: Infrastructure (Days 43-63)</h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Platform integration configuration guide</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>LMS and SIS integration documentation</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Data security implementation framework</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Department-specific AI tool configurations</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Research infrastructure enhancement setup</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-3 text-indigo-600">Phase 4: Training & Deployment (Days 64-105)</h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Comprehensive faculty training curriculum</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Department-specific training materials</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Student AI literacy program</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Pilot course implementation results</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Academic support staff training resources</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="md:col-span-2">
-                <h4 className="font-semibold mb-3 text-indigo-600">Phase 5: Campus-Wide Excellence (Days 106-150)</h4>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Campus deployment success report</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Student services AI integration</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Administrative optimization results</span>
-                    </li>
-                  </ul>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Research collaboration platform</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Ongoing excellence monitoring framework</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Quarterly performance reports (automated)</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Onboarding Form */}
+      {/* Onboarding Form */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Start Your Autonomous AI Implementation</CardTitle>
-            <CardDescription>
-              Provide your institution details to begin the fully automated implementation process
-            </CardDescription>
+            <CardTitle>Start Your Autonomous Implementation</CardTitle>
+            <CardDescription>7‑day free trial • Cancel anytime</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {error && (
@@ -473,22 +258,23 @@ export default function HigherEdImplementationPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="subscriptionTier">Subscription Plan</Label>
-                <Select value={formData.subscriptionTier} onValueChange={(value) => handleInputChange('subscriptionTier', value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="essentials">AI Blueprint Essentials ($199/month)</SelectItem>
-                    <SelectItem value="professional">AI Blueprint Professional ($499/month)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-sm text-green-600 font-medium mt-1">
-                  🎉 7-Day Free Trial - No charge until trial ends
-                </p>
-                <p className="text-sm text-gray-600 mt-1">
-                  For custom enterprise solutions, contact us at <a href="mailto:info@northpathstrategies.org" className="text-blue-600 hover:underline">info@northpathstrategies.org</a>
-                </p>
+                <Label htmlFor="subscriptionTier">Billing Period</Label>
+                <div className="inline-flex rounded-md shadow-sm" role="group">
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange('billingPeriod', 'monthly')}
+                    className={`px-4 py-2 text-sm font-medium border ${formData.billingPeriod === 'monthly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
+                  >
+                    Monthly ($99)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange('billingPeriod', 'yearly')}
+                    className={`px-4 py-2 text-sm font-medium border ${formData.billingPeriod === 'yearly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
+                  >
+                    Yearly ($999)
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">

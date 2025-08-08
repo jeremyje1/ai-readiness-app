@@ -32,7 +32,7 @@
         "priceCurrency": "USD",
         "price": "99",
         "availability": "https://schema.org/InStock",
-        "url": "https://aireadiness.northpathstrategies.org/api/stripe/unified-checkout?billing=monthly&trial_days=7",
+        "url": "https://aireadiness.northpathstrategies.org/api/stripe/unified-checkout?billing=monthly&trial_days=7&return_to=k12",
         "category": "EducationalService",
         "eligibleRegion": "US"
       }
@@ -282,7 +282,7 @@
                             <li>✓ Board presentation materials</li>
                         </ul>
                     </div>
-                    <a href="https://aireadiness.northpathstrategies.org/api/stripe/unified-checkout?billing=monthly&trial_days=7" id="startTrialBtnK12" class="w-full btn-primary text-white py-3 rounded-lg font-semibold text-lg" aria-label="Start your 7-day free trial for K12 AI Readiness Complete">Start 7-Day Free Trial</a>
+                    <a href="https://aireadiness.northpathstrategies.org/api/stripe/unified-checkout?billing=monthly&trial_days=7&return_to=k12" id="startTrialBtnK12" class="w-full btn-primary text-white py-3 rounded-lg font-semibold text-lg" aria-label="Start your 7-day free trial for K12 AI Readiness Complete">Start 7-Day Free Trial</a>
                     <p class="text-xs text-gray-500 mt-3">No credit card required • COPPA compliant • Cancel anytime</p>
                 </div>
             </div>
@@ -293,7 +293,7 @@
         let currentBillingK12 = 'monthly';
         function showMonthlyK12(){currentBillingK12='monthly';document.getElementById('monthlyPricingK12').classList.remove('hidden');document.getElementById('yearlyPricingK12').classList.add('hidden');document.getElementById('monthlyBtnK12').className='px-6 py-2 rounded-md text-sm font-medium bg-pink-600 text-white';document.getElementById('yearlyBtnK12').className='px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900';updateTrialButtonK12();}
         function showYearlyK12(){currentBillingK12='yearly';document.getElementById('monthlyPricingK12').classList.add('hidden');document.getElementById('yearlyPricingK12').classList.remove('hidden');document.getElementById('monthlyBtnK12').className='px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900';document.getElementById('yearlyBtnK12').className='px-6 py-2 rounded-md text-sm font-medium bg-pink-600 text-white';updateTrialButtonK12();}
-        function updateTrialButtonK12(){const baseUrl='https://aireadiness.northpathstrategies.org/api/stripe/unified-checkout';const trialUrl=`${baseUrl}?billing=${currentBillingK12}&trial_days=7`;document.getElementById('startTrialBtnK12').href=trialUrl;}
+        function updateTrialButtonK12(){const baseUrl='https://aireadiness.northpathstrategies.org/api/stripe/unified-checkout';const trialUrl=`${baseUrl}?billing=${currentBillingK12}&trial_days=7&return_to=k12`;document.getElementById('startTrialBtnK12').href=trialUrl;}
         updateTrialButtonK12();
     </script>
 
