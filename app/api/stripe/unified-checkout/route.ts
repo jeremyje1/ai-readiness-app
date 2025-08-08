@@ -12,12 +12,11 @@ export async function GET(request: NextRequest) {
     const billingPeriod = searchParams.get('billing') || 'monthly';
     const trialDays = searchParams.get('trial_days') || '7';
     const couponCode = searchParams.get('coupon');
-    const userEmail = searchParams.get('email') || '';
     const returnTo = searchParams.get('return_to') || '';
     // Derive base URL from the request origin to avoid missing envs
     const baseUrl = request.nextUrl.origin;
 
-    return await createCheckoutSession(billingPeriod, trialDays, couponCode, userEmail, returnTo, baseUrl);
+    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl);
   } catch (error) {
     console.error('Stripe checkout error (GET):', error);
     return NextResponse.json(
@@ -30,12 +29,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { billingPeriod = 'monthly', userEmail = '', couponCode, returnTo = '' } = body;
+    const { billingPeriod = 'monthly', couponCode, returnTo = '' } = body;
     const trialDays = '7';
     // Derive base URL from the request origin
     const baseUrl = request.nextUrl.origin;
 
-    return await createCheckoutSession(billingPeriod, trialDays, couponCode, userEmail, returnTo, baseUrl);
+    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl);
   } catch (error) {
     console.error('Stripe checkout error (POST):', error);
     return NextResponse.json(
@@ -49,7 +48,6 @@ async function createCheckoutSession(
   billingPeriod: string,
   trialDays: string,
   couponCode: string | null,
-  userEmail: string,
   returnTo: string,
   baseUrl: string
 ) {
@@ -76,12 +74,10 @@ async function createCheckoutSession(
       cancel_url: `${baseUrl}/pricing?cancelled=true`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
-      customer_email: userEmail || undefined,
       metadata: {
         service: 'ai-readiness-complete',
         billing_period: billingPeriod,
         trial_days: trialDays,
-        ...(userEmail ? { customer_email: userEmail } : {}),
         ...(returnTo ? { return_to: returnTo } : {})
       },
       subscription_data: {
