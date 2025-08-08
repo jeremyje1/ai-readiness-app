@@ -27,15 +27,15 @@ export const AI_SERVICE_COMPLETE = {
   
   pricing: {
     monthly: {
-      price: 99.99,
+      price: 99,
       priceId: process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY || 'price_1Rta8CGrA5DxvwDN5CwgmHj1',
       period: 'month'
     },
     yearly: {
-      price: 999.99,
+      price: 999,
       priceId: process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_YEARLY || 'price_1Rta8CGrA5DxvwDN4tAF3N8w',
       period: 'year',
-      discount: '16.7% off'
+      discount: '15.9% off'
     }
   },
 
@@ -132,16 +132,16 @@ export const AI_SERVICE_COMPLETE = {
 
 export const PRICING_DISPLAY = {
   monthly: {
-    price: 99.99,
+    price: 99,
     period: 'month',
     savings: null,
     description: 'Perfect for getting started with AI transformation'
   },
   yearly: {
-    price: 999.99,
+    price: 999,
     period: 'year',
-    savings: 200.01, // $1199.88 - $999.99
-    description: 'Best value - save over $200 annually'
+    savings: 189, // $1188 - $999
+    description: 'Best value - save $189 annually'
   }
 };
 
