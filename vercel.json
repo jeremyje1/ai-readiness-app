@@ -33,5 +33,11 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    { "source": "/k12aiblueprint.html", "destination": "https://aireadiness.northpathstrategies.org/k12aiblueprint.html", "permanent": true },
+    { "source": "/k12aiblueprint", "destination": "https://aireadiness.northpathstrategies.org/k12aiblueprint.html", "permanent": true },
+    { "source": "/higheredaiblueprint.html", "destination": "https://aireadiness.northpathstrategies.org/higheredaiblueprint.html", "permanent": true },
+    { "source": "/higheredaiblueprint", "destination": "https://aireadiness.northpathstrategies.org/higheredaiblueprint.html", "permanent": true }
   ]
 }
