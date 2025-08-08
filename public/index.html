@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Blueprint™ - Complete AI Implementation Service for Higher Education | North Path Strategies</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Transform your institution with AI Blueprint™ - the only fully autonomous AI implementation service designed specifically for higher education. Get comprehensive AI readiness assessment, policies, and training in 150 days.">
+    <meta name="keywords" content="AI implementation, higher education AI, AI readiness assessment, AI policies, FERPA compliant AI, institutional AI strategy, AI governance, faculty AI training, AI transformation">
+    <meta name="author" content="North Path Strategies">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://aireadiness.northpathstrategies.org/">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="AI Blueprint™ - Complete AI Implementation Service for Higher Education">
+    <meta property="og:description" content="Transform your institution with the only fully autonomous AI implementation service designed specifically for higher education. 7-day free trial available.">
+    <meta property="og:image" content="https://aireadiness.northpathstrategies.org/og-image.jpg">
+    <meta property="og:url" content="https://aireadiness.northpathstrategies.org/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="AI Blueprint™">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI Blueprint™ - Complete AI Implementation Service for Higher Education">
+    <meta name="twitter:description" content="Transform your institution with the only fully autonomous AI implementation service designed specifically for higher education.">
+    <meta name="twitter:image" content="https://aireadiness.northpathstrategies.org/twitter-image.jpg">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "North Path Strategies",
+        "url": "https://aireadiness.northpathstrategies.org",
+        "logo": "https://aireadiness.northpathstrategies.org/logo.png",
+        "description": "Leading provider of AI implementation services for higher education institutions",
+        "offers": {
+            "@type": "Offer",
+            "name": "AI Blueprint™ Complete Implementation Service",
+            "description": "Fully autonomous AI implementation with comprehensive analysis, policies, and reporting",
+            "price": "99.99",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+        },
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+1-555-AI-READY",
+            "contactType": "customer service",
+            "email": "info@northpathstrategies.org"
+        }
+    }
+    </script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS Styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #ffffff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #374151;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #3b82f6;
+        }
+        
+        .cta-button {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .cta-button:hover {
+            background: #2563eb;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+        
+        .hero .description {
+            font-size: 1.125rem;
+            margin-bottom: 2.5rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.8;
+        }
+        
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .primary-cta {
+            background: white;
+            color: #3b82f6;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.125rem;
+            transition: transform 0.3s;
+        }
+        
+        .primary-cta:hover {
+            transform: translateY(-2px);
+        }
+        
+        .trial-note {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+        }
+        
+        /* Trust Indicators */
+        .trust-section {
+            background: #f8fafc;
+            padding: 60px 0;
+            text-align: center;
+        }
+        
+        .trust-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .trust-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .trust-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #3b82f6;
+            display: block;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: #dbeafe;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+        }
+        
+        .feature-description {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        /* Unique Value Proposition */
+        .uvp-section {
+            background: #1f2937;
+            color: white;
+            padding: 80px 0;
+        }
+        
+        .uvp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .uvp-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .uvp-list {
+            list-style: none;
+            margin: 2rem 0;
+        }
+        
+        .uvp-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+        }
+        
+        .uvp-list li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 1rem;
+            font-size: 1.25rem;
+        }
+        
+        /* Pricing Section */
+        .pricing {
+            padding: 80px 0;
+            background: #f8fafc;
+        }
+        
+        .pricing-card {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 0 auto;
+            border: 2px solid #3b82f6;
+            position: relative;
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .price-period {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        
+        .pricing-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .pricing-features li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: #374151;
+        }
+        
+        .pricing-features li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+        
+        /* Credibility Section */
+        .credibility {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .credibility-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        
+        .credibility-item {
+            padding: 2rem;
+        }
+        
+        .credibility-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .credibility-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+        }
+        
+        /* Footer */
+        footer {
+            background: #1f2937;
+            color: white;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f9fafb;
+        }
+        
+        .footer-section a {
+            color: #d1d5db;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: #3b82f6;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 2rem;
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.25rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .uvp-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">AI Blueprint™</a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="mailto:info@northpathstrategies.org">Contact</a></li>
+            </ul>
+            <a href="https://aireadiness.northpathstrategies.org/pricing" class="cta-button">Start Free Trial</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Transform Your Institution with AI Blueprint™</h1>
+            <p class="subtitle">The Only Fully Autonomous AI Implementation Service for Higher Education</p>
+            <p class="description">
+                Get comprehensive AI readiness assessment, custom policies, faculty training, and complete implementation roadmap—all generated automatically by our proprietary algorithms. No consultants needed.
+            </p>
+            <div class="hero-cta">
+                <a href="https://aireadiness.northpathstrategies.org/pricing" class="primary-cta">Start Your 7-Day Free Trial</a>
+            </div>
+            <p class="trial-note">✓ No credit card required • ✓ Full access • ✓ Cancel anytime</p>
+        </div>
+    </section>
+
+    <!-- Trust Indicators -->
+    <section class="trust-section">
+        <div class="container">
+            <h2 class="section-title">Trusted by Leading Institutions</h2>
+            <div class="trust-indicators">
+                <div class="trust-item">
+                    <span class="trust-number">150</span>
+                    <p>Days to Complete Transformation</p>
+                </div>
+                <div class="trust-item">
+                    <span class="trust-number">100%</span>
+                    <p>Autonomous Implementation</p>
+                </div>
+                <div class="trust-item">
+                    <span class="trust-number">85+</span>
+                    <p>Page Comprehensive Reports</p>
+                </div>
+                <div class="trust-item">
+                    <span class="trust-number">FERPA</span>
+                    <p>Compliant Framework</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Everything You Need for AI Success</h2>
+            <p class="section-subtitle">Our proprietary AIRIX™, AIRS™, AICS™, AIMS™, AIPS™, and AIBS™ algorithms deliver a complete AI transformation</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">AI Strategy & Governance</h3>
+                    <p class="feature-description">Comprehensive institutional AI strategy, leadership frameworks, governance structures, and success metrics tailored to your institution's unique needs.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3 class="feature-title">Pedagogical Integration</h3>
+                    <p class="feature-description">Faculty training curricula, curriculum guidelines, student AI literacy programs, and learning outcomes measurement frameworks.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3 class="feature-title">Technology Infrastructure</h3>
+                    <p class="feature-description">Computational resource planning, data systems integration, cybersecurity frameworks, and technical expertise development plans.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚖️</div>
+                    <h3 class="feature-title">Ethics & Compliance</h3>
+                    <p class="feature-description">FERPA-compliant policies, ethical AI frameworks, bias detection protocols, and regulatory compliance documentation.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3 class="feature-title">Change Management</h3>
+                    <p class="feature-description">Stakeholder engagement strategies, communication plans, resistance management protocols, and adoption acceleration frameworks.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Analytics & Reporting</h3>
+                    <p class="feature-description">Real-time progress monitoring, ROI measurement tools, automated reporting dashboards, and continuous improvement analytics.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Unique Value Proposition -->
+    <section class="uvp-section">
+        <div class="container">
+            <div class="uvp-grid">
+                <div class="uvp-content">
+                    <h2>Why AI Blueprint™ is Different</h2>
+                    <p>Unlike expensive consulting firms that take months and cost hundreds of thousands, AI Blueprint™ delivers complete AI transformation autonomously.</p>
+                    
+                    <ul class="uvp-list">
+                        <li>100% AI-powered—no human consultants needed</li>
+                        <li>Complete in 150 days vs. 12-18 months</li>
+                        <li>$99/month vs. $200K+ consulting fees</li>
+                        <li>Specifically designed for higher education</li>
+                        <li>FERPA compliant from day one</li>
+                        <li>Patent-pending assessment algorithms</li>
+                        <li>85+ page comprehensive deliverables</li>
+                        <li>Real-time implementation tracking</li>
+                    </ul>
+                    
+                    <a href="https://aireadiness.northpathstrategies.org/pricing" class="primary-cta">Start Your Transformation</a>
+                </div>
+                
+                <div class="uvp-visual">
+                    <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 12px;">
+                        <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">Traditional Consulting vs. AI Blueprint™</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                            <div>
+                                <strong>Traditional Consulting:</strong><br>
+                                💰 $200,000+ cost<br>
+                                ⏱️ 12-18 months<br>
+                                👥 Human dependency<br>
+                                📄 Generic templates<br>
+                                🎯 One-size-fits-all
+                            </div>
+                            <div>
+                                <strong>AI Blueprint™:</strong><br>
+                                💰 $99/month<br>
+                                ⏱️ 150 days<br>
+                                🤖 Fully autonomous<br>
+                                📊 Custom analysis<br>
+                                🎯 Higher-ed specific
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2 class="section-title">Simple, Transparent Pricing</h2>
+            <p class="section-subtitle">One service that includes everything you need for successful AI adoption</p>
+            
+            <div class="pricing-card">
+                <div class="popular-badge">Most Popular</div>
+                <div class="price">$99<span style="font-size: 1.5rem; color: #6b7280;">/month</span></div>
+                <p class="price-period">Complete AI Implementation Service</p>
+                
+                <ul class="pricing-features">
+                    <li>Comprehensive AI readiness assessment</li>
+                    <li>Custom AI governance policies</li>
+                    <li>Risk mitigation strategies</li>
+                    <li>Implementation timeline & milestones</li>
+                    <li>Faculty training frameworks</li>
+                    <li>Student AI literacy programs</li>
+                    <li>FERPA compliance documentation</li>
+                    <li>Real-time progress monitoring</li>
+                    <li>85+ page detailed reports</li>
+                    <li>Automated stakeholder communications</li>
+                    <li>Self-service knowledge base</li>
+                    <li>Community forum access</li>
+                </ul>
+                
+                <a href="https://aireadiness.northpathstrategies.org/pricing" class="primary-cta" style="width: 100%; text-align: center; display: block; margin-top: 1rem;">Start 7-Day Free Trial</a>
+                <p style="margin-top: 1rem; color: #6b7280; font-size: 0.875rem;">Save $200 with annual billing • Cancel anytime</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Credibility Section -->
+    <section class="credibility" id="about">
+        <div class="container">
+            <h2 class="section-title">Built by Higher Education Experts</h2>
+            <p class="section-subtitle">Our team combines decades of higher education experience with cutting-edge AI technology</p>
+            
+            <div class="credibility-grid">
+                <div class="credibility-item">
+                    <span class="credibility-icon">🎓</span>
+                    <h3 class="credibility-title">Higher Education Focused</h3>
+                    <p>Built specifically for colleges and universities, not generic business solutions adapted for education.</p>
+                </div>
+                
+                <div class="credibility-item">
+                    <span class="credibility-icon">🏆</span>
+                    <h3 class="credibility-title">Patent-Pending Technology</h3>
+                    <p>Our proprietary assessment algorithms are the result of years of research and development.</p>
+                </div>
+                
+                <div class="credibility-item">
+                    <span class="credibility-icon">🔒</span>
+                    <h3 class="credibility-title">Privacy & Compliance</h3>
+                    <p>FERPA compliant by design with enterprise-grade security and data protection protocols.</p>
+                </div>
+                
+                <div class="credibility-item">
+                    <span class="credibility-icon">📈</span>
+                    <h3 class="credibility-title">Proven Results</h3>
+                    <p>Our methodologies have helped institutions successfully navigate their AI transformation journey.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>AI Blueprint™</h3>
+                    <p>The complete AI implementation service designed specifically for higher education institutions.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Services</h3>
+                    <a href="https://aireadiness.northpathstrategies.org/ai-readiness">AI Readiness Assessment</a>
+                    <a href="https://aireadiness.northpathstrategies.org/highered-implementation">Higher Ed Implementation</a>
+                    <a href="https://aireadiness.northpathstrategies.org/k12-implementation">K-12 Implementation</a>
+                    <a href="https://aireadiness.northpathstrategies.org/pricing">Pricing</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <a href="https://aireadiness.northpathstrategies.org/about">About Us</a>
+                    <a href="mailto:info@northpathstrategies.org">Contact</a>
+                    <a href="https://aireadiness.northpathstrategies.org/privacy">Privacy Policy</a>
+                    <a href="https://aireadiness.northpathstrategies.org/terms">Terms of Service</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Get Started</h3>
+                    <a href="https://aireadiness.northpathstrategies.org/pricing">Start Free Trial</a>
+                    <a href="https://aireadiness.northpathstrategies.org/auth/signin">Sign In</a>
+                    <a href="mailto:info@northpathstrategies.org">Contact Sales</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 North Path Strategies. All rights reserved. AI Blueprint™ is a trademark of North Path Strategies.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Analytics -->
+    <script>
+        // Google Analytics 4
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+        
+        // Track CTA clicks
+        document.querySelectorAll('a[href*="aireadiness.northpathstrategies.org"]').forEach(link => {
+            link.addEventListener('click', function() {
+                gtag('event', 'click', {
+                    event_category: 'CTA',
+                    event_label: this.textContent,
+                    value: 1
+                });
+            });
+        });
+    </script>
+</body>
+</html>
