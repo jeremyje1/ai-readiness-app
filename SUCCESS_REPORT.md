@@ -13,7 +13,7 @@ The AI Readiness Platform is now **100% functional** with all core systems worki
 ### 🔗 Webhook Integration
 - **Status**: ✅ WORKING
 - **Endpoint**: `https://aireadiness.northpathstrategies.org/api/stripe/webhooks`
-- **Signing Secret**: Properly configured (`whsec_JACSeAYjr0V7TWCy01dAFFCzLfMg6Koq`)
+- **Signing Secret**: Properly configured and secured
 - **Events**: All required events enabled and processing correctly
 - **Test Result**: Session dsWpxy4h processed successfully
 
