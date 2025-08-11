@@ -14,6 +14,15 @@ dist/
 build/
 *.tsbuildinfo
 
+# Database files
+prisma/dev.db
+prisma/dev.db-journal
+
+# Test scripts (temporary)
+test-database.ts
+clear-database.ts
+verify-empty-db.ts
+
 # IDE
 .vscode/
 .idea/

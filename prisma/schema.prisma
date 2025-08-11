@@ -1,0 +1,161 @@
+// Prisma schema for AI Readiness Platform
+// Supports both SQLite (development) and PostgreSQL (production)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}// User accounts (previously in-memory)
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  passwordHash   String
+  role           UserRole  @default(USER)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  // One-to-many: user can own many institutions
+  ownedInstitutions Institution[]
+  resetTokens    PasswordResetToken[]
+  stripeCustomerId String? @unique
+  eventLogs      EventLog[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// Higher Ed & K12 unified institution entity with a type discriminator
+model Institution {
+  id              String            @id @default(cuid())
+  externalId      String?           @unique // provisional (highered_x / school_x) if supplied
+  name            String
+  segment         InstitutionSegment // highered or k12
+  type            String?            // e.g., university, community_college, elementary, etc.
+  size            String?            // small/medium/large
+  studentCount    Int?               @default(0)
+  facultyCount    Int?               @default(0)
+  subscriptionTier SubscriptionTier  @default(PROFESSIONAL)
+  currentPhase    Int                @default(0)
+  progressOverall Float              @default(0)
+  startDate       DateTime?          @default(now())
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  ownerId         String?
+  owner           User?              @relation(fields: [ownerId], references: [id])
+  phases          ImplementationPhase[]
+  documents       GeneratedDocument[]
+}
+
+enum InstitutionSegment {
+  HIGHER_ED
+  K12
+}
+
+enum SubscriptionTier {
+  BASIC
+  PROFESSIONAL
+  COMPLETE
+}
+
+model ImplementationPhase {
+  id             String    @id @default(cuid())
+  institutionId  String
+  institution    Institution @relation(fields: [institutionId], references: [id])
+  phaseNumber    Int
+  name           String
+  status         PhaseStatus @default(PENDING)
+  progress       Float       @default(0)
+  durationDays   Int?        // optional planning metadata
+  // Relations
+  tasks          AutomatedTask[]
+  deliverables   Deliverable[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  @@unique([institutionId, phaseNumber])
+}
+
+enum PhaseStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model AutomatedTask {
+  id          String    @id @default(cuid())
+  phaseId     String
+  phase       ImplementationPhase @relation(fields: [phaseId], references: [id])
+  code        String    // identifier previously used in in-memory engine
+  title       String
+  description String?
+  status      TaskStatus @default(PENDING)
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  // Could add metrics or execution logs later
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Deliverable {
+  id          String    @id @default(cuid())
+  phaseId     String
+  phase       ImplementationPhase @relation(fields: [phaseId], references: [id])
+  title       String
+  description String?
+  createdAt   DateTime   @default(now())
+}
+
+// Generated strategic / assessment / policy documents
+model GeneratedDocument {
+  id            String      @id @default(cuid())
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  type          DocumentType
+  content       Json        // store structured or raw JSON; PDF generated separately
+  createdAt     DateTime    @default(now())
+}
+
+enum DocumentType {
+  INSTITUTIONAL_ASSESSMENT
+  FACULTY_DEVELOPMENT
+  DEPARTMENT_ANALYSIS
+  AI_STRATEGY
+  AI_POLICIES
+  FERPA_COMPLIANCE
+  BUDGET_PLAN
+  FACULTY_TRAINING
+  INTEGRATION_GUIDE
+  DEPLOYMENT_REPORT
+  RESEARCH_ENHANCEMENT
+}
+
+// Password reset tokens (previously in-memory)
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  consumed  Boolean  @default(false)
+}
+
+// Simple event/audit log (optional future use)
+model EventLog {
+  id            String   @id @default(cuid())
+  type          String
+  actorUserId   String?
+  actorUser     User?    @relation(fields: [actorUserId], references: [id])
+  institutionId String?
+  data          Json?
+  createdAt     DateTime @default(now())
+}
