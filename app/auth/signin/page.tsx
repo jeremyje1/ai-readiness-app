@@ -21,18 +21,52 @@ export default function SignInPage() {
 
   useEffect(() => {
     // Check if user is already signed in
-    getSession().then((session) => {
-      if (session) {
-        // Redirect to appropriate dashboard
-        const savedHigherEdId = localStorage.getItem('higheredInstitutionId')
-        const savedK12Id = localStorage.getItem('k12SchoolId')
-        
-        if (savedHigherEdId) {
-          router.push('/highered-implementation')
-        } else if (savedK12Id) {
-          router.push('/k12-implementation')
-        } else {
-          router.push('/dashboard')
+    getSession().then(async (session) => {
+      if (session?.user?.email) {
+        // Get user data from server to find their institution
+        try {
+          const userDataResponse = await fetch(`/api/user/get-by-email?email=${encodeURIComponent(session.user.email)}`)
+          if (userDataResponse.ok) {
+            const userData = await userDataResponse.json()
+            
+            if (userData.institution) {
+              const institutionId = userData.institution.id
+              const institutionType = userData.institution.type
+              
+              if (institutionType === 'highered') {
+                router.push(`/highered-implementation?institutionId=${encodeURIComponent(institutionId)}`)
+              } else if (institutionType === 'k12') {
+                router.push(`/k12-implementation?institutionId=${encodeURIComponent(institutionId)}`)
+              } else {
+                router.push('/dashboard')
+              }
+            } else {
+              // Fallback to localStorage check
+              const savedHigherEdId = localStorage.getItem('higheredInstitutionId')
+              const savedK12Id = localStorage.getItem('k12SchoolId')
+              
+              if (savedHigherEdId) {
+                router.push('/highered-implementation')
+              } else if (savedK12Id) {
+                router.push('/k12-implementation')
+              } else {
+                router.push('/dashboard')
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error)
+          // Fallback to localStorage check
+          const savedHigherEdId = localStorage.getItem('higheredInstitutionId')
+          const savedK12Id = localStorage.getItem('k12SchoolId')
+          
+          if (savedHigherEdId) {
+            router.push('/highered-implementation')
+          } else if (savedK12Id) {
+            router.push('/k12-implementation')
+          } else {
+            router.push('/dashboard')
+          }
         }
       }
     })
@@ -53,16 +87,53 @@ export default function SignInPage() {
       if (result?.error) {
         setError('Invalid email or password')
       } else {
-        // Check for existing implementations
-        const savedHigherEdId = localStorage.getItem('higheredInstitutionId')
-        const savedK12Id = localStorage.getItem('k12SchoolId')
-        
-        if (savedHigherEdId) {
-          router.push('/highered-implementation')
-        } else if (savedK12Id) {
-          router.push('/k12-implementation')
-        } else {
-          router.push('/dashboard')
+        // Get user data from server to find their institution
+        try {
+          const userDataResponse = await fetch(`/api/user/get-by-email?email=${encodeURIComponent(email)}`)
+          if (userDataResponse.ok) {
+            const userData = await userDataResponse.json()
+            
+            if (userData.institution) {
+              const institutionId = userData.institution.id
+              const institutionType = userData.institution.type
+              
+              if (institutionType === 'highered') {
+                router.push(`/highered-implementation?institutionId=${encodeURIComponent(institutionId)}`)
+              } else if (institutionType === 'k12') {
+                router.push(`/k12-implementation?institutionId=${encodeURIComponent(institutionId)}`)
+              } else {
+                router.push('/dashboard')
+              }
+            } else {
+              // No institution found, redirect to generic dashboard
+              router.push('/dashboard')
+            }
+          } else {
+            // Fallback to localStorage check
+            const savedHigherEdId = localStorage.getItem('higheredInstitutionId')
+            const savedK12Id = localStorage.getItem('k12SchoolId')
+            
+            if (savedHigherEdId) {
+              router.push('/highered-implementation')
+            } else if (savedK12Id) {
+              router.push('/k12-implementation')
+            } else {
+              router.push('/dashboard')
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error)
+          // Fallback to localStorage check
+          const savedHigherEdId = localStorage.getItem('higheredInstitutionId')
+          const savedK12Id = localStorage.getItem('k12SchoolId')
+          
+          if (savedHigherEdId) {
+            router.push('/highered-implementation')
+          } else if (savedK12Id) {
+            router.push('/k12-implementation')
+          } else {
+            router.push('/dashboard')
+          }
         }
       }
     } catch (error) {
