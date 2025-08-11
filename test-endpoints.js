@@ -25,7 +25,7 @@ async function testWebhookEndpoint() {
     };
 
     const payload = JSON.stringify(testPayload);
-    const webhookSecret = 'whsec_i562os5jyA1puuJopdIbByt52VrPVXfW';
+    // Note: Webhook secret removed for security - this test will fail signature validation
     
     try {
         console.log('🧪 Testing webhook endpoint...');
