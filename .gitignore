@@ -26,3 +26,4 @@ Thumbs.db
 .env*
 .env.local
 final_env_update.sh
+.env*.local
