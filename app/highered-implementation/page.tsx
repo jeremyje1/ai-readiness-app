@@ -30,6 +30,18 @@ export default function HigherEdImplementationPage() {
 
   // Check if user already has an active implementation
   useEffect(() => {
+    // Support deep link from email: /highered-implementation?institutionId=...
+    const initialParams = new URLSearchParams(window.location.search);
+    const deepLinkInstitutionId = initialParams.get('institutionId');
+    if (deepLinkInstitutionId) {
+      localStorage.setItem('higheredInstitutionId', deepLinkInstitutionId);
+      setInstitutionId(deepLinkInstitutionId);
+      setCurrentStep('dashboard');
+      // Clean the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
     const savedInstitutionId = localStorage.getItem('higheredInstitutionId');
     if (savedInstitutionId) {
       setInstitutionId(savedInstitutionId);
@@ -66,7 +78,7 @@ export default function HigherEdImplementationPage() {
             localStorage.setItem('higheredInstitutionId', result.institutionId);
             setCurrentStep('dashboard');
             
-            // Send welcome email
+            // Send welcome email with deep-link institutionId
             fetch('/api/send-welcome-email', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -75,7 +87,8 @@ export default function HigherEdImplementationPage() {
                 name: institutionData.contactName,
                 implementationType: 'highered',
                 subscriptionTier: 'complete',
-                billingPeriod: institutionData.billingPeriod
+                billingPeriod: institutionData.billingPeriod,
+                institutionId: result.institutionId
               })
             }).catch(err => console.error('Failed to send welcome email:', err));
             

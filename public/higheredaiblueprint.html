@@ -276,7 +276,7 @@
               <li>✓ Priority email support</li>
             </ul>
           </div>
-          <a href="https://aireadiness.northpathstrategies.org/api/stripe/unified-checkout?billing=monthly&trial_days=7" id="startTrialBtnHE" class="w-full btn-primary text-white py-3 rounded-lg font-semibold text-lg" aria-label="Start your 7-day free trial for Higher Ed AI Readiness Complete">Start 7‑Day Free Trial</a>
+          <a href="/api/stripe/unified-checkout?billing=monthly&trial_days=7&return_to=highered" id="startTrialBtnHE" class="w-full btn-primary text-white py-3 rounded-lg font-semibold text-lg" aria-label="Start your 7-day free trial for Higher Ed AI Readiness Complete">Start 7‑Day Free Trial</a>
           <p class="text-xs text-gray-500 mt-3">No credit card required • FERPA aware • Cancel anytime</p>
         </div>
       </div>
@@ -341,7 +341,7 @@
     let currentBillingHE='monthly';
     function showMonthlyHE(){currentBillingHE='monthly';document.getElementById('monthlyPricingHE').classList.remove('hidden');document.getElementById('yearlyPricingHE').classList.add('hidden');document.getElementById('monthlyBtnHE').className='px-6 py-2 rounded-md text-sm font-medium bg-pink-600 text-white';document.getElementById('yearlyBtnHE').className='px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900';updateTrialButtonHE();}
     function showYearlyHE(){currentBillingHE='yearly';document.getElementById('monthlyPricingHE').classList.add('hidden');document.getElementById('yearlyPricingHE').classList.remove('hidden');document.getElementById('monthlyBtnHE').className='px-6 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900';document.getElementById('yearlyBtnHE').className='px-6 py-2 rounded-md text-sm font-medium bg-pink-600 text-white';updateTrialButtonHE();}
-    function updateTrialButtonHE(){const base='https://aireadiness.northpathstrategies.org/api/stripe/unified-checkout';const url=`${base}?billing=${currentBillingHE}&trial_days=7`;document.getElementById('startTrialBtnHE').href=url;}
+    function updateTrialButtonHE(){const base='/api/stripe/unified-checkout';const url=`${base}?billing=${currentBillingHE}&trial_days=7&return_to=highered`;document.getElementById('startTrialBtnHE').href=url;}
     updateTrialButtonHE();
 
     // Subtle feature-card reveal

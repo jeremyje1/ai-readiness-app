@@ -17,7 +17,34 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Institution ID required' }, { status: 400 });
   }
 
-  const institution = implementations.get(institutionId);
+  let institution = implementations.get(institutionId);
+
+  // Auto-bootstrap a default institution if missing for dashboard-oriented actions
+  if (!institution && (action === 'dashboard' || action === 'status' || action === 'deliverables')) {
+    try {
+      const defaultInstitution: HigherEdInstitution = {
+        id: institutionId,
+        name: 'Your Institution',
+        type: 'university',
+        size: 'medium',
+        studentCount: 10000,
+        facultyCount: 500,
+        currentAIReadiness: 30,
+        subscriptionTier: 'professional',
+        implementationPhases: [],
+        currentPhase: 0,
+        startDate: new Date(),
+        progressOverall: 0
+      };
+      const started = await engine.startImplementation(defaultInstitution);
+      implementations.set(institutionId, started);
+      institution = started;
+    } catch (e) {
+      console.error('Failed to auto-bootstrap institution:', e);
+      return NextResponse.json({ error: 'Institution not found' }, { status: 404 });
+    }
+  }
+
   if (!institution) {
     return NextResponse.json({ error: 'Institution not found' }, { status: 404 });
   }

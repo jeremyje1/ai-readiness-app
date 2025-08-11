@@ -3,14 +3,26 @@ import sgMail from '@sendgrid/mail'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, implementationType, subscriptionTier, billingPeriod, loginPassword, isNewAccount } = await request.json()
+    const { email, name, implementationType, subscriptionTier, billingPeriod, loginPassword, isNewAccount, institutionId } = await request.json()
 
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
+    const apiKey = process.env.SENDGRID_API_KEY || ''
+    if (!apiKey) {
+      console.error('SENDGRID_API_KEY missing; aborting welcome email send')
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
+    }
+    sgMail.setApiKey(apiKey)
 
     // Handle unified pricing structure
     const isUnifiedService = implementationType === 'complete' || subscriptionTier === 'complete'
     const planName = isUnifiedService ? 'Complete AI Implementation Service' : 
                      (subscriptionTier === 'essentials' || subscriptionTier === 'basic' ? 'Essentials' : 'Professional')
+    
+    const baseUrl = (process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org').replace(/\/$/, '')
+    const implementationPath = isUnifiedService
+      ? (implementationType === 'highered' ? 'highered-implementation' : implementationType === 'k12' ? 'k12-implementation' : 'ai-readiness')
+      : (implementationType === 'highered' ? 'highered-implementation' : 'k12-implementation')
+    const deepLink = institutionId ? `${baseUrl}/${implementationPath}?institutionId=${encodeURIComponent(institutionId)}`
+                                   : `${baseUrl}/${implementationPath}`
     
     const welcomeEmail = {
       to: email,
@@ -67,7 +79,7 @@ export async function POST(request: NextRequest) {
             ` : ''}
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org'}/${isUnifiedService ? 'ai-readiness' : (implementationType === 'highered' ? 'highered-implementation' : 'k12-implementation')}" 
+              <a href="${deepLink}" 
                  style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
                 ${isNewAccount ? 'Sign In to Your Dashboard' : 'Access Your Dashboard'}
               </a>
@@ -105,6 +117,21 @@ export async function POST(request: NextRequest) {
     }
 
     await sgMail.send(welcomeEmail)
+
+    // Optional admin notification
+    if (process.env.ADMIN_NOTIFICATION_EMAIL) {
+      try {
+        await sgMail.send({
+          to: process.env.ADMIN_NOTIFICATION_EMAIL,
+          from: 'info@northpathstrategies.org',
+            subject: 'New Trial Activated',
+            text: `New ${implementationType || 'implementation'} trial: ${email}`,
+            html: `<p>New trial started for <strong>${email}</strong><br/>Type: ${implementationType || 'n/a'}<br/>Billing: ${billingPeriod || 'n/a'}</p>`
+        })
+      } catch (e) {
+        console.warn('Admin notification email failed', e)
+      }
+    }
 
     return NextResponse.json({ success: true, message: 'Welcome email sent successfully' })
   } catch (error) {

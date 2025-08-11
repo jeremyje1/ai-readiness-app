@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { headers } from 'next/headers'
+import { createPlaceholderHigherEdInstitution, createPlaceholderK12School } from '@/lib/implementation-bootstrap'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-07-30.basil',
 })
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
+const appBaseUrl = (process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org').replace(/\/$/, '')
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,9 +75,22 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  // Prefer collected email from customer_details when customer_email was not provided
+  const details = (session as any).customer_details
+  let customerEmail: string | undefined | null = session.customer_email || details?.email || undefined
+
+  if (!customerEmail && typeof session.customer === 'string') {
+    try {
+      const customer = await stripe.customers.retrieve(session.customer)
+      if (!('deleted' in customer)) customerEmail = customer.email || undefined
+    } catch (e) {
+      console.warn('Could not retrieve customer email from Stripe:', e)
+    }
+  }
+
   console.log('Checkout completed:', session.id)
   console.log('Session metadata:', session.metadata)
-  console.log('Customer email:', session.customer_email)
+  console.log('Customer email (resolved):', customerEmail)
   
   // Track analytics
   await trackAnalytics('checkout_completed', {
@@ -97,7 +112,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       session.mode === 'subscription' || 
       session.metadata?.billing_period) {
     console.log('Triggering welcome email for AI service subscription')
-    await sendWelcomeEmail(session)
+    await sendWelcomeEmail(session, customerEmail || undefined)
   } else {
     console.log('Not triggering welcome email - metadata check failed:', {
       service: session.metadata?.service,
@@ -115,7 +130,7 @@ async function handleConsultationPurchase(session: Stripe.Checkout.Session) {
 
     if (customerEmail && serviceName) {
       // Send consultation confirmation email
-      await fetch(`${process.env.NEXTAUTH_URL}/api/send-consultation-email`, {
+      await fetch(`${appBaseUrl}/api/send-consultation-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -198,9 +213,10 @@ async function handleTrialWillEnd(subscription: Stripe.Subscription) {
   })
 }
 
-async function sendWelcomeEmail(session: Stripe.Checkout.Session) {
+async function sendWelcomeEmail(session: Stripe.Checkout.Session, resolvedEmail?: string) {
   try {
-    if (session.customer_email) {
+    const email = resolvedEmail
+    if (email) {
       // Create user account for the customer
       const { createUserAccount } = await import('@/lib/user-management')
       
@@ -211,21 +227,43 @@ async function sendWelcomeEmail(session: Stripe.Checkout.Session) {
         trial_end: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days from now
       }
       
-      const userAccount = createUserAccount(session.customer_email, subscription)
+      const userAccount = createUserAccount(email, subscription)
       console.log('Created user account:', userAccount)
       
-      // Send welcome email with login credentials
-      await fetch(`${process.env.NEXTAUTH_URL}/api/send-welcome-email`, {
+      // Map return_to -> implementationType for better CTA routing
+      const implementationType = session.metadata?.return_to === 'highered' ? 'highered' : (session.metadata?.return_to === 'k12' ? 'k12' : 'complete')
+
+      // Bootstrap placeholder implementation so deep link works immediately
+      let institutionId: string | undefined
+      try {
+        if (implementationType === 'highered') {
+          institutionId = createPlaceholderHigherEdInstitution(email).id
+        } else if (implementationType === 'k12') {
+          institutionId = createPlaceholderK12School(email).id
+        }
+      } catch (e) {
+        console.warn('Failed to bootstrap placeholder implementation:', e)
+      }
+
+      const resp = await fetch(`${appBaseUrl}/api/send-welcome-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: session.customer_email,
+          email,
           billingPeriod: session.metadata?.billing_period || 'monthly',
           loginPassword: userAccount.password,
-          isNewAccount: true
+          isNewAccount: true,
+          implementationType,
+          institutionId
         })
       })
-      console.log('Welcome email sent:', session.customer_email)
+      if (!resp.ok) {
+        console.error('Welcome email request failed', resp.status, await resp.text())
+      } else {
+        console.log('Welcome email sent (webhook path):', email, 'institutionId:', institutionId)
+      }
+    } else {
+      console.warn('No customer email found on checkout.session.completed; welcome email not sent.')
     }
   } catch (error) {
     console.error('Error sending welcome email:', error)
@@ -234,7 +272,7 @@ async function sendWelcomeEmail(session: Stripe.Checkout.Session) {
 
 async function trackAnalytics(event: string, properties: Record<string, any>) {
   try {
-    await fetch(`${process.env.NEXTAUTH_URL}/api/analytics/track`, {
+    await fetch(`${appBaseUrl}/api/analytics/track`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event, properties })
