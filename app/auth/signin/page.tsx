@@ -46,7 +46,7 @@ export default function SignInPage() {
               const savedK12Id = localStorage.getItem('k12SchoolId')
               
               if (savedHigherEdId) {
-                router.push('/highered-implementation')
+                router.push(`/highered-implementation?institutionId=${encodeURIComponent(savedHigherEdId)}`)
               } else if (savedK12Id) {
                 router.push(`/k12-implementation?institutionId=${encodeURIComponent(savedK12Id)}`)
               } else {
@@ -61,7 +61,7 @@ export default function SignInPage() {
           const savedK12Id = localStorage.getItem('k12SchoolId')
           
           if (savedHigherEdId) {
-            router.push('/highered-implementation')
+            router.push(`/highered-implementation?institutionId=${encodeURIComponent(savedHigherEdId)}`)
           } else if (savedK12Id) {
             router.push(`/k12-implementation?institutionId=${encodeURIComponent(savedK12Id)}`)
           } else {
@@ -114,7 +114,7 @@ export default function SignInPage() {
             const savedK12Id = localStorage.getItem('k12SchoolId')
             
             if (savedHigherEdId) {
-              router.push('/highered-implementation')
+              router.push(`/highered-implementation?institutionId=${encodeURIComponent(savedHigherEdId)}`)
             } else if (savedK12Id) {
               router.push(`/k12-implementation?institutionId=${encodeURIComponent(savedK12Id)}`)
             } else {
@@ -128,7 +128,7 @@ export default function SignInPage() {
           const savedK12Id = localStorage.getItem('k12SchoolId')
           
           if (savedHigherEdId) {
-            router.push('/highered-implementation')
+            router.push(`/highered-implementation?institutionId=${encodeURIComponent(savedHigherEdId)}`)
           } else if (savedK12Id) {
             router.push(`/k12-implementation?institutionId=${encodeURIComponent(savedK12Id)}`)
           } else {

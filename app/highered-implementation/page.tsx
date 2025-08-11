@@ -37,8 +37,7 @@ export default function HigherEdImplementationPage() {
       localStorage.setItem('higheredInstitutionId', deepLinkInstitutionId);
       setInstitutionId(deepLinkInstitutionId);
       setCurrentStep('dashboard');
-      // Clean the URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Keep query param for shareable direct access instead of cleaning
       return;
     }
 
