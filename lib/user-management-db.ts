@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs')
 import prisma from './db'
 import { UserRole, SubscriptionTier } from '@prisma/client'
+import { hashPassword, comparePassword, generateSecurePassword } from './password-utils'
 
 export interface CreateUserData {
   email: string
@@ -15,7 +15,6 @@ export interface SubscriptionData {
   trial_end?: number
 }
 
-// Create user account with hashed password
 export async function createUserAccount(
   userData: CreateUserData, 
   subscription?: SubscriptionData
@@ -23,7 +22,7 @@ export async function createUserAccount(
   try {
     // Generate secure temporary password
     const temporaryPassword = generateSecurePassword()
-    const passwordHash = await bcrypt.hash(temporaryPassword, 12)
+    const passwordHash = await hashPassword(temporaryPassword)
 
     const user = await prisma.user.create({
       data: {
@@ -67,7 +66,7 @@ export async function getUserByEmail(email: string) {
   }
 }
 
-// Validate user credentials with bcrypt
+// Validate user credentials with password hashing
 export async function validateUser(email: string, password: string) {
   try {
     const user = await prisma.user.findUnique({
@@ -79,7 +78,7 @@ export async function validateUser(email: string, password: string) {
       return null
     }
 
-    const isValid = await bcrypt.compare(password, user.passwordHash)
+    const isValid = await comparePassword(password, user.passwordHash)
     if (!isValid) {
       console.log('Invalid password for:', email)
       return null
@@ -98,10 +97,9 @@ export async function validateUser(email: string, password: string) {
   }
 }
 
-// Update user password with hashing
 export async function updateUserPassword(email: string, newPassword: string): Promise<boolean> {
   try {
-    const passwordHash = await bcrypt.hash(newPassword, 12)
+    const passwordHash = await hashPassword(newPassword)
     
     await prisma.user.update({
       where: { email },
@@ -140,16 +138,6 @@ export async function getAllUsers() {
     console.error('Error getting all users:', error)
     return []
   }
-}
-
-// Generate secure random password
-function generateSecurePassword(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
-  let password = ''
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return password
 }
 
 // Create password reset token
