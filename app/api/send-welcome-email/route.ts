@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sgMail from '@sendgrid/mail'
 
+export async function GET() {
+  return NextResponse.json({ 
+    status: 'ready', 
+    service: 'welcome-email',
+    sendgrid_configured: !!process.env.SENDGRID_API_KEY,
+    ts: Date.now() 
+  })
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, name, implementationType, subscriptionTier, billingPeriod, loginPassword, isNewAccount, institutionId } = await request.json()

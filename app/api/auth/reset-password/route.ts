@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateResetToken, consumeResetToken } from '../forgot-password/route'
+import { validateResetToken, consumeResetToken } from '@/lib/reset-tokens'
 import { getUserByEmail } from '@/lib/user-management'
 
 export async function POST(req: NextRequest) {
