@@ -74,6 +74,18 @@ export default function K12ImplementationPage() {
     } finally {
       setLoading(false);
     }
+
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const deepLinkId = urlParams.get('institutionId');
+      if (deepLinkId) {
+        const r = await fetch(`/api/k12-implementation?action=status&schoolId=${encodeURIComponent(deepLinkId)}`);
+        if (r.status === 404) {
+          await fetch('/api/k12-implementation', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'start_implementation', schoolData: { id: deepLinkId, name: '', type: 'elementary', studentCount: 0, teacherCount: 0, subscriptionTier: 'complete', implementationPhases: [], currentPhase: 0, startDate: new Date(), progressOverall: 0 } }) });
+          setHasImplementation(true);
+        }
+      }
+    } catch {}
   };
 
   const completeImplementationSetup = async () => {
@@ -351,6 +363,18 @@ export default function K12ImplementationPage() {
               </ul>
             </div>
           </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!loading && hasImplementation === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
+        <div className="max-w-lg text-center">
+          <h2 className="text-2xl font-semibold mb-4">No Implementation Started</h2>
+          <p className="text-gray-600 mb-6">Start your autonomous implementation to populate your dashboard.</p>
+          <Button onClick={() => setShowOnboarding(true)}>Begin Onboarding</Button>
         </div>
       </div>
     );

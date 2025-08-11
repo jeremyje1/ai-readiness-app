@@ -216,6 +216,16 @@ export default function HigherEdAutonomousDashboard({ institutionId }: HigherEdD
     );
   }
 
+  if (!loading && dashboardData === null && !error) {
+    return (
+      <div className="p-8 bg-white rounded-lg border border-dashed border-gray-300 text-center">
+        <h2 className="text-xl font-semibold mb-4">No Implementation Data Yet</h2>
+        <p className="text-gray-600 mb-4">Your implementation workspace has been created (ID: {institutionId}) but no details have been added.</p>
+        <p className="text-gray-500 text-sm">Complete the onboarding form to populate phases and begin tracking progress.</p>
+      </div>
+    )
+  }
+
   const { institution, summary, phases, recentActivity, upcomingTasks } = dashboardData;
 
   return (

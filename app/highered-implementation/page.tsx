@@ -36,8 +36,17 @@ export default function HigherEdImplementationPage() {
     if (deepLinkInstitutionId) {
       localStorage.setItem('higheredInstitutionId', deepLinkInstitutionId);
       setInstitutionId(deepLinkInstitutionId);
-      setCurrentStep('dashboard');
-      // Keep query param for shareable direct access instead of cleaning
+      // Attempt to load; if 404, start blank implementation
+      fetch(`/api/highered-implementation?institutionId=${encodeURIComponent(deepLinkInstitutionId)}&action=status`).then(async r => {
+        if (r.status === 404) {
+          await fetch('/api/highered-implementation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'start', institutionData: { id: deepLinkInstitutionId } })
+          });
+        }
+        setCurrentStep('dashboard');
+      });
       return;
     }
 

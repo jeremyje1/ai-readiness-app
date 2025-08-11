@@ -19,32 +19,7 @@ export async function GET(request: NextRequest) {
 
   let institution = implementations.get(institutionId);
 
-  // Auto-bootstrap a default institution if missing for dashboard-oriented actions
-  if (!institution && (action === 'dashboard' || action === 'status' || action === 'deliverables')) {
-    try {
-      const defaultInstitution: HigherEdInstitution = {
-        id: institutionId,
-        name: 'Your Institution',
-        type: 'university',
-        size: 'medium',
-        studentCount: 10000,
-        facultyCount: 500,
-        currentAIReadiness: 30,
-        subscriptionTier: 'professional',
-        implementationPhases: [],
-        currentPhase: 0,
-        startDate: new Date(),
-        progressOverall: 0
-      };
-      const started = await engine.startImplementation(defaultInstitution);
-      implementations.set(institutionId, started);
-      institution = started;
-    } catch (e) {
-      console.error('Failed to auto-bootstrap institution:', e);
-      return NextResponse.json({ error: 'Institution not found' }, { status: 404 });
-    }
-  }
-
+  // Removed auto-bootstrap of default populated institution to start blank until user submits onboarding
   if (!institution) {
     return NextResponse.json({ error: 'Institution not found' }, { status: 404 });
   }
@@ -106,13 +81,13 @@ export async function POST(request: NextRequest) {
       }
 
       const newInstitution: HigherEdInstitution = {
-        id: generateInstitutionId(),
-        name: institutionData.name,
-        type: institutionData.type || 'university',
-        size: institutionData.size || 'medium',
-        studentCount: institutionData.studentCount || 10000,
-        facultyCount: institutionData.facultyCount || 500,
-        currentAIReadiness: institutionData.currentAIReadiness || 30,
+        id: institutionData.id || generateInstitutionId(),
+        name: institutionData.name || '',
+        type: institutionData.type || '',
+        size: institutionData.size || '',
+        studentCount: institutionData.studentCount || 0,
+        facultyCount: institutionData.facultyCount || 0,
+        currentAIReadiness: institutionData.currentAIReadiness || 0,
         subscriptionTier: institutionData.subscriptionTier || 'professional',
         implementationPhases: [],
         currentPhase: 0,
