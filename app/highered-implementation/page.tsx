@@ -42,7 +42,7 @@ export default function HigherEdImplementationPage() {
           await fetch('/api/highered-implementation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'start', institutionData: { id: deepLinkInstitutionId } })
+            body: JSON.stringify({ action: 'initialize_blank', institutionData: { id: deepLinkInstitutionId } })
           });
         }
         setCurrentStep('dashboard');

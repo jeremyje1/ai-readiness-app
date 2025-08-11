@@ -207,6 +207,30 @@ export async function POST(request: NextRequest) {
         message: 'Progress updated successfully'
       });
 
+    case 'initialize_blank':
+      if (!institutionData || !institutionData.id) {
+        return NextResponse.json({ error: 'Institution id required' }, { status: 400 });
+      }
+      if (implementations.has(institutionData.id)) {
+        return NextResponse.json({ success: true, institutionId: institutionData.id, message: 'Institution already exists' });
+      }
+      const blankInstitution: HigherEdInstitution = {
+        id: institutionData.id,
+        name: '',
+        type: '' as any,
+        size: '' as any,
+        studentCount: 0,
+        facultyCount: 0,
+        currentAIReadiness: 0,
+        subscriptionTier: 'professional',
+        implementationPhases: [],
+        currentPhase: 0,
+        startDate: new Date(),
+        progressOverall: 0
+      };
+      implementations.set(blankInstitution.id, blankInstitution);
+      return NextResponse.json({ success: true, institutionId: blankInstitution.id, institution: blankInstitution, message: 'Blank institution initialized' });
+
     default:
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   }
