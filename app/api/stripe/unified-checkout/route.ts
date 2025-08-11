@@ -13,10 +13,11 @@ export async function GET(request: NextRequest) {
     const trialDays = searchParams.get('trial_days') || '7';
     const couponCode = searchParams.get('coupon');
     const returnTo = searchParams.get('return_to') || '';
-    // Derive base URL from the request origin to avoid missing envs
+    // Generate a provisional institution id to deep-link after checkout (in-memory placeholder)
+    const provisionalInstitutionId = returnTo === 'highered' ? `inst_${Date.now()}` : returnTo === 'k12' ? `school_${Date.now()}` : '';
     const baseUrl = request.nextUrl.origin;
 
-    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl);
+    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId);
   } catch (error) {
     console.error('Stripe checkout error (GET):', error);
     return NextResponse.json(
@@ -31,10 +32,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { billingPeriod = 'monthly', couponCode, returnTo = '' } = body;
     const trialDays = '7';
-    // Derive base URL from the request origin
+    const provisionalInstitutionId = returnTo === 'highered' ? `inst_${Date.now()}` : returnTo === 'k12' ? `school_${Date.now()}` : '';
     const baseUrl = request.nextUrl.origin;
 
-    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl);
+    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId);
   } catch (error) {
     console.error('Stripe checkout error (POST):', error);
     return NextResponse.json(
@@ -49,7 +50,8 @@ async function createCheckoutSession(
   trialDays: string,
   couponCode: string | null,
   returnTo: string,
-  baseUrl: string
+  baseUrl: string,
+  provisionalInstitutionId?: string
 ) {
   try {
     // Determine which price ID to use
@@ -78,7 +80,8 @@ async function createCheckoutSession(
         service: 'ai-readiness-complete',
         billing_period: billingPeriod,
         trial_days: trialDays,
-        ...(returnTo ? { return_to: returnTo } : {})
+        ...(returnTo ? { return_to: returnTo } : {}),
+        ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {})
       },
       subscription_data: {
         trial_period_days: parseInt(trialDays, 10),
@@ -86,7 +89,8 @@ async function createCheckoutSession(
           service: 'ai-readiness-complete',
           billing_period: billingPeriod,
           trial_start: new Date().toISOString(),
-          ...(returnTo ? { return_to: returnTo } : {})
+          ...(returnTo ? { return_to: returnTo } : {}),
+          ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {})
         }
       }
     };

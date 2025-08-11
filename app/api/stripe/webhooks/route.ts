@@ -251,7 +251,10 @@ async function sendWelcomeEmail(session: Stripe.Checkout.Session, resolvedEmail?
       // Bootstrap placeholder implementation so deep link works immediately
       let institutionId: string | undefined
       try {
-        if (implementationType === 'highered') {
+        const provisional = session.metadata?.provisional_institution_id
+        if (provisional) {
+          institutionId = provisional
+        } else if (implementationType === 'highered') {
           institutionId = createPlaceholderHigherEdInstitution(email).id
         } else if (implementationType === 'k12') {
           institutionId = createPlaceholderK12School(email).id
