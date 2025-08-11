@@ -5,6 +5,7 @@ import { Card } from '@/components/card';
 import { Button } from '@/components/button';
 import { Badge } from '@/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs';
+import RealUserDashboard from '@/components/admin/RealUserDashboard';
 
 interface Assessment {
   id: string;
@@ -147,8 +148,9 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="real-users">Real Users</TabsTrigger>
             <TabsTrigger value="assessments">Assessments</TabsTrigger>
             <TabsTrigger value="test">Test Assessment</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -176,6 +178,10 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="real-users" className="space-y-4">
+            <RealUserDashboard />
           </TabsContent>
 
           <TabsContent value="assessments" className="space-y-4">

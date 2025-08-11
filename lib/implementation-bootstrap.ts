@@ -45,3 +45,18 @@ export function createPlaceholderK12School(email?: string) {
 export function getPlaceholderInstitution(id: string) {
   return higherEdStore.get(id) || k12Store.get(id);
 }
+
+export function getAllHigherEdInstitutions() {
+  return Array.from(higherEdStore.values());
+}
+
+export function getAllK12Schools() {
+  return Array.from(k12Store.values());
+}
+
+export function getAllInstitutions() {
+  return [
+    ...Array.from(higherEdStore.values()),
+    ...Array.from(k12Store.values())
+  ];
+}
