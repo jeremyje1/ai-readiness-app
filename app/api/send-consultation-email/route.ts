@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import sgMail from '@sendgrid/mail'
 
 export async function POST(request: NextRequest) {
   try {
     const { email, name, serviceName, serviceType } = await request.json()
 
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY || '')
+    const apiKey = process.env.MAILERSEND_API_KEY
+    if (!apiKey) {
+      console.error('MAILERSEND_API_KEY not configured')
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
+    }
 
     const consultationEmail = {
-      to: email,
-      from: 'info@northpathstrategies.org',
+      from: {
+        email: 'info@northpathstrategies.org',
+        name: 'North Path Strategies'
+      },
+      to: [
+        {
+          email: email,
+          name: name || email.split('@')[0]
+        }
+      ],
       subject: `Thank you for your ${serviceName} purchase! 🎉`,
       html: `
         <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
@@ -73,7 +84,19 @@ export async function POST(request: NextRequest) {
       `
     }
 
-    await sgMail.send(consultationEmail)
+    const response = await fetch('https://api.mailersend.com/v1/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(consultationEmail)
+    })
+
+    if (!response.ok) {
+      console.error('MailerSend consultation email failed:', response.status)
+      return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true, message: 'Consultation confirmation email sent successfully' })
   } catch (error) {

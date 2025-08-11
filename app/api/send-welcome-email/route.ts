@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import sgMail from '@sendgrid/mail'
 
 export async function GET() {
   return NextResponse.json({ 
     status: 'ready', 
     service: 'welcome-email',
-    sendgrid_configured: !!process.env.SENDGRID_API_KEY,
+    mailersend_configured: !!process.env.MAILERSEND_API_KEY,
     ts: Date.now() 
   })
 }
@@ -14,12 +13,11 @@ export async function POST(request: NextRequest) {
   try {
     const { email, name, implementationType, subscriptionTier, billingPeriod, loginPassword, isNewAccount, institutionId } = await request.json()
 
-    const apiKey = process.env.SENDGRID_API_KEY || ''
+    const apiKey = process.env.MAILERSEND_API_KEY || ''
     if (!apiKey) {
-      console.error('SENDGRID_API_KEY missing; aborting welcome email send')
+      console.error('MAILERSEND_API_KEY missing; aborting welcome email send')
       return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
     }
-    sgMail.setApiKey(apiKey)
 
     // Handle unified pricing structure
     const isUnifiedService = implementationType === 'complete' || subscriptionTier === 'complete'
@@ -34,8 +32,16 @@ export async function POST(request: NextRequest) {
                                    : `${baseUrl}/${implementationPath}`
     
     const welcomeEmail = {
-      to: email,
-      from: 'info@northpathstrategies.org',
+      from: {
+        email: 'info@northpathstrategies.org',
+        name: 'North Path Strategies'
+      },
+      to: [
+        {
+          email: email,
+          name: name || email.split('@')[0]
+        }
+      ],
       subject: 'Welcome to AI Blueprint - Your 7-Day Free Trial Started! 🎉',
       html: `
         <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
@@ -125,17 +131,49 @@ export async function POST(request: NextRequest) {
       `
     }
 
-    await sgMail.send(welcomeEmail)
+    // Send email using MailerSend API
+    const response = await fetch('https://api.mailersend.com/v1/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(welcomeEmail)
+    })
+
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error('MailerSend API error:', response.status, errorData)
+      throw new Error(`MailerSend API error: ${response.status}`)
+    }
+
+    console.log('Welcome email sent via MailerSend:', email)
 
     // Optional admin notification
     if (process.env.ADMIN_NOTIFICATION_EMAIL) {
       try {
-        await sgMail.send({
-          to: process.env.ADMIN_NOTIFICATION_EMAIL,
-          from: 'info@northpathstrategies.org',
-            subject: 'New Trial Activated',
-            text: `New ${implementationType || 'implementation'} trial: ${email}`,
-            html: `<p>New trial started for <strong>${email}</strong><br/>Type: ${implementationType || 'n/a'}<br/>Billing: ${billingPeriod || 'n/a'}</p>`
+        const adminEmail = {
+          from: {
+            email: 'info@northpathstrategies.org',
+            name: 'AI Blueprint System'
+          },
+          to: [
+            {
+              email: process.env.ADMIN_NOTIFICATION_EMAIL,
+              name: 'Admin'
+            }
+          ],
+          subject: 'New Trial Activated',
+          html: `<p>New trial started for <strong>${email}</strong><br/>Type: ${implementationType || 'n/a'}<br/>Billing: ${billingPeriod || 'n/a'}</p>`
+        }
+
+        await fetch('https://api.mailersend.com/v1/email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify(adminEmail)
         })
       } catch (e) {
         console.warn('Admin notification email failed', e)
