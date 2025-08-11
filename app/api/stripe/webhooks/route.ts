@@ -9,7 +9,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
-const appBaseUrl = (process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org').replace(/\/$/, '')
+let appBaseUrl = process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org';
+if (!/^https?:\/\//i.test(appBaseUrl)) {
+  console.warn('[appBaseUrl] Protocol missing from NEXTAUTH_URL, prepending https://');
+  appBaseUrl = 'https://' + appBaseUrl;
+}
+appBaseUrl = appBaseUrl.replace(/\/$/, '');
 
 export async function GET() {
   return NextResponse.json({ status: 'ok', service: 'stripe-webhook', ts: Date.now() })
