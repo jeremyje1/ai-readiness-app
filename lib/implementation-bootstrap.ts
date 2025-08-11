@@ -54,6 +54,27 @@ export function getAllK12Schools() {
   return Array.from(k12Store.values());
 }
 
+// Clear functions for testing
+export function clearAllHigherEdInstitutions() {
+  const count = higherEdStore.size
+  higherEdStore.clear()
+  console.log(`Cleared ${count} higher ed institutions from memory`)
+  return count
+}
+
+export function clearAllK12Schools() {
+  const count = k12Store.size
+  k12Store.clear()
+  console.log(`Cleared ${count} K12 schools from memory`)
+  return count
+}
+
+export function clearAllInstitutions() {
+  const higherEdCount = clearAllHigherEdInstitutions()
+  const k12Count = clearAllK12Schools()
+  return { higherEdCount, k12Count, total: higherEdCount + k12Count }
+}
+
 export function getAllInstitutions() {
   return [
     ...Array.from(higherEdStore.values()),

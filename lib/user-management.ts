@@ -56,3 +56,16 @@ export function validateUser(email: string, password: string) {
     name: user.name,
   }
 }
+
+// Helper function to get all users (for admin purposes)
+export function getAllUsers() {
+  return Array.from(users.values())
+}
+
+// Helper function to clear all test data (for development/testing)
+export function clearAllUsers() {
+  const count = users.size
+  users.clear()
+  console.log(`Cleared ${count} user accounts from memory`)
+  return count
+}
