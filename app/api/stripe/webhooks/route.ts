@@ -3,12 +3,17 @@ import Stripe from 'stripe'
 import { headers } from 'next/headers'
 import { createPlaceholderHigherEdInstitution, createPlaceholderK12School } from '@/lib/implementation-bootstrap'
 
+// Use stable Stripe API version (cast to any to avoid strict version literal constraint)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
+  apiVersion: '2022-11-15' as any,
 })
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 const appBaseUrl = (process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org').replace(/\/$/, '')
+
+export async function GET() {
+  return NextResponse.json({ status: 'ok', service: 'stripe-webhook', ts: Date.now() })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,9 +21,13 @@ export async function POST(request: NextRequest) {
     const headersList = headers()
     const sig = headersList.get('stripe-signature')
 
-    if (!sig || !endpointSecret) {
-      console.error('Missing signature or endpoint secret')
+    if (!sig) {
+      console.error('Webhook error: missing stripe-signature header')
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
+    }
+    if (!endpointSecret) {
+      console.error('Webhook error: STRIPE_WEBHOOK_SECRET not set in environment')
+      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
     }
 
     let event: Stripe.Event
@@ -31,7 +40,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
 
-    console.log('Processing webhook event:', event.type)
+    console.log('Processing webhook event:', event.type, 'id:', event.id)
 
     // Handle the event
     switch (event.type) {
@@ -69,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Webhook error:', error)
+    console.error('Webhook handler fatal error:', error)
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 })
   }
 }

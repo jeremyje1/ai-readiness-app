@@ -14,6 +14,9 @@ export default function SignInPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showForgot, setShowForgot] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetStatus, setResetStatus] = useState<'idle' | 'sent' | 'error'>('idle')
   const router = useRouter()
 
   useEffect(() => {
@@ -66,6 +69,17 @@ export default function SignInPage() {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault()
+    try {
+      const res = await fetch('/api/auth/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: resetEmail }) })
+      if (res.ok) setResetStatus('sent')
+      else setResetStatus('error')
+    } catch {
+      setResetStatus('error')
     }
   }
 
@@ -146,6 +160,29 @@ export default function SignInPage() {
                   Start K12 Implementation
                 </a>
               </p>
+            </div>
+
+            <div className="mt-4 text-center">
+              <button onClick={() => setShowForgot(s => !s)} className="text-sm text-blue-600">
+                {showForgot ? 'Hide' : 'Forgot password?'}
+              </button>
+              {showForgot && (
+                <form onSubmit={handleForgot} className="mt-4 space-y-2">
+                  <input
+                    type="email"
+                    required
+                    value={resetEmail}
+                    onChange={e => setResetEmail(e.target.value)}
+                    placeholder="Your email"
+                    className="border p-2 w-full"
+                  />
+                  <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+                    Send reset link
+                  </button>
+                  {resetStatus === 'sent' && <p className="text-green-600 text-sm">If an account exists, a reset link was sent.</p>}
+                  {resetStatus === 'error' && <p className="text-red-600 text-sm">Error sending reset link.</p>}
+                </form>
+              )}
             </div>
           </CardContent>
         </Card>
