@@ -88,11 +88,11 @@ export default function K12AutonomousDashboard() {
       const instId = urlParams.get('institutionId')
       if (instId) {
         try {
+          localStorage.setItem('k12SchoolId', instId)
           const resp = await fetch(`/api/k12-implementation?action=status&schoolId=${encodeURIComponent(instId)}`)
           if (resp.ok) {
             const data = await resp.json()
             if (data.status) {
-              // Map API structure if needed – currently using fallback mock
               console.log('Loaded implementation from API placeholder', data.status)
             }
           }

@@ -48,7 +48,7 @@ export default function SignInPage() {
               if (savedHigherEdId) {
                 router.push('/highered-implementation')
               } else if (savedK12Id) {
-                router.push('/k12-implementation')
+                router.push(`/k12-implementation?institutionId=${encodeURIComponent(savedK12Id)}`)
               } else {
                 router.push('/dashboard')
               }
@@ -63,7 +63,7 @@ export default function SignInPage() {
           if (savedHigherEdId) {
             router.push('/highered-implementation')
           } else if (savedK12Id) {
-            router.push('/k12-implementation')
+            router.push(`/k12-implementation?institutionId=${encodeURIComponent(savedK12Id)}`)
           } else {
             router.push('/dashboard')
           }
@@ -116,7 +116,7 @@ export default function SignInPage() {
             if (savedHigherEdId) {
               router.push('/highered-implementation')
             } else if (savedK12Id) {
-              router.push('/k12-implementation')
+              router.push(`/k12-implementation?institutionId=${encodeURIComponent(savedK12Id)}`)
             } else {
               router.push('/dashboard')
             }
@@ -130,7 +130,7 @@ export default function SignInPage() {
           if (savedHigherEdId) {
             router.push('/highered-implementation')
           } else if (savedK12Id) {
-            router.push('/k12-implementation')
+            router.push(`/k12-implementation?institutionId=${encodeURIComponent(savedK12Id)}`)
           } else {
             router.push('/dashboard')
           }

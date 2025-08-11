@@ -272,6 +272,7 @@ async function sendWelcomeEmail(session: Stripe.Checkout.Session, resolvedEmail?
           institutionId
         })
       })
+      console.log('Prepared deep link with institutionId:', institutionId, 'implementationType:', implementationType)
       if (!resp.ok) {
         console.error('Welcome email request failed', resp.status, await resp.text())
       } else {
@@ -290,7 +291,7 @@ async function trackAnalytics(event: string, properties: Record<string, any>) {
     await fetch(`${appBaseUrl}/api/analytics/track`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event, properties })
+      body: JSON.stringify({ event, properties: { ...properties, institution_id: properties.institution_id || properties.institutionId } })
     })
   } catch (error) {
     console.error('Analytics tracking failed:', error)
