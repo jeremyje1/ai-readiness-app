@@ -13,11 +13,13 @@ export async function GET(request: NextRequest) {
     const trialDays = searchParams.get('trial_days') || '7';
     const couponCode = searchParams.get('coupon');
     const returnTo = searchParams.get('return_to') || '';
+    const contactEmail = searchParams.get('contact_email') || '';
+    const contactName = searchParams.get('contact_name') || '';
     // Generate a provisional institution id to deep-link after checkout (in-memory placeholder)
     const provisionalInstitutionId = returnTo === 'highered' ? `inst_${Date.now()}` : returnTo === 'k12' ? `school_${Date.now()}` : '';
     const baseUrl = request.nextUrl.origin;
 
-    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId);
+    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId, contactEmail, contactName);
   } catch (error) {
     console.error('Stripe checkout error (GET):', error);
     return NextResponse.json(
@@ -30,12 +32,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { billingPeriod = 'monthly', couponCode, returnTo = '' } = body;
+    const { billingPeriod = 'monthly', couponCode, returnTo = '', contactEmail = '', contactName = '' } = body;
     const trialDays = '7';
     const provisionalInstitutionId = returnTo === 'highered' ? `inst_${Date.now()}` : returnTo === 'k12' ? `school_${Date.now()}` : '';
     const baseUrl = request.nextUrl.origin;
 
-    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId);
+    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId, contactEmail, contactName);
   } catch (error) {
     console.error('Stripe checkout error (POST):', error);
     return NextResponse.json(
@@ -51,7 +53,9 @@ async function createCheckoutSession(
   couponCode: string | null,
   returnTo: string,
   baseUrl: string,
-  provisionalInstitutionId?: string
+  provisionalInstitutionId?: string,
+  contactEmail?: string,
+  contactName?: string
 ) {
   try {
     // Determine which price ID to use
@@ -80,8 +84,12 @@ async function createCheckoutSession(
         service: 'ai-readiness-complete',
         billing_period: billingPeriod,
         trial_days: trialDays,
+        segment: returnTo === 'k12' ? 'K12' : 'HIGHER_ED',
+        ...(provisionalInstitutionId ? { institution_id: provisionalInstitutionId } : {}),
         ...(returnTo ? { return_to: returnTo } : {}),
-        ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {})
+        ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {}),
+        ...(contactEmail ? { contact_email: contactEmail } : {}),
+        ...(contactName ? { contact_name: contactName } : {})
       },
       subscription_data: {
         trial_period_days: parseInt(trialDays, 10),
@@ -89,8 +97,12 @@ async function createCheckoutSession(
           service: 'ai-readiness-complete',
           billing_period: billingPeriod,
           trial_start: new Date().toISOString(),
+          segment: returnTo === 'k12' ? 'K12' : 'HIGHER_ED',
+          ...(provisionalInstitutionId ? { institution_id: provisionalInstitutionId } : {}),
           ...(returnTo ? { return_to: returnTo } : {}),
-          ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {})
+          ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {}),
+          ...(contactEmail ? { contact_email: contactEmail } : {}),
+          ...(contactName ? { contact_name: contactName } : {})
         }
       }
     };

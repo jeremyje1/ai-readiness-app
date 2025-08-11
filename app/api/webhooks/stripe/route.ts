@@ -11,6 +11,7 @@ import {
   logWebhookReceived,
   logError
 } from '@/lib/database'
+import { createUserAccount } from '@/lib/user-management-db'
 import { InstitutionSegment } from '@prisma/client'
 
 interface StripeWebhookEvent {
@@ -23,6 +24,9 @@ interface StripeWebhookEvent {
         institution_id?: string
         segment?: string
         contact_email?: string
+        contact_name?: string
+        billing_period?: string
+        [key: string]: string | undefined
       }
     }
   }
@@ -106,10 +110,46 @@ async function handleCheckoutCompleted(event: StripeWebhookEvent) {
       throw new Error('Failed to create or retrieve institution')
     }
     
-    // If contact email provided, we could send welcome email here
+    // If contact email provided, create user account and send welcome email
     if (metadata.contact_email) {
-      console.log(`Contact email for institution ${institution.id}: ${metadata.contact_email}`)
-      // TODO: Send welcome email without password (use password reset flow instead)
+      console.log(`Creating user account for institution ${institution.id}: ${metadata.contact_email}`)
+      
+      try {
+        // Create user account using database function
+        const { userId, temporaryPassword } = await createUserAccount({
+          email: metadata.contact_email,
+          name: metadata.contact_name || metadata.contact_email.split('@')[0],
+          stripeCustomerId: session.customer
+        }, {
+          status: 'trialing',
+          plan: metadata.billing_period || 'monthly',
+          trial_end: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days from now
+        })
+        
+        console.log(`User account created: ${userId} for ${metadata.contact_email}`)
+        
+        // Send welcome email
+        const baseUrl = process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org'
+        await fetch(`${baseUrl}/api/send-welcome-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: metadata.contact_email,
+            name: metadata.contact_name || metadata.contact_email.split('@')[0],
+            billingPeriod: metadata.billing_period || 'monthly',
+            loginPassword: temporaryPassword,
+            isNewAccount: true,
+            implementationType: metadata.segment?.toLowerCase(),
+            institutionId: institution.id
+          })
+        })
+        
+        console.log(`Welcome email sent to ${metadata.contact_email}`)
+        
+      } catch (emailError) {
+        console.error('Error creating user account or sending email:', emailError)
+        // Don't fail the webhook for email issues
+      }
     }
     
     return NextResponse.json({ 

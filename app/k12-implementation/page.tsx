@@ -96,13 +96,15 @@ export default function K12ImplementationPage() {
       const storedData = sessionStorage.getItem('k12_onboarding_data');
       if (!storedData) {
         console.error('No onboarding data found in session storage');
-        // Clean up URL and redirect to form
+        // Clean up URL and stay on form
         window.history.replaceState({}, document.title, window.location.pathname);
+        setShowOnboarding(true);
         setLoading(false);
         return;
       }
       
       const onboardingData = JSON.parse(storedData);
+      console.log('Retrieved onboarding data:', onboardingData);
       
       const schoolData = {
         id: `school-${Date.now()}`,
@@ -129,6 +131,7 @@ export default function K12ImplementationPage() {
       });
 
       if (response.ok) {
+        console.log('Implementation setup successful');
         setHasImplementation(true);
         // Clear the stored data
         sessionStorage.removeItem('k12_onboarding_data');
@@ -142,8 +145,9 @@ export default function K12ImplementationPage() {
       alert('Failed to complete setup. Please contact support.');
       // Clear the stored data even on error to prevent infinite loop
       sessionStorage.removeItem('k12_onboarding_data');
-      // Remove the setup parameter from URL
+      // Remove the setup parameter from URL and show form
       window.history.replaceState({}, document.title, window.location.pathname);
+      setShowOnboarding(true);
       setLoading(false);
     }
   };
@@ -161,10 +165,26 @@ export default function K12ImplementationPage() {
       // Store the school data in sessionStorage for after payment
       sessionStorage.setItem('k12_onboarding_data', JSON.stringify(onboardingData));
       
-      // Redirect to unified Stripe checkout (7-day free trial)
+      // Use POST to unified Stripe checkout with contact information
       const billing = onboardingData.billingPeriod || 'monthly';
-      const checkoutUrl = `/api/stripe/unified-checkout?billing=${billing}&trial_days=7&return_to=k12`;
-      window.location.href = checkoutUrl;
+      
+      const response = await fetch('/api/stripe/unified-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          billingPeriod: billing,
+          returnTo: 'k12',
+          contactEmail: onboardingData.contactEmail,
+          contactName: onboardingData.contactName
+        })
+      });
+      
+      if (response.ok) {
+        // The API will redirect to Stripe checkout
+        window.location.href = response.url;
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
       
     } catch (error) {
       console.error('Failed to start checkout:', error);
@@ -280,7 +300,7 @@ export default function K12ImplementationPage() {
                   </label>
                   <input
                     type="number"
-                    value={onboardingData.studentCount}
+                    value={onboardingData.studentCount || ''}
                     onChange={(e) => setOnboardingData({...onboardingData, studentCount: parseInt(e.target.value) || 0})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Number of students"
@@ -295,7 +315,7 @@ export default function K12ImplementationPage() {
                   </label>
                   <input
                     type="number"
-                    value={onboardingData.teacherCount}
+                    value={onboardingData.teacherCount || ''}
                     onChange={(e) => setOnboardingData({...onboardingData, teacherCount: parseInt(e.target.value) || 0})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Number of teachers"
