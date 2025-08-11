@@ -118,6 +118,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Send welcome email for main service - check multiple metadata fields
   if (session.metadata?.service === 'ai-readiness-complete' || 
+      session.metadata?.service === 'ai-blueprint' ||
       session.mode === 'subscription' || 
       session.metadata?.billing_period) {
     console.log('Triggering welcome email for AI service subscription')
