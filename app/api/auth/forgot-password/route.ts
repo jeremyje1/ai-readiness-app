@@ -18,22 +18,10 @@ export async function POST(req: NextRequest) {
     const baseUrl = (process.env.NEXTAUTH_URL || 'https://aireadiness.northpathstrategies.org').replace(/\/$/, '')
     const resetLink = `${baseUrl}/auth/reset-password?token=${token}&email=${encodeURIComponent(email)}`
 
-    const apiKey = process.env.MAILERSEND_API_KEY
-    if (apiKey) {
+    const postmarkToken = process.env.POSTMARK_API_TOKEN
+    if (postmarkToken) {
       try {
-        const resetEmail = {
-          from: {
-            email: 'info@northpathstrategies.org',
-            name: 'North Path Strategies'
-          },
-          to: [
-            {
-              email: email,
-              name: email.split('@')[0]
-            }
-          ],
-          subject: 'Password Reset Request',
-          html: `
+        const HtmlBody = `
             <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
               <div style="background: #667eea; color: white; padding: 20px; text-align: center;">
                 <h1 style="margin: 0;">Password Reset</h1>
@@ -52,19 +40,27 @@ export async function POST(req: NextRequest) {
               </div>
             </div>
           `
-        }
 
-        const response = await fetch('https://api.mailersend.com/v1/email', {
+        const fromEmail = process.env.FROM_EMAIL || 'info@northpathstrategies.org'
+        const messageStream = process.env.POSTMARK_MESSAGE_STREAM || 'outbound'
+
+        const response = await fetch('https://api.postmarkapp.com/email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
+            'X-Postmark-Server-Token': postmarkToken,
           },
-          body: JSON.stringify(resetEmail)
+          body: JSON.stringify({
+            From: fromEmail,
+            To: email,
+            Subject: 'Password Reset Request',
+            HtmlBody,
+            MessageStream: messageStream,
+          }),
         })
 
         if (!response.ok) {
-          console.error('MailerSend reset email failed:', response.status)
+          console.error('Postmark reset email failed:', response.status)
         }
       } catch (e) {
         console.error('Failed to send reset email', e)

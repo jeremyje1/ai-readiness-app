@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {
-  return NextResponse.json({ 
-    status: 'ready', 
+  return NextResponse.json({
+    status: 'ready',
     service: 'welcome-email',
-    mailersend_configured: !!process.env.MAILERSEND_API_KEY,
-    ts: Date.now() 
+    postmark_configured: !!process.env.POSTMARK_API_TOKEN,
+    ts: Date.now(),
   })
 }
 
@@ -13,9 +13,9 @@ export async function POST(request: NextRequest) {
   try {
     const { email, name, implementationType, subscriptionTier, billingPeriod, loginPassword, isNewAccount, institutionId } = await request.json()
 
-    const apiKey = process.env.MAILERSEND_API_KEY || ''
-    if (!apiKey) {
-      console.error('MAILERSEND_API_KEY missing; aborting welcome email send')
+    const postmarkToken = process.env.POSTMARK_API_TOKEN || ''
+    if (!postmarkToken) {
+      console.error('POSTMARK_API_TOKEN missing; aborting welcome email send')
       return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
     }
 
@@ -31,19 +31,11 @@ export async function POST(request: NextRequest) {
     const deepLink = institutionId ? `${baseUrl}/${implementationPath}?institutionId=${encodeURIComponent(institutionId)}`
                                    : `${baseUrl}/${implementationPath}`
     
-    const welcomeEmail = {
-      from: {
-        email: 'info@northpathstrategies.org',
-        name: 'North Path Strategies'
-      },
-      to: [
-        {
-          email: email,
-          name: name || email.split('@')[0]
-        }
-      ],
-      subject: 'Welcome to AI Blueprint - Your 7-Day Free Trial Started! 🎉',
-      html: `
+  const fromEmail = process.env.FROM_EMAIL || 'info@northpathstrategies.org'
+  const replyTo = process.env.REPLY_TO_EMAIL || 'info@northpathstrategies.org'
+  const messageStream = process.env.POSTMARK_MESSAGE_STREAM || 'outbound'
+
+  const HtmlBody = `
         <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center;">
             <h1 style="margin: 0; font-size: 28px;">Welcome to AI Blueprint!</h1>
@@ -129,51 +121,48 @@ export async function POST(request: NextRequest) {
           </div>
         </div>
       `
-    }
 
-    // Send email using MailerSend API
-    const response = await fetch('https://api.mailersend.com/v1/email', {
+    // Send email using Postmark API
+    const response = await fetch('https://api.postmarkapp.com/email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'X-Postmark-Server-Token': postmarkToken,
       },
-      body: JSON.stringify(welcomeEmail)
+      body: JSON.stringify({
+        From: fromEmail,
+        To: email,
+        ReplyTo: replyTo,
+        Subject: 'Welcome to AI Blueprint - Your 7-Day Free Trial Started! 🎉',
+        HtmlBody,
+        MessageStream: messageStream,
+      }),
     })
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error('MailerSend API error:', response.status, errorData)
-      throw new Error(`MailerSend API error: ${response.status}`)
+      console.error('Postmark API error:', response.status, errorData)
+      throw new Error(`Postmark API error: ${response.status}`)
     }
 
-    console.log('Welcome email sent via MailerSend:', email)
+    console.log('Welcome email sent via Postmark:', email)
 
     // Optional admin notification
     if (process.env.ADMIN_NOTIFICATION_EMAIL) {
       try {
-        const adminEmail = {
-          from: {
-            email: 'info@northpathstrategies.org',
-            name: 'AI Blueprint System'
-          },
-          to: [
-            {
-              email: process.env.ADMIN_NOTIFICATION_EMAIL,
-              name: 'Admin'
-            }
-          ],
-          subject: 'New Trial Activated',
-          html: `<p>New trial started for <strong>${email}</strong><br/>Type: ${implementationType || 'n/a'}<br/>Billing: ${billingPeriod || 'n/a'}</p>`
-        }
-
-        await fetch('https://api.mailersend.com/v1/email', {
+        await fetch('https://api.postmarkapp.com/email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
+            'X-Postmark-Server-Token': postmarkToken,
           },
-          body: JSON.stringify(adminEmail)
+          body: JSON.stringify({
+            From: fromEmail,
+            To: process.env.ADMIN_NOTIFICATION_EMAIL,
+            Subject: 'New Trial Activated',
+            HtmlBody: `<p>New trial started for <strong>${email}</strong><br/>Type: ${implementationType || 'n/a'}<br/>Billing: ${billingPeriod || 'n/a'}</p>`,
+            MessageStream: messageStream,
+          }),
         })
       } catch (e) {
         console.warn('Admin notification email failed', e)

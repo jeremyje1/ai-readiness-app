@@ -4,9 +4,9 @@ export async function POST(request: NextRequest) {
   try {
     const { email, name, serviceName, serviceType } = await request.json()
 
-    const apiKey = process.env.MAILERSEND_API_KEY
-    if (!apiKey) {
-      console.error('MAILERSEND_API_KEY not configured')
+    const postmarkToken = process.env.POSTMARK_API_TOKEN
+    if (!postmarkToken) {
+      console.error('POSTMARK_API_TOKEN not configured')
       return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
     }
 
@@ -84,17 +84,26 @@ export async function POST(request: NextRequest) {
       `
     }
 
-    const response = await fetch('https://api.mailersend.com/v1/email', {
+    const fromEmail = process.env.FROM_EMAIL || 'info@northpathstrategies.org'
+    const messageStream = process.env.POSTMARK_MESSAGE_STREAM || 'outbound'
+
+    const response = await fetch('https://api.postmarkapp.com/email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'X-Postmark-Server-Token': postmarkToken!,
       },
-      body: JSON.stringify(consultationEmail)
+      body: JSON.stringify({
+        From: fromEmail,
+        To: email,
+        Subject: `Thank you for your ${serviceName} purchase! 🎉`,
+        HtmlBody: consultationEmail.html,
+        MessageStream: messageStream,
+      }),
     })
 
     if (!response.ok) {
-      console.error('MailerSend consultation email failed:', response.status)
+  console.error('Postmark consultation email failed:', response.status)
       return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
     }
 
