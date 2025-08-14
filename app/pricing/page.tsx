@@ -21,47 +21,28 @@ import {
   Clock,
   Phone
 } from 'lucide-react';
-import { AI_SERVICE_COMPLETE, PRICING_DISPLAY, getAnnualSavings } from '@/lib/unified-pricing-config';
+import { AI_SERVICE_COMPLETE } from '@/lib/unified-pricing-config';
+import { NEW_PRICING_TIERS, getStripePriceId, type NewPricingTier } from '../../lib/new-pricing-structure';
 import { useAnalytics } from '@/components/analytics-tracker';
 import Link from 'next/link';
 
 export default function UnifiedPricingPage() {
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const analytics = useAnalytics();
+  const [processingTier, setProcessingTier] = useState<string | null>(null);
 
   useEffect(() => {
-    analytics.trackPricingPageView(billingPeriod);
-  }, [billingPeriod, analytics]);
+    analytics.trackPricingPageView('multi-tier');
+  }, [analytics]);
 
-  const handleGetStarted = async (period: 'monthly' | 'yearly') => {
-    const trialDays = AI_SERVICE_COMPLETE.trialDays;
-    const pricing = period === 'monthly' ? AI_SERVICE_COMPLETE.pricing.monthly : AI_SERVICE_COMPLETE.pricing.yearly;
-    
-    // Track checkout initiation
-    analytics.trackCheckoutInitiated(period, pricing.price);
-    
+  const handleTierCheckout = async (tierId: string) => {
+    setProcessingTier(tierId);
     try {
-      const response = await fetch('/api/stripe/unified-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          billingPeriod: period,
-          userEmail: 'prospect@example.com' // This would come from a form or auth
-        })
-      });
-
-      const { url } = await response.json();
-      
-      if (url) {
-        // Track trial started before redirect
-        analytics.trackTrialStarted(period, pricing.price);
-        window.location.href = url;
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      // Fallback to old method
-      const baseUrl = '/api/stripe/unified-checkout';
-      window.location.href = `${baseUrl}?billing=${period}&trial_days=${trialDays}`;
+      const priceId = getStripePriceId(tierId as any) || '';
+      const params = new URLSearchParams({ tier: tierId, price_id: priceId });
+      window.location.href = `/api/ai-blueprint/stripe/create-checkout?${params.toString()}`;
+    } catch (e) {
+      console.error(e);
+      setProcessingTier(null);
     }
   };
 
@@ -115,146 +96,60 @@ export default function UnifiedPricingPage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-90"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-700 to-purple-700 opacity-95" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <motion.div 
-            className="text-center text-white"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="flex justify-center mb-6">
-              <Badge className="bg-white/20 text-white px-4 py-2 text-sm font-medium">
-                <Star className="h-3 w-3 mr-1" />
-                Everything Included
-              </Badge>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Complete AI Transformation Service
-            </h1>
-            <p className="text-xl text-blue-100 mb-8 max-w-4xl mx-auto">
-              One comprehensive service that includes everything you need for successful AI adoption - from assessment to implementation and ongoing support.
-            </p>
-            <p className="text-lg text-blue-200 mb-8">
-              7-day free trial • Cancel anytime • All features included
-            </p>
+          <motion.div className="text-center text-white" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">AI Readiness & Transformation Pricing</h1>
+            <p className="text-xl text-indigo-100 mb-6 max-w-4xl mx-auto">Choose the engagement level that matches where you are: from a rapid self‑serve baseline to a facilitated enterprise program.</p>
+            <p className="text-sm uppercase tracking-wider text-indigo-200">Survey → AI Narrative PDF → (Optional) Roadmap & Facilitation</p>
           </motion.div>
         </div>
       </section>
 
-      {/* Billing Toggle */}
-      <section className="container mx-auto px-4 py-8 -mt-8">
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-lg p-2 shadow-lg border">
-            <div className="flex space-x-1">
-              <button
-                onClick={() => setBillingPeriod('monthly')}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-                  billingPeriod === 'monthly'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingPeriod('yearly')}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-                  billingPeriod === 'yearly'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Yearly
-                <Badge className="ml-2 bg-green-100 text-green-800 text-xs">
-                  Save ${getAnnualSavings().toFixed(0)}
-                </Badge>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Card */}
-      <section className="container mx-auto px-4 pb-16">
-        <div className="max-w-2xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Card className="relative border-2 border-indigo-500 shadow-2xl">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-indigo-500 text-white px-6 py-2 text-sm font-medium">
-                  <Star className="h-3 w-3 mr-1" />
-                  Complete Service
-                </Badge>
-              </div>
-              
-              <CardHeader className="text-center pb-4 pt-8">
-                <CardTitle className="text-2xl font-bold mb-2 text-gray-900">
-                  {AI_SERVICE_COMPLETE.name}
-                </CardTitle>
-                <p className="text-gray-600 mb-6">
-                  {AI_SERVICE_COMPLETE.description}
-                </p>
-                <div className="text-4xl font-bold text-indigo-600 mb-2">
-                  ${billingPeriod === 'monthly' 
-                    ? PRICING_DISPLAY.monthly.price 
-                    : PRICING_DISPLAY.yearly.price}
-                </div>
-                <p className="text-gray-500">
-                  {billingPeriod === 'monthly' ? 'per month' : 'per year'}
-                  {billingPeriod === 'yearly' && (
-                    <span className="block text-sm text-green-600 font-medium mt-1">
-                      Only ${(PRICING_DISPLAY.yearly.price / 12).toFixed(2)}/month
-                    </span>
-                  )}
-                </p>
-                <div className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mt-4 inline-block">
-                  {AI_SERVICE_COMPLETE.trialDays}-Day Free Trial
-                </div>
-              </CardHeader>
-              
-              <CardContent className="px-8 pb-8">
-                <div className="grid md:grid-cols-2 gap-4 mb-8">
-                  {AI_SERVICE_COMPLETE.features.map((feature, index) => (
-                    <div key={index} className="flex items-start text-sm">
-                      <div className="mr-3 mt-0.5 text-green-500">
-                        {getFeatureIcon(feature)}
-                      </div>
-                      <span className="text-gray-700">
-                        {feature}
-                      </span>
+      {/* Multi-Tier Pricing Grid */}
+      <section className="container mx-auto px-4 py-16 -mt-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {NEW_PRICING_TIERS.map((tier: NewPricingTier) => {
+            const priceId = getStripePriceId(tier.id);
+            return (
+              <motion.div key={tier.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div className={`relative h-full flex flex-col rounded-xl border shadow-sm bg-white ${tier.badge ? 'border-indigo-500' : 'border-gray-200'}`}>
+                  {tier.badge && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">{tier.badge}</div>}
+                  <div className="p-6 pb-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{tier.name}</h3>
+                    {tier.tagline && <p className="text-sm text-gray-600 mb-3">{tier.tagline}</p>}
+                    <div className="flex items-baseline space-x-1 mb-4">
+                      <span className="text-3xl font-bold text-indigo-600">${tier.price.toLocaleString()}</span>
+                      {tier.type === 'subscription' && <span className="text-xs text-gray-500">/ {tier.period}</span>}
                     </div>
-                  ))}
+                    <ul className="space-y-2 text-sm text-gray-700 mb-4">
+                      {tier.highlights.map((h: string) => <li key={h} className="flex items-start"><CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5" />{h}</li>)}
+                    </ul>
+                    <button disabled={processingTier === tier.id} onClick={() => handleTierCheckout(tier.id)} className={`w-full rounded-md font-semibold text-sm py-2 transition-colors ${tier.badge ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-800 hover:bg-gray-900 text-white'} disabled:opacity-60`}>{processingTier === tier.id ? 'Redirecting...' : tier.cta}</button>
+                    <p className="mt-2 text-[11px] text-gray-400">Stripe ID: {priceId}</p>
+                  </div>
+                  <div className="px-6 pb-6 mt-auto">
+                    <details className="group">
+                      <summary className="cursor-pointer text-xs font-medium text-indigo-600 group-open:mb-2">View Deliverables</summary>
+                      <ul className="space-y-1 text-xs text-gray-600">
+                        {tier.deliverables.map((d: string) => <li key={d} className="flex"><span className="mr-1">•</span>{d}</li>)}
+                      </ul>
+                    </details>
+                  </div>
                 </div>
-                
-                <Button
-                  onClick={() => handleGetStarted(billingPeriod)}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 text-lg font-semibold"
-                  size="lg"
-                >
-                  Start {AI_SERVICE_COMPLETE.trialDays}-Day Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                
-                <p className="text-center text-sm text-gray-500 mt-4">
-                  No credit card required for trial • Cancel anytime
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
-      {/* What's Included Section */}
+  {/* Single-package card removed in favor of grid */}
+
+  {/* Platform Capabilities Section */}
       <section className="container mx-auto px-4 py-16 bg-white rounded-lg shadow-lg mb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything You Need for AI Success</h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Our complete service combines all assessment tiers, advanced analytics, implementation support, and ongoing strategic guidance in one comprehensive package.
-          </p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Platform Capabilities (Across Tiers)</h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">All tiers leverage the same autonomous assessment & narrative engine. Higher tiers layer depth, facilitation, benchmarking, and strategic enablement.</p>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
@@ -397,21 +292,12 @@ export default function UnifiedPricingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+  {/* CTA Section (legacy free trial messaging removed) */}
       <section className="bg-indigo-600 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your AI Strategy?</h2>
-          <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-            Join leading institutions using our complete AI transformation service. Start your free trial today.
-          </p>
-          <Button
-            onClick={() => handleGetStarted(billingPeriod)}
-            className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
-            size="lg"
-          >
-            Start Free Trial
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          <h2 className="text-3xl font-bold mb-4">Need Help Choosing a Tier?</h2>
+          <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">Start with Self‑Serve for a baseline or jump directly to Board‑Ready / Enterprise if you need executive deliverables and facilitation.</p>
+          <Link href="#top" className="inline-flex items-center bg-white text-indigo-700 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-md">View Tiers Again <ArrowRight className="ml-2 h-5 w-5" /></Link>
         </div>
       </section>
     </div>

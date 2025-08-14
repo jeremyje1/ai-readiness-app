@@ -42,8 +42,14 @@ export async function GET(request: NextRequest) {
       'ai-enterprise-partnership',
       'ai-blueprint-essentials',
       'ai-blueprint-professional',
-      'essentials', // Short form for essentials
-      'professional' // Short form for professional
+      'essentials',
+      'professional',
+      // New 2025 pricing tiers
+      'self-serve-assessment',
+      'team-subscription-monthly',
+      'team-subscription-yearly',
+      'board-ready-pro',
+      'enterprise-readiness-program'
     ];
 
     if (!validTiers.includes(tier)) {
@@ -61,15 +67,20 @@ export async function GET(request: NextRequest) {
     let tierMapping;
 
     // Handle new monthly subscription tiers
-    if (tier === 'ai-blueprint-essentials' || tier === 'ai-blueprint-professional' || tier === 'essentials' || tier === 'professional') {
+    if (tier === 'ai-blueprint-essentials' || tier === 'ai-blueprint-professional' || tier === 'essentials' || tier === 'professional' || tier === 'team-subscription-monthly' || tier === 'team-subscription-yearly') {
       // Normalize tier names
       const normalizedTier = tier === 'essentials' ? 'ai-blueprint-essentials' : 
                             tier === 'professional' ? 'ai-blueprint-professional' : tier;
-                            
-      // Determine price ID from tier and environment variables
-      const tierPriceId = normalizedTier === 'ai-blueprint-essentials' 
-        ? process.env.STRIPE_PRICE_AI_BLUEPRINT_ESSENTIALS_MONTHLY || 'price_1Rsp7LGrA5DxvwDNHgskPPpl'
-        : process.env.STRIPE_PRICE_AI_BLUEPRINT_PROFESSIONAL_MONTHLY || 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf';
+      let tierPriceId: string | undefined;
+      if (normalizedTier === 'ai-blueprint-essentials') {
+        tierPriceId = process.env.STRIPE_PRICE_AI_BLUEPRINT_ESSENTIALS_MONTHLY || 'price_1Rsp7LGrA5DxvwDNHgskPPpl';
+      } else if (normalizedTier === 'ai-blueprint-professional') {
+        tierPriceId = process.env.STRIPE_PRICE_AI_BLUEPRINT_PROFESSIONAL_MONTHLY || 'price_1Rsp7MGrA5DxvwDNUNqx3Lsf';
+      } else if (normalizedTier === 'team-subscription-monthly') {
+        tierPriceId = process.env.STRIPE_PRICE_TEAM_SUBSCRIPTION_MONTHLY || 'price_team_monthly_placeholder';
+      } else if (normalizedTier === 'team-subscription-yearly') {
+        tierPriceId = process.env.STRIPE_PRICE_TEAM_SUBSCRIPTION_YEARLY || 'price_team_yearly_placeholder';
+      }
 
       // Use provided price_id if available, otherwise use tier-based price_id
       const finalPriceId = priceId || tierPriceId;
@@ -88,9 +99,9 @@ export async function GET(request: NextRequest) {
         metadata: {
           tier: normalizedTier,
           service: 'ai-blueprint',
-          tier_name: normalizedTier === 'ai-blueprint-essentials' ? 'AI Blueprint Essentials' : 'AI Blueprint Professional',
-          tier_price: normalizedTier === 'ai-blueprint-essentials' ? '199' : '499',
-          subscription_type: 'monthly'
+          tier_name: normalizedTier,
+          tier_price: normalizedTier.includes('yearly') ? '10000' : normalizedTier.includes('team-subscription') ? '995' : (normalizedTier === 'ai-blueprint-essentials' ? '199' : '499'),
+          subscription_type: normalizedTier.includes('yearly') ? 'annual' : 'monthly'
         },
         subscription_data: {
           metadata: {
@@ -111,6 +122,36 @@ export async function GET(request: NextRequest) {
         sessionParams.discounts = [{ coupon: couponCode }];
       }
 
+    } else if (tier === 'self-serve-assessment' || tier === 'board-ready-pro' || tier === 'enterprise-readiness-program') {
+      // New one-time pricing tiers (2025)
+      const priceEnvMap: Record<string, string> = {
+        'self-serve-assessment': process.env.STRIPE_PRICE_SELF_SERVE_ASSESSMENT || 'price_selfserve_placeholder',
+        'board-ready-pro': process.env.STRIPE_PRICE_BOARD_READY_PRO || 'price_boardready_placeholder',
+        'enterprise-readiness-program': process.env.STRIPE_PRICE_ENTERPRISE_READINESS_PROGRAM || 'price_enterprise_program_placeholder'
+      };
+      const mappedPriceId = priceEnvMap[tier];
+      const finalPriceId = priceId || mappedPriceId;
+      if (!finalPriceId) {
+        return NextResponse.json({ error: 'Price ID missing for tier' }, { status: 400 });
+      }
+      sessionParams = {
+        mode: 'payment',
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price: finalPriceId,
+            quantity: 1,
+          },
+        ],
+        success_url: successUrl || `${baseUrl}/success?status=success&tier=${tier}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: cancelUrl || `${baseUrl}/pricing?status=cancelled&tier=${tier}`,
+        metadata: {
+          tier: tier,
+          service: 'ai-blueprint',
+          tier_name: tier,
+          payment_type: 'one_time'
+        },
+      };
     } else {
       // Handle legacy one-time payment tiers
       tierMapping = getAIBlueprintStripeMappingForTier(tier as AIBlueprintTier);
