@@ -8,9 +8,10 @@ export async function sendPostmarkEmail(params: {
   html: string
   replyTo?: string
 }) {
-  const token = process.env.POSTMARK_API_TOKEN
-  const from = process.env.FROM_EMAIL || 'info@northpathstrategies.org'
-  const messageStream = process.env.POSTMARK_MESSAGE_STREAM || 'outbound'
+  const token = (process.env.POSTMARK_API_TOKEN || '').trim()
+  const from = (process.env.FROM_EMAIL || 'info@northpathstrategies.org').trim()
+  const rawStream = process.env.POSTMARK_MESSAGE_STREAM
+  const messageStream = rawStream && rawStream.trim() !== '' ? rawStream.trim() : 'outbound'
 
   if (!token) {
     throw new Error('POSTMARK_API_TOKEN is not set')
@@ -27,7 +28,7 @@ export async function sendPostmarkEmail(params: {
       To: params.to,
       Subject: params.subject,
       HtmlBody: params.html,
-      ReplyTo: params.replyTo,
+  ReplyTo: params.replyTo?.trim() || undefined,
       MessageStream: messageStream,
     }),
   })

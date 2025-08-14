@@ -41,8 +41,9 @@ export async function POST(req: NextRequest) {
             </div>
           `
 
-        const fromEmail = process.env.FROM_EMAIL || 'info@northpathstrategies.org'
-        const messageStream = process.env.POSTMARK_MESSAGE_STREAM || 'outbound'
+  const fromEmail = (process.env.FROM_EMAIL || 'info@northpathstrategies.org').trim()
+  const rawStream = process.env.POSTMARK_MESSAGE_STREAM
+  const messageStream = rawStream && rawStream.trim() !== '' ? rawStream.trim() : 'outbound'
 
         const response = await fetch('https://api.postmarkapp.com/email', {
           method: 'POST',

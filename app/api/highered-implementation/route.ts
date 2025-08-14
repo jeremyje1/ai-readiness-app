@@ -19,9 +19,28 @@ export async function GET(request: NextRequest) {
 
   let institution = implementations.get(institutionId);
 
-  // Removed auto-bootstrap of default populated institution to start blank until user submits onboarding
+  // If not found and requesting dashboard, auto-initialize a blank institution to support stateless environments
   if (!institution) {
-    return NextResponse.json({ error: 'Institution not found' }, { status: 404 });
+    if (action === 'dashboard') {
+      const blankInstitution: HigherEdInstitution = {
+        id: institutionId,
+        name: '',
+        type: '' as any,
+        size: '' as any,
+        studentCount: 0,
+        facultyCount: 0,
+        currentAIReadiness: 0,
+        subscriptionTier: 'professional',
+        implementationPhases: [],
+        currentPhase: 0,
+        startDate: new Date(),
+        progressOverall: 0
+      };
+      implementations.set(institutionId, blankInstitution);
+      institution = blankInstitution;
+    } else {
+      return NextResponse.json({ error: 'Institution not found' }, { status: 404 });
+    }
   }
 
   switch (action) {

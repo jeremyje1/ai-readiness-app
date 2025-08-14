@@ -22,14 +22,28 @@ export async function GET(_req: NextRequest) {
     // New canonical envs (fallback to legacy names for compatibility)
     const TEAM_MONTHLY = process.env.STRIPE_PRICE_AI_BLUEPRINT_TEAM_MONTHLY
       || process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY
+      || process.env.STRIPE_PRICE_TEAM_SUBSCRIPTION_MONTHLY
+      || process.env.STRIPE_PRICE_TEAM_MONTHLY
+      || process.env.STRIPE_PRICE_AI_BLUEPRINT_MEMBERSHIP_MONTHLY
       || ''
     const TEAM_YEARLY = process.env.STRIPE_PRICE_AI_BLUEPRINT_TEAM_YEARLY
       || process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_YEARLY
+      || process.env.STRIPE_PRICE_TEAM_SUBSCRIPTION_YEARLY
+      || process.env.STRIPE_PRICE_TEAM_YEARLY
+      || process.env.STRIPE_PRICE_AI_BLUEPRINT_MEMBERSHIP_ANNUAL
       || ''
 
-    const SELF_SERVE = process.env.STRIPE_PRICE_AI_BLUEPRINT_SELF_SERVE_ONETIME || ''
-    const BOARD_READY = process.env.STRIPE_PRICE_AI_BLUEPRINT_BOARD_READY_PRO_ONETIME || ''
-    const ENTERPRISE = process.env.STRIPE_PRICE_AI_BLUEPRINT_ENTERPRISE_PROGRAM_ONETIME || ''
+    const SELF_SERVE = process.env.STRIPE_PRICE_AI_BLUEPRINT_SELF_SERVE_ONETIME
+      || process.env.STRIPE_PRICE_HIGHER_ED_PULSE_CHECK
+      || process.env.STRIPE_PRICE_AI_BLUEPRINT_COMPREHENSIVE
+      || ''
+    const BOARD_READY = process.env.STRIPE_PRICE_AI_BLUEPRINT_BOARD_READY_PRO_ONETIME
+      || process.env.STRIPE_PRICE_AI_TRANSFORMATION_BLUEPRINT
+      || ''
+    const ENTERPRISE = process.env.STRIPE_PRICE_AI_BLUEPRINT_ENTERPRISE_PROGRAM_ONETIME
+      || process.env.STRIPE_PRICE_ENTERPRISE_PARTNERSHIP_MONTHLY
+      || process.env.STRIPE_PRICE_ENTERPRISE_PARTNERSHIP_ANNUAL
+      || ''
 
     // Fetch what we can; skip missing
     const fetchPrice = async (id: string) => (id ? await stripe.prices.retrieve(id) : null)

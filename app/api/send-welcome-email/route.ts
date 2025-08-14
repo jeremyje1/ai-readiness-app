@@ -11,7 +11,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, implementationType, subscriptionTier, billingPeriod, loginPassword, isNewAccount, institutionId } = await request.json()
+  const { email, name, implementationType, subscriptionTier, billingPeriod, loginPassword, isNewAccount, institutionId } = await request.json()
+  const url = new URL(request.url)
+  const debug = url.searchParams.get('debug') === 'true'
 
     const postmarkToken = process.env.POSTMARK_API_TOKEN || ''
     if (!postmarkToken) {
@@ -31,9 +33,10 @@ export async function POST(request: NextRequest) {
     const deepLink = institutionId ? `${baseUrl}/${implementationPath}?institutionId=${encodeURIComponent(institutionId)}`
                                    : `${baseUrl}/${implementationPath}`
     
-  const fromEmail = process.env.FROM_EMAIL || 'info@northpathstrategies.org'
-  const replyTo = process.env.REPLY_TO_EMAIL || 'info@northpathstrategies.org'
-  const messageStream = process.env.POSTMARK_MESSAGE_STREAM || 'outbound'
+  const fromEmail = (process.env.FROM_EMAIL || 'info@northpathstrategies.org').trim()
+  const replyTo = (process.env.REPLY_TO_EMAIL || 'info@northpathstrategies.org').trim()
+  const rawStream = process.env.POSTMARK_MESSAGE_STREAM
+  const messageStream = rawStream && rawStream.trim() !== '' ? rawStream.trim() : 'outbound'
 
   const HtmlBody = `
         <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
@@ -123,7 +126,7 @@ export async function POST(request: NextRequest) {
       `
 
     // Send email using Postmark API
-    const response = await fetch('https://api.postmarkapp.com/email', {
+    let response = await fetch('https://api.postmarkapp.com/email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -140,8 +143,39 @@ export async function POST(request: NextRequest) {
     })
 
     if (!response.ok) {
-      const errorData = await response.text()
-      console.error('Postmark API error:', response.status, errorData)
+      // Try to parse JSON error to detect invalid stream and retry with 'outbound'
+      const text = await response.text()
+      let parsed: any
+      try { parsed = JSON.parse(text) } catch {}
+      const isInvalidStream = response.status === 422 && (parsed?.ErrorCode === 1235 || /stream\s+provided/i.test(parsed?.Message || ''))
+      if (isInvalidStream && messageStream !== 'outbound') {
+        console.warn(`Postmark stream '${messageStream}' invalid. Retrying with 'outbound'.`)
+        response = await fetch('https://api.postmarkapp.com/email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Postmark-Server-Token': postmarkToken,
+          },
+          body: JSON.stringify({
+            From: fromEmail,
+            To: email,
+            ReplyTo: replyTo,
+            Subject: 'Welcome to AI Blueprint - Your 7-Day Free Trial Started! 🎉',
+            HtmlBody,
+            MessageStream: 'outbound',
+          }),
+        })
+        if (response.ok) {
+          return NextResponse.json({ success: true, message: 'Welcome email sent successfully', note: `Fallback to 'outbound' stream from '${messageStream}'` })
+        }
+      }
+      console.error('Postmark API error:', response.status, text)
+      if (debug) {
+        return NextResponse.json(
+          { error: 'Postmark error', status: response.status, details: text?.slice(0, 500), attemptedStream: messageStream },
+          { status: 500 }
+        )
+      }
       throw new Error(`Postmark API error: ${response.status}`)
     }
 

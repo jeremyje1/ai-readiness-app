@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { sendPostmarkEmail } from '@/lib/email/postmark'
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,26 +85,15 @@ export async function POST(request: NextRequest) {
       `
     }
 
-    const fromEmail = process.env.FROM_EMAIL || 'info@northpathstrategies.org'
-    const messageStream = process.env.POSTMARK_MESSAGE_STREAM || 'outbound'
-
-    const response = await fetch('https://api.postmarkapp.com/email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Postmark-Server-Token': postmarkToken!,
-      },
-      body: JSON.stringify({
-        From: fromEmail,
-        To: email,
-        Subject: `Thank you for your ${serviceName} purchase! 🎉`,
-        HtmlBody: consultationEmail.html,
-        MessageStream: messageStream,
-      }),
-    })
-
-    if (!response.ok) {
-  console.error('Postmark consultation email failed:', response.status)
+    try {
+      await sendPostmarkEmail({
+        to: email,
+        subject: `Thank you for your ${serviceName} purchase! 🎉`,
+        html: consultationEmail.html,
+        replyTo: (process.env.REPLY_TO_EMAIL || 'info@northpathstrategies.org').trim(),
+      })
+    } catch (e) {
+      console.error('Postmark consultation email failed:', e)
       return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
     }
 
