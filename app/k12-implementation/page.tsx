@@ -209,7 +209,7 @@ export default function K12ImplementationPage() {
     return (
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div className="text-center">
               <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
@@ -221,7 +221,7 @@ export default function K12ImplementationPage() {
               <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-6">
                 <Button 
                   onClick={() => setShowOnboarding(true)}
-                  className="bg-yellow-500 text-black px-8 py-4 text-lg font-bold hover:bg-yellow-400 shadow-lg"
+                  className="bg-white text-indigo-700 px-8 py-4 text-lg font-bold hover:bg-indigo-50 shadow-lg"
                 >
                   <Play className="h-5 w-5 mr-2" />
                   Start 7-Day Free Trial
@@ -230,8 +230,44 @@ export default function K12ImplementationPage() {
             </div>
           </div>
         </div>
+        {/* Canonical Pricing Grid */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <h2 className="text-3xl font-semibold text-center text-gray-900 mb-2">Pricing</h2>
+          <p className="text-center text-gray-600 mb-8">Matches our Implementation page across all tracks.</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[{ name: 'Pulse Check', price: 2000 }, { name: 'Comprehensive', price: 4995 }, { name: 'Transformation', price: 24500 }, { name: 'Enterprise', price: 75000 }].map(p => (
+              <div key={p.name} className="bg-white border rounded-lg p-6 flex flex-col hover:border-indigo-300 transition-colors">
+                <h3 className="font-semibold text-gray-900">{p.name}</h3>
+                <div className="text-3xl font-bold mt-3">${'{'}p.price.toLocaleString(){'}'}</div>
+                <ul className="text-sm text-gray-600 mt-4 space-y-1">
+                  {p.name === 'Pulse Check' && (<>
+                    <li>Quick baseline survey</li>
+                    <li>8–10 page report</li>
+                    <li>Rapid recommendations</li>
+                  </>)}
+                  {p.name === 'Comprehensive' && (<>
+                    <li>Deep‑dive assessment</li>
+                    <li>25‑page plan</li>
+                    <li>Priority roadmap</li>
+                  </>)}
+                  {p.name === 'Transformation' && (<>
+                    <li>Implementation blueprint</li>
+                    <li>Policy + training kit</li>
+                    <li>Hands‑on enablement</li>
+                  </>)}
+                  {p.name === 'Enterprise' && (<>
+                    <li>Executive facilitation</li>
+                    <li>Quarterly governance</li>
+                    <li>Custom integrations</li>
+                  </>)}
+                </ul>
+                <Button onClick={() => setShowOnboarding(true)} className="mt-auto">Start Now</Button>
+              </div>
+            ))}
+          </div>
+        </div>
         
-        {/* Onboarding Form */}
+  {/* Onboarding Form */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Card className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
