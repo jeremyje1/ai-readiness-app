@@ -329,23 +329,24 @@ export default function K12ImplementationPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Billing Period
                 </label>
-                <div className="inline-flex rounded-md shadow-sm" role="group">
+        <div className="inline-flex rounded-md shadow-sm" role="group">
                   <button
                     type="button"
                     onClick={() => setOnboardingData({ ...onboardingData, billingPeriod: 'monthly' })}
-                    className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'monthly' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
+          className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'monthly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
                   >
-                    Monthly ($99)
+          Monthly
                   </button>
                   <button
                     type="button"
                     onClick={() => setOnboardingData({ ...onboardingData, billingPeriod: 'yearly' })}
-                    className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'yearly' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
+          className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'yearly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
                   >
-                    Yearly ($999)
+          Yearly
                   </button>
                 </div>
-                <p className="text-xs text-green-700 mt-2">🎉 7-Day Free Trial • Cancel anytime</p>
+        <p className="text-xs text-green-700 mt-2">🎉 7-Day Free Trial • Cancel anytime</p>
+        <p className="text-xs text-gray-500 mt-1">Pricing follows the canonical Implementation page.</p>
               </div>
             </div>
 

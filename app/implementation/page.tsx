@@ -18,18 +18,20 @@ import { Button } from '@/components/ui/button';
  */
 export default function ImplementationPage() {
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-12 space-y-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
       {/* Hero / Intro */}
-      <section className="text-center space-y-4">
-        <h1 className="text-4xl font-bold">AI Blueprint Implementation</h1>
-        <p className="text-lg text-muted-foreground">
-          Ready to transform your school or university with AI? Choose your path below
-          to begin an autonomous implementation tailored to your needs.
-        </p>
+      <section className="px-4 py-14 border-b bg-white/70 backdrop-blur">
+        <div className="container mx-auto max-w-6xl text-center space-y-4">
+          <h1 className="text-4xl font-bold text-gray-900">AI Blueprint Implementation</h1>
+          <p className="text-lg text-gray-600">
+            Ready to transform your school or university with AI? Choose your path below
+            to begin an autonomous implementation tailored to your needs.
+          </p>
+        </div>
       </section>
 
       {/* K‑12 and Higher‑Ed cards */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+  <section className="container mx-auto max-w-6xl px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* K‑12 Card */}
         <Card>
           <CardHeader>
@@ -93,83 +95,32 @@ export default function ImplementationPage() {
         </Card>
       </section>
 
-      {/* Pricing section */}
-      <section className="space-y-8">
-        <h2 className="text-3xl font-semibold text-center">Pricing</h2>
+      {/* Pricing section (canonical) */}
+      <section className="container mx-auto max-w-6xl px-4 py-12 space-y-8">
+        <h2 className="text-3xl font-semibold text-center text-gray-900">Pricing</h2>
+        <p className="text-center text-gray-600">These prices are the source of truth and are reflected across K‑12 and Higher‑Ed pages.</p>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pulse Check</CardTitle>
-              <CardDescription className="text-2xl font-bold">$2,000</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-4">
-                A quick assessment with 8–10 page report. Ideal for institutions seeking
-                a snapshot of AI readiness.
-              </p>
-              <Button asChild>
-                <Link href="/highered-implementation?tier=pulse">Start Now</Link>
-              </Button>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Comprehensive</CardTitle>
-              <CardDescription className="text-2xl font-bold">$4,995</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-4">
-                105‑question assessment with a 25‑page report and next‑step
-                recommendations.
-              </p>
-              <Button asChild>
-                <Link href="/highered-implementation?tier=comprehensive">Start Now</Link>
-              </Button>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Transformation</CardTitle>
-              <CardDescription className="text-2xl font-bold">$24,500</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-4">
-                Full implementation blueprint with policy templates, training materials
-                and hands‑on support.
-              </p>
-              <Button asChild>
-                <Link href="/highered-implementation?tier=transformation">Start Now</Link>
-              </Button>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Enterprise</CardTitle>
-              <CardDescription className="text-2xl font-bold">$75,000</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-4">
-                Customised partnership with unlimited users, analytics dashboard and
-                ongoing advisory. Book a call to discuss.
-              </p>
-              <Button asChild>
-                <Link href="https://calendly.com/northpathstrategies/enterprise-consultation">
-                  Book Consultation
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          {[{ name: 'Pulse Check', price: 2000, href: '/highered-implementation' }, { name: 'Comprehensive', price: 4995, href: '/highered-implementation' }, { name: 'Transformation', price: 24500, href: '/highered-implementation' }, { name: 'Enterprise', price: 75000, href: '/highered-implementation' }].map(p => (
+            <Card key={p.name} className="border-indigo-100 hover:border-indigo-300 transition-colors">
+              <CardHeader>
+                <CardTitle>{p.name}</CardTitle>
+                <CardDescription className="text-2xl font-bold">${'{'}p.price.toLocaleString(){'}'}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild className="w-full">
+                  <Link href={p.href}>Start Now</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
       {/* Resources section */}
-      <section className="space-y-4">
-        <h2 className="text-3xl font-semibold text-center">Resources Included</h2>
-        <p className="text-center text-muted-foreground max-w-3xl mx-auto">
-          Each AI Blueprint package comes with personalised recommendations, policy
-          templates, training modules and benchmarking tools. Our patent‑pending
-          algorithms evaluate your current infrastructure and staff readiness to ensure
-          responsible AI adoption.
+      <section className="container mx-auto max-w-6xl px-4 py-12 space-y-6">
+        <h2 className="text-3xl font-semibold text-center text-gray-900">Resources Included</h2>
+        <p className="text-center text-gray-600 max-w-3xl mx-auto">
+          Each AI Blueprint package includes personalised recommendations, policy templates, training modules and benchmarking tools. Our AI evaluates your infrastructure and staff readiness to ensure responsible adoption.
         </p>
       </section>
     </div>
