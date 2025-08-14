@@ -281,17 +281,37 @@ export default function HigherEdImplementationPage() {
         </div>
       </div>
 
-      {/* Pricing Section (canonical) */}
+      {/* Pricing Section (canonical, dynamic) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">Pricing</h2>
         <div className="grid md:grid-cols-4 gap-6">
           {[
-            { name: 'Pulse Check', price: 2000, desc: ['50‑question survey', '8–10 page report', 'Quick baseline insights'] },
-            { name: 'Comprehensive', price: 4995, desc: ['105‑question assessment', '25‑page plan', 'Priority recommendations'] },
-            { name: 'Transformation', price: 24500, desc: ['Full implementation blueprint', 'Policy + training kit', 'Hands‑on enablement'] },
-            { name: 'Enterprise', price: 75000, desc: ['Executive facilitation', 'Quarterly governance', 'Custom integrations'] },
+            {
+              key: 'selfServe',
+              name: 'Self‑Serve Assessment',
+              price: pricing.selfServeCents ? pricing.selfServeCents / 100 : 1950,
+              desc: ['Rapid baseline survey', 'AI narrative PDF', 'Priority recommendations']
+            },
+            {
+              key: 'teamMonthly',
+              name: 'Team Platform (Monthly)',
+              price: pricing.monthlyCents ? pricing.monthlyCents / 100 : 795,
+              desc: ['Unlimited assessments', 'Trend tracking', 'Team workspace']
+            },
+            {
+              key: 'boardReady',
+              name: 'Board‑Ready Package',
+              price: pricing.boardReadyCents ? pricing.boardReadyCents / 100 : 14500,
+              desc: ['Exec narrative refinement', 'Facilitated workshop', 'Risk & investment framing']
+            },
+            {
+              key: 'enterprise',
+              name: 'Enterprise Program',
+              price: pricing.enterpriseCents ? pricing.enterpriseCents / 100 : 48000,
+              desc: ['Multi‑team orchestration', 'Roadmap co‑build', 'Advisory cadence']
+            },
           ].map((p) => (
-            <div key={p.name} className="bg-white border rounded-lg p-6 flex flex-col">
+            <div key={p.key} className="bg-white border rounded-lg p-6 flex flex-col">
               <h3 className="font-semibold text-gray-900">{p.name}</h3>
               <div className="text-3xl font-bold mt-3">${'{'}p.price.toLocaleString(){'}'}</div>
               <ul className="text-sm text-gray-600 mt-4 space-y-1">
