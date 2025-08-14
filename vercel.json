@@ -36,52 +36,34 @@
   ],
   "redirects": [
     {
+      "source": "/k12",
+      "destination": "/k12-implementation",
+      "permanent": false
+    },
+    {
+      "source": "/highered",
+      "destination": "/highered-implementation",
+      "permanent": false
+    },
+    {
       "source": "/k12aiblueprint.html",
-      "destination": "https://aireadiness.northpathstrategies.org/k12aiblueprint.html",
-      "permanent": true,
-      "has": [
-        {
-          "type": "header",
-          "key": "host",
-          "value": "(.+\\.)?vercel\\.app|app\\.northpathstrategies\\.org"
-        }
-      ]
+      "destination": "/k12aiblueprint.html",
+      "permanent": true
     },
     {
       "source": "/k12aiblueprint",
-      "destination": "https://aireadiness.northpathstrategies.org/k12aiblueprint.html",
-      "permanent": true,
-      "has": [
-        {
-          "type": "header",
-          "key": "host",
-          "value": "(.+\\.)?vercel\\.app|app\\.northpathstrategies\\.org"
-        }
-      ]
+      "destination": "/k12aiblueprint.html",
+      "permanent": true
     },
     {
       "source": "/higheredaiblueprint.html",
-      "destination": "https://aireadiness.northpathstrategies.org/higheredaiblueprint.html",
-      "permanent": true,
-      "has": [
-        {
-          "type": "header",
-          "key": "host",
-          "value": "(.+\\.)?vercel\\.app|app\\.northpathstrategies\\.org"
-        }
-      ]
+      "destination": "/higheredaiblueprint.html",
+      "permanent": true
     },
     {
       "source": "/higheredaiblueprint",
-      "destination": "https://aireadiness.northpathstrategies.org/higheredaiblueprint.html",
-      "permanent": true,
-      "has": [
-        {
-          "type": "header",
-          "key": "host",
-          "value": "(.+\\.)?vercel\\.app|app\\.northpathstrategies\\.org"
-        }
-      ]
+      "destination": "/higheredaiblueprint.html",
+      "permanent": true
     }
   ]
 }
