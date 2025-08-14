@@ -8,34 +8,98 @@ const stripe = stripeSecret
 
 export async function GET(_req: NextRequest) {
   try {
-    const monthlyId = process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY || ''
-    const yearlyId = process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_YEARLY || ''
-
-    if (!stripe || !monthlyId || !yearlyId) {
+    if (!stripe) {
       return NextResponse.json(
         { error: 'Pricing not configured' },
         { status: 500 }
       )
     }
 
-    const [monthlyPrice, yearlyPrice] = await Promise.all([
-      stripe.prices.retrieve(monthlyId),
-      stripe.prices.retrieve(yearlyId),
+    // New canonical envs (fallback to legacy names for compatibility)
+    const TEAM_MONTHLY = process.env.STRIPE_PRICE_AI_BLUEPRINT_TEAM_MONTHLY
+      || process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY
+      || ''
+    const TEAM_YEARLY = process.env.STRIPE_PRICE_AI_BLUEPRINT_TEAM_YEARLY
+      || process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_YEARLY
+      || ''
+
+    const SELF_SERVE = process.env.STRIPE_PRICE_AI_BLUEPRINT_SELF_SERVE_ONETIME || ''
+    const BOARD_READY = process.env.STRIPE_PRICE_AI_BLUEPRINT_BOARD_READY_PRO_ONETIME || ''
+    const ENTERPRISE = process.env.STRIPE_PRICE_AI_BLUEPRINT_ENTERPRISE_PROGRAM_ONETIME || ''
+
+    // Fetch what we can; skip missing
+    const fetchPrice = async (id: string) => (id ? await stripe.prices.retrieve(id) : null)
+
+    const [teamMonthly, teamYearly, selfServe, boardReady, enterprise] = await Promise.all([
+      fetchPrice(TEAM_MONTHLY),
+      fetchPrice(TEAM_YEARLY),
+      fetchPrice(SELF_SERVE),
+      fetchPrice(BOARD_READY),
+      fetchPrice(ENTERPRISE),
     ])
 
     return NextResponse.json({
-      monthly: {
-        id: monthlyPrice.id,
-        unit_amount: monthlyPrice.unit_amount ?? null,
-        currency: monthlyPrice.currency,
-        recurring: monthlyPrice.recurring || null,
+      // Back-compat top-level for pages expecting monthly/yearly (Team)
+      monthly: teamMonthly
+        ? {
+            id: teamMonthly.id,
+            unit_amount: teamMonthly.unit_amount ?? null,
+            currency: teamMonthly.currency,
+            recurring: teamMonthly.recurring || null,
+          }
+        : null,
+      yearly: teamYearly
+        ? {
+            id: teamYearly.id,
+            unit_amount: teamYearly.unit_amount ?? null,
+            currency: teamYearly.currency,
+            recurring: teamYearly.recurring || null,
+          }
+        : null,
+
+      // Expanded pricing structure
+      team: {
+        monthly: teamMonthly
+          ? {
+              id: teamMonthly.id,
+              unit_amount: teamMonthly.unit_amount ?? null,
+              currency: teamMonthly.currency,
+              recurring: teamMonthly.recurring || null,
+            }
+          : null,
+        yearly: teamYearly
+          ? {
+              id: teamYearly.id,
+              unit_amount: teamYearly.unit_amount ?? null,
+              currency: teamYearly.currency,
+              recurring: teamYearly.recurring || null,
+            }
+          : null,
       },
-      yearly: {
-        id: yearlyPrice.id,
-        unit_amount: yearlyPrice.unit_amount ?? null,
-        currency: yearlyPrice.currency,
-        recurring: yearlyPrice.recurring || null,
-      },
+      selfServeAssessment: selfServe
+        ? {
+            id: selfServe.id,
+            unit_amount: selfServe.unit_amount ?? null,
+            currency: selfServe.currency,
+            type: 'one_time',
+          }
+        : null,
+      boardReadyPro: boardReady
+        ? {
+            id: boardReady.id,
+            unit_amount: boardReady.unit_amount ?? null,
+            currency: boardReady.currency,
+            type: 'one_time',
+          }
+        : null,
+      enterpriseReadinessProgram: enterprise
+        ? {
+            id: enterprise.id,
+            unit_amount: enterprise.unit_amount ?? null,
+            currency: enterprise.currency,
+            type: 'one_time',
+          }
+        : null,
     })
   } catch (err) {
     console.error('Unified pricing API error', err)

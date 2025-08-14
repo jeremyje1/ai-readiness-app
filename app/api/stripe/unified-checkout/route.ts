@@ -9,8 +9,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const billingPeriod = searchParams.get('billing') || 'monthly';
-    const trialDays = searchParams.get('trial_days') || '7';
+  const product = (searchParams.get('product') || 'team').toLowerCase();
+  const billingPeriod = searchParams.get('billing') || 'monthly'; // For team subscriptions
+  const trialDays = searchParams.get('trial_days') || '7'; // For team subscriptions
     const couponCode = searchParams.get('coupon');
     const returnTo = searchParams.get('return_to') || '';
     const contactEmail = searchParams.get('contact_email') || '';
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     const provisionalInstitutionId = returnTo === 'highered' ? `inst_${Date.now()}` : returnTo === 'k12' ? `school_${Date.now()}` : '';
     const baseUrl = request.nextUrl.origin;
 
-    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId, contactEmail, contactName);
+  return await createCheckoutSession({ product, billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId, contactEmail, contactName });
   } catch (error) {
     console.error('Stripe checkout error (GET):', error);
     return NextResponse.json(
@@ -32,12 +33,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { billingPeriod = 'monthly', couponCode, returnTo = '', contactEmail = '', contactName = '' } = body;
-    const trialDays = '7';
+  const { product = 'team', billingPeriod = 'monthly', couponCode, returnTo = '', contactEmail = '', contactName = '' } = body;
+  const trialDays = '7'; // Only used for team subscriptions
     const provisionalInstitutionId = returnTo === 'highered' ? `inst_${Date.now()}` : returnTo === 'k12' ? `school_${Date.now()}` : '';
     const baseUrl = request.nextUrl.origin;
 
-    return await createCheckoutSession(billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId, contactEmail, contactName);
+  return await createCheckoutSession({ product, billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId, contactEmail, contactName });
   } catch (error) {
     console.error('Stripe checkout error (POST):', error);
     return NextResponse.json(
@@ -47,56 +48,85 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function createCheckoutSession(
-  billingPeriod: string,
-  trialDays: string,
-  couponCode: string | null,
-  returnTo: string,
-  baseUrl: string,
-  provisionalInstitutionId?: string,
-  contactEmail?: string,
+type CreateSessionArgs = {
+  product: string
+  billingPeriod: string
+  trialDays: string
+  couponCode: string | null
+  returnTo: string
+  baseUrl: string
+  provisionalInstitutionId?: string
+  contactEmail?: string
   contactName?: string
-) {
-  try {
-    // Determine which price ID to use
-    const priceId = billingPeriod === 'yearly' 
-      ? process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_YEARLY
-      : process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY;
+}
 
-    if (!priceId) {
-      throw new Error(`Price ID not found for billing period: ${billingPeriod}`);
-    }
+async function createCheckoutSession(args: CreateSessionArgs) {
+  try {
+    const { product, billingPeriod, trialDays, couponCode, returnTo, baseUrl, provisionalInstitutionId, contactEmail, contactName } = args;
+
+    // Resolve price IDs with new canonical envs (fallback to legacy names)
+    const TEAM_MONTHLY = process.env.STRIPE_PRICE_AI_BLUEPRINT_TEAM_MONTHLY
+      || process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY;
+    const TEAM_YEARLY = process.env.STRIPE_PRICE_AI_BLUEPRINT_TEAM_YEARLY
+      || process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_YEARLY;
+    const SELF_SERVE = process.env.STRIPE_PRICE_AI_BLUEPRINT_SELF_SERVE_ONETIME;
+    const BOARD_READY = process.env.STRIPE_PRICE_AI_BLUEPRINT_BOARD_READY_PRO_ONETIME;
+    const ENTERPRISE = process.env.STRIPE_PRICE_AI_BLUEPRINT_ENTERPRISE_PROGRAM_ONETIME;
 
     // Create checkout session parameters with broadly compatible fields
-    const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      mode: 'subscription',
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}${returnTo ? `&return_to=${encodeURIComponent(returnTo)}` : ''}`,
-      cancel_url: `${baseUrl}/pricing?cancelled=true`,
-      allow_promotion_codes: true,
-      billing_address_collection: 'required',
-      metadata: {
-        service: 'ai-readiness-complete',
-        billing_period: billingPeriod,
-        trial_days: trialDays,
-        segment: returnTo === 'k12' ? 'K12' : 'HIGHER_ED',
-        ...(provisionalInstitutionId ? { institution_id: provisionalInstitutionId } : {}),
-        ...(returnTo ? { return_to: returnTo } : {}),
-        ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {}),
-        ...(contactEmail ? { contact_email: contactEmail } : {}),
-        ...(contactName ? { contact_name: contactName } : {})
-      },
-      subscription_data: {
-        trial_period_days: parseInt(trialDays, 10),
+    let sessionParams: Stripe.Checkout.SessionCreateParams;
+
+    if (product === 'team') {
+      const priceId = billingPeriod === 'yearly' ? TEAM_YEARLY : TEAM_MONTHLY;
+      if (!priceId) throw new Error(`Team price not found for billing=${billingPeriod}`);
+      sessionParams = {
+        mode: 'subscription',
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}${returnTo ? `&return_to=${encodeURIComponent(returnTo)}` : ''}`,
+        cancel_url: `${baseUrl}/pricing?cancelled=true`,
+        allow_promotion_codes: true,
+        billing_address_collection: 'required',
         metadata: {
-          service: 'ai-readiness-complete',
+          service: 'ai-blueprint-team',
+          product,
           billing_period: billingPeriod,
-          trial_start: new Date().toISOString(),
+          trial_days: trialDays,
+          segment: returnTo === 'k12' ? 'K12' : 'HIGHER_ED',
+          ...(provisionalInstitutionId ? { institution_id: provisionalInstitutionId } : {}),
+          ...(returnTo ? { return_to: returnTo } : {}),
+          ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {}),
+          ...(contactEmail ? { contact_email: contactEmail } : {}),
+          ...(contactName ? { contact_name: contactName } : {})
+        },
+        subscription_data: {
+          trial_period_days: parseInt(trialDays, 10),
+          metadata: {
+            service: 'ai-blueprint-team',
+            product,
+            billing_period: billingPeriod,
+            trial_start: new Date().toISOString(),
+            segment: returnTo === 'k12' ? 'K12' : 'HIGHER_ED',
+            ...(provisionalInstitutionId ? { institution_id: provisionalInstitutionId } : {}),
+            ...(returnTo ? { return_to: returnTo } : {}),
+            ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {}),
+            ...(contactEmail ? { contact_email: contactEmail } : {}),
+            ...(contactName ? { contact_name: contactName } : {})
+          }
+        }
+      };
+    } else if (product === 'self-serve' || product === 'selfserve' || product === 'self') {
+      const priceId = SELF_SERVE;
+      if (!priceId) throw new Error('Self-Serve price not configured');
+      sessionParams = {
+        mode: 'payment',
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}${returnTo ? `&return_to=${encodeURIComponent(returnTo)}` : ''}`,
+        cancel_url: `${baseUrl}/pricing?cancelled=true`,
+        allow_promotion_codes: true,
+        billing_address_collection: 'required',
+        metadata: {
+          service: 'ai-blueprint-self-serve',
+          product: 'self-serve',
           segment: returnTo === 'k12' ? 'K12' : 'HIGHER_ED',
           ...(provisionalInstitutionId ? { institution_id: provisionalInstitutionId } : {}),
           ...(returnTo ? { return_to: returnTo } : {}),
@@ -104,11 +134,55 @@ async function createCheckoutSession(
           ...(contactEmail ? { contact_email: contactEmail } : {}),
           ...(contactName ? { contact_name: contactName } : {})
         }
-      }
-    };
+      };
+    } else if (product === 'board' || product === 'board-ready' || product === 'pro') {
+      const priceId = BOARD_READY;
+      if (!priceId) throw new Error('Board-Ready Pro price not configured');
+      sessionParams = {
+        mode: 'payment',
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}${returnTo ? `&return_to=${encodeURIComponent(returnTo)}` : ''}`,
+        cancel_url: `${baseUrl}/pricing?cancelled=true`,
+        allow_promotion_codes: true,
+        billing_address_collection: 'required',
+        metadata: {
+          service: 'ai-blueprint-board-ready-pro',
+          product: 'board-ready-pro',
+          segment: returnTo === 'k12' ? 'K12' : 'HIGHER_ED',
+          ...(provisionalInstitutionId ? { institution_id: provisionalInstitutionId } : {}),
+          ...(returnTo ? { return_to: returnTo } : {}),
+          ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {}),
+          ...(contactEmail ? { contact_email: contactEmail } : {}),
+          ...(contactName ? { contact_name: contactName } : {})
+        }
+      };
+    } else if (product === 'enterprise') {
+      const priceId = ENTERPRISE;
+      if (!priceId) throw new Error('Enterprise Readiness Program price not configured');
+      sessionParams = {
+        mode: 'payment',
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}${returnTo ? `&return_to=${encodeURIComponent(returnTo)}` : ''}`,
+        cancel_url: `${baseUrl}/pricing?cancelled=true`,
+        allow_promotion_codes: true,
+        billing_address_collection: 'required',
+        metadata: {
+          service: 'ai-blueprint-enterprise-readiness',
+          product: 'enterprise',
+          segment: returnTo === 'k12' ? 'K12' : 'HIGHER_ED',
+          ...(provisionalInstitutionId ? { institution_id: provisionalInstitutionId } : {}),
+          ...(returnTo ? { return_to: returnTo } : {}),
+          ...(provisionalInstitutionId ? { provisional_institution_id: provisionalInstitutionId } : {}),
+          ...(contactEmail ? { contact_email: contactEmail } : {}),
+          ...(contactName ? { contact_name: contactName } : {})
+        }
+      };
+    } else {
+      throw new Error(`Unknown product: ${product}`);
+    }
 
     // Add coupon if provided
-    if (couponCode) {
+  if (couponCode) {
       sessionParams.discounts = [{ coupon: couponCode }];
     }
 
