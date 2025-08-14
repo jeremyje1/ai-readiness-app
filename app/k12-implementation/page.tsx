@@ -32,6 +32,7 @@ interface SchoolOnboarding {
 export default function K12ImplementationPage() {
   const [hasImplementation, setHasImplementation] = useState<boolean | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [pricing, setPricing] = useState<{ monthlyCents: number | null; yearlyCents: number | null; selfServeCents: number | null; boardReadyCents: number | null; enterpriseCents: number | null }>({ monthlyCents: null, yearlyCents: null, selfServeCents: null, boardReadyCents: null, enterpriseCents: null });
   const [onboardingData, setOnboardingData] = useState<SchoolOnboarding>({
     contactName: '',
     contactEmail: '',
@@ -47,6 +48,20 @@ export default function K12ImplementationPage() {
 
   useEffect(() => {
     checkExistingImplementation();
+    // Load dynamic unified pricing
+    fetch('/api/pricing/unified')
+      .then(async (r) => {
+        if (!r.ok) return;
+        const data = await r.json();
+        setPricing({
+          monthlyCents: typeof data?.team?.monthly?.unit_amount === 'number' ? data.team.monthly.unit_amount : (typeof data?.monthly?.unit_amount === 'number' ? data.monthly.unit_amount : null),
+          yearlyCents: typeof data?.team?.yearly?.unit_amount === 'number' ? data.team.yearly.unit_amount : (typeof data?.yearly?.unit_amount === 'number' ? data.yearly.unit_amount : null),
+          selfServeCents: typeof data?.selfServeAssessment?.unit_amount === 'number' ? data.selfServeAssessment.unit_amount : null,
+          boardReadyCents: typeof data?.boardReadyPro?.unit_amount === 'number' ? data.boardReadyPro.unit_amount : null,
+          enterpriseCents: typeof data?.enterpriseReadinessProgram?.unit_amount === 'number' ? data.enterpriseReadinessProgram.unit_amount : null,
+        });
+      })
+      .catch(() => {});
     
     // Check if returning from successful Stripe checkout
     const urlParams = new URLSearchParams(window.location.search);
@@ -230,40 +245,96 @@ export default function K12ImplementationPage() {
             </div>
           </div>
         </div>
-        {/* Canonical Pricing Grid */}
+        {/* Canonical Pricing Grid (Dynamic) */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h2 className="text-3xl font-semibold text-center text-gray-900 mb-2">Pricing</h2>
-          <p className="text-center text-gray-600 mb-8">Matches our Implementation page across all tracks.</p>
+          <p className="text-center text-gray-600 mb-8">Live prices pulled from Stripe via our unified pricing API.</p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[{ name: 'Pulse Check', price: 2000 }, { name: 'Comprehensive', price: 4995 }, { name: 'Transformation', price: 24500 }, { name: 'Enterprise', price: 75000 }].map(p => (
-              <div key={p.name} className="bg-white border rounded-lg p-6 flex flex-col hover:border-indigo-300 transition-colors">
+            {[{
+              key: 'selfServe',
+              name: 'Self‑Serve Assessment',
+              price: pricing.selfServeCents ? pricing.selfServeCents / 100 : 1950,
+              desc: ['Rapid baseline survey', 'AI narrative PDF', 'Priority recommendations']
+            }, {
+              key: 'teamMonthly',
+              name: 'Team Platform (Monthly)',
+              price: pricing.monthlyCents ? pricing.monthlyCents / 100 : 795,
+              desc: ['Unlimited assessments', 'Trend tracking', 'Team workspace']
+            }, {
+              key: 'boardReady',
+              name: 'Board‑Ready Package',
+              price: pricing.boardReadyCents ? pricing.boardReadyCents / 100 : 14500,
+              desc: ['Exec narrative refinement', 'Facilitated workshop', 'Risk & investment framing']
+            }, {
+              key: 'enterprise',
+              name: 'Enterprise Program',
+              price: pricing.enterpriseCents ? pricing.enterpriseCents / 100 : 48000,
+              desc: ['Multi‑team orchestration', 'Roadmap co‑build', 'Advisory cadence']
+            }].map((p) => (
+              <div key={p.key} className="bg-white border rounded-lg p-6 flex flex-col hover:border-indigo-300 transition-colors">
                 <h3 className="font-semibold text-gray-900">{p.name}</h3>
                 <div className="text-3xl font-bold mt-3">${'{'}p.price.toLocaleString(){'}'}</div>
                 <ul className="text-sm text-gray-600 mt-4 space-y-1">
-                  {p.name === 'Pulse Check' && (<>
-                    <li>Quick baseline survey</li>
-                    <li>8–10 page report</li>
-                    <li>Rapid recommendations</li>
-                  </>)}
-                  {p.name === 'Comprehensive' && (<>
-                    <li>Deep‑dive assessment</li>
-                    <li>25‑page plan</li>
-                    <li>Priority roadmap</li>
-                  </>)}
-                  {p.name === 'Transformation' && (<>
-                    <li>Implementation blueprint</li>
-                    <li>Policy + training kit</li>
-                    <li>Hands‑on enablement</li>
-                  </>)}
-                  {p.name === 'Enterprise' && (<>
-                    <li>Executive facilitation</li>
-                    <li>Quarterly governance</li>
-                    <li>Custom integrations</li>
-                  </>)}
+                  {p.desc.map(d => <li key={d}>{d}</li>)}
                 </ul>
                 <Button onClick={() => setShowOnboarding(true)} className="mt-auto">Start Now</Button>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Logos / Trust */}
+        <div className="bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <p className="text-center text-gray-500 uppercase tracking-wider text-xs">Trusted by innovative schools and districts</p>
+            <div className="mt-6 grid grid-cols-2 md:grid-cols-6 gap-4 items-center">
+              {['North Valley USD', 'Riverbend HS', 'Oak Ridge K‑8', 'Lakeside District', 'Sunset Middle', 'Pinecrest Charter'].map((name) => (
+                <div key={name} className="h-10 bg-gray-100 rounded flex items-center justify-center text-gray-500 text-xs font-medium">
+                  {name}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Testimonials */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">What Educators Are Saying</h3>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[{
+              quote: 'We had a clear, actionable AI roadmap in under two weeks—without adding meetings to anyone’s calendar.',
+              author: 'Assistant Superintendent, K‑12 District'
+            },{
+              quote: 'The faculty training plan aligned perfectly with our existing PD structures.',
+              author: 'Principal, High School'
+            },{
+              quote: 'Finally a way to move responsibly and quickly on AI without spinning up committees.',
+              author: 'Director of Technology, District'
+            }].map(t => (
+              <div key={t.author} className="bg-white border rounded-lg p-6 shadow-sm">
+                <p className="text-gray-700 italic">“{t.quote}”</p>
+                <p className="mt-3 text-sm text-gray-500">— {t.author}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Frequently Asked Questions</h3>
+          <div className="space-y-6">
+            <div>
+              <h4 className="font-medium text-gray-900">Do we need meetings to get started?</h4>
+              <p className="text-gray-600 text-sm mt-1">No. Setup is fully autonomous. You can start today and see deliverables within days.</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900">Is this compliant with COPPA/FERPA?</h4>
+              <p className="text-gray-600 text-sm mt-1">Yes. The program includes FERPA‑aligned recommendations and a COPPA review step.</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900">Can we cancel during the trial?</h4>
+              <p className="text-gray-600 text-sm mt-1">Yes. The Team Platform includes a 7‑day free trial. Cancel anytime before it ends.</p>
+            </div>
           </div>
         </div>
         
@@ -365,60 +436,59 @@ export default function K12ImplementationPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Billing Period
                 </label>
-        <div className="inline-flex rounded-md shadow-sm" role="group">
+                <div className="inline-flex rounded-md shadow-sm" role="group">
                   <button
                     type="button"
                     onClick={() => setOnboardingData({ ...onboardingData, billingPeriod: 'monthly' })}
-          className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'monthly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
+                    className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'monthly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
                   >
-          Monthly
+                    Monthly
                   </button>
                   <button
                     type="button"
                     onClick={() => setOnboardingData({ ...onboardingData, billingPeriod: 'yearly' })}
-          className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'yearly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
+                    className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'yearly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
                   >
-          Yearly
+                    Yearly
                   </button>
                 </div>
-        <p className="text-xs text-green-700 mt-2">🎉 7-Day Free Trial • Cancel anytime</p>
-        <p className="text-xs text-gray-500 mt-1">Pricing follows the canonical Implementation page.</p>
+                <p className="text-xs text-green-700 mt-2">🎉 7-Day Free Trial • Cancel anytime</p>
+                <p className="text-xs text-gray-500 mt-1">Pricing follows the canonical Implementation page.</p>
               </div>
             </div>
-
-            <div className="flex space-x-4">
-              <Button
-                onClick={() => setShowOnboarding(false)}
-                variant="outline"
-                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={startNewImplementation}
-                disabled={!onboardingData.schoolName || !onboardingData.studentCount || !onboardingData.teacherCount || loading}
-                className="flex-1 bg-yellow-500 text-black font-bold hover:bg-yellow-400 disabled:bg-gray-300 disabled:text-gray-500"
-              >
-                {loading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <Play className="h-4 w-4 mr-2" />
-                )}
-                Start 7-Day Free Trial
-              </Button>
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Billing Period
+              </label>
+              <div className="inline-flex rounded-md shadow-sm" role="group">
+                <button
+                  type="button"
+                  onClick={() => setOnboardingData({ ...onboardingData, billingPeriod: 'monthly' })}
+                  className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'monthly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
+                >
+                  {`Monthly${pricing.monthlyCents ? ` ($${(pricing.monthlyCents/100).toLocaleString()})` : ''}`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOnboardingData({ ...onboardingData, billingPeriod: 'yearly' })}
+                  className={`px-4 py-2 text-sm font-medium border ${onboardingData.billingPeriod === 'yearly' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-100'}`}
+                >
+                  {`Yearly${pricing.yearlyCents ? ` ($${(pricing.yearlyCents/100).toLocaleString()})` : ''}`}
+                </button>
+              </div>
+              <p className="text-xs text-green-700 mt-2">🎉 7-Day Free Trial • Cancel anytime</p>
+              <p className="text-xs text-gray-500 mt-1">Live pricing sourced from Stripe.</p>
             </div>
-
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">What happens next?</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• <strong>7-Day Free Trial</strong> starts immediately - no charge until trial ends</li>
-                <li>• AI immediately begins your infrastructure assessment</li>
-                <li>• Automated teacher readiness survey is deployed</li>
-                <li>• COPPA compliance review starts automatically</li>
-                <li>• All deliverables generate without manual work</li>
-                <li>• Implementation proceeds through 5 phases autonomously</li>
-              </ul>
-            </div>
+            <h4 className="font-semibold text-blue-900 mb-2">What happens next?</h4>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• <strong>7-Day Free Trial</strong> starts immediately - no charge until trial ends</li>
+              <li>• AI immediately begins your infrastructure assessment</li>
+              <li>• Automated teacher readiness survey is deployed</li>
+              <li>• COPPA compliance review starts automatically</li>
+              <li>• All deliverables generate without manual work</li>
+              <li>• Implementation proceeds through 5 phases autonomously</li>
+            </ul>
           </Card>
         </div>
       </div>

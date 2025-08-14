@@ -29,17 +29,90 @@ import Link from 'next/link';
 export default function UnifiedPricingPage() {
   const analytics = useAnalytics();
   const [processingTier, setProcessingTier] = useState<string | null>(null);
+  const [dynamicPrices, setDynamicPrices] = useState<Record<string, number>>({});
+  const [dynamicPriceIds, setDynamicPriceIds] = useState<Record<string, string>>({});
 
   useEffect(() => {
     analytics.trackPricingPageView('multi-tier');
   }, [analytics]);
 
+  // Load dynamic prices from unified API
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/pricing/unified');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!mounted) return;
+        const centsToDollars = (v?: number | null) => (typeof v === 'number' ? v / 100 : undefined);
+
+        const prices: Record<string, number> = {};
+        const ids: Record<string, string> = {};
+
+        // Map unified API -> our tiers
+        if (data?.selfServeAssessment?.unit_amount) {
+          prices['self_serve_assessment'] = centsToDollars(data.selfServeAssessment.unit_amount)!;
+          if (data.selfServeAssessment.id) ids['self_serve_assessment'] = data.selfServeAssessment.id;
+        }
+        const monthly = data?.team?.monthly || data?.monthly;
+        if (monthly?.unit_amount) {
+          prices['team_monthly'] = centsToDollars(monthly.unit_amount)!;
+          if (monthly.id) ids['team_monthly'] = monthly.id;
+        }
+        const yearly = data?.team?.yearly || data?.yearly;
+        if (yearly?.unit_amount) {
+          prices['team_yearly'] = centsToDollars(yearly.unit_amount)!;
+          if (yearly.id) ids['team_yearly'] = yearly.id;
+        }
+        if (data?.boardReadyPro?.unit_amount) {
+          prices['board_ready'] = centsToDollars(data.boardReadyPro.unit_amount)!;
+          if (data.boardReadyPro.id) ids['board_ready'] = data.boardReadyPro.id;
+        }
+        if (data?.enterpriseReadinessProgram?.unit_amount) {
+          prices['enterprise_program'] = centsToDollars(data.enterpriseReadinessProgram.unit_amount)!;
+          if (data.enterpriseReadinessProgram.id) ids['enterprise_program'] = data.enterpriseReadinessProgram.id;
+        }
+
+        setDynamicPrices(prices);
+        setDynamicPriceIds(ids);
+      } catch (e) {
+        // swallow; fallback to static
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleTierCheckout = async (tierId: string) => {
     setProcessingTier(tierId);
     try {
-      const priceId = getStripePriceId(tierId as any) || '';
-      const params = new URLSearchParams({ tier: tierId, price_id: priceId });
-      window.location.href = `/api/ai-blueprint/stripe/create-checkout?${params.toString()}`;
+      // Use unified checkout endpoint; map tiers to product/billing
+      let url = '/api/stripe/unified-checkout';
+      const usp = new URLSearchParams();
+      if (tierId === 'team_monthly') {
+        usp.set('product', 'team');
+        usp.set('billing', 'monthly');
+        usp.set('trial_days', '7');
+      } else if (tierId === 'team_yearly') {
+        usp.set('product', 'team');
+        usp.set('billing', 'yearly');
+        usp.set('trial_days', '7');
+      } else if (tierId === 'self_serve_assessment') {
+        usp.set('product', 'self-serve');
+      } else if (tierId === 'board_ready') {
+        usp.set('product', 'board-ready');
+      } else if (tierId === 'enterprise_program') {
+        usp.set('product', 'enterprise');
+      } else {
+        // Fallback legacy
+        const priceId = getStripePriceId(tierId as any) || '';
+        const params = new URLSearchParams({ tier: tierId, price_id: priceId });
+        window.location.href = `/api/ai-blueprint/stripe/create-checkout?${params.toString()}`;
+        return;
+      }
+      window.location.href = `${url}?${usp.toString()}`;
     } catch (e) {
       console.error(e);
       setProcessingTier(null);
@@ -110,7 +183,8 @@ export default function UnifiedPricingPage() {
       <section className="container mx-auto px-4 py-16 -mt-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {NEW_PRICING_TIERS.map((tier: NewPricingTier) => {
-            const priceId = getStripePriceId(tier.id);
+            const priceId = dynamicPriceIds[tier.id] || getStripePriceId(tier.id);
+            const displayPrice = dynamicPrices[tier.id] ?? tier.price;
             return (
               <motion.div key={tier.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <div className={`relative h-full flex flex-col rounded-xl border shadow-sm bg-white ${tier.badge ? 'border-indigo-500' : 'border-gray-200'}`}>
@@ -119,7 +193,7 @@ export default function UnifiedPricingPage() {
                     <h3 className="text-lg font-bold text-gray-900 mb-1">{tier.name}</h3>
                     {tier.tagline && <p className="text-sm text-gray-600 mb-3">{tier.tagline}</p>}
                     <div className="flex items-baseline space-x-1 mb-4">
-                      <span className="text-3xl font-bold text-indigo-600">${tier.price.toLocaleString()}</span>
+                      <span className="text-3xl font-bold text-indigo-600">${'{'}displayPrice.toLocaleString(){'}'}</span>
                       {tier.type === 'subscription' && <span className="text-xs text-gray-500">/ {tier.period}</span>}
                     </div>
                     <ul className="space-y-2 text-sm text-gray-700 mb-4">
