@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server'
 
+// Ensure this route is always available server-side and not statically pruned
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   const stripeKey = process.env.STRIPE_SECRET_KEY?.trim()
   const monthly = process.env.STRIPE_PRICE_AI_READINESS_COMPLETE_MONTHLY?.trim()

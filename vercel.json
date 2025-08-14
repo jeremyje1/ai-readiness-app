@@ -5,6 +5,12 @@
     "app/api/report/generate/route.ts": {
       "maxDuration": 30
     },
+    "app/api/health/route.ts": {
+      "maxDuration": 10
+    },
+    "app/api/pricing/unified/route.ts": {
+      "maxDuration": 10
+    },
     "app/api/ai-readiness/*/route.ts": {
       "maxDuration": 30
     },
