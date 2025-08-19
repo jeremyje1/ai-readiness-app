@@ -10,10 +10,10 @@ export default defineConfig({
       provider: 'v8',
       reportsDirectory: 'coverage',
       thresholds: {
-        lines: 65,
-        functions: 65,
-        branches: 55,
-        statements: 65
+        lines: 68,
+        functions: 68,
+        branches: 58,
+        statements: 68
       }
     }
   }
