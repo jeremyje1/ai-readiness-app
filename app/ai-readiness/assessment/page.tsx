@@ -73,8 +73,17 @@ export default function AIReadinessAssessmentPage() {
   const [showDocumentUpload, setShowDocumentUpload] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [institutionType, setInstitutionType] = useState<string>('default');
 
   useEffect(() => {
+    // Detect domain context
+    const hostname = window.location.hostname;
+    if (hostname.includes('k12aiblueprint.com')) {
+      setInstitutionType('K12');
+    } else if (hostname.includes('higheredaiblueprint.com')) {
+      setInstitutionType('HigherEd');
+    }
+    
     fetchQuestions();
   }, [tier]);
 
@@ -202,7 +211,11 @@ export default function AIReadinessAssessmentPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">AI Readiness Assessment</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {institutionType === 'K12' ? 'K-12 AI Readiness Assessment' : 
+                 institutionType === 'HigherEd' ? 'Higher Education AI Readiness Assessment' : 
+                 'AI Readiness Assessment'}
+              </h1>
               <p className="text-sm text-gray-600 mt-1">
                 Question {currentQuestionIndex + 1} of {questions.length} • {tier.charAt(0).toUpperCase() + tier.slice(1)} Tier
               </p>
