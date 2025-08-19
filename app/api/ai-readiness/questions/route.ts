@@ -1,6 +1,6 @@
 /**
  * AI Readiness Questions API Endpoint
- * Serves AI readiness questions based on tier selection
+ * Serves AI readiness questions based on tier selection and domain context
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,22 +11,61 @@ import {
   getQuestionsForTier
 } from '@/lib/ai-readiness-questions';
 
+// Function to load questions based on institution type
+async function getQuestionsForInstitutionType(institutionType: string) {
+  if (institutionType === 'K12') {
+    try {
+      const k12Questions = await import('@/data/ai-readiness-questions-k12.json');
+      return k12Questions.default;
+    } catch (error) {
+      console.warn('K-12 questions not found, falling back to default');
+      return null;
+    }
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const tier = searchParams.get('tier');
     const segment = searchParams.get('segment');
+    
+    // Detect institution type from headers (set by middleware) or domain
+    const institutionType = request.headers.get('x-institution-type') || 'default';
+    const domainContext = request.headers.get('x-domain-context') || 'default';
+    
+    console.log(`🎯 Questions API - Institution Type: ${institutionType}, Domain: ${domainContext}`);
+
+    // Load appropriate question set
+    let questionsData = null;
+    if (institutionType === 'K12') {
+      questionsData = await getQuestionsForInstitutionType('K12');
+    }
+    
+    // Use default questions if no specific version found
+    if (!questionsData) {
+      questionsData = {
+        aiReadinessQuestions: AI_READINESS_QUESTIONS,
+        domains: AI_DOMAINS,
+        tiers: AI_TIERS
+      };
+    }
 
     // If tier is specified, return questions for that tier
     if (tier) {
-      const tierQuestions = getQuestionsForTier(tier);
+      const tierQuestions = (questionsData && 'tiers' in questionsData && questionsData.tiers?.[tier]) ? 
+        questionsData.aiReadinessQuestions : 
+        getQuestionsForTier(tier);
       
       return NextResponse.json({
         success: true,
         data: {
           questions: tierQuestions,
-          tierInfo: AI_TIERS[tier],
-          domains: AI_DOMAINS,
+          tierInfo: (questionsData && 'tiers' in questionsData && questionsData.tiers?.[tier]) || AI_TIERS[tier],
+          domains: (questionsData && 'domains' in questionsData && questionsData.domains) || AI_DOMAINS,
+          institutionType,
+          domainContext,
           metadata: {
             total: tierQuestions.length,
             tier: tier,
