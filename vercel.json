@@ -1,10 +1,6 @@
 {
   "framework": "nextjs",
   "regions": ["iad1"],
-  "domains": [
-    "aiblueprint.k12aiblueprint.com",
-    "aiblueprint.higheredaiblueprint.com"
-  ],
   "functions": {
     "app/api/report/generate/route.ts": {
       "maxDuration": 30
