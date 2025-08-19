@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { aiReadinessDatabase } from '@/lib/aiReadinessDatabase';
 import { AIReadinessBenchmarkEngine, type BenchmarkData } from '@/lib/ai-readiness-benchmarks';
 

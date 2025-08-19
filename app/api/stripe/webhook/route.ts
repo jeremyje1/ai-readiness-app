@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { emailService } from '@/lib/email-service';
+import crypto from 'crypto';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', { apiVersion: '2025-06-30.basil' });
 
@@ -25,6 +26,23 @@ interface UserData {
   tier: string;
   stripeCustomerId: string;
   stripeSessionId: string;
+}
+
+async function createPasswordSetupToken(userId: string, email: string) {
+  if (!supabaseAdmin) return null;
+  const token = crypto.randomBytes(24).toString('hex');
+  const expires = new Date(Date.now() + 1000 * 60 * 60).toISOString(); // 1 hour
+  const { error } = await supabaseAdmin.from('auth_password_setup_tokens').insert({
+    user_id: userId,
+    email,
+    token,
+    expires_at: expires
+  });
+  if (error) {
+    console.error('Failed to store password setup token', error);
+    return null;
+  }
+  return { token, expires };
 }
 
 async function createUserAccount(userData: UserData): Promise<string> {
@@ -97,23 +115,38 @@ function getTierPrice(tier: string): number {
 
 async function sendAssessmentAccessEmail(email: string, name: string, tier: string, baseUrl: string) {
   try {
-    // Direct users to success page for authentication flow
     const successUrl = `${baseUrl}/ai-readiness/success?checkout=success`;
-    
-    await emailService.sendAssessmentNotification({
-      userEmail: email,
-      userName: name,
-      institutionName: 'Your Organization',
-      assessmentId: 'pending',
-      tier: tier,
-      overallScore: 0, // Will be calculated after assessment
-      maturityLevel: 'Access Ready - Login Required',
-      dashboardUrl: successUrl,
-      baseUrl,
-      institutionType: 'default'
+    // Create a password setup token
+    const { data: userList } = supabaseAdmin ? await supabaseAdmin.auth.admin.listUsers() : { data: { users: [] } as any };
+    const user = userList?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
+    let passwordSetupTokenUrl = `${baseUrl}/auth/password/setup`;
+    if (user) {
+      const token = await createPasswordSetupToken(user.id, email);
+      if (token) passwordSetupTokenUrl = `${baseUrl}/auth/password/setup?token=${token.token}`;
+    }
+    // Try to generate a magic link using admin API if available
+    let magicLinkUrl: string | undefined = successUrl;
+    try {
+      if (supabaseAdmin && (supabaseAdmin as any).auth?.admin?.generateLink) {
+        const { data, error } = await (supabaseAdmin as any).auth.admin.generateLink({ type: 'magiclink', email });
+        if (!error && data?.properties?.action_link) {
+          magicLinkUrl = data.properties.action_link;
+        }
+      }
+    } catch (e) {
+      console.warn('Magic link generation failed, fallback to success page');
+    }
+    await emailService.sendOnboardingEmail({
+      to: email,
+      name,
+      dashboardUrl: `${baseUrl}/ai-readiness/dashboard`,
+      passwordSetupUrl: passwordSetupTokenUrl,
+      magicLinkUrl,
+  tier,
+  loginUrl: `${baseUrl}/auth/login`,
+  passwordResetUrl: `${baseUrl}/auth/password/reset`
     });
-
-    console.log(`✅ Assessment access email sent to ${email} with login instructions`);
+    console.log(`✅ Onboarding email sent to ${email}`);
   } catch (error) {
     console.error('Failed to send assessment access email:', error);
   }
