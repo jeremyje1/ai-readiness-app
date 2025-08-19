@@ -123,6 +123,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Return assessment ID and initial results
+    // Extract scores from the results structure that contains algorithm outputs
+    const firstAlgorithmResult = Object.values(results.results || {})[0] as any;
+    const overallScore = firstAlgorithmResult?.overallReadiness || firstAlgorithmResult?.score || 0;
+    const readinessLevel = firstAlgorithmResult?.readinessLevel || firstAlgorithmResult?.level || 'Emerging';
+    
     const response = {
       success: true,
       id: assessmentRecord?.id || `ai-test-${Date.now()}`,
@@ -130,11 +135,11 @@ export async function POST(request: NextRequest) {
       assessmentType: 'ai-readiness',
       message: 'AI readiness assessment submitted successfully',
       initialResults: {
-        aiReadinessIndex: results.scores?.overall || results.score.overall,
-        readinessLevel: results.maturityProfile?.overall.name || 'Emerging',
-        domainScores: results.scores?.domains || results.score.categories,
-        recommendationCount: results.recommendations?.length || 0,
-        policyRecommendations: results.policyRecommendations?.length || 0
+        aiReadinessIndex: overallScore,
+        readinessLevel: readinessLevel,
+        domainScores: firstAlgorithmResult?.domainScores || {},
+        recommendationCount: firstAlgorithmResult?.recommendations?.length || 0,
+        policyRecommendations: firstAlgorithmResult?.recommendations?.length || 0
       },
       testMode: testMode
     };
@@ -152,8 +157,8 @@ export async function POST(request: NextRequest) {
           institutionName: institutionName || 'Test Institution',
           assessmentId: response.id,
           tier: tier,
-          overallScore: results.scores?.overall || results.score.overall,
-          maturityLevel: results.maturityProfile?.overall.name || 'Emerging',
+          overallScore: overallScore,
+          maturityLevel: readinessLevel,
           dashboardUrl: `https://aireadiness.northpathstrategies.org/ai-readiness/dashboard?id=${response.id}`
         })
       }).catch(emailError => {
