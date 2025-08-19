@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
     console.log('🤖 AI Readiness Assessment submission received');
     
     const body = await request.json();
+    console.log('📥 Request body received:', JSON.stringify(body, null, 2));
+    
     const { 
       responses, 
       tier, 
@@ -29,7 +31,15 @@ export async function POST(request: NextRequest) {
       assessmentType = 'ai-readiness'
     } = body;
 
+    console.log('🎯 Extracted parameters:', { 
+      tier, 
+      responsesCount: Object.keys(responses || {}).length,
+      institutionName,
+      assessmentType 
+    });
+
     if (!responses) {
+      console.error('❌ Missing responses field');
       return NextResponse.json(
         { error: 'Missing required field: responses' },
         { status: 400 }
@@ -43,9 +53,16 @@ export async function POST(request: NextRequest) {
       'ai-transformation-blueprint',
       'ai-enterprise-partnership'
     ];
+    
+    console.log('🔍 Tier validation:', { receivedTier: tier, validTiers: validAITiers });
+    
     if (!validAITiers.includes(tier)) {
+      console.error('❌ Invalid tier:', tier);
       return NextResponse.json(
-        { error: `Invalid AI readiness tier: ${tier}. Valid tiers: ${validAITiers.join(', ')}` },
+        { 
+          error: `Invalid AI readiness tier: "${tier}". Valid tiers: ${validAITiers.join(', ')}`,
+          details: `Received tier: "${tier}", Type: ${typeof tier}`
+        },
         { status: 400 }
       );
     }

@@ -45,7 +45,26 @@ interface Question {
 
 export default function AIReadinessAssessmentPage() {
   const searchParams = useSearchParams();
-  const tier = searchParams.get('tier') || 'ai-readiness-comprehensive';
+  const rawTier = searchParams.get('tier') || 'comprehensive';
+  
+  // Clean up tier parameter (remove any query string contamination)
+  const cleanTier = rawTier.split('?')[0].split('&')[0];
+  
+  // Map tier variations to valid tier names
+  const tierMapping: Record<string, string> = {
+    'comprehensive': 'ai-readiness-comprehensive',
+    'ai-readiness-comprehensive': 'ai-readiness-comprehensive',
+    'blueprint': 'ai-transformation-blueprint',
+    'ai-transformation-blueprint': 'ai-transformation-blueprint',
+    'pulse': 'higher-ed-ai-pulse-check',
+    'higher-ed-ai-pulse-check': 'higher-ed-ai-pulse-check',
+    'enterprise': 'ai-enterprise-partnership',
+    'ai-enterprise-partnership': 'ai-enterprise-partnership'
+  };
+  
+  const tier = tierMapping[cleanTier] || 'ai-readiness-comprehensive';
+  
+  console.log('🎯 Tier processing:', { rawTier, cleanTier, finalTier: tier });
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
