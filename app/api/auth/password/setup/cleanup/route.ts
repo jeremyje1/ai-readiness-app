@@ -5,11 +5,9 @@ export const dynamic = 'force-dynamic';
 
 function authorized(req: NextRequest) {
   const headerSecret = req.headers.get('x-cron-secret');
-  const urlSecret = req.nextUrl.searchParams.get('key');
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
-  // Accept either header or query param (query param used in Vercel cron path config)
-  return headerSecret === secret || urlSecret === secret;
+  return headerSecret === secret;
 }
 
 async function runCleanup() {
