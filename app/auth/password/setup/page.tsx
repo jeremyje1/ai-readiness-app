@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '@/lib/supabase';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -92,14 +93,28 @@ export default function PasswordSetupPage() {
       const res = await fetch('/api/auth/password/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, password }) });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed');
-      setStatus('Password set! Signing you in...');
-      // Attempt immediate sign-in via magic link OTP (since we now know email). Alternatively you could implement direct sign-in via service role but keep to public flows.
+      setStatus('Password set! Logging you in...');
+      // Attempt immediate password sign-in client-side (no service role exposure).
       if (json.email) {
-        try {
-          await fetch('/api/auth/password/setup/request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: json.email }) });
-        } catch {}
+        let attempt = 0;
+        let signedIn = false;
+        while (attempt < 3 && !signedIn) {
+          const { error } = await supabase.auth.signInWithPassword({ email: json.email, password });
+            if (!error) {
+              signedIn = true;
+              break;
+            }
+          // slight delay in case password propagation not immediate
+          await new Promise(r => setTimeout(r, 400));
+          attempt++;
+        }
+        if (!signedIn) {
+          setStatus('Password set. Please log in manually with your new password.');
+          return;
+        }
       }
-      setTimeout(()=> router.push('/ai-readiness/dashboard?verified=true'), 1400);
+      setStatus('Logged in! Redirecting...');
+      setTimeout(()=> router.push('/ai-readiness/dashboard?verified=true'), 800);
     } catch (err: any) {
       setStatus(err.message);
     } finally {
