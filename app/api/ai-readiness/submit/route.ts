@@ -115,28 +115,32 @@ export async function POST(request: NextRequest) {
 
     // Persist enterprise algorithm metrics (lightweight example using minimal org metrics subset)
     try {
+      // Derive lightweight pseudo org metrics from response distribution as placeholders
+      const numericScores = aiReadinessResponses.map(r => r.score).filter((n: any) => typeof n === 'number');
+      const avg = numericScores.length ? numericScores.reduce((a: number,b: number)=>a+b,0)/numericScores.length : 0;
+      const normalize = (v: number) => Math.min(1, Math.max(0, v / 5));
       const orgMetrics = {
-        digitalMaturity: 0.6,
-        systemIntegration: 0.5,
-        collaborationIndex: 0.55,
-        innovationCapacity: 0.5,
-        strategicAgility: 0.45,
-        leadershipEffectiveness: 0.6,
-        decisionLatency: 0.5,
-        communicationEfficiency: 0.55,
-        employeeEngagement: 0.5,
-        changeReadiness: 0.5,
-        futureReadiness: 0.45,
-        processComplexity: 0.5,
-        operationalRisk: 0.3,
-        technologicalRisk: 0.35,
-        cybersecurityLevel: 0.5,
-        resourceUtilization: 0.55,
-        taskAutomationLevel: 0.4
+        digitalMaturity: normalize(avg),
+        systemIntegration: normalize(avg * 0.9),
+        collaborationIndex: normalize(avg * 0.85),
+        innovationCapacity: normalize(avg * 0.88),
+        strategicAgility: normalize(avg * 0.8),
+        leadershipEffectiveness: normalize(avg * 0.92),
+        decisionLatency: 1 - normalize(avg * 0.75), // inverse style metric
+        communicationEfficiency: normalize(avg * 0.9),
+        employeeEngagement: normalize(avg * 0.87),
+        changeReadiness: normalize(avg * 0.86),
+        futureReadiness: normalize(avg * 0.83),
+        processComplexity: 1 - normalize(avg * 0.7), // higher score -> lower complexity
+        operationalRisk: 1 - normalize(avg * 0.65),
+        technologicalRisk: 1 - normalize(avg * 0.6),
+        cybersecurityLevel: normalize(avg * 0.9),
+        resourceUtilization: normalize(avg * 0.88),
+        taskAutomationLevel: normalize(avg * 0.5)
       };
       const enterpriseMetrics = await calculateEnterpriseMetrics({ responses: aiReadinessResponses }, orgMetrics);
       if (assessmentRecord?.id) {
-        await persistEnterpriseMetrics(assessmentRecord.id, enterpriseMetrics);
+        await persistEnterpriseMetrics(assessmentRecord.id, { ...enterpriseMetrics, meta: { ...enterpriseMetrics.meta, userId: userId || null } } as any);
       }
     } catch (algoPersistError) {
       console.warn('⚠️  Failed to persist enterprise algorithm metrics:', algoPersistError);

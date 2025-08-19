@@ -2,6 +2,7 @@
 create table if not exists public.enterprise_algorithm_results (
   id uuid primary key default gen_random_uuid(),
   assessment_id text not null,
+  user_id uuid,
   algorithm_version text not null,
   computed_at timestamptz not null default now(),
   dsch jsonb not null,
@@ -21,6 +22,10 @@ alter table public.enterprise_algorithm_results enable row level security;
 
 create policy if not exists "service-role-full-access" on public.enterprise_algorithm_results
   for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
+
+-- Allow authenticated users to select rows matching their user_id
+create policy if not exists "select-own" on public.enterprise_algorithm_results
+  for select using (auth.uid() = user_id);
 
 -- Optional: allow authenticated users to read their own assessments if ownership linkage added
 -- create policy "select-own" on public.enterprise_algorithm_results
