@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { aiReadinessDatabase } from '@/lib/aiReadinessDatabase';
 
+// This route depends on request URL search params; force dynamic to avoid build-time static generation errors
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

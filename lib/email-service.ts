@@ -428,6 +428,40 @@ class EmailService {
       htmlBody: welcomeEmailHtml
     });
   }
+
+  /**
+   * Send onboarding email with dashboard + password setup + optional magic link
+   */
+  async sendOnboardingEmail(params: {
+    to: string;
+    name: string;
+    dashboardUrl: string;
+    passwordSetupUrl: string;
+    magicLinkUrl?: string;
+    tier?: string;
+  loginUrl?: string;
+  passwordResetUrl?: string;
+  }): Promise<boolean> {
+  const { to, name, dashboardUrl, passwordSetupUrl, magicLinkUrl, tier, loginUrl, passwordResetUrl } = params;
+    const subject = `Welcome to AI Blueprint${tier ? ' – ' + tier.replace(/-/g, ' ') : ''}`;
+    const htmlBody = `
+      <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:24px;">
+        <h2 style="color:#111;margin-bottom:8px;">Payment Confirmed ✅</h2>
+        <p style="color:#444;font-size:15px;">Hi ${name || 'there'}, welcome to <strong>AI Blueprint™ Assessment Platform</strong>.</p>
+        <p style="color:#444;font-size:15px;">Your account is active. Use the quick links below to get started:</p>
+        <ul style="color:#444;font-size:14px;line-height:1.5;">
+          <li><a href="${dashboardUrl}" style="color:#2563eb;">Open your Dashboard</a></li>
+          <li><a href="${passwordSetupUrl}" style="color:#2563eb;">Set / Create Your Password</a></li>
+          ${magicLinkUrl ? `<li><a href="${magicLinkUrl}" style="color:#2563eb;">One‑Click Magic Login</a> (valid once)</li>` : ''}
+      ${loginUrl ? `<li><a href="${loginUrl}" style="color:#2563eb;">Standard Login Page</a></li>`: ''}
+      ${passwordResetUrl ? `<li><a href="${passwordResetUrl}" style="color:#2563eb;">Forgot / Reset Password</a></li>`: ''}
+        </ul>
+        <p style="color:#444;font-size:14px;">For security, the magic link and password setup links expire. After setting a password you can log in directly anytime.</p>
+        <p style="margin-top:32px;color:#555;font-size:12px;">If you did not authorize this, contact support immediately.</p>
+      </div>
+    `;
+    return this.sendEmail({ to, subject, htmlBody });
+  }
 }
 
 // Export singleton instance

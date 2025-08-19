@@ -15,6 +15,7 @@ export default function PaymentSuccessPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'email' | 'sent' | 'verifying' | 'complete'>('email');
+  const [showPasswordOption, setShowPasswordOption] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function PaymentSuccessPage() {
                 Payment Successful!
               </h2>
               <p className="text-gray-600">
-                Your AI Blueprint™ Assessment access has been activated. To access your dashboard, please enter your email to receive a secure login link.
+                Your AI Blueprint™ Assessment access has been activated. Enter your email to receive a secure one‑time login link OR <a href="/auth/password/setup" className="text-blue-600 underline">set a password</a> now for future direct sign‑ins.
               </p>
             </div>
 
@@ -123,6 +124,11 @@ export default function PaymentSuccessPage() {
                   </>
                 )}
               </Button>
+              {showPasswordOption && (
+                <Button type="button" variant="outline" className="w-full" onClick={()=>{router.push('/auth/password/setup')}}>
+                  Prefer to Create a Password
+                </Button>
+              )}
             </form>
           </div>
         );

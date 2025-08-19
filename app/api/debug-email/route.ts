@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { emailService } from '@/lib/email-service';
 
+// Prevent static optimization and restrict to development / explicitly enabled environments
+export const dynamic = 'force-dynamic';
+
+// Set ENABLE_DEBUG_EMAILS=true in env to allow this endpoint outside of development
+const ALLOWED = process.env.NODE_ENV === 'development' || process.env.ENABLE_DEBUG_EMAILS === 'true';
+
 export async function GET(request: NextRequest) {
+  if (!ALLOWED) {
+    return NextResponse.json({ success: false, error: 'Not Found' }, { status: 404 });
+  }
   try {
     // Check environment variables
     const envCheck = {
