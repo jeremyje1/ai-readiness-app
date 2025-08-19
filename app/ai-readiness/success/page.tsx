@@ -55,6 +55,7 @@ export default function PaymentSuccessPage() {
                 if (r2.ok) {
                   const b = await r2.json();
                   if (b.passwordSetupUrl) {
+                    // Optionally could surface if token reused: b.reused
                     router.replace(b.passwordSetupUrl + '&auto=1');
                     return; // stop further actions
                   }
