@@ -66,22 +66,19 @@ function resolvePriceId(product: string, billing: string): string | null {
 }
 
 function buildRedirectBase(returnTo?: string, tier?: string, request?: any): { success: string; cancel: string } {
-  // Use current deployment URL as fallback
-  const fallbackUrl = 'https://ai-readiness-nib3h3u17-jeremys-projects-73929cad.vercel.app';
-  
-  // Try to get the base URL from the request headers first (for domain-aware redirects)
-  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL;
-  
-  if (request && request.headers) {
-    const host = request.headers.get('host');
-    const protocol = request.headers.get('x-forwarded-proto') || 'https';
-    if (host) {
-      baseUrl = `${protocol}://${host}`;
-    }
+  // Canonical domain we always want to use for post‑checkout flows.
+  const hardCanonical = 'https://aiblueprint.k12aiblueprint.com';
+  const envCandidate = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || hardCanonical;
+  // Sanitize any stale legacy host values in env.
+  let canonical = envCandidate.replace('https://aireadiness.northpathstrategies.org', hardCanonical);
+  if (!canonical.startsWith(hardCanonical)) {
+    // Ignore unexpected hosts and force canonical (prevents preview / legacy domain leakage)
+    canonical = hardCanonical;
   }
-  
-  // Final fallback to current deployment
-  baseUrl = baseUrl || fallbackUrl;
+
+  // Previously we replaced with request host. That leaked legacy domains into success_url if checkout initiated from an old marketing page.
+  // Now we only honor the request host if it matches the canonical (defensive against legacy / preview / vercel.app hosts).
+  let baseUrl = canonical; // Do not trust request host anymore; always stay canonical
   
   // Map return_to shorthand values to paths
   const destination = (() => {
@@ -107,6 +104,16 @@ function buildRedirectBase(returnTo?: string, tier?: string, request?: any): { s
 }
 
 async function createCheckoutSession(params: CheckoutParams, request?: NextRequest) {
+  // Strip/ignore any externally supplied success/cancel URLs that are not canonical
+  const allowedOrigin = 'https://aiblueprint.k12aiblueprint.com';
+  if (params.successUrl && !params.successUrl.startsWith(allowedOrigin)) {
+    console.warn('Ignoring non-canonical successUrl param', params.successUrl);
+    params.successUrl = undefined;
+  }
+  if (params.cancelUrl && !params.cancelUrl.startsWith(allowedOrigin)) {
+    console.warn('Ignoring non-canonical cancelUrl param', params.cancelUrl);
+    params.cancelUrl = undefined;
+  }
   const priceId = params.priceIdOverride || resolvePriceId(params.product, params.billing);
   if (!priceId) {
     throw new Error(`${capitalize(params.product || 'Product')} price not found for billing=${params.billing}. Provide correct env vars (STRIPE_PRICE_* ) or pass price_id explicitly.`);

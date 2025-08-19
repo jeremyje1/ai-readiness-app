@@ -40,14 +40,19 @@
 
 ## 🔄 Next Steps - Ready for Production
 
-### 1. **Custom Domain Configuration** 
+### 1. **Custom Domain Configuration (Canonical)** 
 **Priority: HIGH - Immediate Business Impact**
 
+**Canonical Domain:** `aiblueprint.k12aiblueprint.com`
+
+Legacy domains (`app.northpathstrategies.org`, `ai-readiness.northpathstrategies.org`, `aireadiness.northpathstrategies.org`) are deprecated and should only exist as 301 redirect sources.
+
 **Action Items:**
-- [ ] Configure DNS CNAME record: `app.northpathstrategies.org` → `cname.vercel-dns.com`
-- [ ] Add domain in Vercel project settings
+- [ ] Ensure DNS (CNAME / A) points canonical subdomain to Vercel (if managed externally)
+- [ ] Confirm legacy domains 301 to canonical (verify with curl -I)
+- [ ] Confirm domain present in Vercel project settings
 - [ ] Verify SSL certificate provisioning
-- [ ] Test domain resolution and HTTPS
+- [ ] Test canonical HTTPS load
 
 **Expected Timeline:** 1-2 hours (DNS propagation dependent)
 
@@ -94,7 +99,7 @@
 ### **Immediate Benefits Upon Deployment:**
 
 1. **Professional Online Presence**
-   - Custom domain: `app.northpathstrategies.org`
+   - Canonical domain: `aiblueprint.k12aiblueprint.com`
    - Enhanced SEO for organic discovery
    - Honest, credible homepage content
 

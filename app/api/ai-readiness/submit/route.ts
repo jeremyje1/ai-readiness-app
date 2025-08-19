@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { AIReadinessEngine } from '@/lib/aiReadinessEngine';
+import { calculateEnterpriseMetrics, persistEnterpriseMetrics } from '@/lib/algorithms';
 import { aiReadinessDatabase, formatAssessmentForDatabase } from '@/lib/aiReadinessDatabase';
 import type { AIReadinessResults } from '@/lib/aiReadinessEngine';
 
@@ -112,14 +113,33 @@ export async function POST(request: NextRequest) {
       institutionInfo.name
     );
 
-    // Update database record with results if available
-    if (assessmentRecord && aiReadinessDatabase.isAvailable()) {
-      try {
-        // Note: updateAssessmentWithResults method may need to be implemented
-        console.log('✅ AI readiness assessment results processed');
-      } catch (dbError) {
-        console.warn('⚠️  Failed to update database record with results:', dbError);
+    // Persist enterprise algorithm metrics (lightweight example using minimal org metrics subset)
+    try {
+      const orgMetrics = {
+        digitalMaturity: 0.6,
+        systemIntegration: 0.5,
+        collaborationIndex: 0.55,
+        innovationCapacity: 0.5,
+        strategicAgility: 0.45,
+        leadershipEffectiveness: 0.6,
+        decisionLatency: 0.5,
+        communicationEfficiency: 0.55,
+        employeeEngagement: 0.5,
+        changeReadiness: 0.5,
+        futureReadiness: 0.45,
+        processComplexity: 0.5,
+        operationalRisk: 0.3,
+        technologicalRisk: 0.35,
+        cybersecurityLevel: 0.5,
+        resourceUtilization: 0.55,
+        taskAutomationLevel: 0.4
+      };
+      const enterpriseMetrics = await calculateEnterpriseMetrics({ responses: aiReadinessResponses }, orgMetrics);
+      if (assessmentRecord?.id) {
+        await persistEnterpriseMetrics(assessmentRecord.id, enterpriseMetrics);
       }
+    } catch (algoPersistError) {
+      console.warn('⚠️  Failed to persist enterprise algorithm metrics:', algoPersistError);
     }
 
     // Return assessment ID and initial results

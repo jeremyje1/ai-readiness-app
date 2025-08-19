@@ -20,8 +20,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com';
   return (
     <html lang="en">
+      <head>
+        <link rel="canonical" href={baseUrl} />
+      </head>
       <body className={inter.className}>
         <AuthNav />
         {children}

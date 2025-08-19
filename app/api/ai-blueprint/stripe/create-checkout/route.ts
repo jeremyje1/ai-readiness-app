@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
     const tier = searchParams.get('tier') as AIBlueprintTier;
     const priceId = searchParams.get('price_id');
     const customerEmail = searchParams.get('customer_email');
-    const successUrl = searchParams.get('success_url');
-    const cancelUrl = searchParams.get('cancel_url');
+  let successUrl = searchParams.get('success_url');
+  let cancelUrl = searchParams.get('cancel_url');
 
     if (!tier || !priceId) {
       return NextResponse.json(
@@ -65,9 +65,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                    process.env.NEXT_PUBLIC_APP_URL || 
-                    'https://app.northpathstrategies.org';
+    const hardCanonical = 'https://aiblueprint.k12aiblueprint.com';
+    const envCandidate = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || hardCanonical;
+    let baseUrl = envCandidate.replace('https://aireadiness.northpathstrategies.org', hardCanonical);
+    if (!baseUrl.startsWith(hardCanonical)) {
+      baseUrl = hardCanonical;
+    }
+    if (successUrl && !successUrl.startsWith(hardCanonical)) {
+      console.warn('Ignoring non-canonical successUrl param (ai-blueprint)', successUrl);
+      successUrl = null;
+    }
+    if (cancelUrl && !cancelUrl.startsWith(hardCanonical)) {
+      console.warn('Ignoring non-canonical cancelUrl param (ai-blueprint)', cancelUrl);
+      cancelUrl = null;
+    }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',

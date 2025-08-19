@@ -1,0 +1,1 @@
+import { NextResponse } from "next/server"; const CANONICAL="https://aiblueprint.k12aiblueprint.com"; export async function GET(){ const envBase=process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || CANONICAL; return NextResponse.json({canonical: CANONICAL, envCandidate: envBase}); }
