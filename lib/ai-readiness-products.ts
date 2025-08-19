@@ -15,6 +15,7 @@ export interface AIReadinessProduct {
   duration?: string;
   price: number;
   yearlyPrice?: number;
+  monthlyPrice?: number;
   features: string[];
   supportLevel: string;
   reportPages: number;
@@ -34,6 +35,8 @@ export const AI_READINESS_PRODUCTS: AIReadinessProduct[] = [
     goal: 'Get started with AI transformation',
     duration: '2-3 weeks',
     price: AI_TIERS['higher-ed-ai-pulse-check'].price,
+    monthlyPrice: 199,
+    yearlyPrice: 1999, // ~17% savings
     features: [
       `Rapid AI readiness assessment (${AI_TIERS['higher-ed-ai-pulse-check'].questionCount} questions)`,
       'Institutional benchmark comparison',
@@ -58,6 +61,8 @@ export const AI_READINESS_PRODUCTS: AIReadinessProduct[] = [
     goal: 'Comprehensive analysis and roadmap',
     duration: '4-6 weeks',
     price: AI_TIERS['ai-readiness-comprehensive'].price,
+    monthlyPrice: 499,
+    yearlyPrice: 4999, // ~17% savings
     features: [
       `Comprehensive assessment (${AI_TIERS['ai-readiness-comprehensive'].questionCount} questions)`,
       'Detailed benchmark analysis vs peer institutions',
@@ -85,6 +90,8 @@ export const AI_READINESS_PRODUCTS: AIReadinessProduct[] = [
     goal: 'Full transformation with implementation support',
     duration: '6-12 months',
     price: AI_TIERS['ai-transformation-blueprint'].price,
+    monthlyPrice: 1299,
+    yearlyPrice: 12999, // ~17% savings
     features: [
       `Comprehensive assessment (${AI_TIERS['ai-transformation-blueprint'].questionCount} questions)`,
       'Detailed 18-month implementation roadmap',
@@ -112,6 +119,8 @@ export const AI_READINESS_PRODUCTS: AIReadinessProduct[] = [
     goal: 'Enterprise-scale transformation partnership',
     duration: '12+ months',
     price: AI_TIERS['ai-enterprise-partnership'].price,
+    monthlyPrice: 2999, // Starting at
+    yearlyPrice: 29999, // Starting at ~17% savings
     features: [
       `Enterprise-grade assessment (${AI_TIERS['ai-enterprise-partnership'].questionCount} questions)`,
       'Dedicated transformation team assignment',

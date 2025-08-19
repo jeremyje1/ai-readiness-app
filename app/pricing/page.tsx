@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,8 @@ import { AI_READINESS_PRODUCTS } from '@/lib/ai-readiness-products';
 import Link from 'next/link';
 
 export default function AIReadinessPricingPage() {
+  const [isYearly, setIsYearly] = useState(false);
+
   const handleSelectPlan = (product: any) => {
     // Map product IDs to Stripe checkout tiers
     const stripeCheckoutMap: { [key: string]: string } = {
@@ -95,8 +97,41 @@ export default function AIReadinessPricingPage() {
         </div>
       </section>
 
+      {/* Billing Toggle */}
+      <section className="container mx-auto px-4 -mt-8 mb-8">
+        <div className="flex justify-center">
+          <div className="bg-white rounded-lg p-1 shadow-lg border border-slate-200">
+            <div className="flex items-center">
+              <button
+                onClick={() => setIsYearly(false)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  !isYearly 
+                    ? 'bg-indigo-600 text-white shadow-sm' 
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setIsYearly(true)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  isYearly 
+                    ? 'bg-indigo-600 text-white shadow-sm' 
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Yearly
+                <span className="ml-1 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                  Save 17%
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Cards - New 4-Tier Structure */}
-      <section className="container mx-auto px-4 py-16 -mt-8">
+      <section className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {AI_READINESS_PRODUCTS.map((product, index) => (
             <motion.div
@@ -137,12 +172,32 @@ export default function AIReadinessPricingPage() {
                       ? 'text-yellow-400' 
                       : 'text-indigo-600'
                   }`}>
-                    ${product.price.toLocaleString()}
+                    {product.name === 'Enterprise AI Partnership' ? (
+                      <>Starting at ${isYearly ? product.yearlyPrice?.toLocaleString() : product.monthlyPrice?.toLocaleString()}</>
+                    ) : (
+                      <>
+                        ${isYearly 
+                          ? product.yearlyPrice?.toLocaleString() 
+                          : product.monthlyPrice?.toLocaleString()
+                        }
+                        {!isYearly && product.monthlyPrice && (
+                          <span className="text-sm text-slate-500 ml-1">/mo</span>
+                        )}
+                        {isYearly && product.yearlyPrice && (
+                          <span className="text-sm text-slate-500 ml-1">/year</span>
+                        )}
+                      </>
+                    )}
                   </div>
                   <p className={`text-sm ${
                     product.name === 'Enterprise AI Partnership' ? 'text-gray-400' : 'text-gray-500'
                   }`}>
-                    {product.duration}
+                    {isYearly ? 'Billed annually' : 'Billed monthly'}
+                    {isYearly && product.monthlyPrice && product.yearlyPrice && (
+                      <span className="block text-green-600 font-medium">
+                        Save ${((product.monthlyPrice * 12) - product.yearlyPrice).toLocaleString()}/year
+                      </span>
+                    )}
                   </p>
                 </CardHeader>
                 

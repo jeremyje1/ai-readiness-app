@@ -237,7 +237,7 @@ export function EnhancedFileUpload({
         className={cn(
           "relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300",
           isDragOver && !disabled
-            ? "border-blue-400 bg-blue-50 dark:bg-blue-950/20 border-blue-400"
+            ? "border-blue-400 bg-blue-50 dark:bg-blue-950/20"
             : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
           disabled && "opacity-50 cursor-not-allowed",
           !disabled && "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/20"
