@@ -100,7 +100,8 @@ function buildRedirectBase(returnTo?: string, tier?: string, request?: any): { s
     }
   })();
   return {
-    success: `${baseUrl}${destination}?checkout=success`,
+    // Include session_id placeholder for post-checkout bootstrap
+    success: `${baseUrl}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel: `${baseUrl}/ai-readiness?checkout=cancelled`
   };
 }
