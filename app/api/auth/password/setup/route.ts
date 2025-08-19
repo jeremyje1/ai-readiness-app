@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimit, rateLimitAsync } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   try {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
-  const rl = rateLimit(`pwsetup|${ip}`, 5, 60_000);
+  const rl = await rateLimitAsync(`pwsetup|${ip}`, 5, 60_000);
   if (!rl.allowed) return NextResponse.json({ error: 'Too many attempts. Try again later.' }, { status: 429 });
     if (!supabaseAdmin) return NextResponse.json({ error: 'Admin client unavailable' }, { status: 500 });
     const { token, password } = await req.json();
