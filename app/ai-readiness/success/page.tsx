@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,9 @@ export default function PaymentSuccessPage() {
   const [step, setStep] = useState<'email' | 'sent' | 'verifying' | 'complete'>('email');
   const [showPasswordOption, setShowPasswordOption] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [autoTried, setAutoTried] = useState(false);
+  const sessionId = searchParams.get('session_id');
+  const autoTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -29,6 +32,28 @@ export default function PaymentSuccessPage() {
     };
     
     checkAuth();
+
+    // Bootstrap from Stripe session if present
+    const bootstrap = async () => {
+      if (!sessionId) return;
+      try {
+        const res = await fetch(`/api/stripe/session?id=${sessionId}`);
+        if (res.ok) {
+          const data = await res.json();
+            if (data.email) {
+              setEmail(data.email);
+              // Attempt auto magic link once
+              if (!autoTried) {
+                setAutoTried(true);
+                handleSendMagicLink(new Event('submit') as any, true);
+              }
+            }
+        }
+      } catch (e) {
+        console.warn('Session bootstrap failed', e);
+      }
+    };
+    bootstrap();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -44,7 +69,7 @@ export default function PaymentSuccessPage() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const handleSendMagicLink = async (e: React.FormEvent) => {
+  const handleSendMagicLink = async (e: React.FormEvent, silent?: boolean) => {
     e.preventDefault();
     if (!email) return;
 
@@ -60,12 +85,12 @@ export default function PaymentSuccessPage() {
       });
 
       if (error) {
-        setError(error.message);
-      } else {
+        if (!silent) setError(error.message); else console.warn('Auto magic link error', error.message);
+      } else if (!silent) {
         setStep('sent');
       }
     } catch (err) {
-      setError('Failed to send login link. Please try again.');
+      if (!silent) setError('Failed to send login link. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -82,7 +107,9 @@ export default function PaymentSuccessPage() {
                 Payment Successful!
               </h2>
               <p className="text-gray-600">
-                Your AI Blueprint™ Assessment access has been activated. Enter your email to receive a secure one‑time login link OR <a href="/auth/password/setup" className="text-blue-600 underline">set a password</a> now for future direct sign‑ins.
+                Your AI Blueprint™ Assessment access is active. We detected your purchase; {email ? 'we pre‑filled your email.' : 'enter your email.'} You can:
+                <br/>• Use a one‑time secure login link (sent to your email)
+                <br/>• Or <a href="/auth/password/setup" className="text-blue-600 underline">set a password</a> for direct sign‑ins.
               </p>
             </div>
 
