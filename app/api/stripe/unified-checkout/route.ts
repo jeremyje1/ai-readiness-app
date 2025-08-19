@@ -101,7 +101,7 @@ function buildRedirectBase(returnTo?: string, tier?: string, request?: any): { s
   })();
   return {
     // Include session_id placeholder for post-checkout bootstrap
-    success: `${baseUrl}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+  success: `${baseUrl}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`,
     cancel: `${baseUrl}/ai-readiness?checkout=cancelled`
   };
 }

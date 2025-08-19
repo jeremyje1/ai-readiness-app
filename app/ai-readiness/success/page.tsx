@@ -19,6 +19,7 @@ export default function PaymentSuccessPage() {
   const [error, setError] = useState<string | null>(null);
   const [autoTried, setAutoTried] = useState(false);
   const sessionId = searchParams.get('session_id');
+  const auto = searchParams.get('auto');
   const autoTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function PaymentSuccessPage() {
             if (data.email) {
               setEmail(data.email);
               // Attempt auto magic link once
-              if (!autoTried) {
+              if (auto === '1' && !autoTried) {
                 setAutoTried(true);
                 handleSendMagicLink(new Event('submit') as any, true);
               }
