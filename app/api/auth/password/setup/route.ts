@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, { password });
     if (pwError) return NextResponse.json({ error: 'Failed to set password' }, { status: 500 });
 
-    await supabaseAdmin.from('auth_password_setup_tokens').update({ used_at: new Date().toISOString() }).eq('id', data.id);
+  await supabaseAdmin.from('auth_password_setup_tokens').update({ used_at: new Date().toISOString() }).eq('id', data.id);
 
-    return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, email: data.email });
   } catch (e: any) {
     console.error('Password setup error', e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

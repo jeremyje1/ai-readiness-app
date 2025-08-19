@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -17,12 +17,16 @@ export default function PasswordSetupPage() {
   const [requesting, setRequesting] = useState(false);
   const [email, setEmail] = useState(emailFromQuery);
   const [bootstrapTried, setBootstrapTried] = useState(false);
+  const [bootstrapping, setBootstrapping] = useState(false);
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
+  const pwInputRef = useRef<HTMLInputElement | null>(null);
 
   // If we have a session_id but no token, attempt server-side bootstrap (same as success page flow)
   const attemptBootstrap = useCallback(async () => {
     if (token || !sessionId || bootstrapTried) return;
     setBootstrapTried(true);
     try {
+      setBootstrapping(true);
       const res = await fetch('/api/stripe/post-checkout/bootstrap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -43,8 +47,19 @@ export default function PasswordSetupPage() {
       }
     } catch (e) {
       // silent
+    } finally {
+      setBootstrapping(false);
     }
   }, [token, sessionId, bootstrapTried, params, router, email]);
+  // Focus logic
+  useEffect(() => {
+    if (!token) {
+      emailInputRef.current?.focus();
+    } else {
+      pwInputRef.current?.focus();
+    }
+  }, [token]);
+
 
   useEffect(() => { attemptBootstrap(); }, [attemptBootstrap]);
 
@@ -77,8 +92,14 @@ export default function PasswordSetupPage() {
       const res = await fetch('/api/auth/password/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, password }) });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed');
-      setStatus('Password set! Redirecting...');
-      setTimeout(()=> router.push('/ai-readiness/success?password=created'), 1500);
+      setStatus('Password set! Signing you in...');
+      // Attempt immediate sign-in via magic link OTP (since we now know email). Alternatively you could implement direct sign-in via service role but keep to public flows.
+      if (json.email) {
+        try {
+          await fetch('/api/auth/password/setup/request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: json.email }) });
+        } catch {}
+      }
+      setTimeout(()=> router.push('/ai-readiness/dashboard?verified=true'), 1400);
     } catch (err: any) {
       setStatus(err.message);
     } finally {
@@ -97,18 +118,19 @@ export default function PasswordSetupPage() {
             <form onSubmit={requestToken} className="space-y-2">
               <div>
                 <label className="block text-sm font-medium mb-1">Email Address</label>
-                <Input type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="you@company.com" />
+                <Input ref={emailInputRef} type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="you@company.com" />
               </div>
               <Button type="submit" disabled={requesting}>{requesting ? 'Requesting...' : 'Email Me a Password Setup Link'}</Button>
             </form>
             {status && !token && <p className={`text-xs ${status.includes('emailed') ? 'text-green-600':'text-red-600'}`}>{status}</p>}
             <hr className="my-4" />
             <p className="text-xs text-gray-500">If you just completed checkout, try returning to the success page; it will attempt to generate this token automatically.</p>
+            {bootstrapping && <p className="text-xs text-blue-600 animate-pulse">Attempting automatic token generation...</p>}
           </div>
         )}
         <div>
           <label className="block text-sm font-medium mb-1">New Password</label>
-          <Input type="password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={8} />
+          <Input ref={pwInputRef} type="password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={8} />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Confirm Password</label>
