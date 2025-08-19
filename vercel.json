@@ -1,0 +1,37 @@
+{
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "app/api/report/generate/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/ai-readiness/*/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/reports/generate-pdf/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/assessment/*/route.ts": {
+      "maxDuration": 25
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ]
+}

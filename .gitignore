@@ -1,0 +1,25 @@
+node_modules/
+*.pdf
+.next/
+.vercel
+
+# Environment variables
+.env
+.env.local
+.env.production
+*.sh
+
+# Build files
+dist/
+build/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

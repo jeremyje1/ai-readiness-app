@@ -1,0 +1,8 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f8fafc"/>
+  <rect x="50" y="50" width="300" height="200" rx="8" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="2"/>
+  <circle cx="200" cy="120" r="30" fill="#3b82f6"/>
+  <text x="200" y="125" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">AI</text>
+  <text x="200" y="170" text-anchor="middle" fill="#64748b" font-family="Arial, sans-serif" font-size="14">AI Readiness Visualization</text>
+  <text x="200" y="190" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12">Generated for Assessment Report</text>
+</svg>
