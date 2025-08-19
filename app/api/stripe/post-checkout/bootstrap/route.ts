@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import crypto from 'crypto';
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimit, rateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +37,7 @@ async function createPwToken(userId: string, email: string) {
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
-    const rl = rateLimit(`stripe_bootstrap|${ip}`, 5, 60_000);
+  const rl = await rateLimitAsync(`stripe_bootstrap|${ip}`, 5, 60_000);
     if (!rl.allowed) return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
 
     const { session_id } = await req.json();
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     if (!isPaid) return NextResponse.json({ error: 'Session not paid' }, { status: 402 });
 
     // Prevent abuse: limit per email per minute
-    const rlEmail = rateLimit(`stripe_bootstrap_email|${email.toLowerCase()}`, 3, 60_000);
+  const rlEmail = await rateLimitAsync(`stripe_bootstrap_email|${email.toLowerCase()}`, 3, 60_000);
     if (!rlEmail.allowed) return NextResponse.json({ error: 'Email rate limit exceeded' }, { status: 429 });
 
     const userId = await findOrCreateUser(email, checkout.customer_details?.name || undefined);

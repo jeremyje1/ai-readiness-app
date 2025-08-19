@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import crypto from 'crypto';
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimit, rateLimitAsync } from '@/lib/rate-limit';
 import { emailService } from '@/lib/email-service';
 
 export async function POST(req: NextRequest) {
   try {
     if (!supabaseAdmin) return NextResponse.json({ error: 'Admin unavailable' }, { status: 500 });
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
-    const rl = rateLimit(`pwsetupreq|${ip}`, 3, 60_000);
+  const rl = await rateLimitAsync(`pwsetupreq|${ip}`, 3, 60_000);
     if (!rl.allowed) return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
 
     const { email } = await req.json();
