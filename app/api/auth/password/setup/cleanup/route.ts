@@ -12,9 +12,9 @@ function authorized(req: NextRequest) {
 
 async function runCleanup() {
   if (!supabaseAdmin) return { error: 'Admin unavailable' } as const;
-  const { error } = await supabaseAdmin.rpc('delete_expired_password_tokens');
+  const { data, error } = await supabaseAdmin.rpc('delete_expired_password_tokens');
   if (error) return { error: 'Cleanup failed', details: error.message } as const;
-  return { success: true } as const;
+  return { success: true, deleted: data ?? 0 } as const;
 }
 
 export async function POST(req: NextRequest) {
