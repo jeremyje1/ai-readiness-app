@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     // If tier is specified, return questions for that tier
     if (tier) {
-      const tierQuestions = (questionsData && 'tiers' in questionsData && questionsData.tiers?.[tier]) ? 
+      const tierQuestions = (questionsData && 'tiers' in questionsData && questionsData.tiers && questionsData.tiers[tier as keyof typeof questionsData.tiers]) ? 
         questionsData.aiReadinessQuestions : 
         getQuestionsForTier(tier);
       
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         success: true,
         data: {
           questions: tierQuestions,
-          tierInfo: (questionsData && 'tiers' in questionsData && questionsData.tiers?.[tier]) || AI_TIERS[tier],
+          tierInfo: (questionsData && 'tiers' in questionsData && questionsData.tiers && questionsData.tiers[tier as keyof typeof questionsData.tiers]) || AI_TIERS[tier as keyof typeof AI_TIERS],
           domains: (questionsData && 'domains' in questionsData && questionsData.domains) || AI_DOMAINS,
           institutionType,
           domainContext,
