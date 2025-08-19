@@ -148,24 +148,36 @@ export async function POST(request: NextRequest) {
     try {
       console.log('📧 Triggering email notifications...');
       
-      fetch('/api/emails/assessment-notification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userEmail: institutionName.includes('@') ? institutionName : 'user@institution.edu',
-          userName: 'Assessment User',
-          institutionName: institutionName || 'Test Institution',
-          assessmentId: response.id,
-          tier: tier,
-          overallScore: overallScore,
-          maturityLevel: readinessLevel,
-          dashboardUrl: `https://aireadiness.northpathstrategies.org/ai-readiness/dashboard?id=${response.id}`
-        })
-      }).catch(emailError => {
-        console.warn('⚠️  Email notification failed:', emailError);
+      // Use the email service directly instead of fetch
+      const { emailService } = await import('@/lib/email-service');
+      
+      // Determine the base URL from request or use custom domain
+      const host = request.headers.get('host');
+      const protocol = request.headers.get('x-forwarded-proto') || 'https';
+      const baseUrl = host ? `${protocol}://${host}` : 'https://aiblueprint.k12aiblueprint.com';
+      
+      // Get institutional context from middleware headers
+      const institutionType = request.headers.get('x-institution-type') as 'K12' | 'HigherEd' | 'default' || 'default';
+      const domainContext = request.headers.get('x-domain-context') || undefined;
+      
+      const emailResult = await emailService.sendAssessmentNotification({
+        userEmail: contactEmail || 'user@institution.edu',
+        userName: contactName || 'Assessment User',
+        institutionName: institutionName || 'Test Institution',
+        assessmentId: response.id,
+        tier: tier || 'comprehensive',
+        overallScore: overallScore,
+        maturityLevel: readinessLevel,
+        baseUrl: baseUrl,
+        dashboardUrl: `${baseUrl}/ai-readiness/dashboard`,
+        institutionType: institutionType,
+        domainContext: domainContext
       });
+      
+      console.log('📧 Email notification result:', emailResult);
+      
     } catch (emailError) {
-      console.warn('⚠️  Failed to trigger email notifications:', emailError);
+      console.warn('⚠️  Failed to send email notifications:', emailError);
     }
 
     console.log('✅ AI readiness assessment completed successfully');

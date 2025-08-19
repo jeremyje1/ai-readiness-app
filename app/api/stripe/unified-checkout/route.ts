@@ -65,8 +65,24 @@ function resolvePriceId(product: string, billing: string): string | null {
   return productConfig[normalizedBilling] || null;
 }
 
-function buildRedirectBase(returnTo?: string, tier?: string): { success: string; cancel: string } {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://aireadiness.northpathstrategies.org';
+function buildRedirectBase(returnTo?: string, tier?: string, request?: any): { success: string; cancel: string } {
+  // Use current deployment URL as fallback
+  const fallbackUrl = 'https://ai-readiness-nib3h3u17-jeremys-projects-73929cad.vercel.app';
+  
+  // Try to get the base URL from the request headers first (for domain-aware redirects)
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL;
+  
+  if (request && request.headers) {
+    const host = request.headers.get('host');
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    if (host) {
+      baseUrl = `${protocol}://${host}`;
+    }
+  }
+  
+  // Final fallback to current deployment
+  baseUrl = baseUrl || fallbackUrl;
+  
   // Map return_to shorthand values to paths
   const destination = (() => {
     switch (returnTo) {
@@ -78,11 +94,9 @@ function buildRedirectBase(returnTo?: string, tier?: string): { success: string;
       case 'dashboard':
         return '/dashboard';
       default:
-        // For team/AI readiness, redirect to assessment after successful payment
-        if (tier === 'team') {
-          return '/ai-readiness/assessment?tier=comprehensive';
-        }
-        return '/';
+        // For AI readiness products, redirect to dashboard after successful payment
+        // This gives users guidance on how to get started
+        return '/ai-readiness/dashboard';
     }
   })();
   return {
@@ -91,14 +105,14 @@ function buildRedirectBase(returnTo?: string, tier?: string): { success: string;
   };
 }
 
-async function createCheckoutSession(params: CheckoutParams) {
+async function createCheckoutSession(params: CheckoutParams, request?: NextRequest) {
   const priceId = params.priceIdOverride || resolvePriceId(params.product, params.billing);
   if (!priceId) {
     throw new Error(`${capitalize(params.product || 'Product')} price not found for billing=${params.billing}. Provide correct env vars (STRIPE_PRICE_* ) or pass price_id explicitly.`);
   }
 
   const isSubscription = true; // unified checkout uses subscriptions (supports trial days)
-  const redirect = buildRedirectBase(params.returnTo, params.tier);
+  const redirect = buildRedirectBase(params.returnTo, params.tier, request);
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: isSubscription ? 'subscription' : 'payment',
@@ -155,7 +169,7 @@ async function handler(request: NextRequest) {
       return NextResponse.json({ error: 'Missing billing parameter' }, { status: 400 });
     }
 
-    const session = await createCheckoutSession(params);
+    const session = await createCheckoutSession(params, request);
     return NextResponse.redirect(session.url!, { status: 303 });
   } catch (error: any) {
     console.error('Unified checkout error:', error);

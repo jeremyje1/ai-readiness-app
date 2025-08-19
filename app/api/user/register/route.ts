@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { emailService } from '@/lib/email-service';
 import { headers } from 'next/headers';
 
 interface UserRegistrationData {
@@ -61,6 +62,32 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       status: 'pending_payment'
     };
+
+    // Send welcome email
+    try {
+      // Determine the base URL from request or use custom domain
+      const host = request.headers.get('host');
+      const protocol = request.headers.get('x-forwarded-proto') || 'https';
+      const baseUrl = host ? `${protocol}://${host}` : 'https://aiblueprint.k12aiblueprint.com';
+      
+      // Get institutional context from middleware headers
+      const institutionType = request.headers.get('x-institution-type') as 'K12' | 'HigherEd' | 'default' || 'default';
+      const domainContext = request.headers.get('x-domain-context') || undefined;
+      
+      await emailService.sendWelcomeEmail({
+        userEmail: body.email,
+        userName: `${body.firstName} ${body.lastName}`,
+        institutionName: body.organization,
+        userId,
+        baseUrl: baseUrl,
+        institutionType: institutionType,
+        domainContext: domainContext
+      });
+      console.log(`✅ Welcome email sent to ${body.email}`);
+    } catch (emailError) {
+      console.error('❌ Failed to send welcome email:', emailError);
+      // Don't fail registration if email fails
+    }
 
     // Create response with user ID in header
     const response = NextResponse.json(
