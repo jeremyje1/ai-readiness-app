@@ -41,14 +41,31 @@ export default function PaymentSuccessPage() {
         const res = await fetch(`/api/stripe/session?id=${sessionId}`);
         if (res.ok) {
           const data = await res.json();
-            if (data.email) {
-              setEmail(data.email);
-              // Attempt auto magic link once
-              if (auto === '1' && !autoTried) {
-                setAutoTried(true);
-                handleSendMagicLink(new Event('submit') as any, true);
+          if (data.email) {
+            setEmail(data.email);
+            if (auto === '1' && !autoTried) {
+              setAutoTried(true);
+              // Try direct password token bootstrap first
+              try {
+                const r2 = await fetch('/api/stripe/post-checkout/bootstrap', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ session_id: sessionId })
+                });
+                if (r2.ok) {
+                  const b = await r2.json();
+                  if (b.passwordSetupUrl) {
+                    router.replace(b.passwordSetupUrl + '&auto=1');
+                    return; // stop further actions
+                  }
+                }
+              } catch (e) {
+                console.warn('Password bootstrap failed, fallback to magic link');
               }
+              // Fallback: send magic link silently
+              handleSendMagicLink(new Event('submit') as any, true);
             }
+          }
         }
       } catch (e) {
         console.warn('Session bootstrap failed', e);
