@@ -5,6 +5,11 @@ import { emailService } from '@/lib/email-service';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', { apiVersion: '2025-06-30.basil' });
 
+// Check if supabaseAdmin is available
+if (!supabaseAdmin) {
+  console.error('CRITICAL: Supabase admin client not available - webhook will not function properly');
+}
+
 // Define tier mapping based on Stripe price IDs
 const tierMapping: Record<string, string> = {
   'price_1QbQzOBUNyUCMaZKH36B4wlU': 'ai-readiness-comprehensive', // $995
@@ -24,6 +29,10 @@ interface UserData {
 
 async function createUserAccount(userData: UserData): Promise<string> {
   try {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not available - check environment variables');
+    }
+
     // Create user in Supabase Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: userData.email,
@@ -168,6 +177,11 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
     const cancelledCustomer = await stripe.customers.retrieve(sub.customer as string);
     if ('email' in cancelledCustomer && cancelledCustomer.email) {
       try {
+        if (!supabaseAdmin) {
+          console.error('Cannot revoke access - Supabase admin client not available');
+          return;
+        }
+        
         const { error } = await supabaseAdmin
           .from('user_payments')
           .update({ 
