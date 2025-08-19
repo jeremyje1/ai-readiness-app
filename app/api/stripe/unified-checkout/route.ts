@@ -94,9 +94,9 @@ function buildRedirectBase(returnTo?: string, tier?: string, request?: any): { s
       case 'dashboard':
         return '/dashboard';
       default:
-        // For AI readiness products, redirect to dashboard after successful payment
-        // This gives users guidance on how to get started
-        return '/ai-readiness/dashboard';
+        // For AI readiness products, redirect to success page that handles authentication
+        // then guides users to their dashboard
+        return '/ai-readiness/success';
     }
   })();
   return {

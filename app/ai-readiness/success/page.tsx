@@ -1,0 +1,209 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, CheckCircle, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+
+export default function PaymentSuccessPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<'email' | 'sent' | 'verifying' | 'complete'>('email');
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // Already logged in, redirect to dashboard
+        router.push('/ai-readiness/dashboard?verified=true');
+      }
+    };
+    
+    checkAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setStep('complete');
+        // Small delay to show success message, then redirect
+        setTimeout(() => {
+          router.push('/ai-readiness/dashboard?verified=true');
+        }, 2000);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
+  const handleSendMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/ai-readiness/dashboard?verified=true`,
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setStep('sent');
+      }
+    } catch (err) {
+      setError('Failed to send login link. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderStep = () => {
+    switch (step) {
+      case 'email':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Payment Successful!
+              </h2>
+              <p className="text-gray-600">
+                Your AI Blueprint™ Assessment access has been activated. To access your dashboard, please enter your email to receive a secure login link.
+              </p>
+            </div>
+
+            <form onSubmit={handleSendMagicLink} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  required
+                  className="mt-1"
+                />
+              </div>
+
+              {error && (
+                <div className="flex items-center space-x-2 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading || !email}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending Login Link...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Send Secure Login Link
+                  </>
+                )}
+              </Button>
+            </form>
+          </div>
+        );
+
+      case 'sent':
+        return (
+          <div className="text-center space-y-6">
+            <Mail className="w-16 h-16 text-blue-500 mx-auto" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Check Your Email
+              </h2>
+              <p className="text-gray-600 mb-4">
+                We've sent a secure login link to <strong>{email}</strong>
+              </p>
+              <p className="text-sm text-gray-500">
+                Click the link in your email to access your AI Blueprint™ Assessment dashboard.
+                The link will expire in 1 hour for security.
+              </p>
+            </div>
+            
+            <div className="pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setStep('email')}
+                className="mr-2"
+              >
+                Use Different Email
+              </Button>
+              <Button 
+                onClick={() => handleSendMagicLink({ preventDefault: () => {} } as any)}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Resending...
+                  </>
+                ) : (
+                  'Resend Link'
+                )}
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'complete':
+        return (
+          <div className="text-center space-y-6">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Welcome to AI Blueprint™!
+              </h2>
+              <p className="text-gray-600 mb-4">
+                You're now logged in and will be redirected to your assessment dashboard.
+              </p>
+            </div>
+            
+            <Button onClick={() => router.push('/ai-readiness/dashboard?verified=true')}>
+              <ArrowRight className="w-4 h-4 mr-2" />
+              Go to Dashboard
+            </Button>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-6">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">AI Blueprint™ Assessment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {renderStep()}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
