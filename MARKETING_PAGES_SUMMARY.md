@@ -1,4 +1,4 @@
-# 🌐 Multi-Domain Marketing Pages - Deployment Summary
+# 🌐 Marketing Pages - Consolidated Deployment Summary
 
 ## ✅ **Marketing Pages Created**
 
@@ -20,10 +20,10 @@
 - Assessment: `https://aiblueprint.k12aiblueprint.com/start?billing=monthly&utm_source=k12_main&utm_medium=hero_cta&utm_campaign=monthly_trial`
 - Contact: `mailto:info@k12aiblueprint.com`
 
-### 🎓 **Higher Ed Marketing Page** (`highered-marketing-page.html`)
-- **Domain:** `higheredaiblueprint.com`
-- **Platform URL:** `aiblueprint.higheredaiblueprint.com`
-- **Brand:** Higher Ed AI Blueprint
+### 🎓 **Higher Ed Marketing Content (Consolidated)** (`highered-marketing-page.html` legacy static file)
+- **Legacy Domains (Deprecated):** `higheredaiblueprint.com`, `aiblueprint.higheredaiblueprint.com`
+- **Current Canonical Path:** `https://aiblueprint.k12aiblueprint.com/higher-ed`
+- **Brand:** Higher Ed AI Blueprint (content only)
 - **Focus:** Universities, colleges, faculty, institutional leadership
 
 **Key Content Updates:**
@@ -34,9 +34,9 @@
 - ✅ Academic excellence and innovation focus
 - ✅ Enterprise partnership opportunities
 
-**URL Structure:**
-- Assessment: `https://aiblueprint.higheredaiblueprint.com/start?billing=monthly&utm_source=he_main&utm_medium=hero_cta&utm_campaign=monthly_trial`
-- Contact: `mailto:info@higheredaiblueprint.com`
+**Current URL Structure (after consolidation):**
+- Trial CTA: `https://aiblueprint.k12aiblueprint.com/start?billing=monthly&utm_source=he_main&utm_medium=hero_cta&utm_campaign=monthly_trial`
+- Contact: `mailto:info@k12aiblueprint.com`
 
 ## 🔗 **Link Structure & UTM Tracking**
 
@@ -45,7 +45,7 @@
 - Medium: `hero_cta`, `card`, `cta`, `sticky`
 - Campaigns: `monthly_trial`, `yearly_trial`, `district_monthly`, `classroom_monthly`
 
-### **Higher Ed Campaign Tracking:**
+### **Higher Ed Campaign Tracking (unchanged UTM source):**
 - Source: `he_main`
 - Medium: `hero_cta`, `card`, `cta`, `sticky`
 - Campaigns: `monthly_trial`, `yearly_trial`, `institutional_monthly`, `academic_monthly`
@@ -59,7 +59,7 @@
 - **Compliance:** COPPA/FERPA emphasis
 - **CTA:** "Ready to Transform Your District?"
 
-### **Higher Ed Specific Features:**
+### **Higher Ed Specific Features (served at /higher-ed):**
 - **Services:** "Higher Ed AI Readiness Assessments", "University Implementation Blueprints", "Faculty Professional Development"
 - **Solutions:** "Institutional Implementation", "Academic Excellence Tools"
 - **Language:** Faculty, universities, institutions, research collaboration
@@ -73,25 +73,19 @@
 - Description: "...specifically designed for school districts"
 - Canonical: `https://k12aiblueprint.com/`
 
-### **Higher Ed Page:**
+### **Higher Ed Page (updated):**
 - Title: "Higher Ed AI Blueprint – AI Solutions for Universities"
 - Description: "...specifically designed for universities and colleges"
-- Canonical: `https://higheredaiblueprint.com/`
+- Canonical: `https://aiblueprint.k12aiblueprint.com/higher-ed`
 
-## 🚀 **Next Steps Required**
+## 🚀 **Post-Consolidation Checklist**
 
-1. **Upload Marketing Pages to Respective Domains:**
-   - Upload `k12-marketing-page.html` to `k12aiblueprint.com`
-   - Upload `highered-marketing-page.html` to `higheredaiblueprint.com`
-
-2. **Configure Custom Domains in Vercel:**
-   - Add `aiblueprint.k12aiblueprint.com` to Vercel project
-   - Add `aiblueprint.higheredaiblueprint.com` to Vercel project
-   - Set up DNS CNAME records
-
-3. **Test Complete User Journey:**
-   - Marketing page → Assessment platform → Dashboard
-   - Verify domain-specific branding throughout
+1. `/higher-ed` route deployed (Next.js page)
+2. 301 redirects from legacy higher ed hosts to canonical in `vercel.json`
+3. Legacy marketing assets updated (canonical tags & emails)
+4. Update external collateral (pitch decks, docs) to use canonical URLs
+5. Submit updated sitemap at `/sitemap.xml` in Search Console
+6. Set URL removal (temporary) if old higher-ed pages were indexed separately
 
 ## 🎨 **Brand Consistency**
 
@@ -109,12 +103,12 @@ Both pages maintain:
 - 🎯 Professional development approaches
 - 🎯 Implementation strategies
 
-## 📈 **Business Impact**
+## 📈 **Business Impact (After Consolidation)**
 
-- ✅ **Clear Market Segmentation:** Separate, focused messaging for each audience
-- ✅ **Improved Conversion:** Audience-specific language and value propositions
-- ✅ **Enhanced Trust:** Compliance and terminology that resonates with each sector
-- ✅ **Better SEO:** Domain-specific content optimization
-- ✅ **Cleaner Analytics:** Separate tracking for K-12 vs Higher Ed performance
+- ✅ Unified domain authority & backlink consolidation
+- ✅ Reduced operational overhead (no dual certs / env / host logic)
+- ✅ Lower risk of domain drift in auth & checkout URLs
+- ✅ Simpler analytics & attribution
+- ✅ Consistent security headers & HSTS scope
 
-The marketing pages are now ready for deployment to their respective domains, providing a professional, targeted experience for both K-12 and higher education prospects!
+Higher Ed messaging remains accessible at a canonical path without maintaining a separate host.

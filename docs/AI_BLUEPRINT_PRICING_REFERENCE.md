@@ -27,32 +27,33 @@
 ## Deployment Information
 
 ### Production Domain
-- **Primary Domain**: `app.northpathstrategies.org`
+- **Canonical Domain**: `aiblueprint.k12aiblueprint.com`
+- **Legacy Domains (Redirect Only)**: `app.northpathstrategies.org`, `ai-readiness.northpathstrategies.org`
 - **Deployment Platform**: Vercel
-- **Deployment Status**: ✅ LIVE (deployed July 25, 2025)
+- **Deployment Status**: ✅ LIVE (latest consolidation August 2025)
 
-### Key URLs
-- **AI Blueprint Pricing**: https://app.northpathstrategies.org/ai-blueprint/pricing
-- **AI Blueprint Assessment**: https://app.northpathstrategies.org/ai-blueprint/assessment
-- **AI Readiness Main Page**: https://app.northpathstrategies.org/ai-readiness
-- **Stripe API Endpoint**: https://app.northpathstrategies.org/api/ai-blueprint/stripe/create-checkout
+### Key URLs (Canonical)
+- **AI Blueprint Pricing**: https://aiblueprint.k12aiblueprint.com/ai-blueprint/pricing
+- **AI Blueprint Assessment**: https://aiblueprint.k12aiblueprint.com/ai-blueprint/assessment
+- **AI Readiness Main Page**: https://aiblueprint.k12aiblueprint.com/ai-readiness
+- **Stripe API Endpoint**: https://aiblueprint.k12aiblueprint.com/api/ai-blueprint/stripe/create-checkout
 
 ### Stripe Checkout Links
 All Stripe checkout links are working and tested ✅
 
 1. **Higher Ed AI Pulse Check ($2,000)**:
    ```
-   https://app.northpathstrategies.org/api/ai-blueprint/stripe/create-checkout?tier=higher-ed-ai-pulse-check&price_id=price_1RomXAELd2WOuqIWUJT4cY29
+   https://aiblueprint.k12aiblueprint.com/api/ai-blueprint/stripe/create-checkout?tier=higher-ed-ai-pulse-check&price_id=price_1RomXAELd2WOuqIWUJT4cY29
    ```
 
 2. **AI Readiness Comprehensive ($4,995)**:
    ```
-   https://app.northpathstrategies.org/api/ai-blueprint/stripe/create-checkout?tier=ai-readiness-comprehensive&price_id=price_1Ro4tAELd2WOuqIWaDPEWxX3
+   https://aiblueprint.k12aiblueprint.com/api/ai-blueprint/stripe/create-checkout?tier=ai-readiness-comprehensive&price_id=price_1Ro4tAELd2WOuqIWaDPEWxX3
    ```
 
 3. **AI Transformation Blueprint™ ($24,500)**:
    ```
-   https://app.northpathstrategies.org/api/ai-blueprint/stripe/create-checkout?tier=ai-transformation-blueprint&price_id=price_1RomY5ELd2WOuqIWd3wUhiQm
+   https://aiblueprint.k12aiblueprint.com/api/ai-blueprint/stripe/create-checkout?tier=ai-transformation-blueprint&price_id=price_1RomY5ELd2WOuqIWd3wUhiQm
    ```
 
 4. **Enterprise Partnership (Consultation)**:
@@ -128,11 +129,11 @@ All Stripe checkout links are working and tested ✅
 - [ ] End-to-end checkout testing completed
 
 ### IMPORTANT: Production Deployment Information
-**Production Domain:** `https://app.northpathstrategies.org`
+**Canonical Production Domain:** `https://aiblueprint.k12aiblueprint.com`
 
 **Status:** ✅ Main app is live and accessible
-- Main domain: Working (HTTP 200)
-- AI Blueprint pages: May need deployment (HTTP 404 detected)
+- Canonical domain: Working (HTTP 200)
+- Legacy domains: 301 redirect to canonical
 
 **Next Steps:** 
 1. Deploy latest changes to ensure AI Blueprint pages are available
@@ -142,8 +143,8 @@ All Stripe checkout links are working and tested ✅
 **Deployment Command:** `vercel --prod` (if needed)
 
 ### Updated HTML Files:
-- All Stripe checkout links now point to: `https://app.northpathstrategies.org/api/ai-blueprint/stripe/create-checkout`
-- All pricing page links now point to: `https://app.northpathstrategies.org/ai-blueprint/pricing`
+- All Stripe checkout links now point to: `https://aiblueprint.k12aiblueprint.com/api/ai-blueprint/stripe/create-checkout`
+- All pricing page links now point to: `https://aiblueprint.k12aiblueprint.com/ai-blueprint/pricing`
 
 ### Link Workflow Verified
 1. ✅ Service buttons → Direct Stripe checkout

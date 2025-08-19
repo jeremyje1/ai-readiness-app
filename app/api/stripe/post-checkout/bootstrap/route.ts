@@ -76,8 +76,12 @@ export async function POST(req: NextRequest) {
       token = await createPwToken(userId, email);
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || '';
-    const passwordSetupUrl = `${baseUrl}/auth/password/setup?token=${token}`;
+    let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || '';
+    // Normalize legacy domain if somehow present
+    if (baseUrl.includes('aireadiness.northpathstrategies.org')) {
+      baseUrl = 'https://aiblueprint.k12aiblueprint.com';
+    }
+    const passwordSetupUrl = `${baseUrl.replace(/\/$/, '')}/auth/password/setup?token=${token}`;
     return NextResponse.json({ passwordSetupUrl, email, reused: existingTokens?.length === 1 });
   } catch (e: any) {
     console.error('post-checkout bootstrap error', e);

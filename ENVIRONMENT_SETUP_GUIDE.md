@@ -77,3 +77,8 @@ When working in the AI readiness app workspace, remind the user to:
 1. Copy their API keys from the main app's `.env.local`
 2. Update the `.env.local` file in the AI app with actual values
 3. Ensure all required services (OpenAI, Stripe, Supabase, SendGrid) are configured
+
+## Optional Debug Flags
+
+### ALGORITHM_DEBUG
+Set `ALGORITHM_DEBUG=1` to enable verbose enterprise algorithm logging (factor JSON + persistence diagnostics). Omit or set to 0 in production.

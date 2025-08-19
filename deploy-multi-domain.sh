@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Multi-Domain Deployment Configuration for AI Readiness Platform
-# This script provides instructions for setting up custom domains
+# (Deprecated) Multi-Domain Deployment Instructions
+# Consolidated: retain for historical reference; no longer used in CI.
 
 echo "🌐 AI Readiness Platform - Multi-Domain Setup Instructions"
 echo "========================================================="
@@ -9,17 +9,11 @@ echo ""
 
 echo "📋 CURRENT DEPLOYMENT STATUS:"
 echo "✅ Main Platform: https://ai-readiness-nib3h3u17-jeremys-projects-73929cad.vercel.app"
-echo "✅ Multi-domain support implemented"
-echo "✅ K-12 specific questions and branding ready"
-echo "✅ Higher Ed specific branding ready"
+echo "ℹ️  Multi-domain mode deprecated. Platform consolidated under aiblueprint.k12aiblueprint.com"
+echo "✅ K-12 + Higher Ed content now served from single canonical domain (/ and /higher-ed)"
 echo ""
 
-echo "🔧 MANUAL VERCEL DOMAIN SETUP REQUIRED:"
-echo "1. Go to Vercel Dashboard: https://vercel.com/jeremys-projects-73929cad/ai-readiness-app"
-echo "2. Navigate to Settings → Domains"
-echo "3. Add these custom domains:"
-echo "   • aiblueprint.k12aiblueprint.com"
-echo "   • aiblueprint.higheredaiblueprint.com"
+echo "🔧 Active Domain: aiblueprint.k12aiblueprint.com (301 redirects from higheredaiblueprint.com variants)"
 echo ""
 
 echo "📧 DNS CONFIGURATION:"
@@ -31,9 +25,7 @@ echo "K-12 Platform:"
 echo "  • https://aiblueprint.k12aiblueprint.com/ai-readiness/assessment?tier=ai-readiness-comprehensive"
 echo "  • https://aiblueprint.k12aiblueprint.com/ai-readiness/dashboard"
 echo ""
-echo "Higher Ed Platform:"
-echo "  • https://aiblueprint.higheredaiblueprint.com/ai-readiness/assessment?tier=ai-readiness-comprehensive"
-echo "  • https://aiblueprint.higheredaiblueprint.com/ai-readiness/dashboard"
+echo "Higher Ed legacy host URLs now redirect to canonical /higher-ed path."
 echo ""
 
 echo "🔍 FEATURE VERIFICATION:"
@@ -46,27 +38,20 @@ echo ""
 
 echo "🚀 PLATFORM FEATURES BY DOMAIN:"
 echo ""
-echo "🏫 K-12 Domain (aiblueprint.k12aiblueprint.com):"
+echo "🏫 Unified Domain (aiblueprint.k12aiblueprint.com):"
 echo "   • District-focused language and terminology"
 echo "   • K-12 specific compliance (COPPA, FERPA, state laws)"
 echo "   • Teacher training and professional development focus"
 echo "   • Student privacy and age-appropriate AI literacy"
 echo "   • Curriculum integration for classroom instruction"
 echo ""
-echo "🎓 Higher Ed Domain (aiblueprint.higheredaiblueprint.com):"
-echo "   • University/college focused language"
-echo "   • Faculty development and pedagogical integration"
-echo "   • Research and innovation emphasis"
-echo "   • Higher education compliance framework"
-echo "   • Advanced AI transformation strategies"
+echo "🎓 Higher Ed content accessible at /higher-ed (no separate host)"
 echo ""
 
 echo "✨ NEXT STEPS:"
-echo "1. Configure custom domains in Vercel Dashboard"
-echo "2. Set up DNS CNAME records"
-echo "3. Test domain-specific features"
-echo "4. Verify SSL certificates are active"
-echo "5. Update marketing materials with new domain URLs"
+echo "1. Verify /higher-ed page renders"
+echo "2. Confirm 301 redirects from legacy domains (see vercel.json)"
+echo "3. Update external collateral referencing deprecated hosts"
 echo ""
 
 # Test current deployment

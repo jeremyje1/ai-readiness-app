@@ -75,7 +75,7 @@ Current Stripe price configuration:
 - `STRIPE_PRICE_TEAM_YEARLY`: price_1PtRkfJhVfEPKcpcNj9uSgWr
 
 ### 8. Custom Domain Integration
-- Marketing page directs to: `aireadiness.northpathstrategies.org`
+- Marketing page (OLD, deprecated) directed to: `aireadiness.northpathstrategies.org` (now redirects)
 - All checkout flows use custom domain
 - UTM tracking for marketing attribution
 - Proper redirect handling post-payment
@@ -119,7 +119,7 @@ Current Stripe price configuration:
 ## Testing & Validation
 
 ### Verified Functionality
-- ✅ Custom domain working (aireadiness.northpathstrategies.org)
+- ✅ Legacy custom domain (aireadiness.northpathstrategies.org) now permanently redirects to canonical `aiblueprint.k12aiblueprint.com`
 - ✅ User registration form functional
 - ✅ Stripe integration with new parameters
 - ✅ Monthly/yearly billing options
@@ -127,9 +127,9 @@ Current Stripe price configuration:
 - ✅ Marketing page updates deployed
 
 ### Live URLs for Testing
-- Monthly Registration: https://aireadiness.northpathstrategies.org/start?billing=monthly
-- Yearly Registration: https://aireadiness.northpathstrategies.org/start?billing=yearly
-- AI Readiness Landing: https://aireadiness.northpathstrategies.org/ai-readiness
+- Monthly Registration (legacy): https://aireadiness.northpathstrategies.org/start?billing=monthly → 301 to https://aiblueprint.k12aiblueprint.com/start?billing=monthly
+- Yearly Registration (legacy): https://aireadiness.northpathstrategies.org/start?billing=yearly → 301 to https://aiblueprint.k12aiblueprint.com/start?billing=yearly
+- AI Readiness Landing (legacy): https://aireadiness.northpathstrategies.org/ai-readiness → 301 to https://aiblueprint.k12aiblueprint.com/ai-readiness
 
 ## Business Impact
 

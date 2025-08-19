@@ -1,4 +1,4 @@
-# Deployment Guide - NorthPath Analytics Platform
+# Deployment Guide - AI Blueprint Platform (Canonical Domain)
 
 ## Prerequisites Checklist
 
@@ -6,13 +6,15 @@
 
 Update the following environment variables in Vercel Dashboard:
 
-#### Domain & URL Variables
+#### Domain & URL Variables (Canonical Only)
+
+Legacy domains (app.northpathstrategies.org, ai-readiness.northpathstrategies.org, aireadiness.northpathstrategies.org) are deprecated.
 
 ```
-NEXT_PUBLIC_DOMAIN=app.northpathstrategies.org
-NEXT_PUBLIC_APP_URL=https://app.northpathstrategies.org
-NEXT_PUBLIC_BASE_URL=https://app.northpathstrategies.org
-NEXTAUTH_URL=https://app.northpathstrategies.org
+NEXT_PUBLIC_DOMAIN=aiblueprint.k12aiblueprint.com
+NEXT_PUBLIC_APP_URL=https://aiblueprint.k12aiblueprint.com
+NEXT_PUBLIC_BASE_URL=https://aiblueprint.k12aiblueprint.com
+NEXTAUTH_URL=https://aiblueprint.k12aiblueprint.com
 ```
 
 #### Database Variables
@@ -77,7 +79,7 @@ npx prisma generate
 
 Updated `vercel.json` with:
 
-- Correct domain: `app.northpathstrategies.org`
+- Correct canonical domain: `aiblueprint.k12aiblueprint.com`
 - Extended function timeouts for AI/PDF generation (30s)
 - CORS headers for API routes
 - Regional deployment (IAD1)
@@ -87,12 +89,12 @@ Updated `vercel.json` with:
 #### Required Actions:
 
 1. **Power BI Admin Portal**
-   - Add `app.northpathstrategies.org` to embed allowlist
+   - Add `aiblueprint.k12aiblueprint.com` to embed allowlist
    - Configure tenant settings for embedding
    - Enable service principal access
 
 2. **Azure AD App Registration**
-   - Update redirect URIs to include `https://app.northpathstrategies.org`
+   - Update redirect URIs to include `https://aiblueprint.k12aiblueprint.com`
    - Configure API permissions for Power BI Service
    - Add application secrets for production
 
@@ -106,12 +108,12 @@ Updated `vercel.json` with:
 ### Step 1: Update Environment Variables
 
 ```bash
-# Using Vercel CLI (if available)
+# Using Vercel CLI (canonical only)
 vercel env add NEXT_PUBLIC_DOMAIN production
-# Enter: app.northpathstrategies.org
+# Enter: aiblueprint.k12aiblueprint.com
 
 vercel env add NEXT_PUBLIC_APP_URL production
-# Enter: https://app.northpathstrategies.org
+# Enter: https://aiblueprint.k12aiblueprint.com
 
 # Or update via Vercel Dashboard:
 # https://vercel.com/dashboard/settings/environment-variables
@@ -140,7 +142,7 @@ git push origin main
 
 #### Health Checks
 
-- [ ] Application loads at `https://app.northpathstrategies.org`
+- [ ] Application loads at `https://aiblueprint.k12aiblueprint.com`
 - [ ] API endpoints respond correctly
 - [ ] Authentication flow works
 - [ ] Database connections established
@@ -152,15 +154,15 @@ git push origin main
 
 ```bash
 # Test health endpoint
-curl https://app.northpathstrategies.org/api/health
+curl https://aiblueprint.k12aiblueprint.com/api/health
 
 # Test upload endpoint
-curl -X POST https://app.northpathstrategies.org/api/upload \
+curl -X POST https://aiblueprint.k12aiblueprint.com/api/upload \
   -H "Content-Type: multipart/form-data" \
   -F "file=@test-data.csv"
 
 # Test AI report generation
-curl -X POST https://app.northpathstrategies.org/api/report/generate \
+curl -X POST https://aiblueprint.k12aiblueprint.com/api/report/generate \
   -H "Content-Type: application/json" \
   -d '{"data": "test"}'
 ```
@@ -171,7 +173,7 @@ curl -X POST https://app.northpathstrategies.org/api/report/generate \
 
 1. Login to Power BI Admin Portal
 2. Navigate to Tenant Settings > Developer Settings
-3. Add `app.northpathstrategies.org` to "Embed content in apps"
+3. Add `aiblueprint.k12aiblueprint.com` to "Embed content in apps"
 4. Configure service principal authentication
 5. Test embed functionality
 
@@ -179,14 +181,14 @@ curl -X POST https://app.northpathstrategies.org/api/report/generate \
 
 ```bash
 # Update webhook endpoint in Stripe Dashboard
-# Endpoint: https://app.northpathstrategies.org/api/webhooks/stripe
+# Endpoint: https://aiblueprint.k12aiblueprint.com/api/webhooks/stripe
 # Events: subscription.created, subscription.updated, subscription.deleted
 ```
 
 #### Auth Provider Updates
 
-- **Google OAuth**: Add `https://app.northpathstrategies.org` to authorized origins
-- **GitHub OAuth**: Update callback URL to `https://app.northpathstrategies.org/api/auth/callback/github`
+- **Google OAuth**: Add `https://aiblueprint.k12aiblueprint.com` to authorized origins
+- **GitHub OAuth**: Update callback URL to `https://aiblueprint.k12aiblueprint.com/api/auth/callback/github`
 - **Auth0**: Update allowed callback URLs and origins
 
 ## Monitoring & Maintenance

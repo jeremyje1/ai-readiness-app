@@ -37,7 +37,8 @@ export default function AIReadinessPricingPage() {
     
     const stripeTier = stripeCheckoutMap[product.id];
     if (stripeTier) {
-      window.location.href = `https://app.northpathstrategies.org/api/stripe/create-tier-checkout?tier=${stripeTier}`;
+  // Use canonical domain (legacy app.northpathstrategies.org removed)
+  window.location.href = `https://aiblueprint.k12aiblueprint.com/api/stripe/create-tier-checkout?tier=${stripeTier}`;
     } else {
       // Fallback to contact for enterprise
       window.location.href = `/contact?service=enterprise-ai`;
