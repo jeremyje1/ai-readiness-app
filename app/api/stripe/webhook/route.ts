@@ -97,7 +97,8 @@ function getTierPrice(tier: string): number {
 
 async function sendAssessmentAccessEmail(email: string, name: string, tier: string, baseUrl: string) {
   try {
-    const accessUrl = `${baseUrl}/ai-readiness/dashboard?verified=true`;
+    // Direct users to success page for authentication flow
+    const successUrl = `${baseUrl}/ai-readiness/success?checkout=success`;
     
     await emailService.sendAssessmentNotification({
       userEmail: email,
@@ -106,13 +107,13 @@ async function sendAssessmentAccessEmail(email: string, name: string, tier: stri
       assessmentId: 'pending',
       tier: tier,
       overallScore: 0, // Will be calculated after assessment
-      maturityLevel: 'Assessment Pending',
-      dashboardUrl: accessUrl,
+      maturityLevel: 'Access Ready - Login Required',
+      dashboardUrl: successUrl,
       baseUrl,
       institutionType: 'default'
     });
 
-    console.log(`✅ Assessment access email sent to ${email}`);
+    console.log(`✅ Assessment access email sent to ${email} with login instructions`);
   } catch (error) {
     console.error('Failed to send assessment access email:', error);
   }
