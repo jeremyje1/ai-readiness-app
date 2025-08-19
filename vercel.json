@@ -33,5 +33,11 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/auth/password/setup/cleanup?key=86f25f39e2af15bba12855b0de17b0f001c4f8300bf56827",
+      "schedule": "10 * * * *"
+    }
   ]
 }
