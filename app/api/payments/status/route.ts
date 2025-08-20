@@ -21,25 +21,43 @@ interface PaymentStatusResponse {
   debug?: any;
 }
 
-export async function GET() {
-  // Using the global supabase client (anon key). If more reliable server session
-  // retrieval is needed, consider a dedicated server-side helper that rehydrates
-  // the auth context from cookies. For now, rely on getSession which works in
-  // App Route server context when cookies are forwarded automatically.
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError) {
-    return NextResponse.json({ isVerified: false, error: 'auth_error', message: sessionError.message } as PaymentStatusResponse, { status: 401 });
+export async function GET(request: Request) {
+  // Attempt normal session retrieval first (works if using helpers that set cookies).
+  let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+  let accessToken: string | null = null;
+  if (!session) {
+    // Fallback: Authorization: Bearer <token>
+    const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      accessToken = authHeader.slice(7).trim();
+    } else {
+      // Also support x-supabase-access-token (client convenience)
+      accessToken = request.headers.get('x-supabase-access-token');
+    }
+    if (accessToken) {
+      const { data: userResult, error: userErr } = await supabase.auth.getUser(accessToken);
+      if (userErr) {
+        return NextResponse.json({ isVerified: false, error: 'auth_error', message: userErr.message } as PaymentStatusResponse, { status: 401 });
+      }
+      if (userResult?.user) {
+        session = { user: userResult.user, access_token: accessToken, token_type: 'bearer', expires_in: 0, expires_at: 0, refresh_token: '' } as any;
+      }
+    }
   }
+
   if (!session?.user) {
     return NextResponse.json({ isVerified: false, error: 'not_authenticated' } as PaymentStatusResponse, { status: 401 });
   }
 
   const userId = session.user.id;
   const userEmail = session.user.email?.toLowerCase() || null;
-  const debug: any = { phase: 'start', userId, userEmail };
+  const debug: any = { phase: 'start', userId, userEmail, tokenFallback: Boolean(accessToken) };
 
   // 1. Primary lookup by user_id
-  const { data: byUser, error: byUserErr } = await supabase
+  const queryClient = accessToken && supabaseAdmin ? supabaseAdmin : supabase; // if token fallback used, prefer admin to ensure RLS context (we already validated token)
+
+  const { data: byUser, error: byUserErr } = await queryClient
     .from('user_payments')
     .select('*')
     .eq('user_id', userId)
@@ -57,7 +75,7 @@ export async function GET() {
 
   // 2. Fallback by email (RLS now reveals matching unclaimed row)
   if (!row && userEmail) {
-    const { data: byEmail, error: byEmailErr } = await supabase
+  const { data: byEmail, error: byEmailErr } = await queryClient
       .from('user_payments')
       .select('*')
       .eq('email', userEmail)
@@ -72,7 +90,7 @@ export async function GET() {
       row = byEmail[0];
       // Attempt claim if user_id is null
       if (row && !row.user_id) {
-        const { error: claimErr } = await supabase
+  const { error: claimErr } = await queryClient
           .from('user_payments')
           .update({ user_id: userId })
           .eq('id', row.id);
