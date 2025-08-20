@@ -27,7 +27,7 @@ const tierMapping: Record<string, string> = {
 };
 
 interface UserData {
-  email: string;
+  email: string; // original casing from Stripe
   name: string;
   organization?: string;
   tier: string;
@@ -52,40 +52,67 @@ async function createPasswordSetupToken(userId: string, email: string) {
   return { token, expires };
 }
 
-async function createUserAccount(userData: UserData): Promise<string> {
-  try {
-    if (!supabaseAdmin) {
-      throw new Error('Supabase admin client not available - check environment variables');
-    }
+async function createOrFindUserAndGrantAccess(userData: UserData): Promise<string> {
+  if (!supabaseAdmin) throw new Error('Supabase admin client not available - check environment variables');
 
-    // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: userData.email,
-      email_confirm: true,
-      user_metadata: {
-        name: userData.name,
-        organization: userData.organization,
-        tier: userData.tier,
-        stripe_customer_id: userData.stripeCustomerId,
-        stripe_session_id: userData.stripeSessionId,
-        payment_verified: true,
-        access_granted_at: new Date().toISOString()
+  const normalizedEmail = userData.email.toLowerCase();
+  let userId: string | null = null;
+
+  // 1. Try create user
+  const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+    email: normalizedEmail,
+    email_confirm: true,
+    user_metadata: {
+      name: userData.name,
+      organization: userData.organization,
+      tier: userData.tier,
+      stripe_customer_id: userData.stripeCustomerId,
+      stripe_session_id: userData.stripeSessionId,
+      payment_verified: true,
+      access_granted_at: new Date().toISOString()
+    }
+  });
+
+  if (createErr) {
+    // If already exists, fetch existing user id instead of aborting
+    const alreadyExists = /already registered|User already exists/i.test(createErr.message || '');
+    if (alreadyExists) {
+      const { data: list } = await supabaseAdmin.auth.admin.listUsers();
+      const existing = list?.users?.find((u: any) => u.email?.toLowerCase() === normalizedEmail);
+      if (existing) {
+        userId = existing.id;
+        console.log(`ℹ️  Using existing user for email ${normalizedEmail}: ${userId}`);
+      } else {
+        console.error('Unable to locate existing user after duplicate error');
+        throw createErr;
       }
-    });
-
-    if (authError) {
-      console.error('Failed to create user:', authError);
-      throw authError;
+    } else {
+      console.error('Failed to create user:', createErr);
+      throw createErr;
     }
+  } else if (created?.user?.id) {
+    userId = created.user.id;
+    console.log(`✅ User account created: ${userId}`);
+  }
 
-    const userId = authData.user.id;
+  if (!userId) throw new Error('User ID unresolved');
 
-    // Create user record in our database
-    const { error: dbError } = await supabaseAdmin
+  // 2. Upsert payment record idempotently (by stripe_session_id)
+  const { data: existingPayment, error: findPaymentErr } = await supabaseAdmin
+    .from('user_payments')
+    .select('id')
+    .eq('stripe_session_id', userData.stripeSessionId)
+    .limit(1);
+  if (findPaymentErr) {
+    console.warn('Payment lookup failed (non-fatal):', findPaymentErr.message);
+  }
+
+  if (!existingPayment || existingPayment.length === 0) {
+    const { error: insertErr } = await supabaseAdmin
       .from('user_payments')
       .insert({
         user_id: userId,
-        email: userData.email,
+        email: normalizedEmail,
         name: userData.name,
         organization: userData.organization,
         tier: userData.tier,
@@ -96,18 +123,16 @@ async function createUserAccount(userData: UserData): Promise<string> {
         access_granted: true,
         created_at: new Date().toISOString()
       });
-
-    if (dbError) {
-      console.error('Failed to create user record:', dbError);
-      // Don't throw here, auth user is already created
+    if (insertErr) {
+      console.error('Failed to insert payment row:', insertErr);
+    } else {
+      console.log(`💾 Payment row inserted for user ${userId}`);
     }
-
-    console.log(`✅ User account created successfully: ${userId}`);
-    return userId;
-  } catch (error) {
-    console.error('Error creating user account:', error);
-    throw error;
+  } else {
+    console.log(`↩️  Payment row already exists for session ${userData.stripeSessionId}`);
   }
+
+  return userId;
 }
 
 function getTierPrice(tier: string): number {
@@ -196,7 +221,7 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
       };
 
       // Create user account and grant access
-      const userId = await createUserAccount(userData);
+  const userId = await createOrFindUserAndGrantAccess(userData);
       
       // Send access email
       const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.k12aiblueprint.com';
