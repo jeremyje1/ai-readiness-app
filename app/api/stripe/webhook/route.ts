@@ -13,17 +13,8 @@ if (!supabaseAdmin) {
 
 // Define tier mapping based on Stripe price IDs (current canonical production)
 // NOTE: Keep legacy IDs for backward compatibility; add new production IDs from pricing reference.
-const tierMapping: Record<string, string> = {
-  // Current production price IDs (July 2025 reference)
-  'price_1RomXAELd2WOuqIWUJT4cY29': 'higher-ed-ai-pulse-check',        // $2,000
-  'price_1Ro4tAELd2WOuqIWaDPEWxX3': 'ai-readiness-comprehensive',      // $4,995
-  'price_1RomY5ELd2WOuqIWd3wUhiQm': 'ai-transformation-blueprint',     // $24,500
-  'price_1RomYtELd2WOuqIWKdsStKyQ': 'enterprise-partnership',          // $75,000 (consultation)
-  // Legacy / earlier sandbox IDs (retain so historical events still resolve)
-  'price_1QbQzOBUNyUCMaZKH36B4wlU': 'ai-readiness-comprehensive',      // legacy $995
-  'price_1QbR0VBUNyUCMaZK7wGCqhXt': 'ai-transformation-blueprint',     // legacy $2,499
-  'price_1QbR1fBUNyUCMaZKGvfpHgJj': 'enterprise-partnership',          // legacy $9,999
-  'price_1QbR2vBUNyUCMaZKTwDuNnZz': 'custom-enterprise',               // legacy $24,500
+const tierMapping: Record<string, string> = {'price_1RxbFkRMpSG47vNmLp4CRHZ': 'team-monthly', // $995/month
+'price_1RxbGlRMpSG47vNmWEOu1otZ': 'team-yearly',  // $10,000/year
 };
 
 interface UserData {
@@ -135,16 +126,10 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
   return userId;
 }
 
-function getTierPrice(tier: string): number {
-  // Returns price IN DOLLARS (historical behavior); stored into payment_amount column which is labeled 'in cents'.
-  // TODO: Align semantics (either convert to cents here or adjust column usage) in a future migration.
-  const prices: Record<string, number> = {
-    'higher-ed-ai-pulse-check': 2000,
-    'ai-readiness-comprehensive': 4995,
-    'ai-transformation-blueprint': 24500,
-    'enterprise-partnership': 75000,
-    'custom-enterprise': 24500
-  };
+function getTierPrice(tier: string): number {'team-monthly': 995,
+'team-yearly': 10000,
+  const prices: Record<string, number> = {'team-monthly': 995,
+'team-yearly': 10000,};
   return prices[tier] || 0;
 }
 
