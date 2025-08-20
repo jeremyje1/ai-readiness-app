@@ -13,8 +13,9 @@ if (!supabaseAdmin) {
 
 // Define tier mapping based on Stripe price IDs (current canonical production)
 // NOTE: Keep legacy IDs for backward compatibility; add new production IDs from pricing reference.
-const tierMapping: Record<string, string> = {'price_1RxbFkRMpSG47vNmLp4CRHZ': 'team-monthly', // $995/month
-'price_1RxbGlRMpSG47vNmWEOu1otZ': 'team-yearly',  // $10,000/year
+const tierMapping: Record<string, string> = {
+  'price_1RxbFkRMpSG47vNmLp4CRHZ': 'team-monthly', // $995/month
+  'price_1RxbGlRMpSG47vNmWEOu1otZ': 'team-yearly',  // $10,000/year
 };
 
 interface UserData {
@@ -126,10 +127,11 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
   return userId;
 }
 
-function getTierPrice(tier: string): number {'team-monthly': 995,
-'team-yearly': 10000,
-  const prices: Record<string, number> = {'team-monthly': 995,
-'team-yearly': 10000,};
+function getTierPrice(tier: string): number {
+  const prices: Record<string, number> = {
+    'team-monthly': 995,
+    'team-yearly': 10000,
+  };
   return prices[tier] || 0;
 }
 
