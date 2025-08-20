@@ -1,0 +1,1 @@
+Trigger redeploy at 2025-08-20T00:00Z approximate (actual local time). Purpose: force Vercel build to pick up latest payment/RLS changes.
