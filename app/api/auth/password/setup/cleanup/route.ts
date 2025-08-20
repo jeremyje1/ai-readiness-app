@@ -14,7 +14,9 @@ async function runCleanup() {
   if (!supabaseAdmin) return { error: 'Admin unavailable' } as const;
   const { data, error } = await supabaseAdmin.rpc('delete_expired_password_tokens');
   if (error) return { error: 'Cleanup failed', details: error.message } as const;
-  return { success: true, deleted: data ?? 0 } as const;
+  // data is integer when function returns integer; undefined/null when void.
+  const deleted = typeof data === 'number' ? data : 0;
+  return { success: true, deleted } as const;
 }
 
 export async function POST(req: NextRequest) {
