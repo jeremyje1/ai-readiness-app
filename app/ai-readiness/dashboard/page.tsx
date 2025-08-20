@@ -33,93 +33,41 @@ export default function AIReadinessDashboard() {
     try {
       setLoading(true);
       setError(null);
-
-      // Check if user is authenticated
       const { data: { session }, error: authError } = await supabase.auth.getSession();
-      
       if (authError) {
         setError('Authentication error: ' + authError.message);
         setLoading(false);
         return;
       }
-
       if (!session?.user) {
-        // No session - redirect to payment/login
         router.push('/ai-readiness');
         return;
       }
-
-  const userEmail = session.user.email;
-  // Primary lookup by user_id
-  const { data: paymentData, error: paymentError } = await supabase
-        .from('user_payments')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('access_granted', true)
-    .eq('is_test', false)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (paymentError) {
-        console.error('Payment verification error:', paymentError);
-        setError('Unable to verify payment status. Please contact support.');
-        setLoading(false);
-        return;
-      }
-
-      let payment = paymentData && paymentData[0];
-
-      // Fallback: lookup by email if user_id row not yet linked (race in webhook vs auth) or none found.
-      if (!payment) {
-        const { data: emailRows, error: emailLookupError } = await supabase
-          .from('user_payments')
-          .select('*')
-          .eq('email', userEmail)
-          .eq('access_granted', true)
-            .eq('is_test', false)
-          .order('created_at', { ascending: false })
-          .limit(1);
-        if (!emailLookupError && emailRows && emailRows.length === 1) {
-          payment = emailRows[0];
-          // If row missing user_id, attempt to patch it (best-effort)
-          if (!payment.user_id) {
-            const { error: patchErr } = await supabase
-              .from('user_payments')
-              .update({ user_id: session.user.id })
-              .eq('id', payment.id);
-            if (patchErr && debugMode) {
-              console.warn('Failed to patch user_id onto payment row', patchErr);
-            } else if (!patchErr) {
-              payment.user_id = session.user.id;
-            }
-          }
-        }
-      }
-
-      if (!payment) {
+      const accessToken = session.access_token;
+      // Call unified status endpoint with bearer token
+      const res = await fetch('/api/payments/status', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        },
+        cache: 'no-store'
+      });
+      const json = await res.json();
+      if (debugMode) setDebugInfo(json.debug || json);
+      if (!res.ok || !json.isVerified) {
         setVerification({ isVerified: false });
         setError('No valid payment found. If you just completed checkout, wait a few seconds and retry.');
-        setLoading(false);
-        if (debugMode) setDebugInfo({ phase: 'fallback-miss', userId: session.user.id, email: userEmail });
-        return;
+      } else {
+        setVerification({
+          isVerified: true,
+          tier: json.tier,
+          email: json.email,
+          name: json.name,
+          organization: json.organization,
+          accessUrl: `/ai-readiness/assessment?tier=${json.tier}`
+        });
       }
-
-      // Payment verified - set up access
-      setVerification({
-        isVerified: true,
-        tier: payment.tier,
-        email: payment.email,
-        name: payment.name,
-        organization: payment.organization,
-        accessUrl: `/ai-readiness/assessment?tier=${payment.tier}`
-      });
-
-  if (debugMode) setDebugInfo({ phase: 'verified', rowId: payment.id, tier: payment.tier, email: payment.email });
-
-      console.log(`✅ Payment verified for ${payment.email} - Tier: ${payment.tier}`);
-      
-    } catch (error) {
-      console.error('Verification error:', error);
+    } catch (e) {
+      console.error('Verification error:', e);
       setError('Unable to verify access. Please try again or contact support.');
     } finally {
       setLoading(false);
