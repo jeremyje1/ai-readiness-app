@@ -22,6 +22,8 @@ export default function AIReadinessDashboard() {
   const [verification, setVerification] = useState<PaymentVerification>({ isVerified: false });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const debugMode = searchParams.get('debug') === '1';
 
   useEffect(() => {
     verifyPaymentAccess();
@@ -47,12 +49,14 @@ export default function AIReadinessDashboard() {
         return;
       }
 
-      // Verify payment status in database
-      const { data: paymentData, error: paymentError } = await supabase
+  const userEmail = session.user.email;
+  // Primary lookup by user_id
+  const { data: paymentData, error: paymentError } = await supabase
         .from('user_payments')
         .select('*')
         .eq('user_id', session.user.id)
         .eq('access_granted', true)
+    .eq('is_test', false)
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -63,16 +67,43 @@ export default function AIReadinessDashboard() {
         return;
       }
 
-      if (!paymentData || paymentData.length === 0) {
-        // No valid payment found
+      let payment = paymentData && paymentData[0];
+
+      // Fallback: lookup by email if user_id row not yet linked (race in webhook vs auth) or none found.
+      if (!payment) {
+        const { data: emailRows, error: emailLookupError } = await supabase
+          .from('user_payments')
+          .select('*')
+          .eq('email', userEmail)
+          .eq('access_granted', true)
+            .eq('is_test', false)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (!emailLookupError && emailRows && emailRows.length === 1) {
+          payment = emailRows[0];
+          // If row missing user_id, attempt to patch it (best-effort)
+          if (!payment.user_id) {
+            const { error: patchErr } = await supabase
+              .from('user_payments')
+              .update({ user_id: session.user.id })
+              .eq('id', payment.id);
+            if (patchErr && debugMode) {
+              console.warn('Failed to patch user_id onto payment row', patchErr);
+            } else if (!patchErr) {
+              payment.user_id = session.user.id;
+            }
+          }
+        }
+      }
+
+      if (!payment) {
         setVerification({ isVerified: false });
-        setError('No valid payment found. Please complete your purchase to access the AI assessment.');
+        setError('No valid payment found. If you just completed checkout, wait a few seconds and retry.');
         setLoading(false);
+        if (debugMode) setDebugInfo({ phase: 'fallback-miss', userId: session.user.id, email: userEmail });
         return;
       }
 
-      const payment = paymentData[0];
-      
       // Payment verified - set up access
       setVerification({
         isVerified: true,
@@ -82,6 +113,8 @@ export default function AIReadinessDashboard() {
         organization: payment.organization,
         accessUrl: `/ai-readiness/assessment?tier=${payment.tier}`
       });
+
+  if (debugMode) setDebugInfo({ phase: 'verified', rowId: payment.id, tier: payment.tier, email: payment.email });
 
       console.log(`✅ Payment verified for ${payment.email} - Tier: ${payment.tier}`);
       
@@ -144,6 +177,11 @@ export default function AIReadinessDashboard() {
             >
               Retry Verification
             </Button>
+            {debugMode && (
+              <pre className="text-left text-xs bg-white/70 p-3 rounded border overflow-auto max-h-40">
+                {JSON.stringify({ debugInfo, search: searchParams.toString() }, null, 2)}
+              </pre>
+            )}
           </div>
         </Card>
       </div>
@@ -161,6 +199,13 @@ export default function AIReadinessDashboard() {
               <p className="text-gray-600 mt-1">Payment verified • Access granted</p>
             </div>
           </div>
+
+          {debugMode && debugInfo && (
+            <div className="mb-6 text-xs bg-yellow-50 border border-yellow-300 p-3 rounded">
+              <strong className="block mb-1">Debug Diagnostics</strong>
+              <pre className="whitespace-pre-wrap break-all">{JSON.stringify(debugInfo, null, 2)}</pre>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-white p-6 rounded-lg border">

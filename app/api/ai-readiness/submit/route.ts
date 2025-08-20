@@ -68,6 +68,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Derive user id (prefer header, then body)
+    const derivedUserId = request.headers.get('x-user-id') || userId || null;
+
     // Create institution info object
     const institutionInfo = {
       name: institutionName || `Test Institution - ${industry}`,
@@ -75,7 +78,7 @@ export async function POST(request: NextRequest) {
       contactEmail: contactEmail || 'test@example.com',
       contactName: contactName || 'Test User',
       tier: tier,
-      userId: userId || 'test-user'
+      userId: derivedUserId || 'test-user'
     };
 
     // Create database record first
@@ -140,7 +143,7 @@ export async function POST(request: NextRequest) {
       };
       const enterpriseMetrics = await calculateEnterpriseMetrics({ responses: aiReadinessResponses }, orgMetrics);
       if (assessmentRecord?.id) {
-        await persistEnterpriseMetrics(assessmentRecord.id, { ...enterpriseMetrics, meta: { ...enterpriseMetrics.meta, userId: userId || null } } as any);
+        await persistEnterpriseMetrics(assessmentRecord.id, { ...enterpriseMetrics, meta: { ...enterpriseMetrics.meta, userId: derivedUserId || null } } as any);
       }
     } catch (algoPersistError) {
       console.warn('⚠️  Failed to persist enterprise algorithm metrics:', algoPersistError);

@@ -11,12 +11,19 @@ if (!supabaseAdmin) {
   console.error('CRITICAL: Supabase admin client not available - webhook will not function properly');
 }
 
-// Define tier mapping based on Stripe price IDs
+// Define tier mapping based on Stripe price IDs (current canonical production)
+// NOTE: Keep legacy IDs for backward compatibility; add new production IDs from pricing reference.
 const tierMapping: Record<string, string> = {
-  'price_1QbQzOBUNyUCMaZKH36B4wlU': 'ai-readiness-comprehensive', // $995
-  'price_1QbR0VBUNyUCMaZK7wGCqhXt': 'ai-transformation-blueprint', // $2,499
-  'price_1QbR1fBUNyUCMaZKGvfpHgJj': 'enterprise-partnership', // $9,999
-  'price_1QbR2vBUNyUCMaZKTwDuNnZz': 'custom-enterprise', // $24,500
+  // Current production price IDs (July 2025 reference)
+  'price_1RomXAELd2WOuqIWUJT4cY29': 'higher-ed-ai-pulse-check',        // $2,000
+  'price_1Ro4tAELd2WOuqIWaDPEWxX3': 'ai-readiness-comprehensive',      // $4,995
+  'price_1RomY5ELd2WOuqIWd3wUhiQm': 'ai-transformation-blueprint',     // $24,500
+  'price_1RomYtELd2WOuqIWKdsStKyQ': 'enterprise-partnership',          // $75,000 (consultation)
+  // Legacy / earlier sandbox IDs (retain so historical events still resolve)
+  'price_1QbQzOBUNyUCMaZKH36B4wlU': 'ai-readiness-comprehensive',      // legacy $995
+  'price_1QbR0VBUNyUCMaZK7wGCqhXt': 'ai-transformation-blueprint',     // legacy $2,499
+  'price_1QbR1fBUNyUCMaZKGvfpHgJj': 'enterprise-partnership',          // legacy $9,999
+  'price_1QbR2vBUNyUCMaZKTwDuNnZz': 'custom-enterprise',               // legacy $24,500
 };
 
 interface UserData {
@@ -104,10 +111,13 @@ async function createUserAccount(userData: UserData): Promise<string> {
 }
 
 function getTierPrice(tier: string): number {
+  // Returns price IN DOLLARS (historical behavior); stored into payment_amount column which is labeled 'in cents'.
+  // TODO: Align semantics (either convert to cents here or adjust column usage) in a future migration.
   const prices: Record<string, number> = {
-    'ai-readiness-comprehensive': 995,
-    'ai-transformation-blueprint': 2499,
-    'enterprise-partnership': 9999,
+    'higher-ed-ai-pulse-check': 2000,
+    'ai-readiness-comprehensive': 4995,
+    'ai-transformation-blueprint': 24500,
+    'enterprise-partnership': 75000,
     'custom-enterprise': 24500
   };
   return prices[tier] || 0;
@@ -162,11 +172,18 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
       // Get price ID to determine tier
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
       const priceId = lineItems.data[0]?.price?.id;
-      const tier = priceId ? tierMapping[priceId] : 'unknown';
-      
-      if (tier === 'unknown') {
-        console.error('❌ Unknown price ID:', priceId);
-        return;
+      let tier = priceId ? tierMapping[priceId] : undefined;
+
+      if (!tier) {
+        // Attempt fallback to metadata.tier if provided
+        const metaTier = session.metadata?.tier;
+        if (metaTier && getTierPrice(metaTier) > 0) {
+          tier = metaTier;
+          console.warn('⚠️  Price ID not in mapping; using metadata.tier fallback:', priceId, '→', metaTier);
+        } else {
+          console.error('❌ Unknown price ID and no valid metadata.tier fallback:', priceId, metaTier);
+          return; // still bail to avoid creating incorrect account
+        }
       }
 
       const userData: UserData = {
