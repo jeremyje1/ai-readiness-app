@@ -20,12 +20,32 @@ create index if not exists enterprise_algorithm_results_assessment_idx
 
 alter table public.enterprise_algorithm_results enable row level security;
 
-create policy if not exists "service-role-full-access" on public.enterprise_algorithm_results
-  for all using (auth.role() = 'service_role') with check (auth.role() = 'service_role');
+-- Create policies conditionally (CREATE POLICY does not support IF NOT EXISTS)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'enterprise_algorithm_results'
+      AND policyname = 'service-role-full-access'
+  ) THEN
+    EXECUTE 'CREATE POLICY "service-role-full-access" ON public.enterprise_algorithm_results FOR ALL USING (auth.role() = ''service_role'') WITH CHECK (auth.role() = ''service_role'')';
+  END IF;
+END
+$$;
 
--- Allow authenticated users to select rows matching their user_id
-create policy if not exists "select-own" on public.enterprise_algorithm_results
-  for select using (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'enterprise_algorithm_results'
+      AND policyname = 'select-own'
+  ) THEN
+    EXECUTE 'CREATE POLICY "select-own" ON public.enterprise_algorithm_results FOR SELECT USING (auth.uid() = user_id)';
+  END IF;
+END
+$$;
 
 -- Optional: allow authenticated users to read their own assessments if ownership linkage added
 -- create policy "select-own" on public.enterprise_algorithm_results

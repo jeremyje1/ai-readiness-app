@@ -191,6 +191,7 @@ export async function persistEnterpriseMetrics(assessmentId: string, result: Ent
     assessment_id: assessmentId,
     algorithm_version: result.meta?.version,
     computed_at: result.meta?.computedAt,
+  user_id: (result as any).meta?.userId || null,
     dsch: result.dsch,
     crf: result.crf,
     lei: result.lei,
@@ -201,7 +202,8 @@ export async function persistEnterpriseMetrics(assessmentId: string, result: Ent
   const { error } = await supabaseAdmin.from('enterprise_algorithm_results').insert(record);
   if (error) {
     console.error('[AlgorithmSuite] persist failed', error.message);
-    return { success: false, error: error.message };
+  const dup = /duplicate key value/i.test(error.message || '') ? 'DUPLICATE_RESULT' : undefined;
+  return { success: false, error: error.message, code: dup };
   }
   return { success: true, assessmentId, version: result.meta?.version };
 }

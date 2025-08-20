@@ -45,5 +45,7 @@ export interface EnterpriseAlgorithmResult {
     version: string;
     computedAt: string;
     responseCount: number;
+  // Optional user linkage (used for persistence & RLS ownership)
+  userId?: string;
   };
 }
