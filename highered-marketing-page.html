@@ -54,7 +54,7 @@
     .btn-outline:hover { background: rgba(255,255,255,0.12); }
     .tag { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); }
 
-    /* Nav */
+  /* Nav */
     nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); background: rgba(0,0,0,0.5); }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; }
     .brand { display: flex; align-items: center; gap: 0.75rem; }
@@ -62,8 +62,14 @@
     .brand span { font-weight: 700; font-size: 1.1rem; }
     .menu { display: flex; gap: 1rem; align-items: center; }
     .menu a { opacity: 0.95; }
-    .menu a:hover { color: var(--primary); }
+  .menu a:hover { color: var(--primary); }
+  .menu a.active { color: var(--primary); font-weight:600; }
     .menu-toggle { display: none; background: transparent; border: 0; color: var(--text); font-size: 1.25rem; }
+  .btn-login { font-size:0.85rem; font-weight:500; color:#fff; opacity:.9; }
+  .btn-login:hover { color: var(--primary); }
+  .learn-more { display:inline-flex; margin-top:0.5rem; font-size:0.8rem; letter-spacing:.25px; color: var(--primary); text-decoration:none; }
+  .learn-more:hover { text-decoration:underline; }
+  #wpadminbar { display:none !important; }
 
     /* Hero */
     .hero { position: relative; background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)), url('https://northpathstrategies.org/wp-content/uploads/2025/07/—Pngtree—intriguingly-dark-geometric-backdrop-perfect_11036843.jpg') center/cover no-repeat; }
@@ -144,7 +150,12 @@
       </a>
       <button class="menu-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Open menu">☰</button>
       <div id="nav-menu" class="menu" role="menubar">
-  <a role="menuitem" href="https://aiblueprint.k12aiblueprint.com/privacy/">Privacy</a>
+        <a role="menuitem" href="/services">Services</a>
+        <a role="menuitem" href="/contact">Contact</a>
+        <a role="menuitem" href="/privacy">Privacy</a>
+        <a role="menuitem" href="/terms">Terms</a>
+        <a role="menuitem" class="btn-login" href="/auth/login">Login</a>
+        <a role="menuitem" class="btn btn-primary" href="/start?billing=monthly">Start</a>
       </div>
     </div>
   </nav>
@@ -155,8 +166,8 @@
       <h1>Empowering Higher Education with Responsible AI</h1>
       <p class="muted">From readiness assessments to implementation roadmaps, Higher Ed AI Blueprint helps universities and colleges deploy AI safely and effectively using our patent-pending algorithm suite: AIRIX™, AIRS™, AICS™, AIMS™, AIPS™, and AIBS™.</p>
       <div class="cta-group" role="group" aria-label="Primary calls to action">
-  <a class="btn btn-primary" data-cta="start-monthly" href="https://aiblueprint.k12aiblueprint.com/start?billing=monthly&utm_source=he_main&utm_medium=hero_cta&utm_campaign=monthly_trial" rel="nofollow noopener">Start Monthly Plan - $995/month</a>
-  <a class="btn btn-outline" data-cta="start-yearly" href="https://aiblueprint.k12aiblueprint.com/start?billing=yearly&utm_source=he_main&utm_medium=hero_cta&utm_campaign=yearly_trial" rel="nofollow noopener">Save 17% - Annual Plan</a>
+  <a class="btn btn-primary" data-cta="start-monthly" href="/start?billing=monthly" rel="nofollow noopener">Start Monthly Plan - $995/month</a>
+  <a class="btn btn-outline" data-cta="start-yearly" href="/start?billing=yearly" rel="nofollow noopener">Save 17% - Annual Plan</a>
       </div>
       <p class="note" style="margin-top: 1rem; color: var(--muted); font-size: 0.875rem;">✨ 7-day free trial included • Cancel anytime • All 6 patent-pending algorithms</p>
     </div>
@@ -169,8 +180,8 @@
         <h3 id="institutional-title">Institutional Implementation</h3>
         <p class="muted">University-wide policies, faculty governance frameworks, research use guidance, and strategic roadmaps aligned to institutional review processes.</p>
         <div class="actions">
-          <a class="btn btn-primary" data-cta="institutional-start" href="https://aiblueprint.k12aiblueprint.com/start?billing=monthly&utm_source=he_main&utm_medium=card&utm_campaign=institutional_monthly" rel="nofollow noopener">Start Monthly Plan</a>
-          <a class="btn btn-outline" data-cta="institutional-pricing" href="https://aiblueprint.k12aiblueprint.com/start?billing=yearly&utm_source=he_main&utm_medium=card&utm_campaign=institutional_yearly" rel="nofollow noopener">Annual Plan (Save 17%)</a>
+          <a class="btn btn-primary" data-cta="institutional-start" href="/start?billing=monthly" rel="nofollow noopener">Start Monthly Plan</a>
+          <a class="btn btn-outline" data-cta="institutional-pricing" href="/start?billing=yearly" rel="nofollow noopener">Annual Plan (Save 17%)</a>
         </div>
         <p class="note">Monthly $995 subscription includes all services and features. 7‑day free trial, cancel anytime.</p>
       </article>
@@ -179,8 +190,8 @@
         <h3 id="academic-title">Academic Excellence Tools</h3>
         <p class="muted">Faculty development modules, pedagogical AI integration guides, student learning analytics, and research collaboration frameworks.</p>
         <div class="actions">
-          <a class="btn btn-primary" data-cta="academic-start" href="https://aiblueprint.k12aiblueprint.com/start?billing=monthly&utm_source=he_main&utm_medium=card&utm_campaign=academic_monthly" rel="nofollow noopener">Start Monthly Plan</a>
-          <a class="btn btn-outline" data-cta="academic-pricing" href="https://aiblueprint.k12aiblueprint.com/start?billing=yearly&utm_source=he_main&utm_medium=card&utm_campaign=academic_yearly" rel="nofollow noopener">Annual Plan (Save 17%)</a>
+          <a class="btn btn-primary" data-cta="academic-start" href="/start?billing=monthly" rel="nofollow noopener">Start Monthly Plan</a>
+          <a class="btn btn-outline" data-cta="academic-pricing" href="/start?billing=yearly" rel="nofollow noopener">Annual Plan (Save 17%)</a>
         </div>
         <p class="note">Monthly $995 subscription includes all services and features. Enterprise partnerships available.</p>
       </article>
@@ -223,14 +234,17 @@
       <article class="card">
         <h3>Higher Ed AI Readiness Assessments</h3>
         <p class="muted">Pinpoint strengths and gaps across institutional governance, research data systems, academic programs, and campus technology infrastructure.</p>
+  <p><a class="learn-more" href="/services/ai-readiness-assessment" aria-label="Learn more about AI Readiness Assessments">Learn more →</a></p>
       </article>
       <article class="card">
         <h3>University Implementation Blueprints</h3>
         <p class="muted">Policy templates, faculty development plans, and change‑management playbooks specifically designed for higher education environments.</p>
+  <p><a class="learn-more" href="/services/implementation-blueprints" aria-label="Learn more about Implementation Blueprints">Learn more →</a></p>
       </article>
       <article class="card">
         <h3>Faculty Professional Development</h3>
         <p class="muted">On‑site workshops and self‑paced modules for university leadership, department chairs, and faculty.</p>
+  <p><a class="learn-more" href="/services/professional-development" aria-label="Learn more about Professional Development">Learn more →</a></p>
       </article>
     </div>
   </section>
@@ -259,7 +273,7 @@
       Start your higher education AI journey with AI Blueprint. Get instant access with your 7-day free trial, then continue with full access at $995/month—no sales call required.
     </p>
     <div class="cta-group">
-  <a class="btn btn-primary" data-cta="impl-main" href="https://aiblueprint.k12aiblueprint.com/start?billing=monthly&utm_source=he_main&utm_medium=cta&utm_campaign=main_trial" rel="nofollow noopener">Start Free Trial</a>
+  <a class="btn btn-primary" data-cta="impl-main" href="/start?billing=monthly" rel="nofollow noopener">Start Free Trial</a>
   <a class="btn btn-outline" data-cta="contact-footer" href="/contact">Contact</a>
     </div>
   </section>
@@ -269,8 +283,8 @@
     <div class="container inner">
       <span>Try Higher Ed AI Blueprint</span>
       <div class="cta-group">
-  <a class="btn btn-primary" href="https://aiblueprint.k12aiblueprint.com/start?billing=monthly&utm_source=he_main&utm_medium=sticky&utm_campaign=university_trial" rel="nofollow noopener">Start Trial</a>
-  <a class="btn btn-outline" href="https://aiblueprint.k12aiblueprint.com/start?billing=yearly&utm_source=he_main&utm_medium=sticky&utm_campaign=university_yearly" rel="nofollow noopener">Save 17%</a>
+  <a class="btn btn-primary" href="/start?billing=monthly" rel="nofollow noopener">Start Trial</a>
+  <a class="btn btn-outline" href="/start?billing=yearly" rel="nofollow noopener">Save 17%</a>
       </div>
     </div>
   </div>
