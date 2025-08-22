@@ -197,7 +197,23 @@ export default function AIReadinessDashboard() {
             {debugMode && (
               <pre className="text-left text-xs bg-white/70 p-3 rounded border overflow-auto max-h-40">
                 {JSON.stringify({ debugInfo, search: searchParams.toString() }, null, 2)}
+                {(() => {
+                  try {
+                    const token = (debugInfo?.client?.accessTokenPreview && verification.isVerified === false) ? 'hidden-for-security' : null;
+                  } catch(_) {}
+                  return null;
+                })()}
               </pre>
+            )}
+            {debugMode && debugInfo?.client?.accessTokenPreview && (
+              <div className="text-[10px] text-gray-600 mt-2 break-all">
+                <strong>Direct API (token param) test:</strong>{' '}
+                <a
+                  className="underline text-blue-600"
+                  href={`/api/payments/status?debug=1&token=${encodeURIComponent((debugInfo as any)?.client?.accessTokenPreview?.includes('…') ? '' : '')}`}
+                  onClick={(e) => { e.preventDefault(); alert('Open console and use fetch(\'/api/payments/status?debug=1&token=ACCESS_TOKEN\') with the real token. For security the direct link omits the full token.'); }}
+                >Instructions</a>
+              </div>
             )}
           </div>
         </Card>
