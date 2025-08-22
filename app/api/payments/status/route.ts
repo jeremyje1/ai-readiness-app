@@ -191,7 +191,12 @@ export async function GET(request: Request) {
   debug.queryClientType = supabaseAdmin ? 'service-role' : authedClient ? 'authed-access-token' : 'anon';
 
   // Allow including test payments for specific tester emails or if exclusion disabled.
-  const excludeTest = process.env.EXCLUDE_TEST_PAYMENTS === 'true';
+  const includeTestOverride = url.searchParams.get('includeTest') === '1';
+  const excludeTestEnv = process.env.EXCLUDE_TEST_PAYMENTS === 'true';
+  const excludeTest = excludeTestEnv && !includeTestOverride;
+  debug.excludeTestEnv = excludeTestEnv;
+  debug.includeTestOverride = includeTestOverride;
+  debug.excludeTestActive = excludeTest;
   const baseUserQuery = queryClient
     .from('user_payments')
     .select('*')
@@ -205,6 +210,7 @@ export async function GET(request: Request) {
   if (byUserErr) {
     debug.byUserErr = byUserErr.message;
   }
+  if (byUser) debug.byUserCount = byUser.length;
 
   let row = byUser?.[0];
   let claimed = false;
@@ -223,6 +229,7 @@ export async function GET(request: Request) {
     if (byEmailErr) {
       debug.byEmailErr = byEmailErr.message;
     }
+    if (byEmail) debug.byEmailCount = byEmail.length;
     if (byEmail && byEmail.length === 1) {
       row = byEmail[0];
       // Attempt claim if user_id is null
