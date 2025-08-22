@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '../../../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 // Unified payment status endpoint.
 // - Authenticates user via Supabase session cookie.
@@ -174,7 +175,20 @@ export async function GET(request: Request) {
   }
 
   // 1. Primary lookup by user_id
-  const queryClient = accessToken && supabaseAdmin ? supabaseAdmin : supabase; // if token fallback used, prefer admin to ensure RLS context (we already validated token)
+  // Build a per-request authed client when we have an access token but no service role
+  let authedClient: any = null;
+  if (accessToken && !supabaseAdmin) {
+    try {
+      authedClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+        global: { headers: { Authorization: `Bearer ${accessToken}` } }
+      });
+      debug.createdAuthedClient = true;
+    } catch (e:any) {
+      debug.authedClientError = e.message;
+    }
+  }
+  const queryClient = accessToken && (supabaseAdmin || authedClient) ? (supabaseAdmin || authedClient) : supabase;
+  debug.queryClientType = supabaseAdmin ? 'service-role' : authedClient ? 'authed-access-token' : 'anon';
 
   // Allow including test payments for specific tester emails or if exclusion disabled.
   const excludeTest = process.env.EXCLUDE_TEST_PAYMENTS === 'true';
