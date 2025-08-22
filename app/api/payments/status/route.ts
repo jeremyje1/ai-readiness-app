@@ -77,12 +77,38 @@ export async function GET(request: Request) {
         hasCookie: Boolean(request.headers.get('cookie'))
       }
     };
+    // Admin bypass for diagnostics: ?email=...&admin_debug=1 with x-admin-token header
+    const adminDebug = url.searchParams.get('admin_debug') === '1';
+    const emailParam = url.searchParams.get('email');
+    if (adminDebug && emailParam && process.env.ADMIN_GRANT_TOKEN && request.headers.get('x-admin-token') === process.env.ADMIN_GRANT_TOKEN && supabaseAdmin) {
+      const { data: rows, error: adminErr } = await supabaseAdmin
+        .from('user_payments')
+        .select('*')
+        .eq('email', emailParam.toLowerCase())
+        .eq('access_granted', true)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (adminErr) {
+        return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: { ...debugUnauth, adminBypassTried: true, adminErr: adminErr.message } }, { status: 401 });
+      }
+      if (rows && rows.length === 1) {
+        return NextResponse.json({ isVerified: true, tier: rows[0].tier, email: rows[0].email, name: rows[0].name, organization: rows[0].organization, rowId: rows[0].id, debug: { phase: 'verified-admin-bypass', note: 'Bypassed normal auth for diagnostics', originalAuthIssue: debugUnauth } });
+      }
+      return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: { ...debugUnauth, adminBypassTried: true, adminFound: 0 } }, { status: 401 });
+    }
     return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: debugUnauth } as PaymentStatusResponse, { status: 401 });
   }
 
   const userId = session.user.id;
   const userEmail = session.user.email?.toLowerCase() || null;
   const debug: any = { phase: 'start', userId, userEmail, tokenFallback: Boolean(accessToken), sessionError: sessionError?.message };
+  if (accessToken) {
+    debug.accessTokenPreview = accessToken.length > 20 ? accessToken.slice(0, 12) + '...' + accessToken.slice(-8) : accessToken;
+    debug.accessTokenLength = accessToken.length;
+    if (accessToken === 'undefined' || accessToken === 'null' || accessToken.trim() === '') {
+      debug.tokenValueInvalid = true;
+    }
+  }
 
   // 1. Primary lookup by user_id
   const queryClient = accessToken && supabaseAdmin ? supabaseAdmin : supabase; // if token fallback used, prefer admin to ensure RLS context (we already validated token)
