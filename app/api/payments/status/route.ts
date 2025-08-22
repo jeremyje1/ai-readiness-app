@@ -26,12 +26,26 @@ export async function GET(request: Request) {
   let { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
   let accessToken: string | null = null;
+  // Try extracting sb-access-token cookie if Supabase client not yet initialized server-side
+  if (!session) {
+    const rawCookies = request.headers.get('cookie') || '';
+    if (rawCookies) {
+      for (const part of rawCookies.split(/;\s*/)) {
+        const [k, v] = part.split('=');
+        if (k === 'sb-access-token' && v) {
+          accessToken = decodeURIComponent(v);
+          break;
+        }
+      }
+    }
+  }
   if (!session) {
     // Fallback: Authorization: Bearer <token>
     const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    if (!accessToken && authHeader && authHeader.startsWith('Bearer ')) {
       accessToken = authHeader.slice(7).trim();
-    } else {
+    }
+    if (!accessToken) {
       // Also support x-supabase-access-token (client convenience)
       accessToken = request.headers.get('x-supabase-access-token');
     }
@@ -47,12 +61,14 @@ export async function GET(request: Request) {
   }
 
   if (!session?.user) {
-    return NextResponse.json({ isVerified: false, error: 'not_authenticated' } as PaymentStatusResponse, { status: 401 });
+    return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: { phase: 'auth-missing', hint: 'No Supabase session cookie or bearer token detected', headers: {
+      hasAuth: Boolean(request.headers.get('authorization') || request.headers.get('Authorization')), hasCookie: Boolean(request.headers.get('cookie'))
+    } } } as PaymentStatusResponse, { status: 401 });
   }
 
   const userId = session.user.id;
   const userEmail = session.user.email?.toLowerCase() || null;
-  const debug: any = { phase: 'start', userId, userEmail, tokenFallback: Boolean(accessToken) };
+  const debug: any = { phase: 'start', userId, userEmail, tokenFallback: Boolean(accessToken), sessionError: sessionError?.message };
 
   // 1. Primary lookup by user_id
   const queryClient = accessToken && supabaseAdmin ? supabaseAdmin : supabase; // if token fallback used, prefer admin to ensure RLS context (we already validated token)
