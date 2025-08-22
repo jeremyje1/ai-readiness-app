@@ -21,14 +21,26 @@ interface PaymentStatusResponse {
   debug?: any;
 }
 
+// Build timestamp for this route (helps verify deployment freshness)
+const ROUTE_BUILD_TIME = new Date().toISOString();
+
 export async function GET(request: Request) {
   // Attempt normal session retrieval first (works if using helpers that set cookies).
   let { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
+  const url = new URL(request.url);
+  const debugParam = url.searchParams.get('debug') === '1';
+  const debugAlways = process.env.DEBUG_ALWAYS === 'true';
+  const debugAggregate: any = {
+    route: '/api/payments/status',
+    buildTime: ROUTE_BUILD_TIME,
+    debugParam,
+    envSupabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  };
+
   let accessToken: string | null = null;
   // Try extracting sb-access-token cookie if Supabase client not yet initialized server-side
   // Extract query params for optional token pass-through (diagnostic / fallback when direct browser nav can't set auth header)
-  const url = new URL(request.url);
   const qpToken = url.searchParams.get('token') || url.searchParams.get('access_token');
   if (qpToken) {
     accessToken = qpToken;
@@ -94,7 +106,8 @@ export async function GET(request: Request) {
         } catch (_) {}
         // Provide richer diagnostics when Supabase rejects the provided token
         const debugAuthErr = {
-          phase: 'auth-error-getUser',
+          phase: 'auth-error-get-user',
+          phaseCanonical: 'auth-error-get-user',
           suppliedAccessToken: true,
           accessTokenPreview: accessToken.length > 16 ? accessToken.slice(0, 8) + '...' + accessToken.slice(-6) : accessToken,
             accessTokenLength: accessToken.length,
@@ -108,7 +121,7 @@ export async function GET(request: Request) {
           projectRefMismatch: jwtInfo.projectRefFromIss && envProjectRef && jwtInfo.projectRefFromIss !== envProjectRef,
           hint: 'Token rejected by Supabase. If accessTokenLength is very small or tokenLooksPlaceholder=true, client is passing an uninitialized value.'
         };
-        return NextResponse.json({ isVerified: false, error: 'auth_error', message: userErr.message, debug: debugAuthErr } as PaymentStatusResponse, { status: 401 });
+        return NextResponse.json({ isVerified: false, error: 'auth_error', message: userErr.message, debug: { ...debugAggregate, ...debugAuthErr } } as PaymentStatusResponse, { status: 401 });
       }
       if (userResult?.user) {
         session = { user: userResult.user, access_token: accessToken, token_type: 'bearer', expires_in: 0, expires_at: 0, refresh_token: '' } as any;
@@ -118,6 +131,7 @@ export async function GET(request: Request) {
 
   if (!session?.user) {
     const debugUnauth = {
+      ...debugAggregate,
       phase: 'auth-missing',
       hint: 'No Supabase session / bearer token; supply Authorization header or ?token=... param',
       sawQueryParamToken: Boolean(qpToken),
@@ -140,8 +154,8 @@ export async function GET(request: Request) {
       if (adminErr) {
         return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: { ...debugUnauth, adminBypassTried: true, adminErr: adminErr.message } }, { status: 401 });
       }
-      if (rows && rows.length === 1) {
-        return NextResponse.json({ isVerified: true, tier: rows[0].tier, email: rows[0].email, name: rows[0].name, organization: rows[0].organization, rowId: rows[0].id, debug: { phase: 'verified-admin-bypass', note: 'Bypassed normal auth for diagnostics', originalAuthIssue: debugUnauth } });
+  if (rows && rows.length === 1) {
+    return NextResponse.json({ isVerified: true, tier: rows[0].tier, email: rows[0].email, name: rows[0].name, organization: rows[0].organization, rowId: rows[0].id, debug: { ...debugAggregate, phase: 'verified-admin-bypass', note: 'Bypassed normal auth for diagnostics', originalAuthIssue: debugUnauth } });
       }
       return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: { ...debugUnauth, adminBypassTried: true, adminFound: 0 } }, { status: 401 });
     }
@@ -150,7 +164,7 @@ export async function GET(request: Request) {
 
   const userId = session.user.id;
   const userEmail = session.user.email?.toLowerCase() || null;
-  const debug: any = { phase: 'start', userId, userEmail, tokenFallback: Boolean(accessToken), sessionError: sessionError?.message };
+  const debug: any = { ...debugAggregate, phase: 'start', userId, userEmail, tokenFallback: Boolean(accessToken), sessionError: sessionError?.message };
   if (accessToken) {
     debug.accessTokenPreview = accessToken.length > 20 ? accessToken.slice(0, 12) + '...' + accessToken.slice(-8) : accessToken;
     debug.accessTokenLength = accessToken.length;
@@ -214,8 +228,8 @@ export async function GET(request: Request) {
   }
 
   if (!row) {
-    debug.phase = 'not-found';
-    return NextResponse.json({ isVerified: false, debug } as PaymentStatusResponse, { status: 404 });
+  debug.phase = 'not-found';
+  return NextResponse.json({ isVerified: false, debug } as PaymentStatusResponse, { status: 404 });
   }
 
   debug.phase = 'verified';
@@ -228,7 +242,7 @@ export async function GET(request: Request) {
     name: row.name,
     organization: row.organization,
     rowId: row.id,
-    debug
+    debug: debugParam || debugAlways ? debug : undefined
   };
 
   return NextResponse.json(payload);

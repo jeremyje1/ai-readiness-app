@@ -44,20 +44,55 @@ export default function AIReadinessDashboard() {
         return;
       }
       const accessToken = session.access_token;
-      // Call unified status endpoint with bearer token
-  const statusEndpoint = '/api/payments/status';
+      // Prepare client-side debug details (does not expose full secrets)
+      const clientDebug: any = debugMode ? {
+        clientPhase: 'have-session',
+        sessionUserId: session.user.id,
+        sessionEmail: session.user.email,
+        accessTokenLength: accessToken?.length,
+        accessTokenPreview: accessToken ? (accessToken.length > 24 ? accessToken.slice(0,12)+'…'+accessToken.slice(-8) : accessToken) : null,
+      } : null;
+      if (debugMode && accessToken) {
+        try {
+          const [h,p] = accessToken.split('.');
+          if (p) {
+            const json = JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/')));
+            clientDebug.jwt = {
+              iss: json.iss,
+              aud: json.aud,
+              subPresent: Boolean(json.sub),
+              exp: json.exp,
+              expInFuture: typeof json.exp==='number' ? (json.exp*1000 > Date.now()) : undefined,
+              projectRefFromIss: typeof json.iss === 'string' ? json.iss.split('//')[1]?.split('.')[0] : undefined
+            };
+            try {
+              const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+              if (envUrl) {
+                const host = new URL(envUrl).host;
+                const envProjectRef = host.split('.supabase.co')[0];
+                clientDebug.envProjectRef = envProjectRef;
+                clientDebug.projectRefMismatch = clientDebug.jwt.projectRefFromIss && envProjectRef && clientDebug.jwt.projectRefFromIss !== envProjectRef;
+              }
+            } catch(_){}
+          }
+        } catch (e) {
+          clientDebug.jwtDecodeError = true;
+        }
+      }
+    // Call unified status endpoint with bearer token (propagate debug flag)
+  const statusEndpoint = debugMode ? '/api/payments/status?debug=1' : '/api/payments/status';
   let res = await fetch(statusEndpoint, {
         headers: { Authorization: `Bearer ${accessToken}` },
         cache: 'no-store'
       });
       let json = await res.json();
-      if (debugMode) setDebugInfo(json.debug || json);
+      if (debugMode) setDebugInfo({ server: json.debug || json, client: clientDebug });
 
       // Fallback: some proxies / static hosts may strip Authorization.
       if ((!res.ok && json?.error === 'not_authenticated') || (!json.isVerified && json?.error === 'not_authenticated')) {
         const fallback = await fetch(`/api/payments/status?token=${encodeURIComponent(accessToken)}&debug=1`, { cache: 'no-store' });
         const fallbackJson = await fallback.json();
-        if (debugMode) setDebugInfo({ primary: json, fallback: fallbackJson });
+  if (debugMode) setDebugInfo({ server: { primary: json, fallback: fallbackJson }, client: clientDebug });
         if (fallback.ok && fallbackJson.isVerified) {
           json = fallbackJson;
           res = fallback; // treat as success
