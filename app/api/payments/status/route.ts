@@ -27,6 +27,13 @@ export async function GET(request: Request) {
 
   let accessToken: string | null = null;
   // Try extracting sb-access-token cookie if Supabase client not yet initialized server-side
+  // Extract query params for optional token pass-through (diagnostic / fallback when direct browser nav can't set auth header)
+  const url = new URL(request.url);
+  const qpToken = url.searchParams.get('token') || url.searchParams.get('access_token');
+  if (qpToken) {
+    accessToken = qpToken;
+  }
+
   if (!session) {
     const rawCookies = request.headers.get('cookie') || '';
     if (rawCookies) {
@@ -61,9 +68,16 @@ export async function GET(request: Request) {
   }
 
   if (!session?.user) {
-    return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: { phase: 'auth-missing', hint: 'No Supabase session cookie or bearer token detected', headers: {
-      hasAuth: Boolean(request.headers.get('authorization') || request.headers.get('Authorization')), hasCookie: Boolean(request.headers.get('cookie'))
-    } } } as PaymentStatusResponse, { status: 401 });
+    const debugUnauth = {
+      phase: 'auth-missing',
+      hint: 'No Supabase session / bearer token; supply Authorization header or ?token=... param',
+      sawQueryParamToken: Boolean(qpToken),
+      headers: {
+        hasAuth: Boolean(request.headers.get('authorization') || request.headers.get('Authorization')),
+        hasCookie: Boolean(request.headers.get('cookie'))
+      }
+    };
+    return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: debugUnauth } as PaymentStatusResponse, { status: 401 });
   }
 
   const userId = session.user.id;
