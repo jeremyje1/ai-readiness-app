@@ -57,6 +57,13 @@ export async function GET(request: Request) {
       accessToken = request.headers.get('x-supabase-access-token');
     }
     if (accessToken) {
+      // Heuristic: Supabase refresh tokens are significantly longer (>800 chars). If we detect one, refresh first.
+      if (accessToken.length > 800) {
+        const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession({ refresh_token: accessToken });
+        if (!refreshErr && refreshed?.session?.access_token) {
+          accessToken = refreshed.session.access_token;
+        }
+      }
       const { data: userResult, error: userErr } = await supabase.auth.getUser(accessToken);
       if (userErr) {
         // Provide richer diagnostics when Supabase rejects the provided token
@@ -69,6 +76,7 @@ export async function GET(request: Request) {
           qpTokenPresent: Boolean(qpToken),
           hadAuthHeader: Boolean(request.headers.get('authorization') || request.headers.get('Authorization')),
           hadCookie: Boolean(request.headers.get('cookie')),
+          attemptedRefresh: accessToken.length <= 800 ? false : true,
           hint: 'Token rejected by Supabase. If accessTokenLength is very small or tokenLooksPlaceholder=true, client is passing an uninitialized value.'
         };
         return NextResponse.json({ isVerified: false, error: 'auth_error', message: userErr.message, debug: debugAuthErr } as PaymentStatusResponse, { status: 401 });
