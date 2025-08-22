@@ -43,7 +43,7 @@ export default function AIReadinessDashboard() {
         router.push('/ai-readiness');
         return;
       }
-      const accessToken = session.access_token;
+  const accessToken = session.access_token;
       // Prepare client-side debug details (does not expose full secrets)
       const clientDebug: any = debugMode ? {
         clientPhase: 'have-session',
@@ -79,23 +79,43 @@ export default function AIReadinessDashboard() {
           clientDebug.jwtDecodeError = true;
         }
       }
-    // Call unified status endpoint with bearer token (propagate debug flag)
-  const statusEndpoint = debugMode ? '/api/payments/status?debug=1' : '/api/payments/status';
-  let res = await fetch(statusEndpoint, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      // Call unified status endpoint with bearer token (propagate debug flag)
+      const statusEndpoint = debugMode ? '/api/payments/status?debug=1' : '/api/payments/status';
+      console.log('[verifyPaymentAccess] sending Authorization header?', Boolean(accessToken));
+      let res = await fetch(statusEndpoint, {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
         cache: 'no-store'
       });
-      let json = await res.json();
+      let json: any = {};
+      try { json = await res.json(); } catch (e) { json = { parseError: true }; }
+      if (debugMode) clientDebug.primaryFetch = { ok: res.ok, status: res.status, url: statusEndpoint, hadAuthHeader: Boolean(accessToken) };
       if (debugMode) setDebugInfo({ server: json.debug || json, client: clientDebug });
 
       // Fallback: some proxies / static hosts may strip Authorization.
       if ((!res.ok && json?.error === 'not_authenticated') || (!json.isVerified && json?.error === 'not_authenticated')) {
-        const fallback = await fetch(`/api/payments/status?token=${encodeURIComponent(accessToken)}&debug=1`, { cache: 'no-store' });
+        const tokenParamUrl = `/api/payments/status?token=${encodeURIComponent(accessToken)}&debug=1&origin=fallback`;
+        const fallback = await fetch(tokenParamUrl, { cache: 'no-store' });
         const fallbackJson = await fallback.json();
-  if (debugMode) setDebugInfo({ server: { primary: json, fallback: fallbackJson }, client: clientDebug });
+        if (debugMode) clientDebug.fallbackFetch = { ok: fallback.ok, status: fallback.status, url: tokenParamUrl };
+        if (debugMode) setDebugInfo({ server: { primary: json, fallback: fallbackJson }, client: clientDebug });
         if (fallback.ok && fallbackJson.isVerified) {
           json = fallbackJson;
           res = fallback; // treat as success
+        }
+      }
+
+      // Extra echo test (debug mode) to see what headers arrive server-side
+      if (debugMode) {
+        try {
+          const echoRes = await fetch(`/api/debug/echo?ts=${Date.now()}`, {
+            headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+            cache: 'no-store'
+          });
+          const echoJson = await echoRes.json();
+          clientDebug.echo = echoJson;
+          setDebugInfo((prev: any) => ({ ...(prev || {}), client: clientDebug }));
+        } catch (e) {
+          clientDebug.echoError = (e as Error).message;
         }
       }
 
