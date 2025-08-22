@@ -11,8 +11,8 @@ export default function PrivacyPolicyPage() {
       <p>To provide assessments, analytics, reports and support communications.</p>
       <h2>Data Security</h2>
       <p>We implement safeguards aligned with industry best practices to protect data.</p>
-      <h2>Contact</h2>
-      <p>For privacy inquiries contact <a href="mailto:info@northpathstrategies.org">info@northpathstrategies.org</a>.</p>
+  <h2>Contact</h2>
+  <p>For privacy inquiries please <a href="/contact">contact us through the secure form</a>. You may also reply to any system email you have received.</p>
     </div>
   );
 }
