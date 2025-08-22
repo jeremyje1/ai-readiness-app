@@ -59,7 +59,19 @@ export async function GET(request: Request) {
     if (accessToken) {
       const { data: userResult, error: userErr } = await supabase.auth.getUser(accessToken);
       if (userErr) {
-        return NextResponse.json({ isVerified: false, error: 'auth_error', message: userErr.message } as PaymentStatusResponse, { status: 401 });
+        // Provide richer diagnostics when Supabase rejects the provided token
+        const debugAuthErr = {
+          phase: 'auth-error-getUser',
+          suppliedAccessToken: true,
+          accessTokenPreview: accessToken.length > 16 ? accessToken.slice(0, 8) + '...' + accessToken.slice(-6) : accessToken,
+            accessTokenLength: accessToken.length,
+          tokenLooksPlaceholder: ['undefined','null',''].includes(accessToken.trim()),
+          qpTokenPresent: Boolean(qpToken),
+          hadAuthHeader: Boolean(request.headers.get('authorization') || request.headers.get('Authorization')),
+          hadCookie: Boolean(request.headers.get('cookie')),
+          hint: 'Token rejected by Supabase. If accessTokenLength is very small or tokenLooksPlaceholder=true, client is passing an uninitialized value.'
+        };
+        return NextResponse.json({ isVerified: false, error: 'auth_error', message: userErr.message, debug: debugAuthErr } as PaymentStatusResponse, { status: 401 });
       }
       if (userResult?.user) {
         session = { user: userResult.user, access_token: accessToken, token_type: 'bearer', expires_in: 0, expires_at: 0, refresh_token: '' } as any;
