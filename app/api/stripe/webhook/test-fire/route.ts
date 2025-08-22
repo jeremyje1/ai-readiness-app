@@ -18,6 +18,9 @@ const PRICES: Record<string, number> = {
 interface Body { email: string; tier: string; name?: string; organization?: string; }
 
 export async function POST(req: NextRequest) {
+  if (process.env.ADMIN_DEBUG_ENDPOINTS_ENABLED !== 'true') {
+    return NextResponse.json({ error: 'disabled' }, { status: 404 });
+  }
   const auth = req.headers.get('authorization') || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : null;
   if (!token || token !== process.env.ADMIN_GRANT_TOKEN) {
@@ -74,3 +77,4 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() { return NextResponse.json({ service: 'stripe-webhook-test-fire', ok: true }); }
+export const dynamic = 'force-dynamic';

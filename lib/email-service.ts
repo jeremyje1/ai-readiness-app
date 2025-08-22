@@ -220,7 +220,7 @@ class EmailService {
             AI Transformation Specialists</p>
         </div>
         <div class="footer">
-            <p><strong>Need help?</strong> Reply to this email or contact us at <a href="mailto:info@northpathstrategies.org">info@northpathstrategies.org</a></p>
+            <p><strong>Need help?</strong> Reply to this email or visit <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com'}/contact">our contact page</a>.</p>
             <p>This email was sent regarding your AI Blueprint assessment for ${institutionName}</p>
         </div>
     </div>
@@ -415,7 +415,7 @@ class EmailService {
             <strong>The ${brandedTitle} Team</strong></p>
         </div>
         <div class="footer">
-            <p><strong>Need help?</strong> Contact us at <a href="mailto:info@northpathstrategies.org">info@northpathstrategies.org</a></p>
+            <p><strong>Need help?</strong> Visit <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com'}/contact">our contact page</a> or reply to this email.</p>
             <p>AI Blueprint by NorthPath Strategies</p>
         </div>
     </div>

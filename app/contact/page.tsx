@@ -1,14 +1,16 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', organization: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', organization: '', message: '', company_website: '' });
   const [status, setStatus] = useState<string|null>(null);
   const [error, setError] = useState<string|null>(null);
   const [loading, setLoading] = useState(false);
+  const errorRef = useRef<HTMLParagraphElement|null>(null);
+  const successRef = useRef<HTMLParagraphElement|null>(null);
 
   const update = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,11 +24,16 @@ export default function ContactPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Submission failed');
       setStatus('Message sent. We will follow up shortly.');
-      setForm({ name: '', email: '', organization: '', message: '' });
+      setForm({ name: '', email: '', organization: '', message: '', company_website: '' });
     } catch (e:any) {
       setError(e.message);
     } finally { setLoading(false); }
   };
+
+  useEffect(()=>{
+    if (error && errorRef.current) errorRef.current.focus();
+    if (status && successRef.current) successRef.current.focus();
+  },[error,status]);
 
   const disabled = !form.name || !form.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email) || !form.message;
 
@@ -38,11 +45,11 @@ export default function ContactPage() {
         <form onSubmit={submit} className='space-y-5'>
           <div>
             <label className='block text-sm font-medium mb-1'>Name *</label>
-            <Input name='name' value={form.name} onChange={update} required />
+            <Input name='name' aria-required='true' aria-invalid={!form.name ? 'true':'false'} value={form.name} onChange={update} required />
           </div>
           <div>
             <label className='block text-sm font-medium mb-1'>Email *</label>
-            <Input type='email' name='email' value={form.email} onChange={update} required />
+            <Input type='email' name='email' aria-required='true' aria-invalid={form.email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email) ? 'false':'true'} value={form.email} onChange={update} required />
           </div>
             <div>
             <label className='block text-sm font-medium mb-1'>Organization (optional)</label>
@@ -50,10 +57,15 @@ export default function ContactPage() {
           </div>
           <div>
             <label className='block text-sm font-medium mb-1'>Message *</label>
-            <Textarea name='message' value={form.message} onChange={update} rows={5} required />
+            <Textarea name='message' aria-required='true' aria-invalid={!form.message ? 'true':'false'} value={form.message} onChange={update} rows={5} required />
           </div>
-          {error && <p className='text-sm text-red-600'>{error}</p>}
-          {status && <p className='text-sm text-green-600'>{status}</p>}
+          {/* Honeypot field (hidden from users) */}
+          <div className='hidden'>
+            <label>Company Website (leave blank)</label>
+            <input type='text' name='company_website' value={form.company_website} onChange={update} tabIndex={-1} autoComplete='off' />
+          </div>
+          {error && <p ref={errorRef} tabIndex={-1} className='text-sm text-red-600'>{error}</p>}
+          {status && <p ref={successRef} tabIndex={-1} className='text-sm text-green-600'>{status}</p>}
           <Button type='submit' disabled={disabled || loading} className='w-full'>
             {loading ? 'Sending...' : 'Send Message'}
           </Button>

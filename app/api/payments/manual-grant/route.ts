@@ -15,6 +15,9 @@ interface GrantBody {
 }
 
 export async function POST(req: NextRequest) {
+  if (process.env.ADMIN_DEBUG_ENDPOINTS_ENABLED !== 'true') {
+    return NextResponse.json({ error: 'disabled' }, { status: 404 });
+  }
   if (!supabaseAdmin) {
     return NextResponse.json({ error: 'admin_client_unavailable' }, { status: 500 });
   }
@@ -91,5 +94,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
+  if (process.env.ADMIN_DEBUG_ENDPOINTS_ENABLED !== 'true') {
+    return NextResponse.json({ error: 'disabled' }, { status: 404 });
+  }
   return NextResponse.json({ service: 'manual-grant', ok: true });
 }
