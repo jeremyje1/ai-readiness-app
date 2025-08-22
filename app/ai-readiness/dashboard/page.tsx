@@ -45,14 +45,24 @@ export default function AIReadinessDashboard() {
       }
       const accessToken = session.access_token;
       // Call unified status endpoint with bearer token
-      const res = await fetch('/api/payments/status', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        },
+      let res = await fetch('/api/payments/status', {
+        headers: { Authorization: `Bearer ${accessToken}` },
         cache: 'no-store'
       });
-      const json = await res.json();
+      let json = await res.json();
       if (debugMode) setDebugInfo(json.debug || json);
+
+      // Fallback: some proxies / static hosts may strip Authorization.
+      if ((!res.ok && json?.error === 'not_authenticated') || (!json.isVerified && json?.error === 'not_authenticated')) {
+        const fallback = await fetch(`/api/payments/status?token=${encodeURIComponent(accessToken)}&debug=1`, { cache: 'no-store' });
+        const fallbackJson = await fallback.json();
+        if (debugMode) setDebugInfo({ primary: json, fallback: fallbackJson });
+        if (fallback.ok && fallbackJson.isVerified) {
+          json = fallbackJson;
+          res = fallback; // treat as success
+        }
+      }
+
       if (!res.ok || !json.isVerified) {
         setVerification({ isVerified: false });
         setError('No valid payment found. If you just completed checkout, wait a few seconds and retry.');
