@@ -45,7 +45,8 @@ export default function AIReadinessDashboard() {
       }
       const accessToken = session.access_token;
       // Call unified status endpoint with bearer token
-      let res = await fetch('/api/payments/status', {
+  const statusEndpoint = '/api/payments/status';
+  let res = await fetch(statusEndpoint, {
         headers: { Authorization: `Bearer ${accessToken}` },
         cache: 'no-store'
       });
@@ -63,6 +64,9 @@ export default function AIReadinessDashboard() {
         }
       }
 
+      if ((!res.ok && res.status === 404) && debugMode) {
+        console.warn('Primary status endpoint returned 404. This may indicate a deployment lag or path mismatch.');
+      }
       if (!res.ok || !json.isVerified) {
         setVerification({ isVerified: false });
         setError('No valid payment found. If you just completed checkout, wait a few seconds and retry.');
