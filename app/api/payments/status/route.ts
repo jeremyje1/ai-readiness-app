@@ -66,6 +66,32 @@ export async function GET(request: Request) {
       }
       const { data: userResult, error: userErr } = await supabase.auth.getUser(accessToken);
       if (userErr) {
+        // Attempt to decode JWT issuer/project ref for mismatch diagnostics
+        let jwtInfo: any = {};
+        try {
+          const parts = accessToken.split('.');
+          if (parts.length >= 2) {
+            const b64 = (str: string) => Buffer.from(str.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+            const header = JSON.parse(b64(parts[0]));
+            const payload = JSON.parse(b64(parts[1]));
+            jwtInfo = {
+              headerAlg: header.alg,
+              headerTyp: header.typ,
+              iss: payload.iss,
+              aud: payload.aud,
+              subPresent: Boolean(payload.sub),
+              expInFuture: typeof payload.exp === 'number' ? (payload.exp * 1000 > Date.now()) : undefined,
+              projectRefFromIss: typeof payload.iss === 'string' ? payload.iss.split('//')[1]?.split('.')[0] : undefined
+            };
+          }
+        } catch (_) {
+          jwtInfo.decodeError = true;
+        }
+        let envProjectRef: string | undefined;
+        try {
+          const host = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '').host;
+          envProjectRef = host.split('.supabase.co')[0];
+        } catch (_) {}
         // Provide richer diagnostics when Supabase rejects the provided token
         const debugAuthErr = {
           phase: 'auth-error-getUser',
@@ -77,6 +103,9 @@ export async function GET(request: Request) {
           hadAuthHeader: Boolean(request.headers.get('authorization') || request.headers.get('Authorization')),
           hadCookie: Boolean(request.headers.get('cookie')),
           attemptedRefresh: accessToken.length <= 800 ? false : true,
+          jwt: jwtInfo,
+          envProjectRef,
+          projectRefMismatch: jwtInfo.projectRefFromIss && envProjectRef && jwtInfo.projectRefFromIss !== envProjectRef,
           hint: 'Token rejected by Supabase. If accessTokenLength is very small or tokenLooksPlaceholder=true, client is passing an uninitialized value.'
         };
         return NextResponse.json({ isVerified: false, error: 'auth_error', message: userErr.message, debug: debugAuthErr } as PaymentStatusResponse, { status: 401 });
