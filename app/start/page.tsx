@@ -34,6 +34,7 @@ function StartPageContent() {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string,string>>({});
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -42,30 +43,34 @@ function StartPageContent() {
     });
   };
   
+  const validate = () => {
+    const newErrors: Record<string,string> = {};
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formData.email)) newErrors.email = 'Enter a valid email address';
+    if (!formData.organization.trim()) newErrors.organization = 'Organization is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
     setIsSubmitting(true);
-    
     try {
-      // Create user account and proceed to checkout
       const response = await fetch('/api/user/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          billing
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, billing }),
       });
-      
       if (response.ok) {
-        // Proceed to unified checkout
         window.location.href = `/api/stripe/unified-checkout?billing=${billing}&tier=team&userId=${response.headers.get('user-id')}`;
       } else {
-        throw new Error('Registration failed');
+        const text = await response.text();
+        alert('Registration failed: ' + text);
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error('Registration error:', error);
       alert('Registration failed. Please try again.');
     } finally {
@@ -137,6 +142,7 @@ function StartPageContent() {
                       onChange={handleInputChange}
                       className="mt-1"
                     />
+                    {errors.firstName && <p className="text-xs text-red-600 mt-1">{errors.firstName}</p>}
                   </div>
                   <div>
                     <Label htmlFor="lastName">Last Name *</Label>
@@ -149,6 +155,7 @@ function StartPageContent() {
                       onChange={handleInputChange}
                       className="mt-1"
                     />
+                    {errors.lastName && <p className="text-xs text-red-600 mt-1">{errors.lastName}</p>}
                   </div>
                 </div>
 
@@ -163,6 +170,7 @@ function StartPageContent() {
                     onChange={handleInputChange}
                     className="mt-1"
                   />
+                  {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
                 </div>
 
                 <div>
@@ -176,10 +184,11 @@ function StartPageContent() {
                     onChange={handleInputChange}
                     className="mt-1"
                   />
+                  {errors.organization && <p className="text-xs text-red-600 mt-1">{errors.organization}</p>}
                 </div>
 
                 <div>
-                  <Label htmlFor="title">Job Title</Label>
+                  <Label htmlFor="title">Job Title <span className="text-gray-400 text-xs">(optional)</span></Label>
                   <Input
                     id="title"
                     name="title"
@@ -191,7 +200,7 @@ function StartPageContent() {
                 </div>
 
                 <div>
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">Phone Number <span className="text-gray-400 text-xs">(optional)</span></Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -227,7 +236,7 @@ function StartPageContent() {
               </form>
 
               <p className="text-xs text-gray-500 mt-4 text-center">
-                By creating an account, you agree to our Terms of Service and Privacy Policy.
+                By creating an account, you agree to our <a href="/terms" className="underline hover:text-gray-700">Terms of Service</a> and <a href="/privacy" className="underline hover:text-gray-700">Privacy Policy</a>.
               </p>
             </motion.div>
           </div>
