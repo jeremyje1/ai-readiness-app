@@ -57,12 +57,15 @@ export async function GET(request: Request) {
   // 1. Primary lookup by user_id
   const queryClient = accessToken && supabaseAdmin ? supabaseAdmin : supabase; // if token fallback used, prefer admin to ensure RLS context (we already validated token)
 
-  const { data: byUser, error: byUserErr } = await queryClient
+  // Allow including test payments for specific tester emails or if exclusion disabled.
+  const excludeTest = process.env.EXCLUDE_TEST_PAYMENTS === 'true';
+  const baseUserQuery = queryClient
     .from('user_payments')
     .select('*')
     .eq('user_id', userId)
-    .eq('access_granted', true)
-    .eq('is_test', false)
+    .eq('access_granted', true);
+  if (excludeTest) baseUserQuery.eq('is_test', false);
+  const { data: byUser, error: byUserErr } = await baseUserQuery
     .order('created_at', { ascending: false })
     .limit(1);
 
@@ -75,12 +78,13 @@ export async function GET(request: Request) {
 
   // 2. Fallback by email (RLS now reveals matching unclaimed row)
   if (!row && userEmail) {
-  const { data: byEmail, error: byEmailErr } = await queryClient
+    const baseEmailQuery = queryClient
       .from('user_payments')
       .select('*')
       .eq('email', userEmail)
-      .eq('access_granted', true)
-    .eq('is_test', false)
+      .eq('access_granted', true);
+    if (excludeTest) baseEmailQuery.eq('is_test', false);
+    const { data: byEmail, error: byEmailErr } = await baseEmailQuery
       .order('created_at', { ascending: false })
       .limit(1);
     if (byEmailErr) {
