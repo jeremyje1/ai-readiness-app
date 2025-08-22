@@ -28,7 +28,13 @@ export default function AuthNav() {
     <div className='w-full bg-white/70 backdrop-blur border-b border-gray-200 text-sm'>
       <div className='max-w-7xl mx-auto px-4 py-2 flex items-center justify-between'>
         <Link href='/' className='font-semibold text-gray-800'>AI Blueprint™</Link>
-        <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-5'>
+          <nav className='hidden md:flex items-center gap-4 text-gray-600'>
+            <Link href='/services' className='hover:text-gray-900'>Services</Link>
+            <Link href='/contact' className='hover:text-gray-900'>Contact</Link>
+            <Link href='/privacy' className='hover:text-gray-900'>Privacy</Link>
+            <Link href='/terms' className='hover:text-gray-900'>Terms</Link>
+          </nav>
           {!loading && userEmail && (
             <>
               <Link href='/ai-readiness/dashboard' className='text-gray-700 hover:text-black'>{userEmail}</Link>
