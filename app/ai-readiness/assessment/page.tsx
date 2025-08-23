@@ -177,11 +177,56 @@ export default function AIReadinessAssessmentPage() {
 
   const handleResponse = (questionId: string, value: number) => {
     console.log('🔄 Response updated:', { questionId, value });
-    setResponses(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
+    setResponses(prev => {
+      const updated = {
+        ...prev,
+        [questionId]: value
+      };
+      
+      // Immediate save to localStorage on every answer
+      if (assessmentId) {
+        const progressData = {
+          responses: updated,
+          currentIndex: currentQuestionIndex,
+          lastSaved: new Date().toISOString(),
+          tier,
+          questionCount: questions.length
+        };
+        localStorage.setItem(`assessment-progress-${assessmentId}`, JSON.stringify(progressData));
+        console.log('💾 Answer auto-saved immediately');
+      }
+      
+      return updated;
+    });
+    
+    // Also trigger async database save (non-blocking)
+    setTimeout(() => saveProgress(), 100);
   };
+
+  // Add beforeunload protection to save on page exit
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (assessmentId && Object.keys(responses).length > 0) {
+        // Final save attempt
+        const progressData = {
+          responses,
+          currentIndex: currentQuestionIndex,
+          lastSaved: new Date().toISOString(),
+          tier,
+          questionCount: questions.length
+        };
+        localStorage.setItem(`assessment-progress-${assessmentId}`, JSON.stringify(progressData));
+        
+        // Show warning for unsaved changes
+        e.preventDefault();
+        e.returnValue = 'Your progress has been saved. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [assessmentId, responses, currentQuestionIndex, tier, questions.length]);
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
@@ -265,22 +310,56 @@ export default function AIReadinessAssessmentPage() {
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
   const allQuestionsAnswered = Object.keys(responses).length === questions.length;
   
-  // Calculate section-based progress
-  const totalSections = [...new Set(questions.map(q => q.section))].length;
-  const currentSectionIndex = questions.findIndex(q => q.section === currentQuestion?.section);
-  const questionsInCurrentSection = questions.filter(q => q.section === currentQuestion?.section).length;
-  const currentPositionInSection = questions.slice(0, currentQuestionIndex + 1).filter(q => q.section === currentQuestion?.section).length;
+  // Enhanced section-based progress with time estimates
+  const sections = [...new Set(questions.map(q => q.section))];
+  const currentSectionName = currentQuestion?.section || '';
+  const currentSectionIndex = sections.indexOf(currentSectionName);
+  const questionsInCurrentSection = questions.filter(q => q.section === currentSectionName).length;
+  const answeredInCurrentSection = questions.slice(0, currentQuestionIndex + 1).filter(q => q.section === currentSectionName).length;
+  const sectionProgress = questionsInCurrentSection > 0 ? (answeredInCurrentSection / questionsInCurrentSection) * 100 : 0;
   
-  // Milestone achievements
-  const getMilestone = (progress: number) => {
+  // Time estimates per section (rough estimates)
+  const getSectionTimeEstimate = (sectionName: string, questionCount: number) => {
+    const baseTime = Math.ceil(questionCount * 1.5); // 1.5 minutes per question
+    return `${baseTime}-${baseTime + 5} min`;
+  };
+  
+  // Section completion rewards
+  const getSectionMilestone = (sectionIndex: number, totalSections: number) => {
+    const sectionNames = [
+      'Foundation', 'Strategy', 'Implementation', 'Culture', 'Compliance'
+    ];
+    return {
+      name: sectionNames[sectionIndex] || `Section ${sectionIndex + 1}`,
+      emoji: ['🏗️', '🎯', '⚡', '🤝', '🛡️'][sectionIndex] || '📋',
+      completion: `${sectionIndex + 1}/${totalSections} sections`,
+      motivational: [
+        'Building strong foundations!',
+        'Strategic planning excellence!', 
+        'Implementation ready!',
+        'Culture transformation!',
+        'Risk management mastery!'
+      ][sectionIndex] || 'Great progress!'
+    };
+  };
+  
+  const currentSectionMilestone = getSectionMilestone(currentSectionIndex, sections.length);
+  
+  // Overall milestone achievements
+  const getMilestone = (progress: number, sectionIndex: number, totalSections: number) => {
     if (progress >= 100) return { emoji: '🎉', text: 'Assessment Complete!', color: 'text-green-600' };
     if (progress >= 75) return { emoji: '🏁', text: 'Final Quarter - Almost Done!', color: 'text-green-600' };
     if (progress >= 50) return { emoji: '⭐', text: 'Halfway There - Great Progress!', color: 'text-blue-600' };
     if (progress >= 25) return { emoji: '🚀', text: 'Quarter Complete - Keep Going!', color: 'text-purple-600' };
-    return { emoji: '💪', text: 'Getting Started - You\'ve Got This!', color: 'text-blue-600' };
+    
+    // Section-based encouragement for early progress
+    if (sectionIndex === 0) return { emoji: '🏗️', text: 'Foundation Building - Excellent Start!', color: 'text-blue-600' };
+    if (sectionIndex === 1) return { emoji: '🎯', text: 'Strategy Development - You\'re Focused!', color: 'text-purple-600' };
+    
+    return { emoji: '💪', text: 'Making Great Progress!', color: 'text-blue-600' };
   };
   
-  const milestone = getMilestone(progress);
+  const milestone = getMilestone(progress, currentSectionIndex, sections.length);
 
   if (questions.length === 0 || !currentQuestion) {
     return (
@@ -346,25 +425,75 @@ export default function AIReadinessAssessmentPage() {
             </div>
           </div>
           
-          {/* Enhanced Progress Bar */}
-          <div className="mt-4 space-y-2">
+          {/* Enhanced Progress Bar with Section Details */}
+          <div className="mt-4 space-y-3">
+            {/* Section Progress Card */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{currentSectionMilestone.emoji}</span>
+                  <div>
+                    <h4 className="font-semibold text-blue-900 text-sm">
+                      {currentSectionMilestone.name} ({currentSectionMilestone.completion})
+                    </h4>
+                    <p className="text-blue-700 text-xs">{currentSectionMilestone.motivational}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-semibold text-blue-900">{Math.round(sectionProgress)}%</div>
+                  <div className="text-xs text-blue-600">section</div>
+                </div>
+              </div>
+              <div className="flex justify-between text-xs text-blue-600 mb-1">
+                <span>{answeredInCurrentSection} of {questionsInCurrentSection} questions</span>
+                <span>~{getSectionTimeEstimate(currentSectionName, questionsInCurrentSection)}</span>
+              </div>
+              <Progress value={sectionProgress} className="h-2 bg-blue-100" />
+            </div>
+            
+            {/* Overall Progress */}
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Section: {currentQuestion?.section}</span>
+              <span>Overall Progress: Question {currentQuestionIndex + 1} of {questions.length}</span>
               <span>{Math.round(progress)}% Complete</span>
             </div>
             <div className="relative">
               <Progress value={progress} className="h-3" />
-              {/* Milestone markers */}
-              <div className="absolute top-0 left-1/4 w-1 h-3 bg-purple-400 rounded-full opacity-60"></div>
-              <div className="absolute top-0 left-1/2 w-1 h-3 bg-blue-400 rounded-full opacity-60"></div>
-              <div className="absolute top-0 left-3/4 w-1 h-3 bg-green-400 rounded-full opacity-60"></div>
+              {/* Section markers instead of arbitrary percentages */}
+              {sections.map((_, index) => {
+                const sectionStart = (index / sections.length) * 100;
+                return (
+                  <div 
+                    key={index}
+                    className={`absolute top-0 w-1 h-3 rounded-full opacity-60 ${
+                      index <= currentSectionIndex ? 'bg-green-400' : 'bg-gray-300'
+                    }`}
+                    style={{ left: `${sectionStart}%` }}
+                  ></div>
+                );
+              })}
             </div>
             <div className="flex justify-between text-xs text-gray-500">
-              <span>25%</span>
-              <span>50%</span>
-              <span>75%</span>
-              <span>100%</span>
+              {sections.map((section, index) => (
+                <span key={index} className={index <= currentSectionIndex ? 'text-green-600' : ''}>
+                  {section.split(' ')[0]}
+                </span>
+              ))}
             </div>
+            
+            {/* Next Section Preview (when close to section completion) */}
+            {sectionProgress > 75 && currentSectionIndex < sections.length - 1 && (
+              <div className="mt-3 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-green-600">🎯</span>
+                  <div className="text-sm">
+                    <span className="font-semibold text-green-800">Almost done with {currentSectionName}!</span>
+                    <span className="text-green-700 ml-2">
+                      Next: {sections[currentSectionIndex + 1]}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
