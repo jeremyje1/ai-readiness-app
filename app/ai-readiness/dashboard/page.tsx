@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, AlertCircle, CheckCircle, Lock } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle, Lock, BookOpen, Users, FileText, BarChart3 } from 'lucide-react';
 import SubscriptionValueDashboard from '@/components/SubscriptionValueDashboard';
 
 interface PaymentVerification {
@@ -232,6 +232,45 @@ export default function AIReadinessDashboard() {
               <h1 className="text-3xl font-bold text-gray-900">AI Blueprint Dashboard</h1>
               <p className="text-gray-600 mt-1">Your ongoing AI transformation journey • Active subscription</p>
             </div>
+          </div>
+
+          {/* Quick Navigation */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Button 
+              onClick={() => window.location.href = '/ai-readiness/assessment'}
+              className="flex flex-col items-center gap-2 h-20 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
+              variant="outline"
+            >
+              <FileText className="w-6 h-6" />
+              <span className="text-sm">Take Assessment</span>
+            </Button>
+            
+            <Button 
+              onClick={() => window.location.href = '/resources/templates'}
+              className="flex flex-col items-center gap-2 h-20 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200"
+              variant="outline"
+            >
+              <BookOpen className="w-6 h-6" />
+              <span className="text-sm">Resource Library</span>
+            </Button>
+            
+            <Button 
+              onClick={() => window.open('https://calendly.com/aiblueprint-expert/monthly-strategy', '_blank')}
+              className="flex flex-col items-center gap-2 h-20 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200"
+              variant="outline"
+            >
+              <Users className="w-6 h-6" />
+              <span className="text-sm">Expert Sessions</span>
+            </Button>
+            
+            <Button 
+              onClick={() => window.location.href = '/ai-readiness/results'}
+              className="flex flex-col items-center gap-2 h-20 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200"
+              variant="outline"
+            >
+              <BarChart3 className="w-6 h-6" />
+              <span className="text-sm">View Results</span>
+            </Button>
           </div>
 
           {debugMode && debugInfo && (
