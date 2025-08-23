@@ -164,7 +164,7 @@ export default function CommunityGuidelines() {
                 </p>
                 <div className="space-x-4">
                   <button 
-                    onClick={() => window.open('https://join.slack.com/t/aireadiness/shared_invite/zt-ai-readiness-community', '_blank')}
+                    onClick={() => alert('🤝 Ready to Join?\n\n📧 Email info@northpathstrategies.org with:\n• Subject: "Slack Community Access"\n• Your subscription email for verification\n• Brief intro about your organization\n\n⚡ You\'ll receive an invite within 24 hours!\n\n💡 What to expect:\n• Weekly AI strategy discussions\n• Peer support and networking\n• Expert office hours\n• Resource sharing and feedback')}
                     className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                   >
                     Join Slack Community

@@ -255,7 +255,7 @@ export default function AIReadinessDashboard() {
             </Button>
             
             <Button 
-              onClick={() => window.open('https://calendly.com/aiblueprint-expert/monthly-strategy', '_blank')}
+              onClick={() => window.open('https://calendly.com/jeremyestrella/30min', '_blank')}
               className="flex flex-col items-center gap-2 h-20 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200"
               variant="outline"
             >

@@ -75,6 +75,13 @@ export default function AIReadinessAssessmentPage() {
     fetchQuestions();
   }, [tier]);
 
+  // Load saved progress when assessment ID becomes available
+  useEffect(() => {
+    if (assessmentId && questions.length > 0) {
+      loadSavedProgress();
+    }
+  }, [assessmentId, questions.length]);
+
   // Auto-save progress every 10 seconds
   useEffect(() => {
     if (assessmentId && Object.keys(responses).length > 0) {
@@ -154,8 +161,10 @@ export default function AIReadinessAssessmentPage() {
         setQuestions(data.data.questions);
         console.log('Questions set:', data.data.questions.length);
         
-        // Load saved progress after questions are loaded
-        setTimeout(loadSavedProgress, 100);
+        // Load saved progress after questions are loaded and assessment ID is set
+        if (assessmentId) {
+          loadSavedProgress();
+        }
       } else {
         console.error('API returned error:', data);
       }
@@ -383,7 +392,7 @@ export default function AIReadinessAssessmentPage() {
                   <Button
                     onClick={handleNext}
                     disabled={!isAnswered}
-                    className="flex items-center gap-2"
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-6 py-2"
                   >
                     Next
                     <ArrowRight className="w-4 h-4" />
@@ -392,7 +401,7 @@ export default function AIReadinessAssessmentPage() {
                   <Button
                     onClick={handleSubmit}
                     disabled={!allQuestionsAnswered || saving}
-                    className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
+                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 px-6 py-2"
                   >
                     {saving ? 'Submitting...' : 'Complete Assessment'}
                     <CheckCircle className="w-4 h-4" />
