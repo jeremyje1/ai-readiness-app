@@ -108,20 +108,37 @@ const getTypeIcon = (type: Template['type']) => {
 
 export default function ResourcesTemplatesPage() {
   const handleDownload = (template: Template) => {
-    // In production, this would track downloads and provide secure access
-    console.log(`Downloading: ${template.title}`);
-    
-    // For webinars, open in new tab
+    // Track download for analytics
+    try {
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'template_download',
+          template_id: template.id,
+          template_title: template.title,
+          template_type: template.type
+        })
+      }).catch(() => {}); // Silent fail for analytics
+    } catch (e) {}
+
+    // Handle different types of resources
     if (template.type === 'webinar') {
-      window.open(template.downloadUrl, '_blank');
+      // For webinars, show a modal with access info
+      alert(`Webinar Access:\n\nThis webinar is available in your subscriber area. Access details:\n\n• Recording available for 90 days\n• Slides included in download\n• Q&A transcript provided\n\nNote: Full webinar access will be implemented in the next update.`);
+      return;
+    }
+
+    // For templates and documents
+    if (template.downloadUrl.startsWith('/resources/downloads/')) {
+      // Show download dialog for now
+      const confirmed = confirm(`Download ${template.title}?\n\nThis will download:\n• ${template.title}\n• Implementation guide\n• Best practices document\n\nNote: Full download system will be available in the next update.`);
+      if (confirmed) {
+        // Simulate download
+        alert(`${template.title} would be downloaded here.\n\nComing soon: Direct PDF downloads of all templates and resources.`);
+      }
     } else {
-      // For files, trigger download
-      const link = document.createElement('a');
-      link.href = template.downloadUrl;
-      link.download = template.title;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      window.open(template.downloadUrl, '_blank');
     }
   };
 
@@ -276,10 +293,37 @@ export default function ResourcesTemplatesPage() {
                 </ul>
               </div>
               <div className="space-y-2">
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                <Button 
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  onClick={() => {
+                    // Track community access
+                    if (typeof window !== 'undefined' && (window as any).gtag) {
+                      (window as any).gtag('event', 'community_access', {
+                        event_category: 'subscription_value',
+                        event_label: 'slack_community_join'
+                      });
+                    }
+                    // Open Slack community invite
+                    window.open('https://join.slack.com/t/aireadiness/shared_invite/zt-ai-readiness-community', '_blank');
+                  }}
+                >
                   Join Slack Community
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => {
+                    // Track guidelines view
+                    if (typeof window !== 'undefined' && (window as any).gtag) {
+                      (window as any).gtag('event', 'guidelines_view', {
+                        event_category: 'subscription_value',
+                        event_label: 'community_guidelines'
+                      });
+                    }
+                    // Open community guidelines in modal or new tab
+                    window.open('/community-guidelines', '_blank');
+                  }}
+                >
                   View Community Guidelines
                 </Button>
               </div>

@@ -1,36 +1,18 @@
 /**
- * AI Readiness Assessmexport default function AIReadinessAssessmentPage() {
-  const searchParams = useSearchParams();
-  const rawTier = searchParams.get('tier') || 'comprehensive';
-  
-  // Map tier variations to valid tier names
-  const tierMapping: Record<string, string> = {
-    'comprehensive': 'ai-readiness-comprehensive',
-    'ai-readiness-comprehensive': 'ai-readiness-comprehensive',
-    'blueprint': 'ai-transformation-blueprint',
-    'ai-transformation-blueprint': 'ai-transformation-blueprint',
-    'pulse': 'higher-ed-ai-pulse-check',
-    'higher-ed-ai-pulse-check': 'higher-ed-ai-pulse-check',
-    'enterprise': 'ai-enterprise-partnership',
-    'ai-enterprise-partnership': 'ai-enterprise-partnership'
-  };
-  
-  const tier = tierMapping[rawTier] || 'ai-readiness-comprehensive';
-  
-  const [questions, setQuestions] = useState<Question[]>();age  
- * Main assessment interface for AI readiness evaluation
+ * AI Readiness Assessment Page
+ * Main assessment interface for AI readiness evaluation with auto-save functionality
  */
 
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-// import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/components/card';
+import { Button } from '@/components/button';
 import { Progress } from '@/components/progress';
 import { EnhancedFileUpload } from '@/components/enhanced-file-upload';
-import { CheckCircle, Clock, FileText, ArrowRight, Upload } from 'lucide-react';
+import { CheckCircle, Clock, FileText, ArrowRight, Upload, Save } from 'lucide-react';
+import { useAssessmentPersistence } from '@/hooks/useAssessmentPersistence';
 
 interface Question {
   id: string;
@@ -66,19 +48,29 @@ export default function AIReadinessAssessmentPage() {
   
   console.log('🎯 Tier processing:', { rawTier, cleanTier, finalTier: tier });
   
+  // Assessment state
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [responses, setResponses] = useState<Record<string, number>>({});
   const [uploadedDocuments, setUploadedDocuments] = useState<string[]>([]);
   const [showDocumentUpload, setShowDocumentUpload] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [autoSaving, setAutoSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [institutionType, setInstitutionType] = useState<string>('default');
   const [assessmentId, setAssessmentId] = useState<string>('');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  // Initialize assessment persistence
+  const {
+    isLoaded,
+    responses,
+    currentQuestionIndex,
+    lastSaved,
+    autoSaving,
+    hasUnsavedChanges,
+    updateResponse,
+    updateCurrentIndex,
+    saveProgress
+  } = useAssessmentPersistence(assessmentId, tier);
+
+  // Initialize assessment ID and load questions
   useEffect(() => {
     // Detect domain context
     const hostname = window.location.hostname;
@@ -92,7 +84,6 @@ export default function AIReadinessAssessmentPage() {
     const storedAssessmentId = localStorage.getItem('assessment-id');
     if (storedAssessmentId) {
       setAssessmentId(storedAssessmentId);
-      loadSavedProgress(storedAssessmentId);
     } else {
       const newAssessmentId = `assessment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       setAssessmentId(newAssessmentId);
@@ -101,98 +92,6 @@ export default function AIReadinessAssessmentPage() {
     
     fetchQuestions();
   }, [tier]);
-
-  // Auto-save responses every 10 seconds
-  useEffect(() => {
-    if (hasUnsavedChanges && assessmentId) {
-      const autoSaveInterval = setInterval(() => {
-        autoSaveProgress();
-      }, 10000); // Save every 10 seconds
-
-      return () => clearInterval(autoSaveInterval);
-    }
-  }, [hasUnsavedChanges, assessmentId, responses]);
-
-  // Save progress when responses change
-  useEffect(() => {
-    if (Object.keys(responses).length > 0) {
-      setHasUnsavedChanges(true);
-    }
-  }, [responses]);
-
-  // Warn before leaving page with unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        return e.returnValue;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
-
-  const loadSavedProgress = async (assessmentId: string) => {
-    try {
-      const saved = localStorage.getItem(`assessment-progress-${assessmentId}`);
-      if (saved) {
-        const { responses: savedResponses, currentIndex, lastSaved } = JSON.parse(saved);
-        setResponses(savedResponses);
-        setCurrentQuestionIndex(currentIndex);
-        setLastSaved(new Date(lastSaved));
-        setHasUnsavedChanges(false);
-      }
-    } catch (error) {
-      console.error('Failed to load saved progress:', error);
-    }
-  };
-
-  const autoSaveProgress = async () => {
-    if (!assessmentId || Object.keys(responses).length === 0) return;
-    
-    try {
-      setAutoSaving(true);
-      
-      // Save to localStorage
-      const progressData = {
-        responses,
-        currentIndex: currentQuestionIndex,
-        lastSaved: new Date().toISOString(),
-        tier,
-        questionCount: questions.length
-      };
-      
-      localStorage.setItem(`assessment-progress-${assessmentId}`, JSON.stringify(progressData));
-      
-      // Also save to database if user is authenticated
-      try {
-        await fetch('/api/ai-readiness/save-progress', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            assessmentId,
-            ...progressData
-          })
-        });
-      } catch (dbError) {
-        // Silent fail for database save - localStorage is backup
-        console.warn('Database save failed, using localStorage only');
-      }
-      
-      setLastSaved(new Date());
-      setHasUnsavedChanges(false);
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    } finally {
-      setAutoSaving(false);
-    }
-  };
-
-  const manualSave = async () => {
-    await autoSaveProgress();
-  };
 
   const fetchQuestions = async () => {
     try {
@@ -217,28 +116,32 @@ export default function AIReadinessAssessmentPage() {
   };
 
   const handleResponse = (questionId: string, value: number) => {
-    setResponses(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
-    setHasUnsavedChanges(true);
+    console.log('🔄 Response updated:', { questionId, value });
+    updateResponse(questionId, value);
   };
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
+      const newIndex = currentQuestionIndex + 1;
+      console.log('➡️ Moving to next question:', newIndex);
+      updateCurrentIndex(newIndex);
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1);
+      const newIndex = currentQuestionIndex - 1;
+      console.log('⬅️ Moving to previous question:', newIndex);
+      updateCurrentIndex(newIndex);
     }
   };
 
   const handleSubmit = async () => {
     try {
       setSaving(true);
+      
+      // Save progress before submitting
+      await saveProgress();
       
       // Add more robust submission data
       const submissionData = {
@@ -269,7 +172,11 @@ export default function AIReadinessAssessmentPage() {
       if (response.ok && result.success) {
         console.log('✅ Assessment submitted successfully:', result);
         
-        // Redirect to results page instead of dashboard
+        // Clear saved progress
+        localStorage.removeItem(`assessment-progress-${assessmentId}`);
+        localStorage.removeItem('assessment-id');
+        
+        // Redirect to results page
         window.location.href = `/ai-readiness/results?id=${result.id}`;
       } else {
         console.error('❌ Assessment submission failed:', result);
@@ -283,7 +190,7 @@ export default function AIReadinessAssessmentPage() {
     }
   };
 
-  if (loading) {
+  if (loading || !isLoaded) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -339,144 +246,182 @@ export default function AIReadinessAssessmentPage() {
                   {lastSaved && !autoSaving && (
                     <span className="text-green-600 flex items-center gap-1">
                       <CheckCircle className="w-3 h-3" />
-                      Saved {new Date(lastSaved).toLocaleTimeString()}
+                      Saved {lastSaved.toLocaleTimeString()}
                     </span>
                   )}
                   {hasUnsavedChanges && !autoSaving && (
-                    <span className="text-orange-600">
+                    <span className="text-orange-600 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
                       Unsaved changes
                     </span>
                   )}
                 </div>
+                {/* Manual Save Button */}
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={saveProgress}
+                  disabled={autoSaving || !hasUnsavedChanges}
+                  className="flex items-center gap-1 text-xs"
+                >
+                  <Save className="w-3 h-3" />
+                  Save Now
+                </Button>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-600 mb-2">Progress</div>
-              <Progress value={progress} className="w-32" />
-              <button
-                onClick={manualSave}
-                disabled={autoSaving || !hasUnsavedChanges}
-                className="mt-2 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Save Now
-              </button>
-            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="mt-4">
+            <Progress value={progress} className="h-2" />
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div>
+        {!showDocuments ? (
+          /* Question Display */
           <Card className="p-8">
-            {/* Question */}
-            <div className="mb-8">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-blue-600">
-                      {currentQuestionIndex + 1}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm text-gray-500 mb-2">{currentQuestion.section}</div>
-                  <h2 className="text-xl font-semibold text-gray-900 leading-relaxed">
-                    {currentQuestion.prompt}
-                  </h2>
-                  {currentQuestion.helpText && (
-                    <p className="text-sm text-gray-600 mt-3">{currentQuestion.helpText}</p>
-                  )}
-                </div>
+            <div className="space-y-6">
+              {/* Section Badge */}
+              <div className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-lg inline-block">
+                {currentQuestion.section}
               </div>
-            </div>
+              
+              {/* Question */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">
+                  {currentQuestion.prompt}
+                </h2>
+                
+                {currentQuestion.helpText && (
+                  <p className="text-gray-600 text-sm mb-4">
+                    {currentQuestion.helpText}
+                  </p>
+                )}
+              </div>
 
-            {/* Response Options */}
-            <div className="mb-8">
-              <div className="grid grid-cols-1 gap-3">
+              {/* Response Options */}
+              <div className="space-y-3">
                 {[
-                  { value: 5, label: 'Strongly Agree / Fully ready', color: 'green' },
-                  { value: 4, label: 'Agree / Mostly ready', color: 'blue' },
-                  { value: 3, label: 'Neutral / Somewhat ready', color: 'yellow' },
-                  { value: 2, label: 'Disagree / Minimally ready', color: 'orange' },
-                  { value: 1, label: 'Strongly Disagree / Not at all ready', color: 'red' }
+                  { value: 1, label: "Strongly Disagree", color: "bg-red-100 border-red-300 text-red-700" },
+                  { value: 2, label: "Disagree", color: "bg-orange-100 border-orange-300 text-orange-700" },
+                  { value: 3, label: "Neutral", color: "bg-yellow-100 border-yellow-300 text-yellow-700" },
+                  { value: 4, label: "Agree", color: "bg-blue-100 border-blue-300 text-blue-700" },
+                  { value: 5, label: "Strongly Agree", color: "bg-green-100 border-green-300 text-green-700" }
                 ].map((option) => (
                   <button
                     key={option.value}
                     onClick={() => handleResponse(currentQuestion.id, option.value)}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    className={`w-full p-4 text-left border-2 rounded-lg transition-all ${
                       responses[currentQuestion.id] === option.value
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                        ? option.color
+                        : 'bg-white border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{option.label}</span>
                       {responses[currentQuestion.id] === option.value && (
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        <CheckCircle className="w-5 h-5 text-current" />
                       )}
                     </div>
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* Context Input (if enabled) */}
-            {currentQuestion.enableContext && isAnswered && (
-              <div className="mb-8">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {currentQuestion.contextPrompt || 'Additional context (optional)'}
-                </label>
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Provide additional details or context..."
-                />
-              </div>
-            )}
-
-            {/* Navigation */}
-            <div className="flex items-center justify-between pt-6 border-t">
-              <Button
-                onClick={handlePrevious}
-                variant="outline"
-                disabled={currentQuestionIndex === 0}
-              >
-                Previous
-              </Button>
-
-              <div className="text-sm text-gray-500">
-                {Object.keys(responses).length} of {questions.length} answered
-              </div>
-
-              {isLastQuestion ? (
+              {/* Navigation */}
+              <div className="flex justify-between pt-6">
                 <Button
-                  onClick={handleSubmit}
-                  disabled={!isAnswered || saving}
-                  className="min-w-[120px]"
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentQuestionIndex === 0}
                 >
-                  {saving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Submitting...
-                    </>
+                  Previous
+                </Button>
+                
+                <div className="flex gap-3">
+                  {!isLastQuestion ? (
+                    <Button
+                      onClick={handleNext}
+                      disabled={!isAnswered}
+                      className="flex items-center gap-2"
+                    >
+                      Next
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
                   ) : (
-                    'Complete Assessment'
+                    <>
+                      {!requiresDocuments ? (
+                        <Button
+                          onClick={handleSubmit}
+                          disabled={!allQuestionsAnswered || saving}
+                          className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
+                        >
+                          {saving ? 'Submitting...' : 'Complete Assessment'}
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => setShowDocumentUpload(true)}
+                          disabled={!allQuestionsAnswered}
+                          className="flex items-center gap-2"
+                        >
+                          Continue to Document Upload
+                          <Upload className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </>
                   )}
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleNext}
-                  disabled={!isAnswered}
-                  className="min-w-[120px]"
-                >
-                  Next
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
+                </div>
+              </div>
             </div>
           </Card>
-        </div>
+        ) : (
+          /* Document Upload */
+          <div className="space-y-6">
+            <Card className="p-8">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                  <FileText className="w-8 h-8 text-blue-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Optional Document Upload
+                </h2>
+                <p className="text-gray-600">
+                  Upload relevant documents to enhance your AI readiness analysis.
+                  This step is optional but will provide more personalized insights.
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-8">
+              <EnhancedFileUpload
+                onFilesUploaded={(files) => {
+                  setUploadedDocuments(files);
+                }}
+              />
+              
+              <div className="flex justify-between pt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDocumentUpload(false)}
+                >
+                  Back to Questions
+                </Button>
+                
+                <Button
+                  onClick={handleSubmit}
+                  disabled={saving}
+                  className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
+                >
+                  {saving ? 'Submitting...' : 'Complete Assessment'}
+                  <CheckCircle className="w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
