@@ -397,8 +397,8 @@ export default function AIReadinessAssessmentPage() {
 
             <Card className="p-8">
               <EnhancedFileUpload
-                onFilesUploaded={(files) => {
-                  setUploadedDocuments(files);
+                onFilesSelected={(files) => {
+                  setUploadedDocuments(files.map(f => f.name));
                 }}
               />
               
