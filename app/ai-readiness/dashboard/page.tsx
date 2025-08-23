@@ -255,7 +255,10 @@ export default function AIReadinessDashboard() {
             </Button>
             
             <Button 
-              onClick={() => window.open('https://calendly.com/jeremyestrella/30min', '_blank')}
+              onClick={() => {
+                alert('🕐 Scheduling Information\n\n✅ Expert Sessions Available!\n\n⏰ Time Zone Details:\n• Calendly shows Pacific Time by default\n• Jeremy is in Central Time (CST/CDT)\n• You can adjust time zone on the booking page\n• 30-minute sessions available\n\n📅 What to Expect:\n• AI implementation strategy discussion\n• Personalized recommendations review\n• Q&A about your assessment results\n• Next steps planning\n\nClick OK to open scheduling page.');
+                window.open('https://calendly.com/jeremyestrella/30min', '_blank');
+              }}
               className="flex flex-col items-center gap-2 h-20 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200"
               variant="outline"
             >
