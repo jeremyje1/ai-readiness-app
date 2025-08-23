@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, CheckCircle, Lock } from 'lucide-react';
+import SubscriptionValueDashboard from '@/components/SubscriptionValueDashboard';
 
 interface PaymentVerification {
   isVerified: boolean;
@@ -223,13 +224,13 @@ export default function AIReadinessDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <Card className="p-8 mb-6">
           <div className="flex items-center mb-6">
             <CheckCircle className="w-8 h-8 text-green-500 mr-3" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Welcome to Your AI Assessment</h1>
-              <p className="text-gray-600 mt-1">Payment verified • Access granted</p>
+              <h1 className="text-3xl font-bold text-gray-900">AI Blueprint Dashboard</h1>
+              <p className="text-gray-600 mt-1">Your ongoing AI transformation journey • Active subscription</p>
             </div>
           </div>
 
@@ -278,42 +279,61 @@ export default function AIReadinessDashboard() {
               Your comprehensive AI assessment includes personalized recommendations, 
               maturity analysis, and actionable insights for your organization.
             </p>
-            <Button 
-              onClick={startAssessment}
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
-            >
-              Start Assessment
-            </Button>
           </div>
         </Card>
 
+        {/* Add the new Subscription Value Dashboard here */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Subscription Value</h2>
+          <SubscriptionValueDashboard 
+            userId={verification.email || 'unknown'} 
+            tier={verification.tier || 'comprehensive'} 
+          />
+        </div>
+
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">What's Included in Your Assessment</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="flex items-start">
-              <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Comprehensive 60+ question assessment</span>
+          <h3 className="text-lg font-semibold mb-4">Assessment & Results</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+              <div>
+                <h4 className="font-semibold">Take Your AI Readiness Assessment</h4>
+                <p className="text-sm text-gray-600 mt-1">
+                  Get comprehensive insights with our 6-algorithm assessment suite
+                </p>
+              </div>
+              <Button 
+                onClick={startAssessment}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Start Assessment
+              </Button>
             </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span>AI readiness scoring and maturity analysis</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Personalized recommendations and roadmap</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Detailed PDF report with insights</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Strategic planning guidance</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span>Implementation timeline</span>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>6 patent-pending algorithms (AIRIX™, AIRS™, AICS™, AIMS™, AIPS™, AIBS™)</span>
+              </div>
+              <div className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Quarterly progress tracking and reassessment</span>
+              </div>
+              <div className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Peer benchmarking and competitive analysis</span>
+              </div>
+              <div className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Implementation roadmap with 90-day milestones</span>
+              </div>
+              <div className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Monthly expert strategy sessions</span>
+              </div>
+              <div className="flex items-start">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Exclusive community and resource library</span>
+              </div>
             </div>
           </div>
         </Card>
