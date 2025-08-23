@@ -264,6 +264,23 @@ export default function AIReadinessAssessmentPage() {
   const isAnswered = currentQuestion ? responses[currentQuestion.id] !== undefined : false;
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
   const allQuestionsAnswered = Object.keys(responses).length === questions.length;
+  
+  // Calculate section-based progress
+  const totalSections = [...new Set(questions.map(q => q.section))].length;
+  const currentSectionIndex = questions.findIndex(q => q.section === currentQuestion?.section);
+  const questionsInCurrentSection = questions.filter(q => q.section === currentQuestion?.section).length;
+  const currentPositionInSection = questions.slice(0, currentQuestionIndex + 1).filter(q => q.section === currentQuestion?.section).length;
+  
+  // Milestone achievements
+  const getMilestone = (progress: number) => {
+    if (progress >= 100) return { emoji: '🎉', text: 'Assessment Complete!', color: 'text-green-600' };
+    if (progress >= 75) return { emoji: '🏁', text: 'Final Quarter - Almost Done!', color: 'text-green-600' };
+    if (progress >= 50) return { emoji: '⭐', text: 'Halfway There - Great Progress!', color: 'text-blue-600' };
+    if (progress >= 25) return { emoji: '🚀', text: 'Quarter Complete - Keep Going!', color: 'text-purple-600' };
+    return { emoji: '💪', text: 'Getting Started - You\'ve Got This!', color: 'text-blue-600' };
+  };
+  
+  const milestone = getMilestone(progress);
 
   if (questions.length === 0 || !currentQuestion) {
     return (
@@ -288,9 +305,18 @@ export default function AIReadinessAssessmentPage() {
                  'AI Readiness Assessment'}
               </h1>
               <div className="flex items-center gap-4 mt-1">
-                <p className="text-sm text-gray-600">
-                  Question {currentQuestionIndex + 1} of {questions.length} • {Object.keys(responses).length} answered
-                </p>
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-gray-600">
+                    Question {currentQuestionIndex + 1} of {questions.length} • {Object.keys(responses).length} answered
+                  </p>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-medium text-blue-600">{Math.round(progress)}% Complete</span>
+                    <span className={`${milestone.color} flex items-center gap-1`}>
+                      <span>{milestone.emoji}</span>
+                      <span className="hidden sm:inline">{milestone.text}</span>
+                    </span>
+                  </div>
+                </div>
                 {/* Save Status */}
                 <div className="flex items-center gap-2 text-xs">
                   {autoSaving && (
@@ -320,9 +346,25 @@ export default function AIReadinessAssessmentPage() {
             </div>
           </div>
           
-          {/* Progress Bar */}
-          <div className="mt-4">
-            <Progress value={progress} className="h-2" />
+          {/* Enhanced Progress Bar */}
+          <div className="mt-4 space-y-2">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Section: {currentQuestion?.section}</span>
+              <span>{Math.round(progress)}% Complete</span>
+            </div>
+            <div className="relative">
+              <Progress value={progress} className="h-3" />
+              {/* Milestone markers */}
+              <div className="absolute top-0 left-1/4 w-1 h-3 bg-purple-400 rounded-full opacity-60"></div>
+              <div className="absolute top-0 left-1/2 w-1 h-3 bg-blue-400 rounded-full opacity-60"></div>
+              <div className="absolute top-0 left-3/4 w-1 h-3 bg-green-400 rounded-full opacity-60"></div>
+            </div>
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>25%</span>
+              <span>50%</span>
+              <span>75%</span>
+              <span>100%</span>
+            </div>
           </div>
         </div>
       </div>
@@ -346,6 +388,22 @@ export default function AIReadinessAssessmentPage() {
                 <p className="text-gray-600 text-sm mb-4">
                   {currentQuestion.helpText}
                 </p>
+              )}
+              
+              {/* Value reinforcement - show periodically */}
+              {(currentQuestionIndex + 1) % 15 === 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-blue-600 text-lg">💡</div>
+                    <div>
+                      <h4 className="font-semibold text-blue-900 mb-1">Your Personalized Insights Are Building</h4>
+                      <p className="text-blue-800 text-sm">
+                        Each thoughtful response helps us create more precise, actionable recommendations specifically for your organization. 
+                        The thorough assessment you're completing will generate a customized AI transformation roadmap worth thousands in consulting value.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 

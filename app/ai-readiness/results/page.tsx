@@ -178,9 +178,29 @@ export default function AIReadinessResultsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your results...</p>
+          <h2 className="mt-4 text-xl font-semibold text-gray-900">Checking for Your Results</h2>
+          <p className="mt-2 text-gray-600">
+            Results become available after completing your full assessment.
+          </p>
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="text-blue-600 mb-2">📊 Results Include:</div>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• Comprehensive AI readiness score</li>
+              <li>• Personalized improvement recommendations</li>
+              <li>• Domain-specific analysis and benchmarking</li>
+              <li>• Downloadable PDF report with action items</li>
+            </ul>
+          </div>
+          <div className="mt-4">
+            <Button 
+              onClick={() => window.location.href = '/ai-readiness/assessment'}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Continue Assessment
+            </Button>
+          </div>
         </div>
       </div>
     );

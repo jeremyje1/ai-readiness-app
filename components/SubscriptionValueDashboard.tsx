@@ -96,7 +96,10 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier 
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-gray-600">Implementation</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-sm text-gray-600">Implementation</p>
+                  <span className="text-xs text-gray-400 cursor-help" title="Based on: assessment completion, resource usage, expert sessions, and action items completed">ℹ️</span>
+                </div>
                 <p className="text-2xl font-bold">{progress.implementationProgress}%</p>
               </div>
             </div>
