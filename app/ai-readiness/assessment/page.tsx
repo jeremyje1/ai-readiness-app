@@ -161,8 +161,8 @@ export default function AIReadinessAssessmentPage() {
       if (response.ok && result.success) {
         console.log('✅ Assessment submitted successfully:', result);
         
-        // Redirect to comprehensive dashboard
-        window.location.href = `/ai-readiness/dashboard?id=${result.data?.id || result.id || 'test'}`;
+        // Redirect to results page instead of dashboard
+        window.location.href = `/ai-readiness/results?id=${result.id}`;
       } else {
         console.error('❌ Assessment submission failed:', result);
         alert(`Failed to submit assessment: ${result.error || 'Unknown error'}. Please try again.`);

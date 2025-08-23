@@ -4,7 +4,7 @@ export default function ImplementationBlueprintsServicePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-16 px-6">
       <div className="max-w-4xl mx-auto prose prose-indigo">
-        <h1>District Implementation Blueprints</h1>
+        <h1>Implementation Blueprints</h1>
         <p>
           Our Implementation Blueprints convert readiness insights into sequenced action architecture. We map initiatives
           across governance, instructional integration, data infrastructure, professional development, and risk mitigation

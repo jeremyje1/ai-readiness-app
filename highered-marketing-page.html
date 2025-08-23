@@ -40,19 +40,64 @@
       --focus: #fbbf24;
       --maxw: 1200px;
       --radius: 10px;
+      /* Enhanced contrast colors for accessibility */
+      --text-high-contrast: #f1f5f9;
+      --muted-high-contrast: #d4d4d8;
+      --primary-accessible: #1e90ff;
     }
     * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: var(--text); background: var(--bg-900); line-height: 1.6; }
+    html, body { margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: var(--text-high-contrast); background: var(--bg-900); line-height: 1.6; }
     img { max-width: 100%; height: auto; display: block; }
-    a { color: var(--text); text-decoration: none; }
+    a { color: var(--text-high-contrast); text-decoration: none; }
     a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
     .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 1rem; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; border: 0; transition: 0.2s ease; }
-    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary { background: var(--primary-accessible); color: #fff; }
     .btn-primary:hover { background: var(--primary-600); }
     .btn-outline { background: transparent; color: #fff; border: 2px solid #fff; }
     .btn-outline:hover { background: rgba(255,255,255,0.12); }
     .tag { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); }
+
+  /* Enhanced accessibility for interactive elements */
+  .btn, .learn-more, nav a {
+    position: relative;
+  }
+  .btn:focus, .learn-more:focus, nav a:focus {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  /* Better contrast for muted text */
+  .muted { color: var(--muted-high-contrast); }
+  
+  /* Form validation styles (for when forms are added) */
+  .form-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+  .form-field.error input,
+  .form-field.error textarea,
+  .form-field.error select {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+  .form-field.error label {
+    color: #ef4444;
+  }
+  
+  /* Screen reader only text */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 
   /* Nav */
     nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); background: rgba(0,0,0,0.5); }
@@ -228,23 +273,23 @@
     </div>
   </section>
 
-  <section class="container" id="services" aria-labelledby="services-heading">
+    <section class="container" id="services" aria-labelledby="services-heading">
     <h2 class="section-title" id="services-heading">Our Services</h2>
     <div class="grid grid-3">
-      <article class="card">
-        <h3>Higher Ed AI Readiness Assessments</h3>
-        <p class="muted">Pinpoint strengths and gaps across institutional governance, research data systems, academic programs, and campus technology infrastructure.</p>
-  <p><a class="learn-more" href="https://aiblueprint.k12aiblueprint.com/services/ai-readiness-assessment" aria-label="Learn more about AI Readiness Assessments">Learn more →</a></p>
+      <article class="card" role="region" aria-labelledby="assess-title">
+        <h3 id="assess-title">Higher Ed AI Readiness Assessments</h3>
+        <p class="muted">Pinpoint strengths and gaps across institutional governance, research data systems, academic integration, and campus technology infrastructure.</p>
+  <p><a class="learn-more" href="https://aiblueprint.k12aiblueprint.com/services/ai-readiness-assessment" aria-label="Learn more about Higher Ed AI Readiness Assessments" role="link">Learn more →</a></p>
       </article>
-      <article class="card">
-        <h3>University Implementation Blueprints</h3>
-        <p class="muted">Policy templates, faculty development plans, and change‑management playbooks specifically designed for higher education environments.</p>
-  <p><a class="learn-more" href="https://aiblueprint.k12aiblueprint.com/services/implementation-blueprints" aria-label="Learn more about Implementation Blueprints">Learn more →</a></p>
+      <article class="card" role="region" aria-labelledby="blueprint-title">
+        <h3 id="blueprint-title">University Implementation Blueprints</h3>
+        <p class="muted">Policy templates, faculty training plans, and change‑management playbooks specifically designed for higher education environments.</p>
+  <p><a class="learn-more" href="https://aiblueprint.k12aiblueprint.com/services/university-implementation-blueprints" aria-label="Learn more about University Implementation Blueprints" role="link">Learn more →</a></p>
       </article>
-      <article class="card">
-        <h3>Faculty Professional Development</h3>
-        <p class="muted">On‑site workshops and self‑paced modules for university leadership, department chairs, and faculty.</p>
-  <p><a class="learn-more" href="https://aiblueprint.k12aiblueprint.com/services/professional-development" aria-label="Learn more about Professional Development">Learn more →</a></p>
+      <article class="card" role="region" aria-labelledby="dev-title">
+        <h3 id="dev-title">Faculty Professional Development</h3>
+        <p class="muted">On‑site workshops and self‑paced modules for provosts, deans, department chairs, and faculty members.</p>
+  <p><a class="learn-more" href="https://aiblueprint.k12aiblueprint.com/services/professional-development" aria-label="Learn more about Faculty Professional Development" role="link">Learn more →</a></p>
       </article>
     </div>
   </section>
