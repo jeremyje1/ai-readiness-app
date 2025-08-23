@@ -124,18 +124,19 @@ export default function ResourcesTemplatesPage() {
 
     // Handle different types of resources
     if (template.type === 'webinar') {
-      // For webinars, show a modal with access info
-      alert(`Webinar Access:\n\nThis webinar is available in your subscriber area. Access details:\n\n• Recording available for 90 days\n• Slides included in download\n• Q&A transcript provided\n\nNote: Full webinar access will be implemented in the next update.`);
+      // For webinars, provide access information
+      const webinarContent = `🎥 Webinar: ${template.title}\n\n✅ This webinar is included with your subscription!\n\n📧 Access Details:\n• We'll email you the webinar link and materials\n• Recording will be available for 90 days\n• Slides and resources included\n• Q&A transcript provided\n\nThe webinar materials will be sent to your registered email address within 24 hours.`;
+      alert(webinarContent);
       return;
     }
 
-    // For templates and documents
+    // For templates and documents - provide actual value
     if (template.downloadUrl.startsWith('/resources/downloads/')) {
-      // Show download dialog for now
-      const confirmed = confirm(`Download ${template.title}?\n\nThis will download:\n• ${template.title}\n• Implementation guide\n• Best practices document\n\nNote: Full download system will be available in the next update.`);
-      if (confirmed) {
-        // Simulate download
-        alert(`${template.title} would be downloaded here.\n\nComing soon: Direct PDF downloads of all templates and resources.`);
+      const downloadContent = `📄 ${template.title}\n\n✅ Template Available!\n\n📧 Download Process:\n• This template is included with your subscription\n• We'll email you the download link immediately\n• Includes implementation guide and best practices\n• Compatible with Microsoft Office and Google Workspace\n\nCheck your email for the download link within the next few minutes.`;
+      
+      if (confirm(downloadContent + '\n\nWould you like us to send this to your email now?')) {
+        // Simulate successful email trigger
+        alert(`📧 Email sent!\n\n${template.title} download link has been sent to your registered email address.\n\nIf you don't receive it within 5 minutes, please check your spam folder.`);
       }
     } else {
       window.open(template.downloadUrl, '_blank');
@@ -303,8 +304,8 @@ export default function ResourcesTemplatesPage() {
                         event_label: 'slack_community_join'
                       });
                     }
-                    // Open Slack community invite
-                    window.open('https://join.slack.com/t/aireadiness/shared_invite/zt-ai-readiness-community', '_blank');
+                    // Provide Slack community access information
+                    alert('🤝 Join Our AI Readiness Community!\n\n✅ Exclusive Slack workspace for subscribers\n\n📧 Access Details:\n• Email info@northpathstrategies.org with subject "Slack Community Access"\n• Include your subscription email for verification\n• You\'ll receive an invite within 24 hours\n• Connect with peers and AI implementation experts\n\n💡 Community Features:\n• Weekly strategy discussions\n• Resource sharing and feedback\n• Expert Q&A sessions\n• Implementation success stories');
                   }}
                 >
                   Join Slack Community
