@@ -152,8 +152,8 @@ export async function POST(request: NextRequest) {
     // Return assessment ID and initial results
     // Extract scores from the results structure that contains algorithm outputs
     const firstAlgorithmResult = Object.values(results.results || {})[0] as any;
-    const overallScore = firstAlgorithmResult?.overallReadiness || firstAlgorithmResult?.score || 0;
-    const readinessLevel = firstAlgorithmResult?.readinessLevel || firstAlgorithmResult?.level || 'Emerging';
+    const overallScore = results.overallScore || firstAlgorithmResult?.overallReadiness || firstAlgorithmResult?.score || 0;
+    const readinessLevel = results.maturityLevel || firstAlgorithmResult?.readinessLevel || firstAlgorithmResult?.level || 'Emerging';
     
     const response = {
       success: true,
@@ -164,9 +164,10 @@ export async function POST(request: NextRequest) {
       initialResults: {
         aiReadinessIndex: overallScore,
         readinessLevel: readinessLevel,
-        domainScores: firstAlgorithmResult?.domainScores || {},
-        recommendationCount: firstAlgorithmResult?.recommendations?.length || 0,
-        policyRecommendations: firstAlgorithmResult?.recommendations?.length || 0
+        domainScores: results.domainScores || firstAlgorithmResult?.domainScores || {},
+        recommendationCount: (results.recommendations || firstAlgorithmResult?.recommendations || []).length,
+        policyRecommendations: (results.recommendations || firstAlgorithmResult?.recommendations || []).length,
+        algorithmResults: results.algorithmResults || {}
       },
       testMode: testMode
     };
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
         overallScore: overallScore,
         maturityLevel: readinessLevel,
         baseUrl: baseUrl,
-        dashboardUrl: `${baseUrl}/ai-readiness/dashboard`,
+        dashboardUrl: `${baseUrl}/ai-readiness/results?id=${response.id}`,
         institutionType: institutionType,
         domainContext: domainContext
       });

@@ -4,10 +4,10 @@ export default function ProfessionalDevelopmentServicePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-16 px-6">
       <div className="max-w-4xl mx-auto prose prose-indigo">
-        <h1>Teacher Professional Development</h1>
+        <h1>Professional Development</h1>
         <p>
           Structured professional learning pathways aligned to AI literacy, instructional integration, ethical governance,
-          and data stewardship. Cohort‑based and asynchronous modules tailored to district or campus maturity stage.
+          and data stewardship. Cohort‑based and asynchronous modules tailored to institutional maturity stage.
         </p>
         <h2>Program Components</h2>
         <ul>

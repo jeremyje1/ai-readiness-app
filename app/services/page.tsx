@@ -6,17 +6,17 @@ export const dynamic = 'force-static';
 const services = [
   {
     slug: 'ai-readiness-assessment',
-    title: 'K-12 & Higher-Ed AI Readiness Assessments',
+    title: 'AI Readiness Assessments',
     blurb: 'Comprehensive multi-domain diagnostic using our AIRIX™, AIRS™, AICS™, AIMS™, AIPS™ and AIBS™ algorithms.'
   },
   {
     slug: 'implementation-blueprints',
-    title: 'District Implementation Blueprints',
+    title: 'Implementation Blueprints',
     blurb: 'Strategic sequencing of AI initiatives with prioritized roadmap & governance alignment.'
   },
   {
     slug: 'professional-development',
-    title: 'Teacher Professional Development',
+    title: 'Professional Development',
     blurb: 'Faculty & staff capability building: AI literacy, policy adoption, and instructional integration.'
   }
 ];
