@@ -28,15 +28,15 @@ export default function AIReadinessDashboard() {
   const [hydrated, setHydrated] = useState(false);
   const debugMode = searchParams.get('debug') === '1';
 
-  // Handle hydration and detect domain context
+  // Handle hydration and get institution type from localStorage or user profile
   useEffect(() => {
     setHydrated(true);
-    const hostname = window.location.hostname;
-    if (hostname.includes('higheredaiblueprint.com')) {
-      setInstitutionType('HigherEd');
-    } else {
-      setInstitutionType('K12');
+    // Get institution type from localStorage (set during registration)
+    const storedType = localStorage.getItem('ai_blueprint_institution_type');
+    if (storedType === 'HigherEd' || storedType === 'K12') {
+      setInstitutionType(storedType);
     }
+    // TODO: Also fetch from user profile in database when user system is enhanced
   }, []);
 
   useEffect(() => {
