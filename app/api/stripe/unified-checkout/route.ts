@@ -65,20 +65,31 @@ function resolvePriceId(product: string, billing: string): string | null {
   return productConfig[normalizedBilling] || null;
 }
 
-function buildRedirectBase(returnTo?: string, tier?: string, request?: any): { success: string; cancel: string } {
-  // Canonical domain we always want to use for post‑checkout flows.
-  const hardCanonical = 'https://aiblueprint.k12aiblueprint.com';
+function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
+  // Detect domain context from request headers
+  const host = request?.headers.get('host') || '';
+  const isHigherEd = host.includes('higheredaiblueprint.com');
+  
+  // Set canonical domain based on context
+  const k12Canonical = 'https://aiblueprint.k12aiblueprint.com';
+  const higherEdCanonical = 'https://aiblueprint.higheredaiblueprint.com';
+  const hardCanonical = isHigherEd ? higherEdCanonical : k12Canonical;
+  
   const envCandidate = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || hardCanonical;
   // Sanitize any stale legacy host values in env.
   let canonical = envCandidate.replace('https://aireadiness.northpathstrategies.org', hardCanonical);
-  if (!canonical.startsWith(hardCanonical)) {
+  
+  // For domain-aware routing, use the appropriate canonical domain
+  if (isHigherEd) {
+    canonical = higherEdCanonical;
+  } else if (!canonical.startsWith(k12Canonical) && !canonical.startsWith(higherEdCanonical)) {
     // Ignore unexpected hosts and force canonical (prevents preview / legacy domain leakage)
     canonical = hardCanonical;
   }
 
   // Previously we replaced with request host. That leaked legacy domains into success_url if checkout initiated from an old marketing page.
-  // Now we only honor the request host if it matches the canonical (defensive against legacy / preview / vercel.app hosts).
-  let baseUrl = canonical; // Do not trust request host anymore; always stay canonical
+  // Now we detect the domain context and use the appropriate canonical domain
+  let baseUrl = canonical;
   
   // Map return_to shorthand values to paths
   const destination = (() => {
@@ -96,21 +107,27 @@ function buildRedirectBase(returnTo?: string, tier?: string, request?: any): { s
         return '/ai-readiness/success';
     }
   })();
+  
   return {
     // Include session_id placeholder for post-checkout bootstrap
-  success: `${baseUrl}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`,
+    success: `${baseUrl}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`,
     cancel: `${baseUrl}/ai-readiness?checkout=cancelled`
   };
 }
 
 async function createCheckoutSession(params: CheckoutParams, request?: NextRequest) {
   // Strip/ignore any externally supplied success/cancel URLs that are not canonical
-  const allowedOrigin = 'https://aiblueprint.k12aiblueprint.com';
-  if (params.successUrl && !params.successUrl.startsWith(allowedOrigin)) {
+  // Allow both K-12 and Higher Ed canonical domains
+  const allowedOrigins = [
+    'https://aiblueprint.k12aiblueprint.com',
+    'https://aiblueprint.higheredaiblueprint.com'
+  ];
+  
+  if (params.successUrl && !allowedOrigins.some(origin => params.successUrl!.startsWith(origin))) {
     console.warn('Ignoring non-canonical successUrl param', params.successUrl);
     params.successUrl = undefined;
   }
-  if (params.cancelUrl && !params.cancelUrl.startsWith(allowedOrigin)) {
+  if (params.cancelUrl && !allowedOrigins.some(origin => params.cancelUrl!.startsWith(origin))) {
     console.warn('Ignoring non-canonical cancelUrl param', params.cancelUrl);
     params.cancelUrl = undefined;
   }
@@ -120,7 +137,7 @@ async function createCheckoutSession(params: CheckoutParams, request?: NextReque
   }
 
   const isSubscription = true; // unified checkout uses subscriptions (supports trial days)
-  const redirect = buildRedirectBase(params.returnTo, params.tier, request);
+  const redirect = buildCheckoutUrls(params.returnTo, request);
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: isSubscription ? 'subscription' : 'payment',

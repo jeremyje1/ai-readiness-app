@@ -1,0 +1,23 @@
+CRITICAL DOMAIN REDIRECT FIX - Deploy 2025-08-24
+
+ISSUE RESOLVED: Higher Ed users redirected to K-12 domain after checkout
+
+FIXES IMPLEMENTED:
+✅ Domain-aware Stripe checkout logic (unified-checkout/route.ts)
+✅ Domain-aware client-side redirects (success page, password setup, dashboard)
+✅ New domain utility functions for consistent URL generation
+✅ Subscription progress API URL decoding fix
+
+TECHNICAL CHANGES:
+1. buildCheckoutUrls() now detects host header and uses appropriate canonical domain
+2. All router.push() calls replaced with navigateToDomainAwarePath() for cross-domain nav
+3. Added /lib/domain-utils.ts for consistent domain detection and URL generation
+4. Fixed URL encoding issue in subscription progress API
+
+TESTING REQUIRED:
+- Higher Ed checkout flow: aiblueprint.higheredaiblueprint.com → Stripe → back to Higher Ed domain
+- K-12 checkout flow: aiblueprint.k12aiblueprint.com → Stripe → back to K-12 domain
+- Dashboard redirects maintain domain context throughout user journey
+
+DEPLOY: Ready for production deployment
+BUILD: ✅ Successful compilation

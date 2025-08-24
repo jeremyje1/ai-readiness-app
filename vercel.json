@@ -37,18 +37,6 @@
   "redirects": [
     {
       "source": "(.*)",
-      "has": [ { "type": "host", "value": "higheredaiblueprint.com" } ],
-      "destination": "https://aiblueprint.k12aiblueprint.com/higher-ed$1",
-      "permanent": true
-    },
-    {
-      "source": "(.*)",
-      "has": [ { "type": "host", "value": "aiblueprint.higheredaiblueprint.com" } ],
-      "destination": "https://aiblueprint.k12aiblueprint.com$1",
-      "permanent": true
-    },
-    {
-      "source": "(.*)",
       "has": [
         { "type": "host", "value": "aireadiness.northpathstrategies.org" }
       ],

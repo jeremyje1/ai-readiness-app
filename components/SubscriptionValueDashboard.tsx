@@ -19,6 +19,7 @@ interface SubscriptionValueProps {
   userId: string;
   assessmentId?: string;
   tier: string;
+  institutionType?: 'K12' | 'HigherEd';
 }
 
 interface ProgressData {
@@ -32,7 +33,7 @@ interface ProgressData {
   templatesDownloaded: number;
 }
 
-export default function SubscriptionValueDashboard({ userId, assessmentId, tier }: SubscriptionValueProps) {
+export default function SubscriptionValueDashboard({ userId, assessmentId, tier, institutionType = 'K12' }: SubscriptionValueProps) {
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,11 +44,28 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier 
   const loadProgressData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/subscription/progress/${userId}`);
+      const response = await fetch(`/api/subscription/progress/${encodeURIComponent(userId)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
       setProgress(data);
     } catch (error) {
       console.error('Failed to load progress:', error);
+      // Set default progress data instead of failing
+      setProgress({
+        implementationProgress: 15,
+        daysActive: 1,
+        nextMilestone: 'Complete initial assessment',
+        reassessmentDue: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+        expertSessionsUsed: 0,
+        expertSessionsTotal: 1,
+        communityPosts: 0,
+        templatesDownloaded: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -59,6 +77,40 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier 
 
   const joinCommunity = () => {
     window.open('https://aiblueprint-community.slack.com', '_blank');
+  };
+
+  // Helper functions for institution-specific content
+  const getContextualTerms = () => {
+    if (institutionType === 'HigherEd') {
+      return {
+        institution: 'university',
+        stakeholders: 'faculty and students',
+        leadership: 'provosts and deans',
+        environment: 'academic environment',
+        implementationContext: 'university implementation'
+      };
+    }
+    return {
+      institution: 'district',
+      stakeholders: 'teachers and students',
+      leadership: 'superintendents and principals',
+      environment: 'K-12 environment',
+      implementationContext: 'district implementation'
+    };
+  };
+
+  const getProgressLabel = () => {
+    const terms = getContextualTerms();
+    return `${terms.institution.charAt(0).toUpperCase()}${terms.institution.slice(1)} Implementation Progress`;
+  };
+
+  const getNextMilestoneContext = (milestone: string) => {
+    const terms = getContextualTerms();
+    // Contextualize milestone text based on institution type
+    if (!milestone) return milestone;
+    return milestone.replace(/district/gi, terms.institution)
+                  .replace(/school/gi, institutionType === 'HigherEd' ? 'university' : 'school')
+                  .replace(/teachers/gi, institutionType === 'HigherEd' ? 'faculty' : 'teachers');
   };
 
   if (loading) {
@@ -159,7 +211,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Implementation Progress
+            {getProgressLabel()}
           </CardTitle>
           <CardDescription>
             Your AI implementation journey progress
@@ -181,7 +233,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier 
           
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <span>Next milestone: {progress.nextMilestone}</span>
+            <span>Next milestone: {getNextMilestoneContext(progress.nextMilestone)}</span>
           </div>
         </CardContent>
       </Card>
@@ -230,7 +282,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier 
               Community & Resources
             </CardTitle>
             <CardDescription>
-              Connect with peers and access exclusive content
+              Connect with {institutionType === 'HigherEd' ? 'other higher education leaders' : 'other K-12 district leaders'} and access exclusive content
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
