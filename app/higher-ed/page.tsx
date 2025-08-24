@@ -31,10 +31,10 @@ export default function HigherEdPage() {
       <Head>
         <title>Higher Ed AI Blueprint – AI Solutions for Universities</title>
         <meta name="description" content="Higher Ed AI Blueprint offers AI readiness assessments, implementation blueprints, and professional development specifically designed for universities and colleges." />
-        <link rel="canonical" href="https://aiblueprint.k12aiblueprint.com/higher-ed" />
+        <link rel="canonical" href="https://aiblueprint.higheredaiblueprint.com/" />
         <meta property="og:title" content="Higher Ed AI Blueprint – AI Solutions for Universities" />
         <meta property="og:description" content="AI readiness, implementation blueprints, and professional development specifically designed for higher education institutions." />
-        <meta property="og:url" content="https://aiblueprint.k12aiblueprint.com/higher-ed" />
+        <meta property="og:url" content="https://aiblueprint.higheredaiblueprint.com/" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/wp-content/uploads/2025/07/hero-og.jpg" />
       </Head>
@@ -70,11 +70,11 @@ export default function HigherEdPage() {
               <Link 
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-white border-0 transition-all duration-200"
                 style={{ background: 'var(--primary-accessible)' }}
-                href="/start?billing=monthly"
+                href="/ai-readiness/start"
                 onMouseOver={(e) => e.currentTarget.style.background = 'var(--primary-600)'}
                 onMouseOut={(e) => e.currentTarget.style.background = 'var(--primary-accessible)'}
               >
-                Start Monthly Plan - $995/month
+                Start Assessment - Choose Your Mode
               </Link>
               <Link 
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-white border-2 border-white bg-transparent transition-all duration-200"
@@ -85,7 +85,7 @@ export default function HigherEdPage() {
                 Save 17% - Annual Plan
               </Link>
             </div>
-            <p className="text-sm opacity-75">✨ 7-day free trial included • Cancel anytime • All 6 patent-pending algorithms</p>
+            <p className="text-sm opacity-75">⚡ Quick (8-10 min) or 🔬 Comprehensive (25-35 min) • Auto-save progress • Section results</p>
           </div>
         </header>
 
@@ -117,9 +117,9 @@ export default function HigherEdPage() {
                   <Link 
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white"
                     style={{ background: 'var(--primary-accessible)' }}
-                    href="/start?billing=monthly"
+                    href="/ai-readiness/start"
                   >
-                    Start Monthly Plan
+                    Start Assessment
                   </Link>
                   <Link 
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white border-2 border-white bg-transparent"
@@ -149,9 +149,9 @@ export default function HigherEdPage() {
                   <Link 
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white"
                     style={{ background: 'var(--primary-accessible)' }}
-                    href="/start?billing=monthly"
+                    href="/ai-readiness/start"
                   >
-                    Start Monthly Plan
+                    Start Assessment
                   </Link>
                   <Link 
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white border-2 border-white bg-transparent"
@@ -302,15 +302,15 @@ export default function HigherEdPage() {
               Ready to Transform Your Institution?
             </h2>
             <p className="text-lg mb-8 opacity-75 max-w-3xl mx-auto">
-              Start your higher education AI journey with AI Blueprint. Get instant access with your 7-day free trial, then continue with full access at $995/month—no sales call required.
+              Start your higher education AI journey with AI Blueprint. Choose between Quick (8-10 min) or Comprehensive (25-35 min) assessment modes to match your available time.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link 
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-white"
                 style={{ background: 'var(--primary-accessible)' }}
-                href="/start?billing=monthly"
+                href="/ai-readiness/start"
               >
-                Start Free Trial
+                Start Assessment
               </Link>
               <Link 
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-white border-2 border-white bg-transparent"

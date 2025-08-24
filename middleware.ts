@@ -4,24 +4,32 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const host = request.headers.get('host') || '';
-  const canonicalHost = 'aiblueprint.k12aiblueprint.com';
-  // Redirect legacy domain to canonical
+  
+  // Define canonical domains
+  const k12Domain = 'aiblueprint.k12aiblueprint.com';
+  const higherEdDomain = 'aiblueprint.higheredaiblueprint.com';
+  
+  // Redirect legacy domain to K-12 canonical
   if (host === 'aireadiness.northpathstrategies.org') {
     const url = new URL(request.url);
-    url.host = canonicalHost;
+    url.host = k12Domain;
     return NextResponse.redirect(url, 301);
   }
   
   // Clone the request URL to modify
   const response = NextResponse.next();
   
-  // Single consolidated domain context after higher-ed host deprecation
-  if (host.includes('k12aiblueprint.com')) {
+  // Set institution type and domain context based on hostname
+  if (host.includes('higheredaiblueprint.com')) {
+    response.headers.set('x-institution-type', 'HigherEd');
+    response.headers.set('x-domain-context', 'higher-ed');
+  } else if (host.includes('k12aiblueprint.com')) {
     response.headers.set('x-institution-type', 'K12');
     response.headers.set('x-domain-context', 'k12');
   } else {
-    response.headers.set('x-institution-type', 'default');
-    response.headers.set('x-domain-context', 'default');
+    // Default to K12 for development/localhost
+    response.headers.set('x-institution-type', 'K12');
+    response.headers.set('x-domain-context', 'k12');
   }
   
   // Add domain info to response headers for client-side access
