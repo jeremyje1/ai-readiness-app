@@ -189,18 +189,18 @@
 <body>
   <nav aria-label="Primary navigation">
     <div class="container nav-inner">
-      <a class="brand" href="https://aiblueprint.higheredaiblueprint.com/" aria-label="Higher Ed AI Blueprint home">
-  <img alt="Higher Ed AI Blueprint logo" loading="lazy" src="https://aiblueprint.higheredaiblueprint.com/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png" />
+      <a class="brand" href="https://aiblueprint.k12aiblueprint.com/" aria-label="Higher Ed AI Blueprint home">
+  <img alt="Higher Ed AI Blueprint logo" loading="lazy" src="https://aiblueprint.k12aiblueprint.com/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png" />
         <span>Higher Ed AI Blueprint</span>
       </a>
       <button class="menu-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Open menu">☰</button>
       <div id="nav-menu" class="menu" role="menubar">
-        <a role="menuitem" href="https://aiblueprint.higheredaiblueprint.com/services">Services</a>
-        <a role="menuitem" href="https://aiblueprint.higheredaiblueprint.com/contact">Contact</a>
-        <a role="menuitem" href="https://aiblueprint.higheredaiblueprint.com/privacy">Privacy</a>
-        <a role="menuitem" href="https://aiblueprint.higheredaiblueprint.com/terms">Terms</a>
-        <a role="menuitem" class="btn-login" href="https://aiblueprint.higheredaiblueprint.com/auth/login">Login</a>
-        <a role="menuitem" class="btn btn-primary" href="https://aiblueprint.higheredaiblueprint.com/start?billing=monthly">Start</a>
+        <a role="menuitem" href="https://aiblueprint.k12aiblueprint.com/services">Services</a>
+        <a role="menuitem" href="https://aiblueprint.k12aiblueprint.com/contact">Contact</a>
+        <a role="menuitem" href="https://aiblueprint.k12aiblueprint.com/privacy">Privacy</a>
+        <a role="menuitem" href="https://aiblueprint.k12aiblueprint.com/terms">Terms</a>
+        <a role="menuitem" class="btn-login" href="https://aiblueprint.k12aiblueprint.com/auth/login">Login</a>
+        <a role="menuitem" class="btn btn-primary" href="https://aiblueprint.k12aiblueprint.com/start?billing=monthly&context=HigherEd">Start</a>
       </div>
     </div>
   </nav>
@@ -211,8 +211,8 @@
       <h1>Empowering Higher Education with Responsible AI</h1>
       <p class="muted">From readiness assessments to implementation roadmaps, Higher Ed AI Blueprint helps universities and colleges deploy AI safely and effectively using our patent-pending algorithm suite: AIRIX™, AIRS™, AICS™, AIMS™, AIPS™, and AIBS™.</p>
       <div class="cta-group" role="group" aria-label="Primary calls to action">
-  <a class="btn btn-primary" data-cta="start-monthly" href="https://aiblueprint.higheredaiblueprint.com/start?billing=monthly" rel="nofollow noopener">Start Monthly Plan - $995/month</a>
-  <a class="btn btn-outline" data-cta="start-yearly" href="https://aiblueprint.higheredaiblueprint.com/start?billing=yearly" rel="nofollow noopener">Save 17% - Annual Plan</a>
+  <a class="btn btn-primary" data-cta="start-monthly" href="https://aiblueprint.k12aiblueprint.com/start?billing=monthly&context=HigherEd" rel="nofollow noopener">Start Monthly Plan - $995/month</a>
+  <a class="btn btn-outline" data-cta="start-yearly" href="https://aiblueprint.k12aiblueprint.com/start?billing=yearly&context=HigherEd" rel="nofollow noopener">Save 17% - Annual Plan</a>
       </div>
       <p class="note" style="margin-top: 1rem; color: var(--muted); font-size: 0.875rem;">✨ 7-day free trial included • Cancel anytime • All 6 patent-pending algorithms</p>
     </div>
@@ -347,12 +347,20 @@
   <!-- Minimal JS for mobile menu + smooth scroll -->
   <script>
     (function(){
-      const APP_BASE = 'https://aiblueprint.higheredaiblueprint.com';
+      const APP_BASE = 'https://aiblueprint.k12aiblueprint.com';
       const links = document.querySelectorAll('a[href^="/"], a[href*="/services"], a[href*="/start?"], a[href$="/privacy"], a[href$="/terms"], a[href$="/contact"]');
       links.forEach(a=>{
         const href = a.getAttribute('href');
         if (!href) return;
         if (href.startsWith('/')) a.href = APP_BASE + href;
+        
+        // For start links, add higher ed context parameter
+        if (href.includes('/start')) {
+          const url = new URL(a.href);
+          url.searchParams.set('context', 'HigherEd');
+          a.href = url.toString();
+        }
+        
         try {
           if (window.location.hostname === new URL(APP_BASE).hostname) {
             const currentPath = window.location.pathname.replace(/\/$/,'');

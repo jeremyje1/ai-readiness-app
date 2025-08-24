@@ -66,30 +66,8 @@ function resolvePriceId(product: string, billing: string): string | null {
 }
 
 function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
-  // Detect domain context from request headers
-  const host = request?.headers.get('host') || '';
-  const isHigherEd = host.includes('higheredaiblueprint.com');
-  
-  // Set canonical domain based on context
-  const k12Canonical = 'https://aiblueprint.k12aiblueprint.com';
-  const higherEdCanonical = 'https://aiblueprint.higheredaiblueprint.com';
-  const hardCanonical = isHigherEd ? higherEdCanonical : k12Canonical;
-  
-  const envCandidate = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || hardCanonical;
-  // Sanitize any stale legacy host values in env.
-  let canonical = envCandidate.replace('https://aireadiness.northpathstrategies.org', hardCanonical);
-  
-  // For domain-aware routing, use the appropriate canonical domain
-  if (isHigherEd) {
-    canonical = higherEdCanonical;
-  } else if (!canonical.startsWith(k12Canonical) && !canonical.startsWith(higherEdCanonical)) {
-    // Ignore unexpected hosts and force canonical (prevents preview / legacy domain leakage)
-    canonical = hardCanonical;
-  }
-
-  // Previously we replaced with request host. That leaked legacy domains into success_url if checkout initiated from an old marketing page.
-  // Now we detect the domain context and use the appropriate canonical domain
-  let baseUrl = canonical;
+  // Simple single-domain approach
+  const canonical = 'https://aiblueprint.k12aiblueprint.com';
   
   // Map return_to shorthand values to paths
   const destination = (() => {
@@ -110,17 +88,15 @@ function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
   
   return {
     // Include session_id placeholder for post-checkout bootstrap
-    success: `${baseUrl}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`,
-    cancel: `${baseUrl}/ai-readiness?checkout=cancelled`
+    success: `${canonical}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`,
+    cancel: `${canonical}/ai-readiness?checkout=cancelled`
   };
 }
 
 async function createCheckoutSession(params: CheckoutParams, request?: NextRequest) {
-  // Strip/ignore any externally supplied success/cancel URLs that are not canonical
-  // Allow both K-12 and Higher Ed canonical domains
+  // Simple single-domain allowlist
   const allowedOrigins = [
-    'https://aiblueprint.k12aiblueprint.com',
-    'https://aiblueprint.higheredaiblueprint.com'
+    'https://aiblueprint.k12aiblueprint.com'
   ];
   
   if (params.successUrl && !allowedOrigins.some(origin => params.successUrl!.startsWith(origin))) {
