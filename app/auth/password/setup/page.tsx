@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { navigateToDomainAwarePath } from '@/lib/domain-utils';
 
 export default function PasswordSetupPage() {
   const params = useSearchParams();
@@ -114,7 +115,7 @@ export default function PasswordSetupPage() {
         }
       }
       setStatus('Logged in! Redirecting...');
-      setTimeout(()=> router.push('/ai-readiness/dashboard?verified=true'), 800);
+      setTimeout(() => navigateToDomainAwarePath('/ai-readiness/dashboard?verified=true'), 800);
     } catch (err: any) {
       setStatus(err.message);
     } finally {

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, CheckCircle, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { navigateToDomainAwarePath } from '@/lib/domain-utils';
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -27,8 +28,8 @@ export default function PaymentSuccessPage() {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        // Already logged in, redirect to dashboard
-        router.push('/ai-readiness/dashboard?verified=true');
+        // Already logged in, redirect to dashboard using domain-aware URL
+        navigateToDomainAwarePath('/ai-readiness/dashboard?verified=true');
       }
     };
     
@@ -78,9 +79,9 @@ export default function PaymentSuccessPage() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         setStep('complete');
-        // Small delay to show success message, then redirect
+        // Small delay to show success message, then redirect using domain-aware URL
         setTimeout(() => {
-          router.push('/ai-readiness/dashboard?verified=true');
+          navigateToDomainAwarePath('/ai-readiness/dashboard?verified=true');
         }, 2000);
       }
     });
@@ -234,7 +235,7 @@ export default function PaymentSuccessPage() {
               </p>
             </div>
             
-            <Button onClick={() => router.push('/ai-readiness/dashboard?verified=true')}>
+            <Button onClick={() => navigateToDomainAwarePath('/ai-readiness/dashboard?verified=true')}>
               <ArrowRight className="w-4 h-4 mr-2" />
               Go to Dashboard
             </Button>

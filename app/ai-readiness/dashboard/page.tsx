@@ -24,7 +24,20 @@ export default function AIReadinessDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [institutionType, setInstitutionType] = useState<'K12' | 'HigherEd'>('K12');
+  const [hydrated, setHydrated] = useState(false);
   const debugMode = searchParams.get('debug') === '1';
+
+  // Handle hydration and detect domain context
+  useEffect(() => {
+    setHydrated(true);
+    const hostname = window.location.hostname;
+    if (hostname.includes('higheredaiblueprint.com')) {
+      setInstitutionType('HigherEd');
+    } else {
+      setInstitutionType('K12');
+    }
+  }, []);
 
   useEffect(() => {
     verifyPaymentAccess();
@@ -154,6 +167,38 @@ export default function AIReadinessDashboard() {
     return names[tier] || tier;
   };
 
+  // Helper functions for institution-specific content
+  const getWelcomeMessage = () => {
+    if (institutionType === 'HigherEd') {
+      return "Welcome to your Higher Education AI Blueprint Dashboard. Track your university's AI readiness progress and access implementation resources tailored for academic institutions.";
+    }
+    return "Welcome to your K-12 AI Blueprint Dashboard. Track your district's AI readiness progress and access implementation resources designed for school environments.";
+  };
+
+  const getAssessmentStartText = () => {
+    if (institutionType === 'HigherEd') {
+      return "Begin your comprehensive AI readiness assessment designed specifically for universities and colleges.";
+    }
+    return "Begin your comprehensive AI readiness assessment designed specifically for K-12 school districts.";
+  };
+
+  const getInstitutionTerms = () => {
+    if (institutionType === 'HigherEd') {
+      return {
+        institution: 'university',
+        context: 'academic environment',
+        stakeholders: 'faculty and students',
+        leadership: 'provosts and deans'
+      };
+    }
+    return {
+      institution: 'district',
+      context: 'K-12 environment',
+      stakeholders: 'teachers and students',
+      leadership: 'superintendents and principals'
+    };
+  };
+
   const startAssessment = () => {
     if (verification.accessUrl) {
       router.push(verification.accessUrl);
@@ -167,6 +212,19 @@ export default function AIReadinessDashboard() {
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
           <h2 className="text-xl font-semibold mb-2">Verifying Access</h2>
           <p className="text-gray-600">Checking your payment status...</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // Prevent hydration mismatch by showing loading until client-side detection completes
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <Card className="p-8 text-center max-w-md">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <h2 className="text-xl font-semibold mb-2">Loading Dashboard</h2>
+          <p className="text-gray-600">Preparing your experience...</p>
         </Card>
       </div>
     );
@@ -229,7 +287,9 @@ export default function AIReadinessDashboard() {
           <div className="flex items-center mb-6">
             <CheckCircle className="w-8 h-8 text-green-500 mr-3" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">AI Blueprint Dashboard</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {institutionType === 'HigherEd' ? 'Higher Ed AI Blueprint Dashboard' : 'K-12 AI Blueprint Dashboard'}
+              </h1>
               <p className="text-gray-600 mt-1">Your ongoing AI transformation journey • Active subscription</p>
             </div>
           </div>
@@ -318,8 +378,7 @@ export default function AIReadinessDashboard() {
           <div className="text-center">
             <h2 className="text-2xl font-semibold mb-4">Ready to Start Your AI Readiness Assessment?</h2>
             <p className="text-gray-600 mb-6">
-              Your comprehensive AI assessment includes personalized recommendations, 
-              maturity analysis, and actionable insights for your organization.
+              {getAssessmentStartText()}
             </p>
           </div>
         </Card>
@@ -330,6 +389,7 @@ export default function AIReadinessDashboard() {
           <SubscriptionValueDashboard 
             userId={verification.email || 'unknown'} 
             tier={verification.tier || 'comprehensive'} 
+            institutionType={institutionType}
           />
         </div>
 
@@ -338,9 +398,11 @@ export default function AIReadinessDashboard() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
               <div>
-                <h4 className="font-semibold">Take Your AI Readiness Assessment</h4>
+                <h4 className="font-semibold">
+                  {institutionType === 'HigherEd' ? 'Take Your Higher Ed AI Readiness Assessment' : 'Take Your K-12 AI Readiness Assessment'}
+                </h4>
                 <p className="text-sm text-gray-600 mt-1">
-                  Get comprehensive insights with our 6-algorithm assessment suite
+                  Get comprehensive insights with our 6-algorithm assessment suite designed for {getInstitutionTerms().context}
                 </p>
               </div>
               <Button 

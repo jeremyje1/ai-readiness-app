@@ -6,7 +6,8 @@ export async function GET(
   { params }: { params: { userId: string } }
 ) {
   try {
-    const { userId } = params;
+    // Decode the userId parameter in case it's URL encoded
+    const userId = decodeURIComponent(params.userId);
     
     // Get user's subscription start date and assessments
     const { data: userData, error: userError } = await supabase
