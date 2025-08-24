@@ -1,22 +1,47 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/card';
 import { Button } from '@/components/button';
 import { CheckCircle, Clock, BarChart3, ArrowRight } from 'lucide-react';
 
 export default function AssessmentStartPage() {
+  const [institutionType, setInstitutionType] = useState<'K12' | 'HigherEd'>('K12');
+
+  useEffect(() => {
+    // Detect domain context
+    const hostname = window.location.hostname;
+    if (hostname.includes('higheredaiblueprint.com')) {
+      setInstitutionType('HigherEd');
+    } else {
+      setInstitutionType('K12');
+    }
+  }, []);
+
+  const getTitle = () => {
+    if (institutionType === 'HigherEd') {
+      return 'Higher Education AI Readiness Assessment';
+    }
+    return 'K-12 AI Readiness Assessment';
+  };
+
+  const getContextualDescription = () => {
+    if (institutionType === 'HigherEd') {
+      return 'Choose your assessment approach for university and college environments';
+    }
+    return 'Choose your assessment approach for school district environments';
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            AI Readiness Assessment
+            {getTitle()}
           </h1>
           <p className="text-xl text-gray-600 mb-6">
-            Choose your assessment approach based on your time and detail needs
+            {getContextualDescription()}
           </p>
           <div className="flex justify-center items-center gap-4 text-sm text-gray-500">
             <span className="flex items-center gap-1">
@@ -50,7 +75,7 @@ export default function AssessmentStartPage() {
               <div className="mb-6">
                 <div className="text-4xl font-bold text-blue-600 mb-2">8-10 min</div>
                 <p className="text-gray-600">
-                  Core questions covering all key areas. Perfect for getting immediate insights and identifying priority areas.
+                  Core questions covering all key areas. Perfect for getting immediate insights and identifying priority areas in your {institutionType === 'HigherEd' ? 'institution' : 'district'}.
                 </p>
               </div>
 
@@ -81,7 +106,7 @@ export default function AssessmentStartPage() {
               </Link>
               
               <p className="text-xs text-gray-500 mt-3">
-                Best for: First-time users, time-constrained teams, initial exploration
+                Best for: First-time users, time-constrained {institutionType === 'HigherEd' ? 'faculty' : 'teams'}, initial exploration
               </p>
             </div>
           </Card>
@@ -100,7 +125,7 @@ export default function AssessmentStartPage() {
               <div className="mb-6">
                 <div className="text-4xl font-bold text-purple-600 mb-2">25-35 min</div>
                 <p className="text-gray-600">
-                  Complete evaluation with detailed analysis, benchmarking, and strategic roadmap development.
+                  Complete evaluation with detailed analysis, benchmarking, and strategic roadmap development for {institutionType === 'HigherEd' ? 'university environments' : 'district-wide implementation'}.
                 </p>
               </div>
 
@@ -131,7 +156,7 @@ export default function AssessmentStartPage() {
               </Link>
               
               <p className="text-xs text-gray-500 mt-3">
-                Best for: Strategic planning, detailed analysis, comprehensive roadmap
+                Best for: Strategic planning, detailed analysis, comprehensive {institutionType === 'HigherEd' ? 'institutional' : 'district'} roadmap
               </p>
             </div>
           </Card>
