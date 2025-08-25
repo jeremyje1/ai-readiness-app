@@ -135,7 +135,9 @@ export class LivePeerBenchmarking {
     const sectorPeers = {
       higher_education: [
         'Regional State University', 'Community College System', 'Private Liberal Arts College',
-        'Technical Institute', 'Research University', 'Urban Community College'
+        'Technical Institute', 'Research University', 'Urban Community College',
+        'Trade School Network', 'Vocational Training Center', 'Professional Institute',
+        'Community & Technical College', 'Career College', 'Technology Institute'
       ],
       healthcare: [
         'Regional Medical Center', 'Community Hospital', 'Specialty Care Center',

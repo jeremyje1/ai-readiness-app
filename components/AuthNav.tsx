@@ -35,6 +35,13 @@ export default function AuthNav() {
     { href: '/privacy', label: 'Privacy' },
     { href: '/terms', label: 'Terms' }
   ];
+
+  const dashboardLinks = [
+    { href: '/executive', label: 'Executive Dashboard', description: 'Readiness scorecards & metrics' },
+    { href: '/executive/compliance', label: 'Compliance Watch', description: 'Track policies & vendor renewals' },
+    { href: '/executive/funding', label: 'Funding Justification', description: 'Generate grant narratives' },
+    { href: '/community', label: 'Community Hub', description: 'Monthly briefings, templates & benchmarks' }
+  ];
   return (
     <header className='w-full bg-white/70 backdrop-blur border-b border-gray-200 text-sm sticky top-0 z-40'>
       <div className='max-w-7xl mx-auto px-4 py-2 flex items-center justify-between'>
@@ -51,6 +58,14 @@ export default function AuthNav() {
           {links.map(l => (
             <Link key={l.href} href={l.href} className={`${linkBase} ${pathname === l.href ? activeClasses : ''}`}>{l.label}</Link>
           ))}
+          {userEmail && (
+            <>
+              <div className="h-4 w-px bg-gray-300 mx-2"></div>
+              {dashboardLinks.map(l => (
+                <Link key={l.href} href={l.href} className={`${linkBase} ${pathname === l.href ? activeClasses : ''}`} title={l.description}>{l.label}</Link>
+              ))}
+            </>
+          )}
         </nav>
         <div className='hidden md:flex items-center gap-3'>
           {!loading && userEmail && (
@@ -74,6 +89,20 @@ export default function AuthNav() {
             {links.map(l => (
               <Link key={l.href} href={l.href} onClick={()=>setOpen(false)} className={`${linkBase} ${pathname === l.href ? activeClasses : 'text-gray-600'}`}>{l.label}</Link>
             ))}
+            {userEmail && (
+              <>
+                <div className='border-t border-gray-100 my-2'></div>
+                <div className="text-xs text-gray-500 font-medium mb-1">DASHBOARDS</div>
+                {dashboardLinks.map(l => (
+                  <Link key={l.href} href={l.href} onClick={()=>setOpen(false)} className={`${linkBase} ${pathname === l.href ? activeClasses : 'text-gray-600'}`}>
+                    <div>
+                      <div className="font-medium">{l.label}</div>
+                      <div className="text-xs text-gray-500">{l.description}</div>
+                    </div>
+                  </Link>
+                ))}
+              </>
+            )}
             <div className='border-t border-gray-100 my-2'></div>
             {!loading && userEmail && (
               <>
