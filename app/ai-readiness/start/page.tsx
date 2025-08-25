@@ -30,7 +30,7 @@ export default function AssessmentStartPage() {
 
   const getContextualDescription = () => {
     if (institutionType === 'HigherEd') {
-      return 'Choose your assessment approach for university and college environments';
+      return 'Choose your assessment approach for universities, community colleges, and trade schools';
     }
     return 'Choose your assessment approach for school district environments';
   };

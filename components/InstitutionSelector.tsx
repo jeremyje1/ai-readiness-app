@@ -94,13 +94,13 @@ export default function InstitutionSelector({
             </CardHeader>
             <CardContent className="text-center">
               <p className={`text-lg mb-6 ${selected === 'HigherEd' ? 'text-slate-700' : 'text-slate-300'}`}>
-                Universities, Colleges, and Community Colleges
+                Universities, Community Colleges, and Trade Schools
               </p>
               <ul className={`text-left space-y-2 mb-6 ${selected === 'HigherEd' ? 'text-slate-600' : 'text-slate-400'}`}>
-                <li>• Institutional governance frameworks</li>
-                <li>• Faculty development programs</li>
-                <li>• Research integration guidance</li>
-                <li>• Academic policy templates</li>
+                <li>• Program-specific governance frameworks</li>
+                <li>• Faculty & instructor development</li>
+                <li>• Accreditation & certification compliance</li>
+                <li>• Industry partnership policies</li>
               </ul>
               <Button 
                 className={`w-full ${

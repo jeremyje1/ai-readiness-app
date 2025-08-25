@@ -84,7 +84,9 @@ async function getEnhancedAnalytics(startDate: string, endDate: string, tier: st
     monthlyTrends: generateMonthlyTrends(),
     
     institutionTypes: {
+      'Universities': Math.floor(Math.random() * 25) + 15,
       'Community College': Math.floor(Math.random() * 20) + 10,
+      'Trade Schools': Math.floor(Math.random() * 15) + 8,
       'Public University': Math.floor(Math.random() * 15) + 15,
       'Private University': Math.floor(Math.random() * 12) + 8,
       'Research Institution': Math.floor(Math.random() * 8) + 5

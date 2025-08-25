@@ -1,0 +1,628 @@
+// This file extends the main schema.prisma with Assessment 2.0 models
+// To be merged into the main schema file
+
+// =====================================================
+// ASSESSMENT 2.0: DOCUMENT PROCESSING
+// =====================================================
+
+model DocumentUpload {
+  id               String    @id @default(uuid())
+  userId           String    @map("user_id")
+  institutionId    String    @map("institution_id")
+  fileName         String    @map("file_name")
+  fileSize         BigInt    @map("file_size")
+  mimeType         String    @map("mime_type")
+  storageUrl       String    @map("storage_url")
+  status           UploadStatus @default(UPLOADED)
+  piiDetected      Boolean   @default(false) @map("pii_detected")
+  piiRedactedUrl   String?   @map("pii_redacted_url")
+  metadata         Json      @default("{}")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  processedAt      DateTime? @map("processed_at")
+
+  // Relations
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institution      Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  processingResult ProcessingResult?
+  approvalWorkflow ApprovalWorkflow[]
+
+  @@index([userId])
+  @@index([institutionId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("document_uploads")
+}
+
+model ProcessingResult {
+  id                String    @id @default(uuid())
+  uploadId          String    @unique @map("upload_id")
+  extractedText     String?   @map("extracted_text")
+  extractedTextHash String?   @map("extracted_text_hash")
+  entities          Json      @default("{}")
+  frameworks        String[]
+  processingTimeMs  Int?      @map("processing_time_ms")
+  errorMessage      String?   @map("error_message")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  upload            DocumentUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  gapAnalyses       GapAnalysis[]
+  policyRedlines    PolicyRedline[]
+  generatedArtifacts GeneratedArtifact[]
+
+  @@index([uploadId])
+  @@index([extractedTextHash])
+  @@map("processing_results")
+}
+
+model GapAnalysis {
+  id            String    @id @default(uuid())
+  resultId      String    @map("result_id")
+  section       String
+  requirement   String
+  currentState  String?   @map("current_state")
+  gap           String
+  riskLevel     RiskLevel @map("risk_level")
+  remediation   String
+  framework     String?
+  sortOrder     Int       @default(0) @map("sort_order")
+
+  // Relations
+  result        ProcessingResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@index([resultId])
+  @@index([riskLevel])
+  @@index([framework])
+  @@map("gap_analyses")
+}
+
+model PolicyRedline {
+  id               String    @id @default(uuid())
+  resultId         String    @map("result_id")
+  section          String
+  originalText     String    @map("original_text")
+  suggestedText    String    @map("suggested_text")
+  rationale        String
+  framework        String
+  confidenceScore  Decimal   @default(0.00) @map("confidence_score") @db.Decimal(3, 2)
+  sortOrder        Int       @default(0) @map("sort_order")
+
+  // Relations
+  result           ProcessingResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@index([resultId])
+  @@index([framework])
+  @@index([confidenceScore])
+  @@map("policy_redlines")
+}
+
+model GeneratedArtifact {
+  id                   String    @id @default(uuid())
+  resultId             String    @map("result_id")
+  type                 ArtifactType
+  format               ArtifactFormat
+  title                String
+  description          String?
+  storageUrl           String    @map("storage_url")
+  fileSize             BigInt?   @map("file_size")
+  signedUrl            String?   @map("signed_url")
+  signedUrlExpiresAt   DateTime? @map("signed_url_expires_at")
+  metadata             Json      @default("{}")
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  result               ProcessingResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  approvalWorkflows    ApprovalWorkflow[]
+  vendorDecisionBrief  VendorDecisionBrief?
+  policyWatchers       PolicyWatcher[]
+
+  @@index([resultId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("generated_artifacts")
+}
+
+// =====================================================
+// APPROVALS WORKFLOW
+// =====================================================
+
+model ApprovalWorkflow {
+  id                String    @id @default(uuid())
+  documentId        String?   @map("document_id")
+  artifactId        String?   @map("artifact_id")
+  ownerId           String    @map("owner_id")
+  institutionId     String    @map("institution_id")
+  title             String
+  description       String?
+  status            WorkflowStatus @default(DRAFT)
+  version           Int       @default(1)
+  deadline          DateTime?
+  requireSequential Boolean   @default(false) @map("require_sequential")
+  requireAllApprovals Boolean @default(true) @map("require_all_approvals")
+  metadata          Json      @default("{}")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  submittedAt       DateTime? @map("submitted_at")
+  completedAt       DateTime? @map("completed_at")
+
+  // Relations
+  document          DocumentUpload? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  artifact          GeneratedArtifact? @relation(fields: [artifactId], references: [id], onDelete: SetNull)
+  owner             User @relation(fields: [ownerId], references: [id])
+  institution       Institution @relation(fields: [institutionId], references: [id])
+  approvalRequests  ApprovalRequest[]
+  comments          ApprovalComment[]
+
+  @@index([ownerId])
+  @@index([institutionId])
+  @@index([status])
+  @@index([deadline])
+  @@map("approval_workflows")
+}
+
+model ApprovalRequest {
+  id              String    @id @default(uuid())
+  workflowId      String    @map("workflow_id")
+  approverId      String    @map("approver_id")
+  role            ApproverRole @default(APPROVER)
+  status          RequestStatus @default(PENDING)
+  comments        String?
+  decidedAt       DateTime? @map("decided_at")
+  reminderSentAt  DateTime? @map("reminder_sent_at")
+  orderIndex      Int       @default(0) @map("order_index")
+  metadata        Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  workflow        ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  approver        User @relation(fields: [approverId], references: [id])
+  signature       ESignature?
+
+  @@unique([workflowId, approverId])
+  @@index([workflowId])
+  @@index([approverId])
+  @@index([status])
+  @@map("approval_requests")
+}
+
+model ESignature {
+  id              String    @id @default(uuid())
+  requestId       String    @unique @map("request_id")
+  signerId        String    @map("signer_id")
+  signatureData   String    @map("signature_data")
+  ipAddress       String    @map("ip_address")
+  userAgent       String?   @map("user_agent")
+  certificateId   String?   @map("certificate_id")
+  verified        Boolean   @default(false)
+  signedAt        DateTime  @default(now()) @map("signed_at")
+
+  // Relations
+  request         ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  signer          User @relation(fields: [signerId], references: [id])
+
+  @@index([requestId])
+  @@index([signerId])
+  @@index([signedAt])
+  @@map("e_signatures")
+}
+
+model ApprovalComment {
+  id          String    @id @default(uuid())
+  workflowId  String    @map("workflow_id")
+  userId      String    @map("user_id")
+  parentId    String?   @map("parent_id")
+  text        String
+  attachments String[]
+  editedAt    DateTime? @map("edited_at")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  workflow    ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  user        User @relation(fields: [userId], references: [id])
+  parent      ApprovalComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     ApprovalComment[] @relation("CommentReplies")
+
+  @@index([workflowId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+  @@map("approval_comments")
+}
+
+// =====================================================
+// VENDOR VETTING SYSTEM
+// =====================================================
+
+model VendorSubmission {
+  id               String    @id @default(uuid())
+  vendorName       String    @map("vendor_name")
+  vendorWebsite    String?   @map("vendor_website")
+  productName      String    @map("product_name")
+  productCategory  String[]  @map("product_category")
+  submitterId      String    @map("submitter_id")
+  institutionId    String    @map("institution_id")
+  status           VendorStatus @default(INTAKE)
+  intakeForm       Json      @default("{}") @map("intake_form")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  reviewedAt       DateTime? @map("reviewed_at")
+
+  // Relations
+  submitter        User @relation(fields: [submitterId], references: [id])
+  institution      Institution @relation(fields: [institutionId], references: [id])
+  documents        VendorDocument[]
+  riskScore        VendorRiskScore?
+  decisionBrief    VendorDecisionBrief?
+
+  @@index([submitterId])
+  @@index([institutionId])
+  @@index([status])
+  @@index([vendorName])
+  @@map("vendor_submissions")
+}
+
+model VendorDocument {
+  id              String    @id @default(uuid())
+  submissionId    String    @map("submission_id")
+  type            DocumentType
+  url             String
+  extractedText   String?   @map("extracted_text")
+  analysisResults Json      @default("{}") @map("analysis_results")
+  uploadedAt      DateTime  @default(now()) @map("uploaded_at")
+  analyzedAt      DateTime? @map("analyzed_at")
+
+  // Relations
+  submission      VendorSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([type])
+  @@map("vendor_documents")
+}
+
+model VendorRiskScore {
+  id                  String    @id @default(uuid())
+  submissionId        String    @unique @map("submission_id")
+  overallScore        Int       @map("overall_score")
+  dataPrivacyScore    Int       @map("data_privacy_score")
+  dataPrivacyLevel    RiskLevel @map("data_privacy_level")
+  securityScore       Int       @map("security_score")
+  securityLevel       RiskLevel @map("security_level")
+  complianceScore     Int       @map("compliance_score")
+  complianceLevel     RiskLevel @map("compliance_level")
+  aiEthicsScore       Int       @map("ai_ethics_score")
+  aiEthicsLevel       RiskLevel @map("ai_ethics_level")
+  studentSafetyScore  Int       @map("student_safety_score")
+  studentSafetyLevel  RiskLevel @map("student_safety_level")
+  findings            Json      @default("{}")
+  recommendations     String[]
+  concerns            Json      @default("[]")
+  calculatedAt        DateTime  @default(now()) @map("calculated_at")
+
+  // Relations
+  submission          VendorSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([overallScore])
+  @@map("vendor_risk_scores")
+}
+
+model VendorDecisionBrief {
+  id                 String    @id @default(uuid())
+  submissionId       String    @unique @map("submission_id")
+  executiveSummary   String    @map("executive_summary")
+  recommendation     RecommendationType
+  conditions         String[]
+  keyRisks           String[]  @map("key_risks")
+  mitigations        String[]
+  alternativeVendors String[]  @map("alternative_vendors")
+  artifactId         String?   @map("artifact_id")
+  generatedAt        DateTime  @default(now()) @map("generated_at")
+
+  // Relations
+  submission         VendorSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  artifact           GeneratedArtifact? @relation(fields: [artifactId], references: [id])
+
+  @@index([submissionId])
+  @@index([recommendation])
+  @@map("vendor_decision_briefs")
+}
+
+// =====================================================
+// EXECUTIVE DASHBOARDS & TELEMETRY
+// =====================================================
+
+model DashboardMetric {
+  id            String    @id @default(uuid())
+  institutionId String    @map("institution_id")
+  type          MetricType
+  name          String
+  value         Decimal   @db.Decimal(10, 2)
+  trend         TrendDirection?
+  period        MetricPeriod
+  dimensions    Json      @default("{}")
+  calculatedAt  DateTime  @default(now()) @map("calculated_at")
+
+  // Relations
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  @@index([institutionId])
+  @@index([type])
+  @@index([calculatedAt])
+  @@index([name])
+  @@map("dashboard_metrics")
+}
+
+model ReadinessScore {
+  id                    String    @id @default(uuid())
+  institutionId         String    @map("institution_id")
+  assessmentId          String?   @map("assessment_id")
+  overallScore          Decimal   @map("overall_score") @db.Decimal(5, 2)
+  leadershipScore       Decimal   @map("leadership_score") @db.Decimal(5, 2)
+  infrastructureScore   Decimal   @map("infrastructure_score") @db.Decimal(5, 2)
+  dataGovernanceScore   Decimal   @map("data_governance_score") @db.Decimal(5, 2)
+  academicScore         Decimal   @map("academic_score") @db.Decimal(5, 2)
+  communityScore        Decimal   @map("community_score") @db.Decimal(5, 2)
+  maturityLevel         Int       @map("maturity_level")
+  calculatedAt          DateTime  @default(now()) @map("calculated_at")
+
+  // Relations
+  institution           Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  assessment            OrganizationalAssessment? @relation(fields: [assessmentId], references: [id])
+
+  @@index([institutionId])
+  @@index([calculatedAt])
+  @@map("readiness_scores")
+}
+
+model AdoptionTelemetry {
+  id            String    @id @default(uuid())
+  eventType     String    @map("event_type")
+  userId        String?   @map("user_id")
+  institutionId String?   @map("institution_id")
+  sessionId     String?   @map("session_id")
+  metadata      Json      @default("{}")
+  timestamp     DateTime  @default(now())
+  processed     Boolean   @default(false)
+
+  // Relations
+  user          User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  @@index([eventType])
+  @@index([userId])
+  @@index([institutionId])
+  @@index([timestamp])
+  @@index([processed])
+  @@map("adoption_telemetry")
+}
+
+model BenchmarkComparison {
+  id            String    @id @default(uuid())
+  institutionId String    @map("institution_id")
+  peerGroup     String    @map("peer_group")
+  quarter       String
+  metrics       Json      @default("{}")
+  peerCount     Int       @default(0) @map("peer_count")
+  calculatedAt  DateTime  @default(now()) @map("calculated_at")
+
+  // Relations
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  @@unique([institutionId, peerGroup, quarter])
+  @@index([institutionId])
+  @@index([quarter])
+  @@map("benchmark_comparisons")
+}
+
+// =====================================================
+// POLICY UPDATE WATCHERS
+// =====================================================
+
+model PolicyWatcher {
+  id              String    @id @default(uuid())
+  institutionId   String    @map("institution_id")
+  policyId        String?   @map("policy_id")
+  policyName      String    @map("policy_name")
+  frameworks      String[]
+  enabled         Boolean   @default(true)
+  lastChecked     DateTime  @default(now()) @map("last_checked")
+  nextCheck       DateTime  @map("next_check")
+  checkFrequency  String    @default("1 day") @map("check_frequency")
+  notifyEmails    String[]  @map("notify_emails")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  institution     Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  policy          GeneratedArtifact? @relation(fields: [policyId], references: [id], onDelete: SetNull)
+  alerts          PolicyUpdateAlert[]
+
+  @@index([institutionId])
+  @@index([enabled])
+  @@index([nextCheck])
+  @@map("policy_watchers")
+}
+
+model FrameworkUpdate {
+  id            String    @id @default(uuid())
+  framework     String
+  version       String
+  previousVersion String? @map("previous_version")
+  publishedDate DateTime  @map("published_date")
+  sourceUrl     String?   @map("source_url")
+  summary       String?
+  changes       Json      @default("[]")
+  detectedAt    DateTime  @default(now()) @map("detected_at")
+  processed     Boolean   @default(false)
+
+  // Relations
+  alerts        PolicyUpdateAlert[]
+
+  @@unique([framework, version])
+  @@index([framework])
+  @@index([publishedDate])
+  @@index([processed])
+  @@map("framework_updates")
+}
+
+model PolicyUpdateAlert {
+  id                String    @id @default(uuid())
+  watcherId         String    @map("watcher_id")
+  updateId          String    @map("update_id")
+  impactedSections  String[]  @map("impacted_sections")
+  suggestedRedlines Json      @default("[]") @map("suggested_redlines")
+  impactScore       Int?      @map("impact_score")
+  status            AlertStatus @default(PENDING)
+  reviewedBy        String?   @map("reviewed_by")
+  reviewedAt        DateTime? @map("reviewed_at")
+  appliedAt         DateTime? @map("applied_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  watcher           PolicyWatcher @relation(fields: [watcherId], references: [id], onDelete: Cascade)
+  update            FrameworkUpdate @relation(fields: [updateId], references: [id])
+  reviewer          User? @relation(fields: [reviewedBy], references: [id])
+
+  @@index([watcherId])
+  @@index([updateId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("policy_update_alerts")
+}
+
+// =====================================================
+// AUDIT & SECURITY
+// =====================================================
+
+model AuditLog {
+  id            String    @id @default(uuid())
+  userId        String?   @map("user_id")
+  institutionId String?   @map("institution_id")
+  action        String
+  resourceType  String    @map("resource_type")
+  resourceId    String?   @map("resource_id")
+  oldValues     Json?     @map("old_values")
+  newValues     Json?     @map("new_values")
+  ipAddress     String?   @map("ip_address")
+  userAgent     String?   @map("user_agent")
+  metadata      Json      @default("{}")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user          User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([institutionId])
+  @@index([action])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// =====================================================
+// ENUMS
+// =====================================================
+
+enum UploadStatus {
+  UPLOADED @map("uploaded")
+  SCANNING @map("scanning")
+  PROCESSING @map("processing")
+  COMPLETE @map("complete")
+  FAILED @map("failed")
+}
+
+enum RiskLevel {
+  CRITICAL @map("critical")
+  HIGH @map("high")
+  MEDIUM @map("medium")
+  LOW @map("low")
+}
+
+enum ArtifactType {
+  GAP_ANALYSIS @map("gap-analysis")
+  POLICY_DRAFT @map("policy-draft")
+  BOARD_DECK @map("board-deck")
+  IMPLEMENTATION_PLAN @map("implementation-plan")
+  DECISION_BRIEF @map("decision-brief")
+}
+
+enum ArtifactFormat {
+  PDF @map("pdf")
+  DOCX @map("docx")
+  PPTX @map("pptx")
+  XLSX @map("xlsx")
+  CSV @map("csv")
+}
+
+enum WorkflowStatus {
+  DRAFT @map("draft")
+  IN_REVIEW @map("in-review")
+  APPROVED @map("approved")
+  REJECTED @map("rejected")
+  EXPIRED @map("expired")
+  CANCELLED @map("cancelled")
+}
+
+enum ApproverRole {
+  REVIEWER @map("reviewer")
+  APPROVER @map("approver")
+  FINAL_APPROVER @map("final-approver")
+}
+
+enum RequestStatus {
+  PENDING @map("pending")
+  APPROVED @map("approved")
+  REJECTED @map("rejected")
+  ABSTAINED @map("abstained")
+}
+
+enum VendorStatus {
+  INTAKE @map("intake")
+  REVIEWING @map("reviewing")
+  SCORED @map("scored")
+  APPROVED @map("approved")
+  REJECTED @map("rejected")
+}
+
+enum DocumentType {
+  PRIVACY_POLICY @map("privacy-policy")
+  TERMS @map("terms")
+  SECURITY_CERT @map("security-cert")
+  SOC2 @map("soc2")
+  ISO27001 @map("iso27001")
+  OTHER @map("other")
+}
+
+enum RecommendationType {
+  APPROVE @map("approve")
+  CONDITIONAL @map("conditional")
+  REJECT @map("reject")
+}
+
+enum MetricType {
+  READINESS @map("readiness")
+  ADOPTION @map("adoption")
+  COMPLIANCE @map("compliance")
+  RISK @map("risk")
+  BENCHMARK @map("benchmark")
+}
+
+enum TrendDirection {
+  UP @map("up")
+  DOWN @map("down")
+  STABLE @map("stable")
+}
+
+enum MetricPeriod {
+  DAILY @map("daily")
+  WEEKLY @map("weekly")
+  MONTHLY @map("monthly")
+  QUARTERLY @map("quarterly")
+  YEARLY @map("yearly")
+}
+
+enum AlertStatus {
+  PENDING @map("pending")
+  REVIEWED @map("reviewed")
+  APPLIED @map("applied")
+  DISMISSED @map("dismissed")
+}

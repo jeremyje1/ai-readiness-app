@@ -648,7 +648,9 @@ function generateAlgorithmInsightsHTML(assessmentResults: any): string {
 
 function generateBenchmarkingHTML(assessmentResults: any, institutionData: any): string {
   const benchmarks = [
+    { category: 'Universities', average: 52, percentile: calculatePercentile(assessmentResults.overallScore, 52) },
     { category: 'Community Colleges', average: 45, percentile: calculatePercentile(assessmentResults.overallScore, 45) },
+    { category: 'Trade Schools', average: 38, percentile: calculatePercentile(assessmentResults.overallScore, 38) },
     { category: 'Regional Universities', average: 52, percentile: calculatePercentile(assessmentResults.overallScore, 52) },
     { category: 'Research Universities', average: 68, percentile: calculatePercentile(assessmentResults.overallScore, 68) },
     { category: 'Liberal Arts Colleges', average: 41, percentile: calculatePercentile(assessmentResults.overallScore, 41) }

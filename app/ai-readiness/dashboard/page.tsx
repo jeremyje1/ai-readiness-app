@@ -168,16 +168,14 @@ export default function AIReadinessDashboard() {
   };
 
   // Helper functions for institution-specific content
-  const getWelcomeMessage = () => {
+const getWelcomeMessage = () => {
+  if (institutionType === 'HigherEd') {
+    return "Welcome to your Higher Education AI Blueprint Dashboard. Track your institution's AI readiness progress and access implementation resources tailored for universities, community colleges, and trade schools.";
+  }
+  return "Welcome to your K-12 AI Blueprint Dashboard. Track your district's AI readiness progress and access implementation resources designed for school environments.";
+};  const getAssessmentStartText = () => {
     if (institutionType === 'HigherEd') {
-      return "Welcome to your Higher Education AI Blueprint Dashboard. Track your university's AI readiness progress and access implementation resources tailored for academic institutions.";
-    }
-    return "Welcome to your K-12 AI Blueprint Dashboard. Track your district's AI readiness progress and access implementation resources designed for school environments.";
-  };
-
-  const getAssessmentStartText = () => {
-    if (institutionType === 'HigherEd') {
-      return "Begin your comprehensive AI readiness assessment designed specifically for universities and colleges.";
+      return "Begin your comprehensive AI readiness assessment designed specifically for universities, community colleges, and trade schools.";
     }
     return "Begin your comprehensive AI readiness assessment designed specifically for K-12 school districts.";
   };
@@ -185,10 +183,10 @@ export default function AIReadinessDashboard() {
   const getInstitutionTerms = () => {
     if (institutionType === 'HigherEd') {
       return {
-        institution: 'university',
-        context: 'academic environment',
-        stakeholders: 'faculty and students',
-        leadership: 'provosts and deans'
+        institution: 'institution',
+        context: 'higher education environment',
+        stakeholders: 'faculty, staff, and students',
+        leadership: 'leadership team'
       };
     }
     return {
