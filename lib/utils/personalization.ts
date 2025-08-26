@@ -70,8 +70,10 @@ export function getInstitutionSpecificExamples(institution: UserInstitution | nu
     }
 }
 
-export default {
+const personalizationUtils = {
     getPersonalizationData,
     personalizeText,
     getInstitutionSpecificExamples
 }
+
+export default personalizationUtils
