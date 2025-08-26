@@ -189,7 +189,7 @@ export default function AIReadinessOnboarding() {
                                 <Input
                                     value={data.organizationName}
                                     onChange={(e) => setData(prev => ({ ...prev, organizationName: e.target.value }))}
-                                    placeholder="e.g., Springfield School District, State University"
+                                    placeholder="e.g., Riverside School District, Central State University"
                                 />
                             </div>
 
@@ -342,8 +342,8 @@ export default function AIReadinessOnboarding() {
                         <div className="space-y-4">
                             <div
                                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragOver
-                                        ? 'border-blue-500 bg-blue-50'
-                                        : 'border-gray-300 hover:border-blue-400'
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-300 hover:border-blue-400'
                                     }`}
                                 onDrop={handleDrop}
                                 onDragOver={handleDragOver}

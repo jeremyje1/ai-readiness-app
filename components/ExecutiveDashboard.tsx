@@ -1,38 +1,34 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ExecutiveTutorialTrigger } from '@/components/TutorialTrigger'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { 
-  BarChart, 
-  Bar, 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts'
-import { 
-  Download, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useUserContext } from '@/components/UserProvider'
+import {
+  AlertTriangle,
+  Building,
+  Clock,
   DollarSign,
-  Users,
-  BookOpen,
+  Download,
   Shield,
-  Building
+  TrendingDown,
+  TrendingUp
 } from 'lucide-react'
+import { useState } from 'react'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts'
 
 interface ReadinessScore {
   domain: string
@@ -80,6 +76,11 @@ interface FundingOpportunity {
 export default function ExecutiveDashboard() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('current')
   const [screenshotMode, setScreenshotMode] = useState(false)
+  const { user, institution, loading } = useUserContext()
+
+  // Use actual institution name or fallback to generic name
+  const institutionName = institution?.name || 'Your Institution'
+  const institutionType = institution?.org_type || 'Educational Institution'
 
   // Sample data - replace with actual API calls
   const readinessData: ReadinessScore[] = [
@@ -217,16 +218,21 @@ export default function ExecutiveDashboard() {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
 
   return (
-    <div className={`space-y-6 ${screenshotMode ? 'screenshot-mode' : ''}`}>
+    <div className={`space-y-6 ${screenshotMode ? 'screenshot-mode' : ''}`} data-testid="executive-dashboard">
       {/* Header with Screenshot Controls */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Executive AI Readiness Dashboard</h1>
           <p className="text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString()} • Springfield School District
+            Last updated: {new Date().toLocaleDateString()} • {institutionName}
           </p>
         </div>
         <div className="flex gap-2">
+          <ExecutiveTutorialTrigger
+            variant="button"
+            showNewBadge={true}
+            className="mr-2"
+          />
           <Button
             variant="outline"
             onClick={() => generateScreenshot('readiness')}
@@ -502,7 +508,7 @@ export default function ExecutiveDashboard() {
                           {opportunity.matchedRecommendations} Matched Recommendations
                         </Badge>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <h4 className="font-medium mb-2">Eligible Categories:</h4>
@@ -529,10 +535,10 @@ export default function ExecutiveDashboard() {
                       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                         <h4 className="font-medium mb-2">Auto-Generated Grant Narrative (Boilerplate):</h4>
                         <p className="text-sm text-gray-700">
-                          "Springfield School District requests funding under {opportunity.program} to implement 
-                          AI governance and educational technology initiatives that directly support {opportunity.eligibility[0]} 
-                          and {opportunity.eligibility[1]}. Our comprehensive AI readiness assessment has identified 
-                          {opportunity.matchedRecommendations} specific recommendations that align with federal guidance 
+                          "{institutionName} requests funding under {opportunity.program} to implement
+                          AI governance and educational technology initiatives that directly support {opportunity.eligibility[0]}
+                          and {opportunity.eligibility[1]}. Our comprehensive AI readiness assessment has identified
+                          {opportunity.matchedRecommendations} specific recommendations that align with federal guidance
                           on allowable uses of funds for artificial intelligence in education..."
                         </p>
                         <Button className="mt-2" variant="outline" size="sm">

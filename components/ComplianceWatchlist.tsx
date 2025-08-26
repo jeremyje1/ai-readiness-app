@@ -1,22 +1,20 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { ComplianceTutorialTrigger } from '@/components/TutorialTrigger'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { 
-  AlertTriangle, 
-  Clock, 
-  CheckCircle, 
-  XCircle,
-  Calendar,
-  User,
+import { useUserContext } from '@/components/UserProvider'
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Download,
   FileText,
-  Shield,
-  Building,
-  Download
+  XCircle
 } from 'lucide-react'
+import { useState } from 'react'
 
 interface ComplianceItem {
   id: string
@@ -48,6 +46,11 @@ interface ComplianceMetrics {
 
 export default function ComplianceWatchlist() {
   const [filter, setFilter] = useState<string>('all')
+  const { user, institution, loading } = useUserContext()
+
+  // Use actual institution data
+  const institutionName = institution?.name || 'Your Institution'
+  const institutionType = institution?.org_type === 'K12' ? 'District' : 'Institution'
   const [sortBy, setSortBy] = useState<string>('dueDate')
 
   const complianceItems: ComplianceItem[] = [
@@ -249,7 +252,7 @@ export default function ComplianceWatchlist() {
     const report = `
 COMPLIANCE WATCHLIST REPORT
 Generated: ${new Date().toLocaleDateString()}
-District: Springfield School District
+${institutionType}: ${institutionName}
 
 EXECUTIVE SUMMARY
 Total Active Items: ${metrics.totalItems}
@@ -259,11 +262,11 @@ Overall Compliance Score: ${metrics.complianceScore}%
 
 CRITICAL ITEMS REQUIRING IMMEDIATE ATTENTION:
 ${complianceItems.filter(item => item.priority === 'critical' || item.daysUntilDue < 0)
-  .map(item => `- ${item.title} (Due: ${item.dueDate}) - ${item.assignedTo}`).join('\n')}
+        .map(item => `- ${item.title} (Due: ${item.dueDate}) - ${item.assignedTo}`).join('\n')}
 
 UPCOMING DEADLINES (Next 30 Days):
 ${complianceItems.filter(item => item.daysUntilDue >= 0 && item.daysUntilDue <= 30)
-  .map(item => `- ${item.title} (${item.daysUntilDue} days) - ${item.assignedTo}`).join('\n')}
+        .map(item => `- ${item.title} (${item.daysUntilDue} days) - ${item.assignedTo}`).join('\n')}
     `.trim()
 
     const element = document.createElement('a')
@@ -278,17 +281,20 @@ ${complianceItems.filter(item => item.daysUntilDue >= 0 && item.daysUntilDue <= 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center" data-testid="compliance-watchlist">
         <div>
           <h1 className="text-3xl font-bold">Compliance Watchlist</h1>
           <p className="text-muted-foreground">
             Track AI-related compliance items, vendor renewals, and policy approvals
           </p>
         </div>
-        <Button onClick={generateReport} variant="outline" className="flex items-center gap-2">
-          <Download className="h-4 w-4" />
-          Generate Report
-        </Button>
+        <div className="flex items-center gap-3">
+          <ComplianceTutorialTrigger showNewBadge={true} variant="floating" />
+          <Button onClick={generateReport} variant="outline" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Generate Report
+          </Button>
+        </div>
       </div>
 
       {/* Metrics Overview */}
@@ -382,12 +388,12 @@ ${complianceItems.filter(item => item.daysUntilDue >= 0 && item.daysUntilDue <= 
                     </Badge>
                   </div>
                   <p className="text-muted-foreground mb-3">{item.description}</p>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                     <div>
                       <span className="font-medium">Due Date: </span>
-                      <span className={item.daysUntilDue < 0 ? 'text-red-600 font-semibold' : 
-                                    item.daysUntilDue <= 7 ? 'text-orange-600 font-semibold' : ''}>
+                      <span className={item.daysUntilDue < 0 ? 'text-red-600 font-semibold' :
+                        item.daysUntilDue <= 7 ? 'text-orange-600 font-semibold' : ''}>
                         {item.dueDate}
                       </span>
                     </div>
@@ -401,10 +407,10 @@ ${complianceItems.filter(item => item.daysUntilDue >= 0 && item.daysUntilDue <= 
                     </div>
                     <div>
                       <span className="font-medium">Days Until Due: </span>
-                      <span className={item.daysUntilDue < 0 ? 'text-red-600 font-semibold' : 
-                                    item.daysUntilDue <= 7 ? 'text-orange-600 font-semibold' : ''}>
-                        {item.daysUntilDue < 0 ? `${Math.abs(item.daysUntilDue)} days overdue` : 
-                         item.daysUntilDue === 0 ? 'Due today' : `${item.daysUntilDue} days`}
+                      <span className={item.daysUntilDue < 0 ? 'text-red-600 font-semibold' :
+                        item.daysUntilDue <= 7 ? 'text-orange-600 font-semibold' : ''}>
+                        {item.daysUntilDue < 0 ? `${Math.abs(item.daysUntilDue)} days overdue` :
+                          item.daysUntilDue === 0 ? 'Due today' : `${item.daysUntilDue} days`}
                       </span>
                     </div>
                   </div>

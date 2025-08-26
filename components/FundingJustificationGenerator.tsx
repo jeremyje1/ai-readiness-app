@@ -1,19 +1,20 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { FundingTutorialTrigger } from '@/components/TutorialTrigger'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  DollarSign, 
-  FileText, 
-  Download, 
-  CheckCircle, 
+import { useUserContext } from '@/components/UserProvider'
+import {
   Calendar,
-  Target,
-  Users
+  CheckCircle,
+  DollarSign,
+  Download,
+  FileText,
+  Target
 } from 'lucide-react'
+import { useState } from 'react'
 
 interface FundingOpportunity {
   id: string
@@ -41,6 +42,13 @@ export default function FundingJustificationGenerator() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<string>('')
   const [generatedNarrative, setGeneratedNarrative] = useState<string>('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const { user, institution, loading } = useUserContext()
+
+  // Use actual institution data or fallback values
+  const institutionName = institution?.name || 'Your Institution'
+  const institutionType = institution?.org_type === 'K12' ? 'School District' : 'Institution'
+  const studentCount = institution?.headcount || 2330 // fallback number
+  const schoolCount = institution?.org_type === 'K12' ? 'three schools' : 'multiple departments'
 
   const fundingOpportunities: FundingOpportunity[] = [
     {
@@ -175,8 +183,8 @@ export default function FundingJustificationGenerator() {
     if (!opportunity) return
 
     // Get matching recommendations
-    const matchingRecommendations = districtRecommendations.filter(rec => 
-      rec.alignment.some(align => 
+    const matchingRecommendations = districtRecommendations.filter(rec =>
+      rec.alignment.some(align =>
         opportunity.eligibleUses.includes(align) || opportunity.aiCategories.includes(align)
       )
     )
@@ -191,14 +199,14 @@ export default function FundingJustificationGenerator() {
 **GRANT NARRATIVE: ${opportunity.program}**
 
 **Executive Summary**
-Springfield School District respectfully requests $${opportunity.estimatedAward.toLocaleString()} under the ${opportunity.program} to implement a comprehensive AI readiness initiative that directly supports ${opportunity.eligibleUses.slice(0, 2).join(' and ')}. Our district serves 2,330 students across three schools and has completed a comprehensive AI readiness assessment that identified specific opportunities to leverage artificial intelligence for educational improvement while maintaining strict ethical and privacy standards.
+${institutionName} respectfully requests $${opportunity.estimatedAward.toLocaleString()} under the ${opportunity.program} to implement a comprehensive AI readiness initiative that directly supports ${opportunity.eligibleUses.slice(0, 2).join(' and ')}. Our ${institutionType.toLowerCase()} serves ${studentCount.toLocaleString()} students across ${schoolCount} and has completed a comprehensive AI readiness assessment that identified specific opportunities to leverage artificial intelligence for educational improvement while maintaining strict ethical and privacy standards.
 
 **Statement of Need**
 Our recent AI readiness assessment revealed critical gaps in our current capacity to effectively and safely integrate AI technologies:
-- Only 62% of our 180 teaching staff have received formal AI literacy training
+- Only 62% of our teaching staff have received formal AI literacy training
 - Current technology infrastructure lacks AI-enabled personalized learning capabilities
 - Students require enhanced digital citizenship education specific to AI technologies
-- District policies need updating to address AI governance and ethical use
+- ${institutionType} policies need updating to address AI governance and ethical use
 
 **Project Description**
 This initiative will implement ${matchingRecommendations.length} evidence-based components over ${Math.max(...matchingRecommendations.map(r => parseInt(r.timeline)))} months:
@@ -246,7 +254,7 @@ District Match: $${(totalCost - opportunity.estimatedAward).toLocaleString()} ($
 High-priority components totaling $${highPriorityItems.reduce((sum, item) => sum + item.estimatedCost, 0).toLocaleString()} will be funded through this grant, ensuring maximum impact on student learning and teacher effectiveness.
 
 **Conclusion**
-Springfield School District is committed to responsible AI integration that enhances educational outcomes while protecting student privacy and promoting ethical use. This grant will enable us to establish a model program that can be replicated across our state and region.
+${institutionName} is committed to responsible AI integration that enhances educational outcomes while protecting student privacy and promoting ethical use. This grant will enable us to establish a model program that can be replicated across our state and region.
     `.trim()
 
     setGeneratedNarrative(narrative)
@@ -264,7 +272,7 @@ Springfield School District is committed to responsible AI integration that enha
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="funding-justification-generator">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Funding Justification Generator</h1>
@@ -272,6 +280,7 @@ Springfield School District is committed to responsible AI integration that enha
             Auto-generate grant narratives aligned with federal funding guidelines for AI initiatives
           </p>
         </div>
+        <FundingTutorialTrigger showNewBadge={true} variant="floating" />
       </div>
 
       <Tabs defaultValue="opportunities" className="w-full">
@@ -346,7 +355,7 @@ Springfield School District is committed to responsible AI integration that enha
                         </ul>
                       </div>
 
-                      <Button 
+                      <Button
                         onClick={() => {
                           setSelectedOpportunity(opportunity.id)
                           generateNarrative(opportunity.id)
@@ -354,8 +363,8 @@ Springfield School District is committed to responsible AI integration that enha
                         className="w-full"
                         disabled={isGenerating}
                       >
-                        {isGenerating && selectedOpportunity === opportunity.id 
-                          ? 'Generating Narrative...' 
+                        {isGenerating && selectedOpportunity === opportunity.id
+                          ? 'Generating Narrative...'
                           : 'Generate Grant Narrative'
                         }
                       </Button>
@@ -389,7 +398,7 @@ Springfield School District is committed to responsible AI integration that enha
                           {rec.priority.toUpperCase()}
                         </Badge>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div>
                           <span className="font-medium">Cost: </span>
@@ -419,7 +428,7 @@ Springfield School District is committed to responsible AI integration that enha
                   </Card>
                 ))}
               </div>
-              
+
               <Card className="mt-6">
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-4">Funding Summary</h3>
@@ -444,8 +453,8 @@ Springfield School District is committed to responsible AI integration that enha
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-purple-600">
-                        {Math.round((fundingOpportunities.reduce((sum, opp) => sum + opp.estimatedAward, 0) / 
-                        districtRecommendations.reduce((sum, rec) => sum + rec.estimatedCost, 0)) * 100)}%
+                        {Math.round((fundingOpportunities.reduce((sum, opp) => sum + opp.estimatedAward, 0) /
+                          districtRecommendations.reduce((sum, rec) => sum + rec.estimatedCost, 0)) * 100)}%
                       </div>
                       <div className="text-sm text-muted-foreground">Funding Coverage</div>
                     </div>

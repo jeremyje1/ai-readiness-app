@@ -6,24 +6,24 @@ export default function TermsOfServicePage() {
       <div className="prose prose-lg max-w-none">
         <h1 className="text-4xl font-bold text-gray-900 mb-8">Terms of Service</h1>
         <p className="text-gray-600 mb-8">Last updated: {new Date().toISOString().split('T')[0]}</p>
-        
+
         <div className="bg-blue-50 p-6 rounded-lg mb-8">
           <h2 className="text-xl font-semibold text-blue-900 mb-2">Welcome to AI Blueprint™</h2>
           <p className="text-blue-800">
-            These Terms of Service govern your use of the AI Blueprint™ assessment platform provided by NorthPath Strategies. 
+            These Terms of Service govern your use of the AI Blueprint™ assessment platform provided by NorthPath Strategies.
             By accessing or using our services, you agree to be bound by these terms.
           </p>
         </div>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">1. Acceptance of Terms</h2>
         <p className="text-gray-700 mb-4">
-          By creating an account, accessing our platform, or using any of our services, you acknowledge that you have read, 
-          understood, and agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms, 
+          By creating an account, accessing our platform, or using any of our services, you acknowledge that you have read,
+          understood, and agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms,
           please do not use our services.
         </p>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">2. Description of Services</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">AI Blueprint™ Platform</h3>
         <p className="text-gray-700 mb-4">
           NorthPath Strategies provides a comprehensive AI readiness assessment platform designed specifically for educational institutions, including:
@@ -58,7 +58,7 @@ export default function TermsOfServicePage() {
         </div>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">3. User Accounts and Responsibilities</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Account Creation</h3>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li>You must provide accurate, current, and complete information during registration</li>
@@ -90,7 +90,7 @@ export default function TermsOfServicePage() {
         </div>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">4. Intellectual Property Rights</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Our Intellectual Property</h3>
         <p className="text-gray-700 mb-4">
           All content, features, and functionality of the AI Blueprint™ platform are owned by NorthPath Strategies and protected by copyright, trademark, and other intellectual property laws, including:
@@ -105,7 +105,7 @@ export default function TermsOfServicePage() {
 
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Your Content</h3>
         <p className="text-gray-700 mb-4">
-          You retain ownership of any content you submit to our platform (assessment responses, uploaded documents, etc.). 
+          You retain ownership of any content you submit to our platform (assessment responses, uploaded documents, etc.).
           By submitting content, you grant us a limited license to:
         </p>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
@@ -116,7 +116,7 @@ export default function TermsOfServicePage() {
         </ul>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">5. Payment Terms and Billing</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Subscription Plans</h3>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li><strong>Payment Processing:</strong> Payments processed securely through Stripe</li>
@@ -128,7 +128,7 @@ export default function TermsOfServicePage() {
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Refund Policy</h3>
         <div className="bg-green-50 p-4 rounded-lg">
           <p className="text-green-800 mb-2">
-            <strong>30-Day Satisfaction Guarantee:</strong> If you're not satisfied with our service, 
+            <strong>30-Day Satisfaction Guarantee:</strong> If you're not satisfied with our service,
             contact us within 30 days of your initial purchase for a full refund.
           </p>
           <ul className="list-disc pl-6 space-y-1 text-green-700 text-sm">
@@ -140,7 +140,7 @@ export default function TermsOfServicePage() {
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">6. Data Protection and Privacy</h2>
         <p className="text-gray-700 mb-4">
-          Your privacy and data security are paramount to us. Our data handling practices are detailed in our 
+          Your privacy and data security are paramount to us. Our data handling practices are detailed in our
           <a href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>, which includes:
         </p>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
@@ -152,7 +152,7 @@ export default function TermsOfServicePage() {
         </ul>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">7. Service Availability and Support</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Service Level Commitments</h3>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li><strong>Uptime:</strong> 99.5% availability target with scheduled maintenance windows</li>
@@ -177,19 +177,19 @@ export default function TermsOfServicePage() {
             <strong>Important Legal Notice:</strong> Please read this section carefully as it limits our liability to you.
           </p>
           <p className="text-yellow-800 text-sm mb-4">
-            TO THE MAXIMUM EXTENT PERMITTED BY LAW, NORTHPATH STRATEGIES SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, 
-            SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, USE, GOODWILL, 
+            TO THE MAXIMUM EXTENT PERMITTED BY LAW, NORTHPATH STRATEGIES SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL,
+            SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, USE, GOODWILL,
             OR OTHER INTANGIBLE LOSSES, RESULTING FROM YOUR USE OF OUR SERVICES.
           </p>
           <p className="text-yellow-800 text-sm">
-            Our total liability to you for any claims arising out of or relating to these terms or our services shall not 
+            Our total liability to you for any claims arising out of or relating to these terms or our services shall not
             exceed the amount you paid to us in the twelve (12) months preceding the claim.
           </p>
         </div>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">9. Indemnification</h2>
         <p className="text-gray-700 mb-4">
-          You agree to indemnify, defend, and hold harmless NorthPath Strategies and its officers, directors, employees, 
+          You agree to indemnify, defend, and hold harmless NorthPath Strategies and its officers, directors, employees,
           and agents from any claims, damages, losses, or expenses (including attorney fees) arising from:
         </p>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
@@ -200,7 +200,7 @@ export default function TermsOfServicePage() {
         </ul>
 
         <h2 className="text-2xl font-semibent text-gray-900 mt-8 mb-4">10. Termination</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Termination by You</h3>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li>You may cancel your subscription at any time through your account settings</li>
@@ -222,7 +222,7 @@ export default function TermsOfServicePage() {
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">11. Governing Law and Dispute Resolution</h2>
         <p className="text-gray-700 mb-4">
-          These Terms of Service are governed by the laws of the State of California, without regard to conflict of law principles. 
+          These Terms of Service are governed by the laws of the State of California, without regard to conflict of law principles.
           Any disputes arising from these terms or your use of our services will be resolved through:
         </p>
         <ol className="list-decimal pl-6 space-y-2 text-gray-700">
@@ -233,7 +233,7 @@ export default function TermsOfServicePage() {
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">12. Changes to Terms</h2>
         <p className="text-gray-700 mb-4">
-          We may modify these Terms of Service from time to time to reflect changes in our services, legal requirements, 
+          We may modify these Terms of Service from time to time to reflect changes in our services, legal requirements,
           or business practices. We will provide notice of significant changes:
         </p>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
@@ -245,8 +245,8 @@ export default function TermsOfServicePage() {
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">13. Severability and Entire Agreement</h2>
         <p className="text-gray-700 mb-4">
-          If any provision of these terms is found to be unenforceable or invalid, the remaining provisions will continue 
-          in full force and effect. These Terms of Service, together with our Privacy Policy, constitute the entire agreement 
+          If any provision of these terms is found to be unenforceable or invalid, the remaining provisions will continue
+          in full force and effect. These Terms of Service, together with our Privacy Policy, constitute the entire agreement
           between you and NorthPath Strategies regarding your use of our services.
         </p>
 

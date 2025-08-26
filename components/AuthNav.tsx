@@ -1,26 +1,26 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
 
 export default function AuthNav() {
-  const [userEmail, setUserEmail] = useState<string|null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(()=>{
-    supabase.auth.getSession().then(({ data })=>{
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
       setUserEmail(data.session?.user?.email || null);
       setLoading(false);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_evt, session)=>{
+    const { data: listener } = supabase.auth.onAuthStateChange((_evt, session) => {
       setUserEmail(session?.user?.email || null);
     });
-    return ()=> listener.subscription.unsubscribe();
-  },[]);
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -47,10 +47,10 @@ export default function AuthNav() {
       <div className='max-w-7xl mx-auto px-4 py-2 flex items-center justify-between'>
         <div className='flex items-center gap-4'>
           <Link href='/' className='font-semibold text-gray-800'>AI Blueprint™</Link>
-          <button aria-label='Toggle navigation menu' aria-expanded={open} onClick={()=>setOpen(o=>!o)} className='md:hidden inline-flex items-center justify-center w-9 h-9 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-indigo-500'>
+          <button aria-label='Toggle navigation menu' aria-expanded={open} onClick={() => setOpen(o => !o)} className='md:hidden inline-flex items-center justify-center w-9 h-9 rounded border border-gray-300 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-indigo-500'>
             <span className='sr-only'>Menu</span>
             <svg width='20' height='20' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
-              {open ? <><line x1='4' y1='4' x2='16' y2='16'/><line x1='16' y1='4' x2='4' y2='16'/></> : <><line x1='3' y1='6' x2='17' y2='6'/><line x1='3' y1='12' x2='17' y2='12'/><line x1='3' y1='18' x2='17' y2='18'/></>}
+              {open ? <><line x1='4' y1='4' x2='16' y2='16' /><line x1='16' y1='4' x2='4' y2='16' /></> : <><line x1='3' y1='6' x2='17' y2='6' /><line x1='3' y1='12' x2='17' y2='12' /><line x1='3' y1='18' x2='17' y2='18' /></>}
             </svg>
           </button>
         </div>
@@ -70,9 +70,9 @@ export default function AuthNav() {
         <div className='hidden md:flex items-center gap-3'>
           {!loading && userEmail && (
             <>
-              <Link 
-                href='/ai-readiness/dashboard' 
-                className='flex items-center gap-2 text-gray-700 hover:text-black bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors' 
+              <Link
+                href='/ai-readiness/dashboard'
+                className='flex items-center gap-2 text-gray-700 hover:text-black bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors'
                 title='Go to Dashboard'
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,14 +96,14 @@ export default function AuthNav() {
         <div className='md:hidden border-t border-gray-200 bg-white px-4 pb-4 animate-fadeIn'>
           <div className='flex flex-col gap-2 py-3'>
             {links.map(l => (
-              <Link key={l.href} href={l.href} onClick={()=>setOpen(false)} className={`${linkBase} ${pathname === l.href ? activeClasses : 'text-gray-600'}`}>{l.label}</Link>
+              <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className={`${linkBase} ${pathname === l.href ? activeClasses : 'text-gray-600'}`}>{l.label}</Link>
             ))}
             {userEmail && (
               <>
                 <div className='border-t border-gray-100 my-2'></div>
                 <div className="text-xs text-gray-500 font-medium mb-1">DASHBOARDS</div>
                 {dashboardLinks.map(l => (
-                  <Link key={l.href} href={l.href} onClick={()=>setOpen(false)} className={`${linkBase} ${pathname === l.href ? activeClasses : 'text-gray-600'}`}>
+                  <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className={`${linkBase} ${pathname === l.href ? activeClasses : 'text-gray-600'}`}>
                     <div>
                       <div className="font-medium">{l.label}</div>
                       <div className="text-xs text-gray-500">{l.description}</div>
@@ -115,9 +115,9 @@ export default function AuthNav() {
             <div className='border-t border-gray-100 my-2'></div>
             {!loading && userEmail && (
               <>
-                <Link 
-                  href='/ai-readiness/dashboard' 
-                  onClick={()=>setOpen(false)} 
+                <Link
+                  href='/ai-readiness/dashboard'
+                  onClick={() => setOpen(false)}
                   className='flex items-center gap-2 text-gray-700 hover:text-black bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors'
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,8 +133,8 @@ export default function AuthNav() {
             )}
             {!loading && !userEmail && (
               <>
-                <Link href='/auth/login' onClick={()=>setOpen(false)} className='text-gray-700 hover:text-black'>Login</Link>
-                <Link href='/start?billing=monthly' onClick={()=>setOpen(false)} className='text-blue-600 hover:underline'>Start</Link>
+                <Link href='/auth/login' onClick={() => setOpen(false)} className='text-gray-700 hover:text-black'>Login</Link>
+                <Link href='/start?billing=monthly' onClick={() => setOpen(false)} className='text-blue-600 hover:underline'>Start</Link>
               </>
             )}
           </div>

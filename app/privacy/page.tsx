@@ -6,17 +6,17 @@ export default function PrivacyPolicyPage() {
       <div className="prose prose-lg max-w-none">
         <h1 className="text-4xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
         <p className="text-gray-600 mb-8">Last updated: {new Date().toISOString().split('T')[0]}</p>
-        
+
         <div className="bg-blue-50 p-6 rounded-lg mb-8">
           <h2 className="text-xl font-semibold text-blue-900 mb-2">Your Privacy Matters</h2>
           <p className="text-blue-800">
-            NorthPath Strategies is committed to protecting your privacy and ensuring the security of your personal information. 
+            NorthPath Strategies is committed to protecting your privacy and ensuring the security of your personal information.
             This policy explains how we collect, use, and safeguard your data when you use our AI Blueprint™ assessment platform.
           </p>
         </div>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Information We Collect</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Personal Information</h3>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li><strong>Account Information:</strong> Name, email address, job title, organization name, and institutional affiliation</li>
@@ -40,7 +40,7 @@ export default function PrivacyPolicyPage() {
         </ul>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">How We Use Your Information</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Assessment Services</h3>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li>Provide personalized AI readiness assessments and recommendations</li>
@@ -66,11 +66,11 @@ export default function PrivacyPolicyPage() {
         </ul>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Data Security & Protection</h2>
-        
+
         <div className="bg-green-50 p-6 rounded-lg mb-6">
           <h3 className="text-lg font-semibold text-green-900 mb-2">Enterprise-Grade Security</h3>
           <p className="text-green-800">
-            We implement industry-leading security measures including encryption, secure data centers, 
+            We implement industry-leading security measures including encryption, secure data centers,
             regular security audits, and compliance with educational data protection standards.
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function PrivacyPolicyPage() {
         </ul>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Data Sharing & Disclosure</h2>
-        
+
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">We Do NOT Sell Your Data</h3>
         <p className="text-gray-700 mb-4">
           NorthPath Strategies does not sell, rent, or trade your personal information to third parties for marketing purposes.
@@ -99,7 +99,7 @@ export default function PrivacyPolicyPage() {
         </ul>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Your Privacy Rights</h2>
-        
+
         <div className="grid md:grid-cols-2 gap-6 my-6">
           <div className="bg-blue-50 p-4 rounded-lg">
             <h3 className="font-semibold text-blue-900 mb-2">Access & Portability</h3>
@@ -153,19 +153,19 @@ export default function PrivacyPolicyPage() {
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Children's Privacy</h2>
         <p className="text-gray-700 mb-4">
-          Our platform is designed for institutional use by adults. We do not knowingly collect personal information 
+          Our platform is designed for institutional use by adults. We do not knowingly collect personal information
           from children under 13 without proper consent and oversight from educational institutions.
         </p>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">International Data Transfers</h2>
         <p className="text-gray-700 mb-4">
-          Your data may be processed in the United States and other countries where we operate. We ensure appropriate 
+          Your data may be processed in the United States and other countries where we operate. We ensure appropriate
           safeguards are in place for international transfers, including standard contractual clauses and adequacy decisions.
         </p>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Updates to This Policy</h2>
         <p className="text-gray-700 mb-4">
-          We may update this privacy policy to reflect changes in our practices or legal requirements. 
+          We may update this privacy policy to reflect changes in our practices or legal requirements.
           We will notify you of significant changes via email or platform notifications.
         </p>
 

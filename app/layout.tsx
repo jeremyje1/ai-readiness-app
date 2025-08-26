@@ -1,7 +1,9 @@
+import AuthNav from '@/components/AuthNav'
+import TutorialProvider from '@/components/TutorialProvider'
+import UserProvider from '@/components/UserProvider'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import AuthNav from '@/components/AuthNav'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,8 +29,12 @@ export default function RootLayout({
         <link rel="canonical" href={baseUrl} />
       </head>
       <body className={inter.className}>
-        <AuthNav />
-        {children}
+        <UserProvider>
+          <TutorialProvider>
+            <AuthNav />
+            {children}
+          </TutorialProvider>
+        </UserProvider>
       </body>
     </html>
   )

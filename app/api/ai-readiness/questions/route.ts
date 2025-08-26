@@ -3,8 +3,8 @@
  * Serves tier-appropriate questions with proper question counts
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { getQuestionsForTier } from '@/lib/ai-readiness-questions';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       helpText: q.helpText,
       options: q.type === 'likert' ? [
         'Strongly Disagree',
-        'Disagree', 
+        'Disagree',
         'Neutral',
         'Agree',
         'Strongly Agree'
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       helpText: q.helpText,
       options: q.type === 'likert' ? [
         'Strongly Disagree',
-        'Disagree', 
+        'Disagree',
         'Neutral',
         'Agree',
         'Strongly Agree'
