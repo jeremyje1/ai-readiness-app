@@ -473,13 +473,17 @@ export default function InteractiveTutorial({
 
     const handleComplete = () => {
         // Store tutorial completion in localStorage
-        localStorage.setItem(`tutorial-completed-${tutorialType}`, 'true')
-        localStorage.setItem('tutorial-completed-at', new Date().toISOString())
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(`tutorial-completed-${tutorialType}`, 'true')
+            localStorage.setItem('tutorial-completed-at', new Date().toISOString())
+        }
         onComplete()
     }
 
     const handleSkip = () => {
-        localStorage.setItem(`tutorial-skipped-${tutorialType}`, 'true')
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(`tutorial-skipped-${tutorialType}`, 'true')
+        }
         onSkip()
     }
 

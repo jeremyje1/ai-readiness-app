@@ -11,7 +11,7 @@ export function useAssessmentPersistence(assessmentId: string, tier: string) {
 
   // Load saved progress on mount
   useEffect(() => {
-    if (!assessmentId) return;
+    if (!assessmentId || typeof window === 'undefined') return;
     
     const loadProgress = () => {
       try {
@@ -55,12 +55,14 @@ export function useAssessmentPersistence(assessmentId: string, tier: string) {
         questionCount: 0 // Will be updated by caller
       };
 
-      // Always save to localStorage first
-      localStorage.setItem(`assessment-progress-${assessmentId}`, JSON.stringify(progressData));
-      console.log('💾 Progress saved to localStorage:', {
-        responseCount: Object.keys(responses).length,
-        currentIndex: currentQuestionIndex
-      });
+      // Always save to localStorage first (client-side only)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`assessment-progress-${assessmentId}`, JSON.stringify(progressData));
+        console.log('💾 Progress saved to localStorage:', {
+          responseCount: Object.keys(responses).length,
+          currentIndex: currentQuestionIndex
+        });
+      }
 
       // Try to save to database
       try {

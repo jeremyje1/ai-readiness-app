@@ -145,8 +145,10 @@ export default function AIReadinessOnboarding() {
         if (currentStep < totalSteps) {
             setCurrentStep(currentStep + 1);
         } else {
-            // Save onboarding data and proceed to assessment
-            localStorage.setItem('ai_readiness_onboarding', JSON.stringify(data));
+            // Save onboarding data and proceed to assessment (client-side only)
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('ai_readiness_onboarding', JSON.stringify(data));
+            }
             router.push(`/ai-readiness/assessment?mode=${assessmentMode}&tier=ai-readiness-comprehensive&onboarded=true`);
         }
     };
