@@ -99,9 +99,81 @@ export default function ContactPage() {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-16 px-6'>
-      <div className='max-w-2xl mx-auto bg-white shadow-sm rounded-lg p-8'>
-        <h1 className='text-3xl font-bold mb-2 text-gray-900'>Contact Us</h1>
-        <p className='text-gray-600 mb-8 text-sm'>Have a question about AI Blueprint™ services, pricing, or implementation? Send us a message and our team will respond promptly.</p>
+      <div className='max-w-4xl mx-auto'>
+        {/* Expert Support Options */}
+        <div className='mb-8'>
+          <h1 className='text-4xl font-bold mb-4 text-gray-900 text-center'>Get Expert Support</h1>
+          <p className='text-gray-600 mb-8 text-center max-w-2xl mx-auto'>
+            Choose the best way to connect with our AI governance experts. From quick questions to strategic planning, we're here to help your institution succeed.
+          </p>
+          
+          <div className='grid md:grid-cols-2 gap-6 mb-12'>
+            {/* Schedule Consultation */}
+            <div className='bg-white shadow-sm rounded-lg p-6 border-l-4 border-blue-500'>
+              <div className='flex items-center mb-4'>
+                <svg className="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h2 className='text-xl font-semibold text-gray-900'>Schedule a Consultation</h2>
+              </div>
+              <p className='text-gray-600 mb-4'>
+                Book a personalized 30-minute session with our AI governance expert Jeremy Estrella to discuss your institution's specific needs and strategy.
+              </p>
+              <a 
+                href="https://calendly.com/jeremyestrella/30min" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className='inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Book Now
+              </a>
+              <div className='mt-3 text-sm text-gray-500'>
+                ✓ Strategic planning guidance<br/>
+                ✓ Policy development support<br/>
+                ✓ Implementation best practices
+              </div>
+            </div>
+
+            {/* Join Community */}
+            <div className='bg-white shadow-sm rounded-lg p-6 border-l-4 border-green-500'>
+              <div className='flex items-center mb-4'>
+                <svg className="w-8 h-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1z" />
+                </svg>
+                <h2 className='text-xl font-semibold text-gray-900'>Join Our Community</h2>
+              </div>
+              <p className='text-gray-600 mb-4'>
+                Connect with peer institutions, ask questions, and get real-time guidance from our experts and community members.
+              </p>
+              <a 
+                href="https://northpath-strategies.slack.com/archives/C09CZFF6URE" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className='inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors'
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Join Slack
+              </a>
+              <div className='mt-3 text-sm text-gray-500'>
+                ✓ Peer-to-peer learning<br/>
+                ✓ Expert Q&A sessions<br/>
+                ✓ Resource sharing
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Form */}
+        <div className='bg-white shadow-sm rounded-lg p-8'>
+          <h2 className='text-2xl font-bold mb-2 text-gray-900'>Send Us a Message</h2>
+          <p className='text-gray-600 mb-8 text-sm'>
+            Prefer to send a detailed message? Use the form below and our team will respond promptly during business hours.
+          </p>
         <form onSubmit={submit} className='space-y-5' noValidate>
           <div>
             <label htmlFor='name' className='block text-sm font-medium mb-1'>Name *</label>
@@ -205,6 +277,7 @@ export default function ContactPage() {
             All required fields must be completed. We respect your privacy. See our <a href='/privacy' className='underline text-blue-600 hover:text-blue-800'>Privacy Policy</a>.
           </p>
         </form>
+        </div>
       </div>
     </div>
   );

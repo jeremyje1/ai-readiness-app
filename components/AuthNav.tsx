@@ -70,7 +70,16 @@ export default function AuthNav() {
         <div className='hidden md:flex items-center gap-3'>
           {!loading && userEmail && (
             <>
-              <Link href='/ai-readiness/dashboard' className='text-gray-700 hover:text-black truncate max-w-[160px]' title={userEmail}>{userEmail}</Link>
+              <Link 
+                href='/ai-readiness/dashboard' 
+                className='flex items-center gap-2 text-gray-700 hover:text-black bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors' 
+                title='Go to Dashboard'
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span className='truncate max-w-[120px]'>{userEmail}</span>
+              </Link>
               <Button variant='outline' size='sm' onClick={logout}>Logout</Button>
             </>
           )}
@@ -106,7 +115,19 @@ export default function AuthNav() {
             <div className='border-t border-gray-100 my-2'></div>
             {!loading && userEmail && (
               <>
-                <Link href='/ai-readiness/dashboard' onClick={()=>setOpen(false)} className='text-gray-700 hover:text-black'>{userEmail}</Link>
+                <Link 
+                  href='/ai-readiness/dashboard' 
+                  onClick={()=>setOpen(false)} 
+                  className='flex items-center gap-2 text-gray-700 hover:text-black bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors'
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                  <div>
+                    <div className="font-medium">Dashboard</div>
+                    <div className="text-xs text-gray-500">{userEmail}</div>
+                  </div>
+                </Link>
                 <Button variant='outline' size='sm' onClick={logout}>Logout</Button>
               </>
             )}

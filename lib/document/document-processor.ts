@@ -86,12 +86,12 @@ export class DocumentProcessor {
             const uint8Array = new Uint8Array(buffer)
             const pdfDoc = await PDFDocument.load(uint8Array)
             const pageCount = pdfDoc.getPageCount()
-            
+
             // For now, we'll use OCR as pdf-lib doesn't have built-in text extraction
             // This is more reliable for production use
             console.log('PDF detected, using OCR for text extraction')
             const result = await this.processImage(buffer)
-            
+
             return {
                 ...result,
                 metadata: {

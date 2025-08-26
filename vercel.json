@@ -1,6 +1,8 @@
 {
   "framework": "nextjs",
-  "regions": ["iad1"],
+  "regions": [
+    "iad1"
+  ],
   "functions": {
     "app/api/report/generate/route.ts": {
       "maxDuration": 30
@@ -42,7 +44,10 @@
     {
       "source": "(.*)",
       "has": [
-        { "type": "host", "value": "aireadiness.northpathstrategies.org" }
+        {
+          "type": "host",
+          "value": "aireadiness.northpathstrategies.org"
+        }
       ],
       "destination": "https://aiblueprint.k12aiblueprint.com$1",
       "permanent": true

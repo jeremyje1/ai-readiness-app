@@ -1,47 +1,64 @@
 /**
  * AI Readiness Questions API Endpoint
- * Serves streamlined AI readiness questions with context capture
+ * Serves tier-appropriate questions with proper question counts
  */
 
-import {
-  COMPREHENSIVE_MODE_QUESTIONS,
-  QUESTION_SECTIONS,
-  QUICK_MODE_QUESTIONS
-} from '@/lib/streamlined-ai-questions';
 import { NextRequest, NextResponse } from 'next/server';
-
+import { getQuestionsForTier } from '@/lib/ai-readiness-questions';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const mode = searchParams.get('mode') || 'quick';
+    const tier = searchParams.get('tier') || 'higher-ed-ai-pulse-check';
     const section = searchParams.get('section');
 
     // Detect institution type from headers (set by middleware) or domain
     const institutionType = request.headers.get('x-institution-type') || 'default';
     const domainContext = request.headers.get('x-domain-context') || 'default';
 
-    console.log(`🎯 Questions API - Institution Type: ${institutionType}, Domain: ${domainContext}, Mode: ${mode}`);
+    console.log(`🎯 Questions API - Institution Type: ${institutionType}, Domain: ${domainContext}, Tier: ${tier}`);
 
-    // Select appropriate question set based on mode
-    let questions = mode === 'comprehensive' ? COMPREHENSIVE_MODE_QUESTIONS : QUICK_MODE_QUESTIONS;
+    // Get tier-appropriate questions
+    let questions = getQuestionsForTier(tier);
 
     // Filter by section if specified
     if (section) {
       questions = questions.filter(q => q.section === section);
     }
 
+    // Convert to expected format for frontend
+    const formattedQuestions = questions.map(q => ({
+      id: q.id,
+      text: q.prompt,
+      section: q.section,
+      type: q.type,
+      required: q.required,
+      helpText: q.helpText,
+      options: q.type === 'likert' ? [
+        'Strongly Disagree',
+        'Disagree', 
+        'Neutral',
+        'Agree',
+        'Strongly Agree'
+      ] : undefined
+    }));
+
+    // Calculate estimated time based on question count
+    const estimatedMinutes = Math.ceil(formattedQuestions.length * 1.5); // 1.5 minutes per question
+
     // Build response
     const response = {
       success: true,
-      mode,
+      tier,
       institutionType,
-      questions,
-      sections: QUESTION_SECTIONS,
+      data: {
+        questions: formattedQuestions
+      },
       metadata: {
-        total: questions.length,
-        sections: [...new Set(questions.map(q => q.section))],
-        estimatedTime: mode === 'comprehensive' ? '25-35 minutes' : '8-10 minutes'
+        total: formattedQuestions.length,
+        sections: [...new Set(formattedQuestions.map(q => q.section))],
+        estimatedTime: `${estimatedMinutes} minutes`,
+        tier: tier
       }
     };
 
@@ -53,8 +70,14 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: 'Failed to load questions',
-        questions: [],
-        sections: QUESTION_SECTIONS
+        data: {
+          questions: []
+        },
+        metadata: {
+          total: 0,
+          sections: [],
+          estimatedTime: '0 minutes'
+        }
       },
       { status: 500 }
     );
@@ -64,10 +87,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { mode = 'quick', filters } = body;
+    const { tier = 'higher-ed-ai-pulse-check', filters } = body;
 
-    // Get questions based on mode
-    let questions = mode === 'comprehensive' ? COMPREHENSIVE_MODE_QUESTIONS : QUICK_MODE_QUESTIONS;
+    // Get questions based on tier
+    let questions = getQuestionsForTier(tier);
 
     // Apply filters if provided
     if (filters) {
@@ -79,15 +102,36 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Convert to expected format
+    const formattedQuestions = questions.map(q => ({
+      id: q.id,
+      text: q.prompt,
+      section: q.section,
+      type: q.type,
+      required: q.required,
+      helpText: q.helpText,
+      options: q.type === 'likert' ? [
+        'Strongly Disagree',
+        'Disagree', 
+        'Neutral',
+        'Agree',
+        'Strongly Agree'
+      ] : undefined
+    }));
+
+    const estimatedMinutes = Math.ceil(formattedQuestions.length * 1.5);
+
     return NextResponse.json({
       success: true,
-      mode,
-      questions,
-      sections: QUESTION_SECTIONS,
+      tier,
+      data: {
+        questions: formattedQuestions
+      },
       metadata: {
-        total: questions.length,
+        total: formattedQuestions.length,
         filtered: !!filters,
-        estimatedTime: mode === 'comprehensive' ? '25-35 minutes' : '8-10 minutes'
+        estimatedTime: `${estimatedMinutes} minutes`,
+        tier: tier
       }
     });
 
