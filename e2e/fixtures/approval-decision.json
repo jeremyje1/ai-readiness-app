@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "data": {
+    "id": "approval-123",
+    "decision": "approved",
+    "userId": "approver1",
+    "comment": "Policy reviewed and approved. Meets all security requirements.",
+    "timestamp": "2024-01-16T14:30:00Z",
+    "eSignature": {
+      "signed": true,
+      "signedAt": "2024-01-16T14:30:00Z",
+      "ipAddress": "192.168.1.100",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    }
+  }
+}

@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, AlertCircle, CheckCircle, Lock, BookOpen, Users, FileText, BarChart3 } from 'lucide-react';
 import SubscriptionValueDashboard from '@/components/SubscriptionValueDashboard';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { supabase } from '@/lib/supabase';
+import { AlertCircle, BarChart3, BookOpen, CheckCircle, FileText, Loader2, Lock, Users } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface PaymentVerification {
   isVerified: boolean;
@@ -27,6 +27,7 @@ export default function AIReadinessDashboard() {
   const [institutionType, setInstitutionType] = useState<'K12' | 'HigherEd'>('K12');
   const [hydrated, setHydrated] = useState(false);
   const debugMode = searchParams.get('debug') === '1';
+  const assessmentMode = searchParams.get('assessment'); // 'quick', 'full', or null
 
   // Handle hydration and get institution type from localStorage or user profile
   useEffect(() => {
@@ -57,26 +58,26 @@ export default function AIReadinessDashboard() {
         router.push('/ai-readiness');
         return;
       }
-  const accessToken = session.access_token;
+      const accessToken = session.access_token;
       // Prepare client-side debug details (does not expose full secrets)
       const clientDebug: any = debugMode ? {
         clientPhase: 'have-session',
         sessionUserId: session.user.id,
         sessionEmail: session.user.email,
         accessTokenLength: accessToken?.length,
-        accessTokenPreview: accessToken ? (accessToken.length > 24 ? accessToken.slice(0,12)+'…'+accessToken.slice(-8) : accessToken) : null,
+        accessTokenPreview: accessToken ? (accessToken.length > 24 ? accessToken.slice(0, 12) + '…' + accessToken.slice(-8) : accessToken) : null,
       } : null;
       if (debugMode && accessToken) {
         try {
-          const [h,p] = accessToken.split('.');
+          const [h, p] = accessToken.split('.');
           if (p) {
-            const json = JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/')));
+            const json = JSON.parse(atob(p.replace(/-/g, '+').replace(/_/g, '/')));
             clientDebug.jwt = {
               iss: json.iss,
               aud: json.aud,
               subPresent: Boolean(json.sub),
               exp: json.exp,
-              expInFuture: typeof json.exp==='number' ? (json.exp*1000 > Date.now()) : undefined,
+              expInFuture: typeof json.exp === 'number' ? (json.exp * 1000 > Date.now()) : undefined,
               projectRefFromIss: typeof json.iss === 'string' ? json.iss.split('//')[1]?.split('.')[0] : undefined
             };
             try {
@@ -87,7 +88,7 @@ export default function AIReadinessDashboard() {
                 clientDebug.envProjectRef = envProjectRef;
                 clientDebug.projectRefMismatch = clientDebug.jwt.projectRefFromIss && envProjectRef && clientDebug.jwt.projectRefFromIss !== envProjectRef;
               }
-            } catch(_){}
+            } catch (_) { }
           }
         } catch (e) {
           clientDebug.jwtDecodeError = true;
@@ -168,12 +169,12 @@ export default function AIReadinessDashboard() {
   };
 
   // Helper functions for institution-specific content
-const getWelcomeMessage = () => {
-  if (institutionType === 'HigherEd') {
-    return "Welcome to your Higher Education AI Blueprint Dashboard. Track your institution's AI readiness progress and access implementation resources tailored for universities, community colleges, and trade schools.";
-  }
-  return "Welcome to your K-12 AI Blueprint Dashboard. Track your district's AI readiness progress and access implementation resources designed for school environments.";
-};  const getAssessmentStartText = () => {
+  const getWelcomeMessage = () => {
+    if (institutionType === 'HigherEd') {
+      return "Welcome to your Higher Education AI Blueprint Dashboard. Track your institution's AI readiness progress and access implementation resources tailored for universities, community colleges, and trade schools.";
+    }
+    return "Welcome to your K-12 AI Blueprint Dashboard. Track your district's AI readiness progress and access implementation resources designed for school environments.";
+  }; const getAssessmentStartText = () => {
     if (institutionType === 'HigherEd') {
       return "Begin your comprehensive AI readiness assessment designed specifically for universities, community colleges, and trade schools.";
     }
@@ -199,7 +200,14 @@ const getWelcomeMessage = () => {
 
   const startAssessment = () => {
     if (verification.accessUrl) {
-      router.push(verification.accessUrl);
+      // If we have an assessment mode parameter, append it to the URL
+      if (assessmentMode === 'quick') {
+        router.push(`${verification.accessUrl}&mode=quick`);
+      } else if (assessmentMode === 'full') {
+        router.push(`${verification.accessUrl}&mode=full`);
+      } else {
+        router.push(verification.accessUrl);
+      }
     }
   };
 
@@ -238,14 +246,20 @@ const getWelcomeMessage = () => {
             {error || 'You need to complete your purchase to access the AI Readiness Assessment.'}
           </p>
           <div className="space-y-3">
-            <Button 
+            <Button
               onClick={() => router.push('/ai-readiness')}
               className="w-full bg-blue-600 hover:bg-blue-700"
             >
-              Purchase Assessment
+              Purchase Full Assessment
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              onClick={() => router.push('/ai-readiness/assessment?mode=quick&tier=ai-readiness-comprehensive')}
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
+              Try Free Quick Assessment
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => window.location.reload()}
               className="w-full"
             >
@@ -257,7 +271,7 @@ const getWelcomeMessage = () => {
                 {(() => {
                   try {
                     const token = (debugInfo?.client?.accessTokenPreview && verification.isVerified === false) ? 'hidden-for-security' : null;
-                  } catch(_) {}
+                  } catch (_) { }
                   return null;
                 })()}
               </pre>
@@ -289,21 +303,31 @@ const getWelcomeMessage = () => {
                 {institutionType === 'HigherEd' ? 'Higher Ed AI Blueprint Dashboard' : 'K-12 AI Blueprint Dashboard'}
               </h1>
               <p className="text-gray-600 mt-1">Your ongoing AI transformation journey • Active subscription</p>
+              {assessmentMode && (
+                <div className="mt-3 p-3 bg-blue-100 border border-blue-300 rounded-lg">
+                  <p className="text-blue-800 font-medium">
+                    🎯 Ready to start your {assessmentMode === 'quick' ? 'Quick Assessment (8-10 min)' : 'Comprehensive Assessment (25-35 min)'}
+                  </p>
+                  <p className="text-blue-700 text-sm mt-1">
+                    Click "Take Assessment" below to begin with your selected assessment type.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Quick Navigation */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Button 
-              onClick={() => window.location.href = '/ai-readiness/assessment'}
+            <Button
+              onClick={startAssessment}
               className="flex flex-col items-center gap-2 h-20 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
               variant="outline"
             >
               <FileText className="w-6 h-6" />
               <span className="text-sm">Take Assessment</span>
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={() => window.location.href = '/resources/templates'}
               className="flex flex-col items-center gap-2 h-20 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200"
               variant="outline"
@@ -311,8 +335,8 @@ const getWelcomeMessage = () => {
               <BookOpen className="w-6 h-6" />
               <span className="text-sm">Resource Library</span>
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={() => {
                 alert('🕐 Scheduling Information\n\n✅ Expert Sessions Available!\n\n⏰ Time Zone Details:\n• Calendly shows Pacific Time by default\n• Jeremy is in Central Time (CST/CDT)\n• You can adjust time zone on the booking page\n• 30-minute sessions available\n\n📅 What to Expect:\n• AI implementation strategy discussion\n• Personalized recommendations review\n• Q&A about your assessment results\n• Next steps planning\n\nClick OK to open scheduling page.');
                 window.open('https://calendly.com/jeremyestrella/30min', '_blank');
@@ -323,8 +347,8 @@ const getWelcomeMessage = () => {
               <Users className="w-6 h-6" />
               <span className="text-sm">Expert Sessions</span>
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={() => window.location.href = '/ai-readiness/results'}
               className="flex flex-col items-center gap-2 h-20 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200"
               variant="outline"
@@ -384,9 +408,9 @@ const getWelcomeMessage = () => {
         {/* Add the new Subscription Value Dashboard here */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Subscription Value</h2>
-          <SubscriptionValueDashboard 
-            userId={verification.email || 'unknown'} 
-            tier={verification.tier || 'comprehensive'} 
+          <SubscriptionValueDashboard
+            userId={verification.email || 'unknown'}
+            tier={verification.tier || 'comprehensive'}
             institutionType={institutionType}
           />
         </div>
@@ -403,14 +427,14 @@ const getWelcomeMessage = () => {
                   Get comprehensive insights with our 6-algorithm assessment suite designed for {getInstitutionTerms().context}
                 </p>
               </div>
-              <Button 
+              <Button
                 onClick={startAssessment}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Start Assessment
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="flex items-start">
                 <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />

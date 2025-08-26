@@ -1,0 +1,108 @@
+name: Policy Updates Refresh
+
+on:
+  schedule:
+    # Runs every 6 hours to check for framework updates
+    - cron: '0 */6 * * *'
+  workflow_dispatch: 
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no changes made)'
+        required: false
+        default: 'false'
+      force_redlines:
+        description: 'Force redline generation even if disabled'
+        required: false
+        default: 'false'
+
+jobs:
+  policy-updates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set environment variables
+        run: |
+          echo "DRY_RUN=${{ github.event.inputs.dry_run || 'false' }}" >> $GITHUB_ENV
+          echo "FORCE_REDLINES=${{ github.event.inputs.force_redlines || 'false' }}" >> $GITHUB_ENV
+
+      - name: Check framework updates and generate redlines
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+        run: |
+          BASE_URL="$APP_BASE_URL"
+          if [ -z "$BASE_URL" ]; then
+            echo "BASE_URL secret (APP_BASE_URL) not set" >&2
+            exit 1
+          fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET GitHub secret not set" >&2
+            exit 1
+          fi
+
+          echo "🔄 Starting policy updates refresh job"
+          echo "DRY_RUN: $DRY_RUN"
+          echo "FORCE_REDLINES: $FORCE_REDLINES"
+
+          # Call policy updates endpoint
+          http_code=$(curl -s -o response.json -w '%{http_code}' -X POST "$BASE_URL/api/cron/policy-updates/refresh" \
+            -H "x-cron-secret: $CRON_SECRET" \
+            -H "content-type: application/json" \
+            -d '{}')
+
+          echo "HTTP Status: $http_code"
+          echo "Response:" && cat response.json && echo
+
+          if [ "$http_code" -ge 300 ]; then
+            echo "❌ Policy updates job failed with status $http_code"
+            exit 1
+          fi
+
+      - name: Validate response and report results
+        run: |
+          if ! grep -q '"success":true' response.json; then
+            echo '❌ Policy updates job failed - success flag not found'
+            cat response.json
+            exit 1
+          fi
+
+          # Extract and report key metrics
+          frameworks_checked=$(grep -o '"frameworksChecked":[0-9]*' response.json | cut -d':' -f2) || echo "0"
+          changes_detected=$(grep -o '"changesDetected":[0-9]*' response.json | cut -d':' -f2) || echo "0" 
+          redlines_generated=$(grep -o '"redlinePacksGenerated":[0-9]*' response.json | cut -d':' -f2) || echo "0"
+          notifications_sent=$(grep -o '"notificationsSent":[0-9]*' response.json | cut -d':' -f2) || echo "0"
+          processing_time=$(grep -o '"processingTime":[0-9]*' response.json | cut -d':' -f2) || echo "0"
+
+          echo "✅ Policy updates job completed successfully"
+          echo "📊 Job Summary:"
+          echo "  - Frameworks checked: $frameworks_checked"
+          echo "  - Changes detected: $changes_detected"
+          echo "  - Redline packs generated: $redlines_generated"
+          echo "  - Notifications sent: $notifications_sent"
+          echo "  - Processing time: ${processing_time}ms"
+
+          # Check for errors
+          error_count=$(grep -o '"errors":\[[^]]*\]' response.json | grep -o ',' | wc -l || echo "0")
+          if [ "$error_count" -gt 0 ]; then
+            echo "⚠️  Job completed with $error_count errors - check logs"
+          fi
+
+          # Report if changes were detected
+          if [ "$changes_detected" -gt 0 ]; then
+            echo "🔄 $changes_detected framework changes detected"
+            if [ "$redlines_generated" -gt 0 ]; then
+              echo "📝 $redlines_generated redline packs generated for policy approval"
+            fi
+            if [ "$notifications_sent" -gt 0 ]; then
+              echo "📧 $notifications_sent approval notifications sent"
+            fi
+          else
+            echo "📋 No framework changes detected - all policies up to date"
+          fi
+
+      - name: Upload job results as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: policy-updates-results-${{ github.run_id }}
+          path: response.json
+          retention-days: 7

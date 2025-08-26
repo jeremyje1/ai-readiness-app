@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     // Stub implementation for PDF generation
     const pdfBuffer = Buffer.from('AI Transformation Blueprint PDF placeholder');
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="ai-transformation-blueprint-${tier}.pdf"`,

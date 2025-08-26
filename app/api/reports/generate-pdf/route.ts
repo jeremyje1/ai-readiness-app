@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generatePDFReport } from '../../../../lib/pdf-report-generator';
 import { generateComprehensivePDFReport } from '../../../../lib/comprehensive-pdf-generator';
-import { generateDataDrivenPDFReport } from '../../../../lib/data-driven-pdf-generator';
 
 export async function POST(request: NextRequest) {
   try {
     const { analysis } = await request.json();
-    
+
     console.log('Generating PDF with comprehensive generator, analysis data:', {
       hasAssessmentData: !!analysis.assessmentData,
       hasResponses: !!analysis.responses,
@@ -15,7 +13,7 @@ export async function POST(request: NextRequest) {
       score: analysis.score
     });
 
-            // Generate PDF using comprehensive PDF generator
+    // Generate PDF using comprehensive PDF generator
     const pdfBuffer = await generateComprehensivePDFReport({
       data: {
         user_email: analysis.user_email || 'unknown@example.com',
@@ -28,7 +26,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

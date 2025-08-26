@@ -4,47 +4,34 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Card } from '@/components/card';
 import { Button } from '@/components/button';
+import { Card } from '@/components/card';
 import { Progress } from '@/components/progress';
-import { CheckCircle, ArrowRight } from 'lucide-react';
+import { Textarea } from '@/components/textarea';
+import { ArrowRight, CheckCircle } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface Question {
   id: string;
   section: string;
-  prompt: string;
-  type: string;
-  required: boolean;
+  question: string;
+  type: 'scale_with_context' | 'open_ended';
   helpText?: string;
+  scaleLabels?: {
+    low: string;
+    high: string;
+  };
 }
 
 export default function AIReadinessAssessmentPage() {
   const searchParams = useSearchParams();
-  const rawTier = searchParams.get('tier') || 'comprehensive';
-  
-  // Clean up tier parameter
-  const cleanTier = rawTier.split('?')[0].split('&')[0];
-  
-  // Map tier variations to valid tier names
-  const tierMapping: Record<string, string> = {
-    'comprehensive': 'ai-readiness-comprehensive',
-    'ai-readiness-comprehensive': 'ai-readiness-comprehensive',
-    'blueprint': 'ai-transformation-blueprint',
-    'ai-transformation-blueprint': 'ai-transformation-blueprint',
-    'pulse': 'higher-ed-ai-pulse-check',
-    'higher-ed-ai-pulse-check': 'higher-ed-ai-pulse-check',
-    'enterprise': 'ai-enterprise-partnership',
-    'ai-enterprise-partnership': 'ai-enterprise-partnership'
-  };
-  
-  const tier = tierMapping[cleanTier] || 'ai-readiness-comprehensive';
-  
+  const mode = searchParams.get('mode') || 'quick';
+
   // Assessment state
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [responses, setResponses] = useState<Record<string, number>>({});
+  const [responses, setResponses] = useState<Record<string, { value?: number; context?: string; text?: string }>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [institutionType, setInstitutionType] = useState<string>('default');
@@ -61,7 +48,7 @@ export default function AIReadinessAssessmentPage() {
     } else if (hostname.includes('higheredaiblueprint.com')) {
       setInstitutionType('HigherEd');
     }
-    
+
     // Generate or retrieve assessment ID
     const storedAssessmentId = localStorage.getItem('assessment-id');
     if (storedAssessmentId) {
@@ -71,9 +58,9 @@ export default function AIReadinessAssessmentPage() {
       setAssessmentId(newAssessmentId);
       localStorage.setItem('assessment-id', newAssessmentId);
     }
-    
+
     fetchQuestions();
-  }, [tier]);
+  }, [mode]);
 
   // Load saved progress when assessment ID becomes available
   useEffect(() => {
@@ -95,21 +82,21 @@ export default function AIReadinessAssessmentPage() {
 
   const saveProgress = async () => {
     if (!assessmentId) return;
-    
+
     try {
       setAutoSaving(true);
-      
+
       // Save to localStorage
       const progressData = {
         responses,
         currentIndex: currentQuestionIndex,
         lastSaved: new Date().toISOString(),
-        tier,
+        mode,
         questionCount: questions.length
       };
-      
+
       localStorage.setItem(`assessment-progress-${assessmentId}`, JSON.stringify(progressData));
-      
+
       // Also save to database
       try {
         await fetch('/api/ai-readiness/save-progress', {
@@ -123,7 +110,7 @@ export default function AIReadinessAssessmentPage() {
       } catch (dbError) {
         console.warn('Database save failed, using localStorage only');
       }
-      
+
       setLastSaved(new Date());
       console.log('✅ Progress saved:', progressData);
     } catch (error) {
@@ -135,7 +122,7 @@ export default function AIReadinessAssessmentPage() {
 
   const loadSavedProgress = () => {
     if (!assessmentId) return;
-    
+
     try {
       const saved = localStorage.getItem(`assessment-progress-${assessmentId}`);
       if (saved) {
@@ -153,14 +140,18 @@ export default function AIReadinessAssessmentPage() {
   const fetchQuestions = async () => {
     try {
       setLoading(true);
-      console.log('Fetching questions for tier:', tier);
-      const response = await fetch(`/api/ai-readiness/questions?tier=${tier}`);
+
+      // Get mode from URL params or onboarding data
+      const mode = searchParams.get('mode') || 'quick';
+
+      console.log('Fetching questions for mode:', mode);
+      const response = await fetch(`/api/ai-readiness/questions?mode=${mode}`);
       const data = await response.json();
-      
+
       if (data.success) {
-        setQuestions(data.data.questions);
-        console.log('Questions set:', data.data.questions.length);
-        
+        setQuestions(data.questions);
+        console.log('Questions loaded:', data.questions.length);
+
         // Load saved progress after questions are loaded and assessment ID is set
         if (assessmentId) {
           loadSavedProgress();
@@ -175,30 +166,29 @@ export default function AIReadinessAssessmentPage() {
     }
   };
 
-  const handleResponse = (questionId: string, value: number) => {
-    console.log('🔄 Response updated:', { questionId, value });
+  const handleResponse = (questionId: string, value?: number, context?: string, text?: string) => {
+    console.log('🔄 Response updated:', { questionId, value, context, text });
     setResponses(prev => {
       const updated = {
         ...prev,
-        [questionId]: value
+        [questionId]: { value, context, text }
       };
-      
+
       // Immediate save to localStorage on every answer
       if (assessmentId) {
         const progressData = {
           responses: updated,
           currentIndex: currentQuestionIndex,
           lastSaved: new Date().toISOString(),
-          tier,
           questionCount: questions.length
         };
         localStorage.setItem(`assessment-progress-${assessmentId}`, JSON.stringify(progressData));
         console.log('💾 Answer auto-saved immediately');
       }
-      
+
       return updated;
     });
-    
+
     // Also trigger async database save (non-blocking)
     setTimeout(() => saveProgress(), 100);
   };
@@ -212,11 +202,11 @@ export default function AIReadinessAssessmentPage() {
           responses,
           currentIndex: currentQuestionIndex,
           lastSaved: new Date().toISOString(),
-          tier,
+          mode,
           questionCount: questions.length
         };
         localStorage.setItem(`assessment-progress-${assessmentId}`, JSON.stringify(progressData));
-        
+
         // Show warning for unsaved changes
         e.preventDefault();
         e.returnValue = 'Your progress has been saved. Are you sure you want to leave?';
@@ -226,7 +216,7 @@ export default function AIReadinessAssessmentPage() {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [assessmentId, responses, currentQuestionIndex, tier, questions.length]);
+  }, [assessmentId, responses, currentQuestionIndex, mode, questions.length]);
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
@@ -243,13 +233,13 @@ export default function AIReadinessAssessmentPage() {
   const handleSubmit = async () => {
     try {
       setSaving(true);
-      
+
       // Save progress before submitting
       await saveProgress();
-      
+
       const submissionData = {
         responses,
-        tier,
+        mode,
         institutionName: 'Educational Institution',
         contactEmail: 'admin@institution.edu',
         contactName: 'Assessment Administrator',
@@ -259,9 +249,9 @@ export default function AIReadinessAssessmentPage() {
         testMode: false,
         assessmentType: 'ai-readiness'
       };
-      
-      console.log('📤 Submitting assessment:', { tier, responseCount: Object.keys(responses).length });
-      
+
+      console.log('📤 Submitting assessment:', { mode, responseCount: Object.keys(responses).length });
+
       const response = await fetch('/api/ai-readiness/submit', {
         method: 'POST',
         headers: {
@@ -271,14 +261,14 @@ export default function AIReadinessAssessmentPage() {
       });
 
       const result = await response.json();
-      
+
       if (response.ok && result.success) {
         console.log('✅ Assessment submitted successfully:', result);
-        
+
         // Clear saved progress
         localStorage.removeItem(`assessment-progress-${assessmentId}`);
         localStorage.removeItem('assessment-id');
-        
+
         // Redirect to results page
         window.location.href = `/ai-readiness/results?id=${result.id}`;
       } else {
@@ -306,10 +296,35 @@ export default function AIReadinessAssessmentPage() {
 
   const currentQuestion = questions[currentQuestionIndex];
   const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
-  const isAnswered = currentQuestion ? responses[currentQuestion.id] !== undefined : false;
+
+  // Updated validation logic for new question types
+  const isAnswered = currentQuestion ? (() => {
+    const response = responses[currentQuestion.id];
+    if (!response) return false;
+
+    if (currentQuestion.type === 'scale_with_context') {
+      return response.value !== undefined;
+    } else if (currentQuestion.type === 'open_ended') {
+      return response.text && response.text.trim().length > 0;
+    }
+    return false;
+  })() : false;
+
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
-  const allQuestionsAnswered = Object.keys(responses).length === questions.length;
-  
+
+  // Check if all questions are answered
+  const allQuestionsAnswered = questions.every(q => {
+    const response = responses[q.id];
+    if (!response) return false;
+
+    if (q.type === 'scale_with_context') {
+      return response.value !== undefined;
+    } else if (q.type === 'open_ended') {
+      return response.text && response.text.trim().length > 0;
+    }
+    return false;
+  });
+
   // Enhanced section-based progress with time estimates
   const sections = [...new Set(questions.map(q => q.section))];
   const currentSectionName = currentQuestion?.section || '';
@@ -317,13 +332,13 @@ export default function AIReadinessAssessmentPage() {
   const questionsInCurrentSection = questions.filter(q => q.section === currentSectionName).length;
   const answeredInCurrentSection = questions.slice(0, currentQuestionIndex + 1).filter(q => q.section === currentSectionName).length;
   const sectionProgress = questionsInCurrentSection > 0 ? (answeredInCurrentSection / questionsInCurrentSection) * 100 : 0;
-  
+
   // Time estimates per section (rough estimates)
   const getSectionTimeEstimate = (sectionName: string, questionCount: number) => {
     const baseTime = Math.ceil(questionCount * 1.5); // 1.5 minutes per question
     return `${baseTime}-${baseTime + 5} min`;
   };
-  
+
   // Section completion rewards
   const getSectionMilestone = (sectionIndex: number, totalSections: number) => {
     const sectionNames = [
@@ -335,30 +350,30 @@ export default function AIReadinessAssessmentPage() {
       completion: `${sectionIndex + 1}/${totalSections} sections`,
       motivational: [
         'Building strong foundations!',
-        'Strategic planning excellence!', 
+        'Strategic planning excellence!',
         'Implementation ready!',
         'Culture transformation!',
         'Risk management mastery!'
       ][sectionIndex] || 'Great progress!'
     };
   };
-  
+
   const currentSectionMilestone = getSectionMilestone(currentSectionIndex, sections.length);
-  
+
   // Overall milestone achievements
   const getMilestone = (progress: number, sectionIndex: number, totalSections: number) => {
     if (progress >= 100) return { emoji: '🎉', text: 'Assessment Complete!', color: 'text-green-600' };
     if (progress >= 75) return { emoji: '🏁', text: 'Final Quarter - Almost Done!', color: 'text-green-600' };
     if (progress >= 50) return { emoji: '⭐', text: 'Halfway There - Great Progress!', color: 'text-blue-600' };
     if (progress >= 25) return { emoji: '🚀', text: 'Quarter Complete - Keep Going!', color: 'text-purple-600' };
-    
+
     // Section-based encouragement for early progress
     if (sectionIndex === 0) return { emoji: '🏗️', text: 'Foundation Building - Excellent Start!', color: 'text-blue-600' };
     if (sectionIndex === 1) return { emoji: '🎯', text: 'Strategy Development - You\'re Focused!', color: 'text-purple-600' };
-    
+
     return { emoji: '💪', text: 'Making Great Progress!', color: 'text-blue-600' };
   };
-  
+
   const milestone = getMilestone(progress, currentSectionIndex, sections.length);
 
   if (questions.length === 0 || !currentQuestion) {
@@ -379,9 +394,9 @@ export default function AIReadinessAssessmentPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {institutionType === 'K12' ? 'K-12 AI Readiness Assessment' : 
-                 institutionType === 'HigherEd' ? 'Higher Education AI Readiness Assessment' : 
-                 'AI Readiness Assessment'}
+                {institutionType === 'K12' ? 'K-12 AI Readiness Assessment' :
+                  institutionType === 'HigherEd' ? 'Higher Education AI Readiness Assessment' :
+                    'AI Readiness Assessment'}
               </h1>
               <div className="flex items-center gap-4 mt-1">
                 <div className="flex items-center gap-4">
@@ -412,9 +427,9 @@ export default function AIReadinessAssessmentPage() {
                   )}
                 </div>
                 {/* Manual Save Button */}
-                <Button 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={saveProgress}
                   disabled={autoSaving}
                   className="flex items-center gap-1 text-xs"
@@ -424,7 +439,7 @@ export default function AIReadinessAssessmentPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Enhanced Progress Bar with Section Details */}
           <div className="mt-4 space-y-3">
             {/* Section Progress Card */}
@@ -450,7 +465,7 @@ export default function AIReadinessAssessmentPage() {
               </div>
               <Progress value={sectionProgress} className="h-2 bg-blue-100" />
             </div>
-            
+
             {/* Overall Progress */}
             <div className="flex justify-between text-sm text-gray-600">
               <span>Overall Progress: Question {currentQuestionIndex + 1} of {questions.length}</span>
@@ -462,11 +477,10 @@ export default function AIReadinessAssessmentPage() {
               {sections.map((_, index) => {
                 const sectionStart = (index / sections.length) * 100;
                 return (
-                  <div 
+                  <div
                     key={index}
-                    className={`absolute top-0 w-1 h-3 rounded-full opacity-60 ${
-                      index <= currentSectionIndex ? 'bg-green-400' : 'bg-gray-300'
-                    }`}
+                    className={`absolute top-0 w-1 h-3 rounded-full opacity-60 ${index <= currentSectionIndex ? 'bg-green-400' : 'bg-gray-300'
+                      }`}
                     style={{ left: `${sectionStart}%` }}
                   ></div>
                 );
@@ -479,7 +493,7 @@ export default function AIReadinessAssessmentPage() {
                 </span>
               ))}
             </div>
-            
+
             {/* Next Section Preview (when close to section completion) */}
             {sectionProgress > 75 && currentSectionIndex < sections.length - 1 && (
               <div className="mt-3 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3">
@@ -506,19 +520,19 @@ export default function AIReadinessAssessmentPage() {
             <div className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-lg inline-block">
               {currentQuestion.section}
             </div>
-            
+
             {/* Question */}
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-3">
-                {currentQuestion.prompt}
+                {currentQuestion.question}
               </h2>
-              
+
               {currentQuestion.helpText && (
                 <p className="text-gray-600 text-sm mb-4">
                   {currentQuestion.helpText}
                 </p>
               )}
-              
+
               {/* Value reinforcement - show periodically */}
               {(currentQuestionIndex + 1) % 15 === 0 && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
@@ -527,7 +541,7 @@ export default function AIReadinessAssessmentPage() {
                     <div>
                       <h4 className="font-semibold text-blue-900 mb-1">Your Personalized Insights Are Building</h4>
                       <p className="text-blue-800 text-sm">
-                        Each thoughtful response helps us create more precise, actionable recommendations specifically for your organization. 
+                        Each thoughtful response helps us create more precise, actionable recommendations specifically for your organization.
                         The thorough assessment you're completing will generate a customized AI transformation roadmap worth thousands in consulting value.
                       </p>
                     </div>
@@ -537,31 +551,81 @@ export default function AIReadinessAssessmentPage() {
             </div>
 
             {/* Response Options */}
-            <div className="space-y-3">
-              {[
-                { value: 1, label: "Strongly Disagree", color: "bg-red-100 border-red-300 text-red-700" },
-                { value: 2, label: "Disagree", color: "bg-orange-100 border-orange-300 text-orange-700" },
-                { value: 3, label: "Neutral", color: "bg-yellow-100 border-yellow-300 text-yellow-700" },
-                { value: 4, label: "Agree", color: "bg-blue-100 border-blue-300 text-blue-700" },
-                { value: 5, label: "Strongly Agree", color: "bg-green-100 border-green-300 text-green-700" }
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleResponse(currentQuestion.id, option.value)}
-                  className={`w-full p-4 text-left border-2 rounded-lg transition-all ${
-                    responses[currentQuestion.id] === option.value
-                      ? option.color
-                      : 'bg-white border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{option.label}</span>
-                    {responses[currentQuestion.id] === option.value && (
-                      <CheckCircle className="w-5 h-5 text-current" />
-                    )}
+            <div className="space-y-6">
+              {currentQuestion.type === 'scale_with_context' && (
+                <>
+                  {/* Scale Response */}
+                  <div className="space-y-3">
+                    {[
+                      { value: 1, label: currentQuestion.scaleLabels?.low || "Low", color: "bg-red-100 border-red-300 text-red-700" },
+                      { value: 2, label: "Below Average", color: "bg-orange-100 border-orange-300 text-orange-700" },
+                      { value: 3, label: "Average", color: "bg-yellow-100 border-yellow-300 text-yellow-700" },
+                      { value: 4, label: "Above Average", color: "bg-blue-100 border-blue-300 text-blue-700" },
+                      { value: 5, label: currentQuestion.scaleLabels?.high || "High", color: "bg-green-100 border-green-300 text-green-700" }
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => handleResponse(
+                          currentQuestion.id,
+                          option.value,
+                          responses[currentQuestion.id]?.context,
+                          responses[currentQuestion.id]?.text
+                        )}
+                        className={`w-full p-4 text-left border-2 rounded-lg transition-all ${responses[currentQuestion.id]?.value === option.value
+                            ? option.color
+                            : 'bg-white border-gray-200 hover:border-gray-300'
+                          }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{option.label}</span>
+                          {responses[currentQuestion.id]?.value === option.value && (
+                            <CheckCircle className="w-5 h-5 text-current" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
                   </div>
-                </button>
-              ))}
+
+                  {/* Context Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Please provide additional context or specific examples (optional):
+                    </label>
+                    <Textarea
+                      value={responses[currentQuestion.id]?.context || ''}
+                      onChange={(e) => handleResponse(
+                        currentQuestion.id,
+                        responses[currentQuestion.id]?.value,
+                        e.target.value,
+                        responses[currentQuestion.id]?.text
+                      )}
+                      placeholder="Share specific examples, challenges, or additional details..."
+                      rows={4}
+                      className="w-full"
+                    />
+                  </div>
+                </>
+              )}
+
+              {currentQuestion.type === 'open_ended' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Response:
+                  </label>
+                  <Textarea
+                    value={responses[currentQuestion.id]?.text || ''}
+                    onChange={(e) => handleResponse(
+                      currentQuestion.id,
+                      undefined,
+                      undefined,
+                      e.target.value
+                    )}
+                    placeholder="Please provide a detailed response..."
+                    rows={6}
+                    className="w-full"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Navigation */}
@@ -573,7 +637,7 @@ export default function AIReadinessAssessmentPage() {
               >
                 Previous
               </Button>
-              
+
               <div className="flex gap-3">
                 {!isLastQuestion ? (
                   <Button

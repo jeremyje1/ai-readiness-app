@@ -1,0 +1,4855 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Policy Engine Integration Tests > Clause Selection > should handle clause exclusions > clause-exclusions 1`] = `
+[
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "This policy establishes guidelines for the responsible use of artificial intelligence (AI) tools and systems within [ORGANIZATION_NAME]. It applies to all faculty, staff, students, and contractors who access, use, or implement AI technologies in educational, research, or administrative contexts.",
+    "id": "purpose-001",
+    "jurisdictions": [
+      "US",
+      "CA",
+      "EU",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 1,
+    "reason": "Specifically designed for k12 institutions; Applicable to restricted tool use policy; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "purpose",
+      "scope",
+      "definitions",
+    ],
+    "title": "Purpose and Scope",
+    "toolUseModes": [
+      "prohibited",
+      "restricted",
+      "permitted",
+      "encouraged",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+    ],
+    "body": "This policy governs the use of AI technologies in K-12 educational settings to ensure student safety, privacy protection under COPPA, and educational appropriateness. All AI implementations must support pedagogical goals while maintaining compliance with federal and state education regulations.",
+    "id": "purpose-002-k12",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 2,
+    "reason": "Matches medium risk profile; Specifically designed for k12 institutions; Applicable to restricted tool use policy; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "purpose",
+      "k12",
+      "coppa",
+      "education",
+    ],
+    "title": "K-12 Educational Purpose",
+    "toolUseModes": [
+      "restricted",
+      "permitted",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Artificial Intelligence (AI) refers to computer systems that can perform tasks typically requiring human intelligence, including but not limited to machine learning, natural language processing, computer vision, automated decision-making, and predictive analytics.",
+    "id": "definitions-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 3,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "ai",
+      "technology",
+    ],
+    "title": "Artificial Intelligence Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "High-Risk AI Systems are those that pose significant potential for adverse impact on student welfare, educational outcomes, privacy rights, or institutional operations. This includes AI systems used for student assessment, disciplinary decisions, college admissions, or processing of sensitive personal data.",
+    "id": "definitions-002",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 4,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "high-risk",
+      "assessment",
+    ],
+    "title": "High-Risk AI System Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "An AI Governance Committee shall be established comprising representatives from IT, Academic Affairs, Legal, Privacy, and Student Services. The committee shall review AI implementations, approve high-risk AI systems, and ensure ongoing compliance with this policy.",
+    "dependencies": [
+      "definitions-002",
+    ],
+    "id": "governance-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 5,
+    "reason": "Matches medium risk profile; Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "governance",
+      "committee",
+      "oversight",
+    ],
+    "title": "AI Governance Committee",
+  },
+  {
+    "audience": [
+      "k12",
+    ],
+    "body": "Parents and guardians must be notified when AI systems will be used in educational activities involving their children. For AI systems that collect, use, or store student data, written parental consent must be obtained in compliance with COPPA requirements.",
+    "id": "governance-002-k12",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 6,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "governance",
+      "k12",
+      "coppa",
+      "parental-consent",
+    ],
+    "title": "K-12 Parental Notification",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems that process student educational records must comply with FERPA requirements. Student data shall not be used for AI training without explicit consent, and all data processing must be limited to legitimate educational purposes.",
+    "id": "privacy-001",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 7,
+    "reason": "Specifically designed for k12 institutions; Applicable to restricted tool use policy; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "privacy",
+      "ferpa",
+      "student-data",
+    ],
+    "title": "Student Data Protection",
+    "toolUseModes": [
+      "restricted",
+      "permitted",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+    ],
+    "body": "AI systems used with students under 13 years of age must comply with the Children's Online Privacy Protection Act (COPPA). This includes obtaining verifiable parental consent before collecting personal information and limiting data collection to what is necessary for the educational purpose.",
+    "id": "privacy-002-coppa",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 8,
+    "reason": "Specifically designed for k12 institutions; Applicable to restricted tool use policy; High relevance to your policy context",
+    "riskLevel": "critical",
+    "selected": true,
+    "tags": [
+      "privacy",
+      "coppa",
+      "k12",
+      "children",
+    ],
+    "title": "COPPA Compliance for Under-13 Students",
+    "toolUseModes": [
+      "restricted",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All AI implementations must undergo a risk assessment prior to deployment. The assessment shall evaluate potential impacts on privacy, bias, accuracy, transparency, and educational outcomes. High-risk AI systems require additional review and approval.",
+    "dependencies": [
+      "definitions-002",
+      "governance-001",
+    ],
+    "id": "risk-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 9,
+    "reason": "Matches medium risk profile; Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "risk-assessment",
+      "compliance",
+      "approval",
+    ],
+    "title": "AI Risk Assessment Requirement",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems must be designed and implemented to minimize bias and ensure fair treatment of all students regardless of race, gender, ethnicity, disability status, or socioeconomic background. Regular bias testing and mitigation measures are required.",
+    "id": "bias-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 10,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "bias",
+      "fairness",
+      "equity",
+      "testing",
+    ],
+    "title": "AI Bias Prevention",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Students and faculty must disclose the use of AI tools in academic work when required by course policies or institutional guidelines. AI-generated content must be clearly identified, and students remain responsible for the accuracy and originality of their submitted work.",
+    "id": "integrity-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 11,
+    "reason": "Matches medium risk profile; Specifically designed for k12 institutions; Applicable to restricted tool use policy; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "academic-integrity",
+      "disclosure",
+      "transparency",
+    ],
+    "title": "Academic Integrity and AI Use",
+    "toolUseModes": [
+      "restricted",
+      "permitted",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems shall be continuously monitored for performance, bias, and compliance with institutional policies. Regular audits, impact assessments, and user feedback collection are required to ensure ongoing effectiveness and safety.",
+    "dependencies": [
+      "governance-001",
+    ],
+    "id": "monitoring-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 12,
+    "reason": "Matches medium risk profile; Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "monitoring",
+      "auditing",
+      "compliance",
+    ],
+    "title": "AI System Monitoring",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Clause Selection > should handle low risk encouraged mode > k12-low-risk-encouraged 1`] = `
+[
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "This policy establishes guidelines for the responsible use of artificial intelligence (AI) tools and systems within [ORGANIZATION_NAME]. It applies to all faculty, staff, students, and contractors who access, use, or implement AI technologies in educational, research, or administrative contexts.",
+    "id": "purpose-001",
+    "jurisdictions": [
+      "US",
+      "CA",
+      "EU",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 1,
+    "reason": "Matches low risk profile; Specifically designed for k12 institutions; Applicable to encouraged tool use policy; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "purpose",
+      "scope",
+      "definitions",
+    ],
+    "title": "Purpose and Scope",
+    "toolUseModes": [
+      "prohibited",
+      "restricted",
+      "permitted",
+      "encouraged",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Artificial Intelligence (AI) refers to computer systems that can perform tasks typically requiring human intelligence, including but not limited to machine learning, natural language processing, computer vision, automated decision-making, and predictive analytics.",
+    "id": "definitions-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 2,
+    "reason": "Matches low risk profile; Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "ai",
+      "technology",
+    ],
+    "title": "Artificial Intelligence Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "High-Risk AI Systems are those that pose significant potential for adverse impact on student welfare, educational outcomes, privacy rights, or institutional operations. This includes AI systems used for student assessment, disciplinary decisions, college admissions, or processing of sensitive personal data.",
+    "id": "definitions-002",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 3,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "high-risk",
+      "assessment",
+    ],
+    "title": "High-Risk AI System Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "An AI Governance Committee shall be established comprising representatives from IT, Academic Affairs, Legal, Privacy, and Student Services. The committee shall review AI implementations, approve high-risk AI systems, and ensure ongoing compliance with this policy.",
+    "dependencies": [
+      "definitions-002",
+    ],
+    "id": "governance-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 4,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "governance",
+      "committee",
+      "oversight",
+    ],
+    "title": "AI Governance Committee",
+  },
+  {
+    "audience": [
+      "k12",
+    ],
+    "body": "Parents and guardians must be notified when AI systems will be used in educational activities involving their children. For AI systems that collect, use, or store student data, written parental consent must be obtained in compliance with COPPA requirements.",
+    "id": "governance-002-k12",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 5,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "governance",
+      "k12",
+      "coppa",
+      "parental-consent",
+    ],
+    "title": "K-12 Parental Notification",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All AI implementations must undergo a risk assessment prior to deployment. The assessment shall evaluate potential impacts on privacy, bias, accuracy, transparency, and educational outcomes. High-risk AI systems require additional review and approval.",
+    "dependencies": [
+      "definitions-002",
+      "governance-001",
+    ],
+    "id": "risk-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 6,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "risk-assessment",
+      "compliance",
+      "approval",
+    ],
+    "title": "AI Risk Assessment Requirement",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems must be designed and implemented to minimize bias and ensure fair treatment of all students regardless of race, gender, ethnicity, disability status, or socioeconomic background. Regular bias testing and mitigation measures are required.",
+    "id": "bias-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 7,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "bias",
+      "fairness",
+      "equity",
+      "testing",
+    ],
+    "title": "AI Bias Prevention",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Third-party AI vendors must demonstrate compliance with applicable privacy laws, security standards, and educational regulations. Vendor agreements must include data processing addendums, liability provisions, and audit rights.",
+    "id": "vendor-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 8,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "vendor",
+      "procurement",
+      "compliance",
+    ],
+    "title": "AI Vendor Due Diligence",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All users of AI systems must complete appropriate training on AI ethics, privacy implications, and institutional policies before gaining access. Training shall be updated annually and include emerging best practices.",
+    "id": "training-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 9,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "training",
+      "education",
+      "competency",
+    ],
+    "title": "AI Training Requirements",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems shall be continuously monitored for performance, bias, and compliance with institutional policies. Regular audits, impact assessments, and user feedback collection are required to ensure ongoing effectiveness and safety.",
+    "dependencies": [
+      "governance-001",
+    ],
+    "id": "monitoring-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 10,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "monitoring",
+      "auditing",
+      "compliance",
+    ],
+    "title": "AI System Monitoring",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Clause Selection > should respect clause dependencies > dependency-resolution 1`] = `
+[
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "This policy establishes guidelines for the responsible use of artificial intelligence (AI) tools and systems within [ORGANIZATION_NAME]. It applies to all faculty, staff, students, and contractors who access, use, or implement AI technologies in educational, research, or administrative contexts.",
+    "id": "purpose-001",
+    "jurisdictions": [
+      "US",
+      "CA",
+      "EU",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 1,
+    "reason": "Specifically designed for highered institutions; Applicable to restricted tool use policy; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "purpose",
+      "scope",
+      "definitions",
+    ],
+    "title": "Purpose and Scope",
+    "toolUseModes": [
+      "prohibited",
+      "restricted",
+      "permitted",
+      "encouraged",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Artificial Intelligence (AI) refers to computer systems that can perform tasks typically requiring human intelligence, including but not limited to machine learning, natural language processing, computer vision, automated decision-making, and predictive analytics.",
+    "id": "definitions-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 2,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "ai",
+      "technology",
+    ],
+    "title": "Artificial Intelligence Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "High-Risk AI Systems are those that pose significant potential for adverse impact on student welfare, educational outcomes, privacy rights, or institutional operations. This includes AI systems used for student assessment, disciplinary decisions, college admissions, or processing of sensitive personal data.",
+    "id": "definitions-002",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 3,
+    "reason": "Matches high risk profile; Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "high-risk",
+      "assessment",
+    ],
+    "title": "High-Risk AI System Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "An AI Governance Committee shall be established comprising representatives from IT, Academic Affairs, Legal, Privacy, and Student Services. The committee shall review AI implementations, approve high-risk AI systems, and ensure ongoing compliance with this policy.",
+    "dependencies": [
+      "definitions-002",
+    ],
+    "id": "governance-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 4,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "governance",
+      "committee",
+      "oversight",
+    ],
+    "title": "AI Governance Committee",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems that process student educational records must comply with FERPA requirements. Student data shall not be used for AI training without explicit consent, and all data processing must be limited to legitimate educational purposes.",
+    "id": "privacy-001",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 5,
+    "reason": "Matches high risk profile; Specifically designed for highered institutions; Applicable to restricted tool use policy; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "privacy",
+      "ferpa",
+      "student-data",
+    ],
+    "title": "Student Data Protection",
+    "toolUseModes": [
+      "restricted",
+      "permitted",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All AI implementations must undergo a risk assessment prior to deployment. The assessment shall evaluate potential impacts on privacy, bias, accuracy, transparency, and educational outcomes. High-risk AI systems require additional review and approval.",
+    "dependencies": [
+      "definitions-002",
+      "governance-001",
+    ],
+    "id": "risk-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 6,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "risk-assessment",
+      "compliance",
+      "approval",
+    ],
+    "title": "AI Risk Assessment Requirement",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems must be designed and implemented to minimize bias and ensure fair treatment of all students regardless of race, gender, ethnicity, disability status, or socioeconomic background. Regular bias testing and mitigation measures are required.",
+    "id": "bias-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 7,
+    "reason": "Matches high risk profile; Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "bias",
+      "fairness",
+      "equity",
+      "testing",
+    ],
+    "title": "AI Bias Prevention",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Students and faculty must disclose the use of AI tools in academic work when required by course policies or institutional guidelines. AI-generated content must be clearly identified, and students remain responsible for the accuracy and originality of their submitted work.",
+    "id": "integrity-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 8,
+    "reason": "Specifically designed for highered institutions; Applicable to restricted tool use policy; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "academic-integrity",
+      "disclosure",
+      "transparency",
+    ],
+    "title": "Academic Integrity and AI Use",
+    "toolUseModes": [
+      "restricted",
+      "permitted",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Third-party AI vendors must demonstrate compliance with applicable privacy laws, security standards, and educational regulations. Vendor agreements must include data processing addendums, liability provisions, and audit rights.",
+    "id": "vendor-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 9,
+    "reason": "Matches high risk profile; Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "vendor",
+      "procurement",
+      "compliance",
+    ],
+    "title": "AI Vendor Due Diligence",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All users of AI systems must complete appropriate training on AI ethics, privacy implications, and institutional policies before gaining access. Training shall be updated annually and include emerging best practices.",
+    "id": "training-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 10,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "training",
+      "education",
+      "competency",
+    ],
+    "title": "AI Training Requirements",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems shall be continuously monitored for performance, bias, and compliance with institutional policies. Regular audits, impact assessments, and user feedback collection are required to ensure ongoing effectiveness and safety.",
+    "dependencies": [
+      "governance-001",
+    ],
+    "id": "monitoring-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 11,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "monitoring",
+      "auditing",
+      "compliance",
+    ],
+    "title": "AI System Monitoring",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Clause Selection > should select appropriate clauses for Higher Ed permitted mode > highered-permitted-clauses 1`] = `
+[
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "This policy establishes guidelines for the responsible use of artificial intelligence (AI) tools and systems within [ORGANIZATION_NAME]. It applies to all faculty, staff, students, and contractors who access, use, or implement AI technologies in educational, research, or administrative contexts.",
+    "id": "purpose-001",
+    "jurisdictions": [
+      "US",
+      "CA",
+      "EU",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 1,
+    "reason": "Specifically designed for highered institutions; Applicable to permitted tool use policy; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "purpose",
+      "scope",
+      "definitions",
+    ],
+    "title": "Purpose and Scope",
+    "toolUseModes": [
+      "prohibited",
+      "restricted",
+      "permitted",
+      "encouraged",
+    ],
+  },
+  {
+    "audience": [
+      "highered",
+    ],
+    "body": "This policy facilitates responsible AI adoption in higher education research, instruction, and administration while ensuring compliance with FERPA, research ethics standards, and institutional academic integrity policies. AI use must advance educational and research missions while protecting student and research data.",
+    "id": "purpose-003-highered",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 2,
+    "reason": "Matches medium risk profile; Specifically designed for highered institutions; Applicable to permitted tool use policy; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "purpose",
+      "highered",
+      "ferpa",
+      "research",
+    ],
+    "title": "Higher Education Research and Academic Purpose",
+    "toolUseModes": [
+      "permitted",
+      "encouraged",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Artificial Intelligence (AI) refers to computer systems that can perform tasks typically requiring human intelligence, including but not limited to machine learning, natural language processing, computer vision, automated decision-making, and predictive analytics.",
+    "id": "definitions-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 3,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "ai",
+      "technology",
+    ],
+    "title": "Artificial Intelligence Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "High-Risk AI Systems are those that pose significant potential for adverse impact on student welfare, educational outcomes, privacy rights, or institutional operations. This includes AI systems used for student assessment, disciplinary decisions, college admissions, or processing of sensitive personal data.",
+    "id": "definitions-002",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 4,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "high-risk",
+      "assessment",
+    ],
+    "title": "High-Risk AI System Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "An AI Governance Committee shall be established comprising representatives from IT, Academic Affairs, Legal, Privacy, and Student Services. The committee shall review AI implementations, approve high-risk AI systems, and ensure ongoing compliance with this policy.",
+    "dependencies": [
+      "definitions-002",
+    ],
+    "id": "governance-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 5,
+    "reason": "Matches medium risk profile; Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "governance",
+      "committee",
+      "oversight",
+    ],
+    "title": "AI Governance Committee",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems that process student educational records must comply with FERPA requirements. Student data shall not be used for AI training without explicit consent, and all data processing must be limited to legitimate educational purposes.",
+    "id": "privacy-001",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 6,
+    "reason": "Specifically designed for highered institutions; Applicable to permitted tool use policy; High relevance to your policy context; Addresses: privacy",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "privacy",
+      "ferpa",
+      "student-data",
+    ],
+    "title": "Student Data Protection",
+    "toolUseModes": [
+      "restricted",
+      "permitted",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All AI implementations must undergo a risk assessment prior to deployment. The assessment shall evaluate potential impacts on privacy, bias, accuracy, transparency, and educational outcomes. High-risk AI systems require additional review and approval.",
+    "dependencies": [
+      "definitions-002",
+      "governance-001",
+    ],
+    "id": "risk-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 7,
+    "reason": "Matches medium risk profile; Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "risk-assessment",
+      "compliance",
+      "approval",
+    ],
+    "title": "AI Risk Assessment Requirement",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems must be designed and implemented to minimize bias and ensure fair treatment of all students regardless of race, gender, ethnicity, disability status, or socioeconomic background. Regular bias testing and mitigation measures are required.",
+    "id": "bias-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 8,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "bias",
+      "fairness",
+      "equity",
+      "testing",
+    ],
+    "title": "AI Bias Prevention",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Students and faculty must disclose the use of AI tools in academic work when required by course policies or institutional guidelines. AI-generated content must be clearly identified, and students remain responsible for the accuracy and originality of their submitted work.",
+    "id": "integrity-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 9,
+    "reason": "Matches medium risk profile; Specifically designed for highered institutions; Applicable to permitted tool use policy; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "academic-integrity",
+      "disclosure",
+      "transparency",
+    ],
+    "title": "Academic Integrity and AI Use",
+    "toolUseModes": [
+      "restricted",
+      "permitted",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Third-party AI vendors must demonstrate compliance with applicable privacy laws, security standards, and educational regulations. Vendor agreements must include data processing addendums, liability provisions, and audit rights.",
+    "id": "vendor-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 10,
+    "reason": "Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "vendor",
+      "procurement",
+      "compliance",
+    ],
+    "title": "AI Vendor Due Diligence",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All users of AI systems must complete appropriate training on AI ethics, privacy implications, and institutional policies before gaining access. Training shall be updated annually and include emerging best practices.",
+    "id": "training-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 11,
+    "reason": "Matches medium risk profile; Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "training",
+      "education",
+      "competency",
+    ],
+    "title": "AI Training Requirements",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems shall be continuously monitored for performance, bias, and compliance with institutional policies. Regular audits, impact assessments, and user feedback collection are required to ensure ongoing effectiveness and safety.",
+    "dependencies": [
+      "governance-001",
+    ],
+    "id": "monitoring-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 12,
+    "reason": "Matches medium risk profile; Specifically designed for highered institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "monitoring",
+      "auditing",
+      "compliance",
+    ],
+    "title": "AI System Monitoring",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Clause Selection > should select appropriate clauses for K-12 prohibited mode > k12-prohibited-clauses 1`] = `
+[
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "This policy establishes guidelines for the responsible use of artificial intelligence (AI) tools and systems within [ORGANIZATION_NAME]. It applies to all faculty, staff, students, and contractors who access, use, or implement AI technologies in educational, research, or administrative contexts.",
+    "id": "purpose-001",
+    "jurisdictions": [
+      "US",
+      "CA",
+      "EU",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 1,
+    "reason": "Specifically designed for k12 institutions; Applicable to prohibited tool use policy; Includes CA jurisdiction requirements; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "purpose",
+      "scope",
+      "definitions",
+    ],
+    "title": "Purpose and Scope",
+    "toolUseModes": [
+      "prohibited",
+      "restricted",
+      "permitted",
+      "encouraged",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Artificial Intelligence (AI) refers to computer systems that can perform tasks typically requiring human intelligence, including but not limited to machine learning, natural language processing, computer vision, automated decision-making, and predictive analytics.",
+    "id": "definitions-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 2,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "low",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "ai",
+      "technology",
+    ],
+    "title": "Artificial Intelligence Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "High-Risk AI Systems are those that pose significant potential for adverse impact on student welfare, educational outcomes, privacy rights, or institutional operations. This includes AI systems used for student assessment, disciplinary decisions, college admissions, or processing of sensitive personal data.",
+    "id": "definitions-002",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 3,
+    "reason": "Matches high risk profile; Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "definitions",
+      "high-risk",
+      "assessment",
+    ],
+    "title": "High-Risk AI System Definition",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "An AI Governance Committee shall be established comprising representatives from IT, Academic Affairs, Legal, Privacy, and Student Services. The committee shall review AI implementations, approve high-risk AI systems, and ensure ongoing compliance with this policy.",
+    "dependencies": [
+      "definitions-002",
+    ],
+    "id": "governance-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 4,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "governance",
+      "committee",
+      "oversight",
+    ],
+    "title": "AI Governance Committee",
+  },
+  {
+    "audience": [
+      "k12",
+    ],
+    "body": "Parents and guardians must be notified when AI systems will be used in educational activities involving their children. For AI systems that collect, use, or store student data, written parental consent must be obtained in compliance with COPPA requirements.",
+    "id": "governance-002-k12",
+    "jurisdictions": [
+      "US",
+    ],
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 5,
+    "reason": "Matches high risk profile; Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "governance",
+      "k12",
+      "coppa",
+      "parental-consent",
+    ],
+    "title": "K-12 Parental Notification",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All AI implementations must undergo a risk assessment prior to deployment. The assessment shall evaluate potential impacts on privacy, bias, accuracy, transparency, and educational outcomes. High-risk AI systems require additional review and approval.",
+    "dependencies": [
+      "definitions-002",
+      "governance-001",
+    ],
+    "id": "risk-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 6,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "risk-assessment",
+      "compliance",
+      "approval",
+    ],
+    "title": "AI Risk Assessment Requirement",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems must be designed and implemented to minimize bias and ensure fair treatment of all students regardless of race, gender, ethnicity, disability status, or socioeconomic background. Regular bias testing and mitigation measures are required.",
+    "id": "bias-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 7,
+    "reason": "Matches high risk profile; Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "bias",
+      "fairness",
+      "equity",
+      "testing",
+    ],
+    "title": "AI Bias Prevention",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "Third-party AI vendors must demonstrate compliance with applicable privacy laws, security standards, and educational regulations. Vendor agreements must include data processing addendums, liability provisions, and audit rights.",
+    "id": "vendor-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 8,
+    "reason": "Matches high risk profile; Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "high",
+    "selected": true,
+    "tags": [
+      "vendor",
+      "procurement",
+      "compliance",
+    ],
+    "title": "AI Vendor Due Diligence",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems shall not be used for: (1) Automated disciplinary decisions without human review, (2) Surveillance of students beyond legitimate safety purposes, (3) Predictive analytics that could result in discriminatory treatment, (4) Processing of biometric data without explicit consent and legal basis.",
+    "id": "prohibited-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 9,
+    "reason": "Critical clause recommended for high-risk environment; Specifically designed for k12 institutions; Applicable to prohibited tool use policy; High relevance to your policy context",
+    "riskLevel": "critical",
+    "selected": true,
+    "tags": [
+      "prohibited",
+      "restrictions",
+      "surveillance",
+    ],
+    "title": "Prohibited AI Uses",
+    "toolUseModes": [
+      "prohibited",
+    ],
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "All users of AI systems must complete appropriate training on AI ethics, privacy implications, and institutional policies before gaining access. Training shall be updated annually and include emerging best practices.",
+    "id": "training-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 10,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "training",
+      "education",
+      "competency",
+    ],
+    "title": "AI Training Requirements",
+  },
+  {
+    "audience": [
+      "k12",
+      "highered",
+    ],
+    "body": "AI systems shall be continuously monitored for performance, bias, and compliance with institutional policies. Regular audits, impact assessments, and user feedback collection are required to ensure ongoing effectiveness and safety.",
+    "dependencies": [
+      "governance-001",
+    ],
+    "id": "monitoring-001",
+    "metadata": {
+      "author": "Policy Engine",
+      "createdAt": "2025-08-26T00:00:00Z",
+      "legalReview": true,
+      "updatedAt": "2025-08-26T00:00:00Z",
+      "version": 1,
+    },
+    "priority": 11,
+    "reason": "Specifically designed for k12 institutions; High relevance to your policy context",
+    "riskLevel": "medium",
+    "selected": true,
+    "tags": [
+      "monitoring",
+      "auditing",
+      "compliance",
+    ],
+    "title": "AI System Monitoring",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Document Rendering > should include metadata in rendered documents > policy-with-metadata 1`] = `
+"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Higher Education Standard AI Policy</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 2in; color: #333; }
+        h1 { text-align: center; margin-bottom: 1in; font-size: 24px; }
+        h2 { color: #2c5aa0; margin-top: 2em; margin-bottom: 0.5em; font-size: 18px; }
+        p { margin-bottom: 1em; text-align: justify; }
+        .metadata { text-align: center; font-style: italic; margin-bottom: 2em; }
+        .org-name { font-weight: bold; margin-bottom: 1em; }
+        .footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid #ccc; font-size: 12px; color: #666; }
+        .clause-meta { font-size: 11px; color: #888; font-style: italic; margin-bottom: 1em; }
+    </style>
+</head>
+<body>
+    <h1>Higher Education Standard AI Policy</h1>
+    
+    <div class="metadata">
+        Version: 1 | Generated: 8/26/2025
+    </div>
+    
+    <div class="org-name">
+        Organization: University of Testing
+    </div>
+    
+    <p><strong>Effective Date:</strong> [Effective Date]</p>
+    
+    
+        <h2>1. Purpose and Scope</h2>
+        <p>This policy establishes guidelines for the responsible use of artificial intelligence (AI) tools and systems within University of Testing. It applies to all faculty, staff, students, and contractors who access, use, or implement AI technologies in educational, research, or administrative contexts.</p>
+        
+    
+        <h2>2. K-12 Educational Purpose</h2>
+        <p>This policy governs the use of AI technologies in K-12 educational settings to ensure student safety, privacy protection under COPPA, and educational appropriateness. All AI implementations must support pedagogical goals while maintaining compliance with federal and state education regulations.</p>
+        
+    
+        <h2>3. Artificial Intelligence Definition</h2>
+        <p>Artificial Intelligence (AI) refers to computer systems that can perform tasks typically requiring human intelligence, including but not limited to machine learning, natural language processing, computer vision, automated decision-making, and predictive analytics.</p>
+        
+    
+        <h2>4. High-Risk AI System Definition</h2>
+        <p>High-Risk AI Systems are those that pose significant potential for adverse impact on student welfare, educational outcomes, privacy rights, or institutional operations. This includes AI systems used for student assessment, disciplinary decisions, college admissions, or processing of sensitive personal data.</p>
+        
+    
+        <h2>5. AI Governance Committee</h2>
+        <p>An AI Governance Committee shall be established comprising representatives from IT, Academic Affairs, Legal, Privacy, and Student Services. The committee shall review AI implementations, approve high-risk AI systems, and ensure ongoing compliance with this policy.</p>
+        
+    
+        <h2>6. K-12 Parental Notification</h2>
+        <p>Parents and guardians must be notified when AI systems will be used in educational activities involving their children. For AI systems that collect, use, or store student data, written parental consent must be obtained in compliance with COPPA requirements.</p>
+        
+    
+        <h2>7. Student Data Protection</h2>
+        <p>AI systems that process student educational records must comply with FERPA requirements. Student data shall not be used for AI training without explicit consent, and all data processing must be limited to legitimate educational purposes.</p>
+        
+    
+        <h2>8. COPPA Compliance for Under-13 Students</h2>
+        <p>AI systems used with students under 13 years of age must comply with the Children's Online Privacy Protection Act (COPPA). This includes obtaining verifiable parental consent before collecting personal information and limiting data collection to what is necessary for the educational purpose.</p>
+        
+    
+        <h2>9. AI Risk Assessment Requirement</h2>
+        <p>All AI implementations must undergo a risk assessment prior to deployment. The assessment shall evaluate potential impacts on privacy, bias, accuracy, transparency, and educational outcomes. High-risk AI systems require additional review and approval.</p>
+        
+    
+        <h2>10. AI Bias Prevention</h2>
+        <p>AI systems must be designed and implemented to minimize bias and ensure fair treatment of all students regardless of race, gender, ethnicity, disability status, or socioeconomic background. Regular bias testing and mitigation measures are required.</p>
+        
+    
+        <h2>11. Academic Integrity and AI Use</h2>
+        <p>Students and faculty must disclose the use of AI tools in academic work when required by course policies or institutional guidelines. AI-generated content must be clearly identified, and students remain responsible for the accuracy and originality of their submitted work.</p>
+        
+    
+        <h2>12. AI Vendor Due Diligence</h2>
+        <p>Third-party AI vendors must demonstrate compliance with applicable privacy laws, security standards, and educational regulations. Vendor agreements must include data processing addendums, liability provisions, and audit rights.</p>
+        
+    
+        <h2>13. AI Training Requirements</h2>
+        <p>All users of AI systems must complete appropriate training on AI ethics, privacy implications, and institutional policies before gaining access. Training shall be updated annually and include emerging best practices.</p>
+        
+    
+        <h2>14. AI System Monitoring</h2>
+        <p>AI systems shall be continuously monitored for performance, bias, and compliance with institutional policies. Regular audits, impact assessments, and user feedback collection are required to ensure ongoing effectiveness and safety.</p>
+        
+    
+    
+    <div class="footer">
+        <p><strong>Document Information</strong></p>
+        <p>Generated by: AI Readiness Policy Engine<br>
+        Template: Higher Education Standard AI Policy<br>
+        Audience: HIGHERED<br>
+        Jurisdiction: US<br>
+        Generated: 2025-08-26T19:46:14.009Z</p>
+        
+        <p><strong>Legal Disclaimer:</strong><br>
+        This policy template is provided for informational purposes only and does not constitute legal advice. 
+        Organizations should consult with qualified legal counsel to ensure compliance with applicable laws and regulations.</p>
+    </div>
+</body>
+</html>
+    "
+`;
+
+exports[`Policy Engine Integration Tests > Document Rendering > should render DOCX policy document > docx-header-bytes 1`] = `
+[
+  80,
+  75,
+  3,
+  4,
+  10,
+  0,
+  0,
+  0,
+  0,
+  0,
+  198,
+  157,
+  26,
+  91,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  5,
+  0,
+  0,
+  0,
+  119,
+  111,
+  114,
+  100,
+  47,
+  80,
+  75,
+  3,
+  4,
+  10,
+  0,
+  0,
+  0,
+  0,
+  0,
+  198,
+  157,
+  26,
+  91,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  11,
+  0,
+  0,
+  0,
+  119,
+  111,
+  114,
+  100,
+  47,
+  95,
+  114,
+  101,
+  108,
+  115,
+  47,
+  80,
+  75,
+  3,
+  4,
+  10,
+  0,
+  0,
+  0,
+  8,
+  0,
+  198,
+  157,
+  26,
+  91,
+  115,
+  140,
+  214,
+  229,
+  239,
+  0,
+  0,
+  0,
+  158,
+  3,
+]
+`;
+
+exports[`Policy Engine Integration Tests > Document Rendering > should render HTML policy document > k12-policy-html 1`] = `
+"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-12 Standard AI Policy</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 2in; color: #333; }
+        h1 { text-align: center; margin-bottom: 1in; font-size: 24px; }
+        h2 { color: #2c5aa0; margin-top: 2em; margin-bottom: 0.5em; font-size: 18px; }
+        p { margin-bottom: 1em; text-align: justify; }
+        .metadata { text-align: center; font-style: italic; margin-bottom: 2em; }
+        .org-name { font-weight: bold; margin-bottom: 1em; }
+        .footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid #ccc; font-size: 12px; color: #666; }
+        .clause-meta { font-size: 11px; color: #888; font-style: italic; margin-bottom: 1em; }
+    </style>
+</head>
+<body>
+    <h1>K-12 Standard AI Policy</h1>
+    
+    <div class="metadata">
+        Version: 1 | Generated: 8/26/2025
+    </div>
+    
+    <div class="org-name">
+        Organization: Sample K-12 District
+    </div>
+    
+    <p><strong>Effective Date:</strong> [Effective Date]</p>
+    
+    
+        <h2>1. Purpose and Scope</h2>
+        <p>This policy establishes guidelines for the responsible use of artificial intelligence (AI) tools and systems within Sample K-12 District. It applies to all faculty, staff, students, and contractors who access, use, or implement AI technologies in educational, research, or administrative contexts.</p>
+        
+    
+        <h2>2. K-12 Educational Purpose</h2>
+        <p>This policy governs the use of AI technologies in K-12 educational settings to ensure student safety, privacy protection under COPPA, and educational appropriateness. All AI implementations must support pedagogical goals while maintaining compliance with federal and state education regulations.</p>
+        
+    
+        <h2>3. Artificial Intelligence Definition</h2>
+        <p>Artificial Intelligence (AI) refers to computer systems that can perform tasks typically requiring human intelligence, including but not limited to machine learning, natural language processing, computer vision, automated decision-making, and predictive analytics.</p>
+        
+    
+        <h2>4. High-Risk AI System Definition</h2>
+        <p>High-Risk AI Systems are those that pose significant potential for adverse impact on student welfare, educational outcomes, privacy rights, or institutional operations. This includes AI systems used for student assessment, disciplinary decisions, college admissions, or processing of sensitive personal data.</p>
+        
+    
+        <h2>5. AI Governance Committee</h2>
+        <p>An AI Governance Committee shall be established comprising representatives from IT, Academic Affairs, Legal, Privacy, and Student Services. The committee shall review AI implementations, approve high-risk AI systems, and ensure ongoing compliance with this policy.</p>
+        
+    
+        <h2>6. K-12 Parental Notification</h2>
+        <p>Parents and guardians must be notified when AI systems will be used in educational activities involving their children. For AI systems that collect, use, or store student data, written parental consent must be obtained in compliance with COPPA requirements.</p>
+        
+    
+        <h2>7. Student Data Protection</h2>
+        <p>AI systems that process student educational records must comply with FERPA requirements. Student data shall not be used for AI training without explicit consent, and all data processing must be limited to legitimate educational purposes.</p>
+        
+    
+        <h2>8. COPPA Compliance for Under-13 Students</h2>
+        <p>AI systems used with students under 13 years of age must comply with the Children's Online Privacy Protection Act (COPPA). This includes obtaining verifiable parental consent before collecting personal information and limiting data collection to what is necessary for the educational purpose.</p>
+        
+    
+        <h2>9. AI Risk Assessment Requirement</h2>
+        <p>All AI implementations must undergo a risk assessment prior to deployment. The assessment shall evaluate potential impacts on privacy, bias, accuracy, transparency, and educational outcomes. High-risk AI systems require additional review and approval.</p>
+        
+    
+        <h2>10. AI Bias Prevention</h2>
+        <p>AI systems must be designed and implemented to minimize bias and ensure fair treatment of all students regardless of race, gender, ethnicity, disability status, or socioeconomic background. Regular bias testing and mitigation measures are required.</p>
+        
+    
+        <h2>11. Academic Integrity and AI Use</h2>
+        <p>Students and faculty must disclose the use of AI tools in academic work when required by course policies or institutional guidelines. AI-generated content must be clearly identified, and students remain responsible for the accuracy and originality of their submitted work.</p>
+        
+    
+        <h2>12. AI Vendor Due Diligence</h2>
+        <p>Third-party AI vendors must demonstrate compliance with applicable privacy laws, security standards, and educational regulations. Vendor agreements must include data processing addendums, liability provisions, and audit rights.</p>
+        
+    
+        <h2>13. AI Training Requirements</h2>
+        <p>All users of AI systems must complete appropriate training on AI ethics, privacy implications, and institutional policies before gaining access. Training shall be updated annually and include emerging best practices.</p>
+        
+    
+        <h2>14. AI System Monitoring</h2>
+        <p>AI systems shall be continuously monitored for performance, bias, and compliance with institutional policies. Regular audits, impact assessments, and user feedback collection are required to ensure ongoing effectiveness and safety.</p>
+        
+    
+    
+    <div class="footer">
+        <p><strong>Document Information</strong></p>
+        <p>Generated by: AI Readiness Policy Engine<br>
+        Template: K-12 Standard AI Policy<br>
+        Audience: K12<br>
+        Jurisdiction: US<br>
+        Generated: 2025-08-26T19:46:13.974Z</p>
+        
+        <p><strong>Legal Disclaimer:</strong><br>
+        This policy template is provided for informational purposes only and does not constitute legal advice. 
+        Organizations should consult with qualified legal counsel to ensure compliance with applicable laws and regulations.</p>
+    </div>
+</body>
+</html>
+    "
+`;
+
+exports[`Policy Engine Integration Tests > End-to-End Workflows > should complete full policy generation workflow > complete-k12-workflow 1`] = `
+{
+  "clauseIds": [
+    "bias-001",
+    "definitions-001",
+    "definitions-002",
+    "governance-001",
+    "governance-002-k12",
+    "monitoring-001",
+    "prohibited-001",
+    "purpose-001",
+    "risk-001",
+    "training-001",
+    "vendor-001",
+  ],
+  "docxSize": 9792,
+  "htmlLength": 5494,
+  "input": {
+    "audience": "k12",
+    "riskProfile": "high",
+    "state": "NY",
+    "toolUseMode": "prohibited",
+  },
+  "selectedClauseCount": 11,
+}
+`;
+
+exports[`Policy Engine Integration Tests > End-to-End Workflows > should handle policy comparison workflow > policy-comparison-workflow 1`] = `
+{
+  "additionCount": 7,
+  "deletionCount": 7,
+  "diffCount": 14,
+  "policy1Length": 5232,
+  "policy2Length": 5198,
+  "redlineCount": 1806,
+}
+`;
+
+exports[`Policy Engine Integration Tests > Error Handling > should handle empty diff inputs > empty-diff 1`] = `[]`;
+
+exports[`Policy Engine Integration Tests > Error Handling > should handle invalid clause selection inputs > invalid-input-clauses 1`] = `[]`;
+
+exports[`Policy Engine Integration Tests > Policy Diffing > should generate policy diffs > policy-diffs 1`] = `
+[
+  {
+    "description": "Removed 2 segments",
+    "id": "diff_1756237574010_g6oz8qdn8",
+    "newText": undefined,
+    "oldText": "# AI Usage Policy
+
+## Purpose
+This policy establishes guidelines for the use of artificial intelligence tools in educational settings 
+
+## Permitted Uses
+- Research assistance
+- Content generation with supervision
+- Administrative task automation
+
+## Prohibited Uses
+- Student assessment without human oversight
+- Personal data processing without consent",
+    "position": 0,
+    "type": "deletion",
+  },
+  {
+    "description": "Added 2 segments",
+    "id": "diff_1756237574010_ad7hwj2d5",
+    "newText": "# AI Usage Policy
+
+## Purpose
+This policy establishes comprehensive guidelines for the responsible use of artificial intelligence tools in educational settings 
+
+## Permitted Uses
+- Research assistance with proper attribution
+- Content generation with faculty supervision
+- Administrative task automation
+- Educational content development
+
+## Prohibited Uses
+- Student assessment without human oversight
+- Personal data processing without explicit consent
+- Automated decision-making affecting student outcomes",
+    "oldText": undefined,
+    "position": 2,
+    "type": "addition",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Policy Diffing > should generate redline changes > redline-changes 1`] = `
+[
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "guidelines"",
+    "id": "redline_1756237574010_3zfui1cys",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "guidelines",
+    "timestamp": "2025-08-26T19:46:14.010Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574010_zf940chdq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.010Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "for"",
+    "id": "redline_1756237574011_8caxrvvvo",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "for",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_d1a6hgra9",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "the"",
+    "id": "redline_1756237574011_54iwktmmf",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "the",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_2yfza01t3",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "use"",
+    "id": "redline_1756237574011_t1tlwp57l",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "use",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_rti9csc0u",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "of"",
+    "id": "redline_1756237574011_epg5zldwh",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "of",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_jtoefgken",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "artificial"",
+    "id": "redline_1756237574011_ultk7m573",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "artificial",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_z8vnp03hz",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "intelligence"",
+    "id": "redline_1756237574011_oac9refwb",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "intelligence",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_xly05krhi",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "tools"",
+    "id": "redline_1756237574011_grlpcej1q",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "tools",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_gy66a3nxx",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "in"",
+    "id": "redline_1756237574011_t5p1py6de",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "in",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_xluh4x697",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "educational"",
+    "id": "redline_1756237574011_zfc3kcw1z",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "educational",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_gbf1pyygc",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "settings."",
+    "id": "redline_1756237574011_wkduzn5l6",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "settings.",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "
+
+"",
+    "id": "redline_1756237574011_iniu03d8e",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "
+
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "##"",
+    "id": "redline_1756237574011_qym6cko2d",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "##",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_et1p18kp9",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Permitted"",
+    "id": "redline_1756237574011_4hj8ocx02",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Permitted",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_q1wp4ny26",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Uses"",
+    "id": "redline_1756237574011_heevthg5h",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Uses",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "
+"",
+    "id": "redline_1756237574011_ien7988b8",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "-"",
+    "id": "redline_1756237574011_tr2n1v27s",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_ypgehukl7",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Research"",
+    "id": "redline_1756237574011_4b7e44wl9",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Research",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_4bz3l35v7",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "assistance"",
+    "id": "redline_1756237574011_peajsf7gd",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "assistance",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "
+"",
+    "id": "redline_1756237574011_70mhzo0rn",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "-"",
+    "id": "redline_1756237574011_2tubkusnt",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_hmv7o7f8z",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Content"",
+    "id": "redline_1756237574011_9tvpwv4yx",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Content",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_qd2n6v5uv",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "generation"",
+    "id": "redline_1756237574011_0r2rrxki0",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "generation",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_tqtixmc2i",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "with"",
+    "id": "redline_1756237574011_cqj6rdd9f",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "with",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_300nm5itt",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "supervision"",
+    "id": "redline_1756237574011_rlql31wbn",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "supervision",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "
+"",
+    "id": "redline_1756237574011_kvh73z9nk",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "-"",
+    "id": "redline_1756237574011_5qlyav9sq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_xxtmu1hth",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Administrative"",
+    "id": "redline_1756237574011_ale079ld4",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Administrative",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_qosgmcsft",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "task"",
+    "id": "redline_1756237574011_nj718ek74",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "task",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_7mtkqzdrn",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "automation"",
+    "id": "redline_1756237574011_li4vs7uuk",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "automation",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "
+
+"",
+    "id": "redline_1756237574011_tpmmekbzz",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "
+
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "##"",
+    "id": "redline_1756237574011_dmgnr9aa2",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "##",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_pqwah40wd",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Prohibited"",
+    "id": "redline_1756237574011_vttfbd52e",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Prohibited",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_c6inspw8b",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Uses"",
+    "id": "redline_1756237574011_xdxxzfcti",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Uses",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "
+"",
+    "id": "redline_1756237574011_5h0hi3vea",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "-"",
+    "id": "redline_1756237574011_ebc5tiufb",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_4pr6m2cyf",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Student"",
+    "id": "redline_1756237574011_12i951965",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Student",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_bztd356rf",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "assessment"",
+    "id": "redline_1756237574011_9kv0b7m8u",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "assessment",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_oil5gafwq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "without"",
+    "id": "redline_1756237574011_swrbxs7n9",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "without",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_ulgl6jyp9",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "human"",
+    "id": "redline_1756237574011_bpzywuf5o",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "human",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_sam2kqdob",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "oversight"",
+    "id": "redline_1756237574011_lzvuq3w8t",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "oversight",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "
+"",
+    "id": "redline_1756237574011_e9x9ut7ep",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "-"",
+    "id": "redline_1756237574011_cf5o5dd8t",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_i62ctafjm",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "Personal"",
+    "id": "redline_1756237574011_14fe9nl4o",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "Personal",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_qw2npfe0l",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "data"",
+    "id": "redline_1756237574011_1e0f1i5bp",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "data",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_98t69s3gp",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "processing"",
+    "id": "redline_1756237574011_qybwcpzzu",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "processing",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_jld3xxdlg",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "without"",
+    "id": "redline_1756237574011_d0s7ikig0",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "without",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: " "",
+    "id": "redline_1756237574011_1vu4j2owi",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Deletion: "consent"",
+    "id": "redline_1756237574011_kvfo5co4s",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "consent",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "delete",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "comprehensive"",
+    "id": "redline_1756237574011_40l3ulw7x",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 10,
+    },
+    "text": "comprehensive",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_3xht53oq0",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 11,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "guidelines"",
+    "id": "redline_1756237574011_4jltz8jy5",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 12,
+    },
+    "text": "guidelines",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_jsmwto5ur",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 13,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "for"",
+    "id": "redline_1756237574011_c7oyb2isb",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 14,
+    },
+    "text": "for",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_0ivyku796",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 15,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "the"",
+    "id": "redline_1756237574011_9fskpc2db",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 16,
+    },
+    "text": "the",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_xpusnwjop",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 17,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "responsible"",
+    "id": "redline_1756237574011_bdf7v0sxq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 18,
+    },
+    "text": "responsible",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_kg3g0aqsy",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 19,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "use"",
+    "id": "redline_1756237574011_6zrbe22cy",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 20,
+    },
+    "text": "use",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_wzr6u0dim",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 21,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "of"",
+    "id": "redline_1756237574011_fmnv78kiu",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 22,
+    },
+    "text": "of",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_tmylvjb2r",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 23,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "artificial"",
+    "id": "redline_1756237574011_vd89wkevi",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 24,
+    },
+    "text": "artificial",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_lvf2b4uv9",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 25,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "intelligence"",
+    "id": "redline_1756237574011_i5dmte93u",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 26,
+    },
+    "text": "intelligence",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_avm7pfis5",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 27,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "tools"",
+    "id": "redline_1756237574011_aq52bze76",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 28,
+    },
+    "text": "tools",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_bqv067z55",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 29,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "in"",
+    "id": "redline_1756237574011_kdkyeqvsm",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 30,
+    },
+    "text": "in",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_24069ahop",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 31,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "educational"",
+    "id": "redline_1756237574011_r5d9bk7zo",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 32,
+    },
+    "text": "educational",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_zztddbe3y",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 33,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "settings."",
+    "id": "redline_1756237574011_jufig01ko",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 34,
+    },
+    "text": "settings.",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+
+"",
+    "id": "redline_1756237574011_8bzod2d82",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 35,
+    },
+    "text": "
+
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "##"",
+    "id": "redline_1756237574011_sz0oi5o8u",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 36,
+    },
+    "text": "##",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_xsw1rm213",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 37,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Permitted"",
+    "id": "redline_1756237574011_lx5sguxc6",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 38,
+    },
+    "text": "Permitted",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_dpi6ku4hr",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 39,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Uses"",
+    "id": "redline_1756237574011_xtedprru7",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 40,
+    },
+    "text": "Uses",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+"",
+    "id": "redline_1756237574011_bwpaln709",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 41,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "-"",
+    "id": "redline_1756237574011_pummjh3cf",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 42,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_mslfqli9g",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 43,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Research"",
+    "id": "redline_1756237574011_zsb14z782",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 44,
+    },
+    "text": "Research",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_unnxd2e5e",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 45,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "assistance"",
+    "id": "redline_1756237574011_ieh133aa8",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 46,
+    },
+    "text": "assistance",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_ym6sbq9k0",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 47,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "with"",
+    "id": "redline_1756237574011_iobjqkjnd",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 48,
+    },
+    "text": "with",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_orqk13g3s",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 49,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "proper"",
+    "id": "redline_1756237574011_o5ee5fig4",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 50,
+    },
+    "text": "proper",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_9tu6w171i",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 51,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "attribution"",
+    "id": "redline_1756237574011_d281a0mah",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 52,
+    },
+    "text": "attribution",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+"",
+    "id": "redline_1756237574011_6nqkoa8ss",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 53,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "-"",
+    "id": "redline_1756237574011_bxaujwfoq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 54,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_61t7fzauv",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 55,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Content"",
+    "id": "redline_1756237574011_7vt4b2lwo",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 56,
+    },
+    "text": "Content",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_s8yfvwmtw",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 57,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "generation"",
+    "id": "redline_1756237574011_zkrgc43vj",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 58,
+    },
+    "text": "generation",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_paf5rrwcy",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 59,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "with"",
+    "id": "redline_1756237574011_dppfmg0l1",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 60,
+    },
+    "text": "with",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_1g9dk4xc2",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 61,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "faculty"",
+    "id": "redline_1756237574011_h2ec3irtw",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 62,
+    },
+    "text": "faculty",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_6ismoh6cz",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 63,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "supervision"",
+    "id": "redline_1756237574011_ijyexpncf",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 64,
+    },
+    "text": "supervision",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+"",
+    "id": "redline_1756237574011_6zt4sr6qr",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 65,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "-"",
+    "id": "redline_1756237574011_citqd9zfy",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 66,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_dlskcnbz8",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 67,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Administrative"",
+    "id": "redline_1756237574011_eycf6gzv1",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 68,
+    },
+    "text": "Administrative",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_ztotyt5h7",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 69,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "task"",
+    "id": "redline_1756237574011_vemk4m7xx",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 70,
+    },
+    "text": "task",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_vbrnw28bu",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 71,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "automation"",
+    "id": "redline_1756237574011_yr8q63frc",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 72,
+    },
+    "text": "automation",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+"",
+    "id": "redline_1756237574011_hym31gqwh",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 73,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "-"",
+    "id": "redline_1756237574011_z2jr6xcpq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 74,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_85jd7zvz8",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 75,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Educational"",
+    "id": "redline_1756237574011_xtqv92jlh",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 76,
+    },
+    "text": "Educational",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_pj9it95h4",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 77,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "content"",
+    "id": "redline_1756237574011_6rlrdhy4v",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 78,
+    },
+    "text": "content",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_hzdea03yo",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 79,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "development"",
+    "id": "redline_1756237574011_zmyw3b9uy",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 80,
+    },
+    "text": "development",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+
+"",
+    "id": "redline_1756237574011_ufh7k8vox",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 81,
+    },
+    "text": "
+
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "##"",
+    "id": "redline_1756237574011_t96juv80i",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 82,
+    },
+    "text": "##",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_uw7wxft6s",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 83,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Prohibited"",
+    "id": "redline_1756237574011_skh3wgweq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 84,
+    },
+    "text": "Prohibited",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_twy4cwkcm",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 85,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Uses"",
+    "id": "redline_1756237574011_m66h0uv0k",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 86,
+    },
+    "text": "Uses",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+"",
+    "id": "redline_1756237574011_upe7whdzx",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 87,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "-"",
+    "id": "redline_1756237574011_wvexytxjx",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 88,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_ma7ejjbhj",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 89,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Student"",
+    "id": "redline_1756237574011_hazau6i7e",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 90,
+    },
+    "text": "Student",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_ktfccgne0",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 91,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "assessment"",
+    "id": "redline_1756237574011_19lnfptvw",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 92,
+    },
+    "text": "assessment",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_zinliu788",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 93,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "without"",
+    "id": "redline_1756237574011_1xikluzba",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 94,
+    },
+    "text": "without",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_beop8iu5h",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 95,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "human"",
+    "id": "redline_1756237574011_0lwoaj3ir",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 96,
+    },
+    "text": "human",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_bfza07tvo",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 97,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "oversight"",
+    "id": "redline_1756237574011_6gx7ys3z8",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 98,
+    },
+    "text": "oversight",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+"",
+    "id": "redline_1756237574011_4onn04wrj",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 99,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "-"",
+    "id": "redline_1756237574011_s9uxsei4k",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 100,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_5586iffy4",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 101,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Personal"",
+    "id": "redline_1756237574011_65tx7mjw8",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 102,
+    },
+    "text": "Personal",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_76dwc57mr",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 103,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "data"",
+    "id": "redline_1756237574011_lfh8sk6t3",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 104,
+    },
+    "text": "data",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_cy3dhul1c",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 105,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "processing"",
+    "id": "redline_1756237574011_76rqug53q",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 106,
+    },
+    "text": "processing",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_8rsb22fde",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 107,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "without"",
+    "id": "redline_1756237574011_7dhopy2p2",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 108,
+    },
+    "text": "without",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_fv7l1ttwi",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 109,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "explicit"",
+    "id": "redline_1756237574011_l2s8wf4mq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 110,
+    },
+    "text": "explicit",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_afhx0g4ix",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 111,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "consent"",
+    "id": "redline_1756237574011_i1k9rc7j8",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 112,
+    },
+    "text": "consent",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "
+"",
+    "id": "redline_1756237574011_jakhq2igk",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 113,
+    },
+    "text": "
+",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "-"",
+    "id": "redline_1756237574011_kaelrvonv",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 114,
+    },
+    "text": "-",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_emyxz5mcy",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 115,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "Automated"",
+    "id": "redline_1756237574011_pbnj8zo5t",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 116,
+    },
+    "text": "Automated",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_tjedt8qcm",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 117,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "decision-making"",
+    "id": "redline_1756237574011_lhadc3jqm",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 118,
+    },
+    "text": "decision-making",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_2vtwn94qx",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 119,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "affecting"",
+    "id": "redline_1756237574011_b130kw9nq",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 120,
+    },
+    "text": "affecting",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_noewzk46i",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 121,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "student"",
+    "id": "redline_1756237574011_nrzooscwp",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 122,
+    },
+    "text": "student",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: " "",
+    "id": "redline_1756237574011_w5jn0jvtt",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 123,
+    },
+    "text": " ",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+  {
+    "author": "Policy Committee",
+    "comment": "Addition: "outcomes"",
+    "id": "redline_1756237574011_kzukpeu6t",
+    "position": {
+      "paragraph": 1,
+      "sentence": 0,
+      "word": 124,
+    },
+    "text": "outcomes",
+    "timestamp": "2025-08-26T19:46:14.011Z",
+    "type": "insert",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Policy Diffing > should handle sentence-level granularity > sentence-level-diffs 1`] = `
+[
+  {
+    "description": "Removed 2 segments",
+    "id": "diff_1756237574022_gi73214kj",
+    "newText": undefined,
+    "oldText": "# AI Usage Policy
+
+## Purpose
+This policy establishes guidelines for the use of artificial intelligence tools in educational settings 
+
+## Permitted Uses
+- Research assistance
+- Content generation with supervision
+- Administrative task automation
+
+## Prohibited Uses
+- Student assessment without human oversight
+- Personal data processing without consent",
+    "position": 0,
+    "type": "deletion",
+  },
+  {
+    "description": "Added 2 segments",
+    "id": "diff_1756237574022_4c6xykfh5",
+    "newText": "# AI Usage Policy
+
+## Purpose
+This policy establishes comprehensive guidelines for the responsible use of artificial intelligence tools in educational settings 
+
+## Permitted Uses
+- Research assistance with proper attribution
+- Content generation with faculty supervision
+- Administrative task automation
+- Educational content development
+
+## Prohibited Uses
+- Student assessment without human oversight
+- Personal data processing without explicit consent
+- Automated decision-making affecting student outcomes",
+    "oldText": undefined,
+    "position": 2,
+    "type": "addition",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Policy Diffing > should handle word-level granularity > word-level-diffs 1`] = `
+[
+  {
+    "description": "Added 1 segment",
+    "id": "diff_1756237574022_q41799lur",
+    "newText": "comprehensive",
+    "oldText": undefined,
+    "position": 9,
+    "type": "addition",
+  },
+  {
+    "description": "Added 1 segment",
+    "id": "diff_1756237574022_ao2qr5mnc",
+    "newText": "responsible",
+    "oldText": undefined,
+    "position": 13,
+    "type": "addition",
+  },
+  {
+    "description": "Added 3 segments",
+    "id": "diff_1756237574022_e9z80k5eo",
+    "newText": "with proper attribution",
+    "oldText": undefined,
+    "position": 28,
+    "type": "addition",
+  },
+  {
+    "description": "Added 1 segment",
+    "id": "diff_1756237574022_bssv8r5qg",
+    "newText": "faculty",
+    "oldText": undefined,
+    "position": 35,
+    "type": "addition",
+  },
+  {
+    "description": "Added 4 segments",
+    "id": "diff_1756237574022_awsiuowho",
+    "newText": "- Educational content development",
+    "oldText": undefined,
+    "position": 41,
+    "type": "addition",
+  },
+  {
+    "description": "Added 1 segment",
+    "id": "diff_1756237574022_mt7eiymo1",
+    "newText": "explicit",
+    "oldText": undefined,
+    "position": 59,
+    "type": "addition",
+  },
+  {
+    "description": "Added 6 segments",
+    "id": "diff_1756237574022_c25e5kikl",
+    "newText": "- Automated decision-making affecting student outcomes",
+    "oldText": undefined,
+    "position": 61,
+    "type": "addition",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Policy Diffing > should ignore case when requested > case-ignored-diffs 1`] = `
+[
+  {
+    "description": "Removed 1 segment",
+    "id": "diff_1756237574022_g0vnv0ynw",
+    "newText": undefined,
+    "oldText": "# AI Usage Policy
+
+## Purpose
+This policy establishes guidelines for the use of artificial intelligence tools in educational settings",
+    "position": 0,
+    "type": "deletion",
+  },
+  {
+    "description": "Added 1 segment",
+    "id": "diff_1756237574022_lsq08pc90",
+    "newText": "# AI USAGE POLICY
+
+## PURPOSE
+THIS POLICY ESTABLISHES GUIDELINES FOR THE USE OF ARTIFICIAL INTELLIGENCE TOOLS IN EDUCATIONAL SETTINGS",
+    "oldText": undefined,
+    "position": 1,
+    "type": "addition",
+  },
+  {
+    "description": "Removed 1 segment",
+    "id": "diff_1756237574022_nnjbyuix2",
+    "newText": undefined,
+    "oldText": "
+
+## Permitted Uses
+- Research assistance
+- Content generation with supervision
+- Administrative task automation
+
+## Prohibited Uses
+- Student assessment without human oversight
+- Personal data processing without consent",
+    "position": 2,
+    "type": "deletion",
+  },
+  {
+    "description": "Added 1 segment",
+    "id": "diff_1756237574022_vtre5kpl4",
+    "newText": "
+
+## PERMITTED USES
+- RESEARCH ASSISTANCE
+- CONTENT GENERATION WITH SUPERVISION
+- ADMINISTRATIVE TASK AUTOMATION
+
+## PROHIBITED USES
+- STUDENT ASSESSMENT WITHOUT HUMAN OVERSIGHT
+- PERSONAL DATA PROCESSING WITHOUT CONSENT",
+    "oldText": undefined,
+    "position": 3,
+    "type": "addition",
+  },
+]
+`;
+
+exports[`Policy Engine Integration Tests > Policy Diffing > should render redline HTML > redline-html 1`] = `
+"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy Comparison</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 2in; color: #333; }
+        h1 { text-align: center; margin-bottom: 1in; }
+        .redline-insert { background-color: #e8f5e9; color: #2e7d32; text-decoration: none; }
+        .redline-delete { background-color: #ffebee; color: #d32f2f; text-decoration: line-through; }
+        .redline-insert:hover, .redline-delete:hover { 
+            box-shadow: 0 0 4px rgba(0,0,0,0.3); 
+            cursor: help; 
+        }
+        .redline-comment { 
+            display: none; 
+            position: absolute; 
+            background: #fff; 
+            border: 1px solid #ccc; 
+            padding: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
+            z-index: 1000;
+        }
+        .metadata { 
+            background: #f5f5f5; 
+            padding: 20px; 
+            margin-bottom: 30px; 
+            border-left: 4px solid #2196f3; 
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add tooltips for redline changes
+            document.querySelectorAll('.redline-insert, .redline-delete').forEach(el => {
+                el.addEventListener('mouseenter', function() {
+                    const comment = this.getAttribute('data-comment')
+                    const author = this.getAttribute('data-author')
+                    if (comment) {
+                        this.title = author + ': ' + comment
+                    }
+                })
+            })
+        })
+    </script>
+</head>
+<body>
+    <h1>Policy Comparison</h1>
+    
+    <div class="metadata">
+        <strong>Redline Guide:</strong><br>
+        <span class="redline-insert">Green text</span> = Additions<br>
+        <span class="redline-delete">Red strikethrough</span> = Deletions<br>
+        Hover over changes to see comments and author information.
+    </div>
+    
+    <p># AI Usage Policy</p><p>## Purpose
+This policy establishes guidelines for the use of <ins class="redline-insert" data-author="System" data-comment="Addition: "comprehensive"">comprehensive</ins><del class="redline-delete" data-author="System" data-comment="Deletion: "consent"">consent</del>ass="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "without"">without</del>ass="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "processing"">processing</del>="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "data"">data</del> class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "Personal"">Personal</del>ss="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "-"">-</del>del class="redline-delete" data-author="System" data-comment="Deletion: "
+"">
+</del>del class="redline-delete" data-author="System" data-comment="Deletion: "oversight"">oversight</del>s="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "human"">human</del>class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "without"">without</del>ass="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "assessment"">assessment</del>="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "Student"">Student</del>ass="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "-"">-</del>del class="redline-delete" data-author="System" data-comment="Deletion: "
+"">
+</del>del class="redline-delete" data-author="System" data-comment="Deletion: "Uses"">Uses</del> class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "Prohibited"">Prohibited</del>="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "##"">##</del>el class="redline-delete" data-author="System" data-comment="Deletion: "</p><p>""></p><p></del>el class="redline-delete" data-author="System" data-comment="Deletion: "automation"">automation</del>="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "task"">task</del> class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "Administrative"">Administrative</del>dline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "-"">-</del>del class="redline-delete" data-author="System" data-comment="Deletion: "
+"">
+</del>del class="redline-delete" data-author="System" data-comment="Deletion: "supervision"">supervision</del>"redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "with"">with</del> class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "generation"">generation</del>="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "Content"">Content</del>ass="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "-"">-</del>del class="redline-delete" data-author="System" data-comment="Deletion: "
+"">
+</del>del class="redline-delete" data-author="System" data-comment="Deletion: "assistance"">assistance</del>="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "Research"">Research</del>ss="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "-"">-</del>del class="redline-delete" data-author="System" data-comment="Deletion: "
+"">
+</del>del class="redline-delete" data-author="System" data-comment="Deletion: "Uses"">Uses</del> class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "Permitted"">Permitted</del>s="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "##"">##</del>el class="redline-delete" data-author="System" data-comment="Deletion: "</p><p>""></p><p></del>el class="redline-delete" data-author="System" data-comment="Deletion: "settings."">settings.</del>s="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "educational"">educational</del>"redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "in"">in</del>el class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "tools"">tools</del>class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "intelligence"">intelligence</del>redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "artificial"">artificial</del>="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "of"">of</del>el class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "use"">use</del>l class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "the"">the</del>l class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "for"">for</del>l class="redline-delete" data-author="System" data-comment="Deletion: " ""> </del>del class="redline-delete" data-author="System" data-comment="Deletion: "guidelines"">guidelines</del> <ins class="redline-insert" data-author="System" data-comment="Addition: " ""> </ins>intelligence <ins class="redline-insert" data-author="System" data-comment="Addition: "guidelines"">guidelines</ins>tools <ins class="redline-insert" data-author="System" data-comment="Addition: " ""> </ins>in <ins class="redline-insert" data-author="System" data-comment="Addition: "for"">for</ins>educational <ins class="redline-insert" data-author="System" data-comment="Addition: " ""> </ins>settings.</p><p>## Permitted Uses
+- Research assistance
+- Content generation with supervision
+- Administrative task automation</p><p>## Prohibited Uses
+- Student assessment without human oversight
+- Personal data processing without consent</p>
+    
+    <div style="margin-top: 3em; padding-top: 1em; border-top: 1px solid #ccc; font-size: 12px; color: #666;">
+        Generated by AI Readiness Policy Engine • 2025-08-26T19:46:14.021Z
+    </div>
+</body>
+</html>
+    "
+`;

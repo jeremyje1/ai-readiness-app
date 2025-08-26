@@ -1,0 +1,126 @@
+{
+  "success": true,
+  "data": {
+    "policiesApproved": {
+      "total": 24,
+      "thisMonth": 6,
+      "byDepartment": [
+        { "department": "Technology", "count": 8, "percentage": 33 },
+        { "department": "Curriculum", "count": 6, "percentage": 25 },
+        { "department": "Administration", "count": 5, "percentage": 21 },
+        { "department": "Student Services", "count": 5, "percentage": 21 }
+      ],
+      "recentApprovals": [
+        {
+          "id": "policy-1",
+          "title": "AI Tool Usage Guidelines",
+          "department": "Technology",
+          "approvedAt": "2025-01-25T14:00:00Z",
+          "approvedBy": "Tech Director"
+        },
+        {
+          "id": "policy-2",
+          "title": "Student Data Privacy Policy",
+          "department": "Administration",
+          "approvedAt": "2025-01-24T10:30:00Z",
+          "approvedBy": "Privacy Officer"
+        }
+      ]
+    },
+    "professionalDevelopment": {
+      "totalCompletions": 156,
+      "completionRate": 78,
+      "byDepartment": [
+        { "department": "Technology", "count": 45, "percentage": 29 },
+        { "department": "Curriculum", "count": 38, "percentage": 24 },
+        { "department": "Administration", "count": 35, "percentage": 22 },
+        { "department": "Student Services", "count": 38, "percentage": 24 }
+      ],
+      "upcomingSessions": [
+        {
+          "id": "session-1",
+          "title": "AI Integration Workshop",
+          "department": "Technology",
+          "scheduledAt": "2025-02-15T09:00:00Z",
+          "attendeeCount": 25,
+          "status": "scheduled"
+        },
+        {
+          "id": "session-2",
+          "title": "Digital Citizenship Training",
+          "department": "Curriculum",
+          "scheduledAt": "2025-02-18T14:00:00Z",
+          "attendeeCount": 30,
+          "status": "scheduled"
+        }
+      ]
+    },
+    "approvedTools": {
+      "total": 18,
+      "byDepartment": [
+        {
+          "department": "Technology",
+          "tools": [
+            {
+              "toolName": "Google Workspace",
+              "category": "Communication & Collaboration",
+              "usageCount": 245,
+              "lastUsed": "2025-01-27T08:00:00Z"
+            },
+            {
+              "toolName": "Canvas LMS",
+              "category": "Learning Management",
+              "usageCount": 189,
+              "lastUsed": "2025-01-27T09:15:00Z"
+            }
+          ],
+          "totalTools": 6
+        },
+        {
+          "department": "Curriculum",
+          "tools": [
+            {
+              "toolName": "Khan Academy",
+              "category": "Educational Content",
+              "usageCount": 167,
+              "lastUsed": "2025-01-26T15:30:00Z"
+            },
+            {
+              "toolName": "Flipgrid",
+              "category": "Student Engagement",
+              "usageCount": 134,
+              "lastUsed": "2025-01-27T11:00:00Z"
+            }
+          ],
+          "totalTools": 5
+        }
+      ],
+      "byCategory": [
+        { "category": "Communication & Collaboration", "count": 5, "percentage": 28 },
+        { "category": "Learning Management", "count": 4, "percentage": 22 },
+        { "category": "Educational Content", "count": 3, "percentage": 17 },
+        { "category": "Assessment Tools", "count": 3, "percentage": 17 },
+        { "category": "Administrative Tools", "count": 3, "percentage": 17 }
+      ],
+      "recentApprovals": [
+        {
+          "id": "tool-1",
+          "vendorName": "Zoom Education",
+          "category": "Communication & Collaboration",
+          "department": "Technology",
+          "approvedAt": "2025-01-26T16:00:00Z",
+          "riskLevel": "low"
+        },
+        {
+          "id": "tool-2",
+          "vendorName": "Padlet",
+          "category": "Student Engagement",
+          "department": "Curriculum",
+          "approvedAt": "2025-01-25T11:30:00Z",
+          "riskLevel": "medium"
+        }
+      ]
+    }
+  },
+  "lastUpdated": "2025-01-27T10:00:00Z"
+}

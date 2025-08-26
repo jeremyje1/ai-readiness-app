@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { ArrowRight, BarChart3, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
-import { Card } from '@/components/card';
-import { Button } from '@/components/button';
-import { CheckCircle, Clock, BarChart3, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function AssessmentStartPage() {
   const [institutionType, setInstitutionType] = useState<'K12' | 'HigherEd'>('K12');
@@ -83,11 +83,11 @@ export default function AssessmentStartPage() {
               <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-3xl">⚡</span>
               </div>
-              
+
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 Quick Assessment
               </h2>
-              
+
               <div className="mb-6">
                 <div className="text-4xl font-bold text-blue-600 mb-2">8-10 min</div>
                 <p className="text-gray-600">
@@ -114,13 +114,13 @@ export default function AssessmentStartPage() {
                 </div>
               </div>
 
-              <Link href="/ai-readiness/assessment?mode=quick">
+              <Link href="/ai-readiness/onboarding?mode=quick">
                 <Button className="w-full text-lg py-3" size="lg">
                   Start Quick Assessment
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              
+
               <p className="text-xs text-gray-500 mt-3">
                 Best for: First-time users, time-constrained {institutionType === 'HigherEd' ? 'faculty' : 'teams'}, initial exploration
               </p>
@@ -133,11 +133,11 @@ export default function AssessmentStartPage() {
               <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-3xl">🔬</span>
               </div>
-              
+
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 Comprehensive Assessment
               </h2>
-              
+
               <div className="mb-6">
                 <div className="text-4xl font-bold text-purple-600 mb-2">25-35 min</div>
                 <p className="text-gray-600">
@@ -164,13 +164,13 @@ export default function AssessmentStartPage() {
                 </div>
               </div>
 
-              <Link href="/ai-readiness/assessment?mode=full">
+              <Link href="/ai-readiness/onboarding?mode=comprehensive">
                 <Button className="w-full text-lg py-3" size="lg" variant="outline">
                   Start Comprehensive Assessment
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              
+
               <p className="text-xs text-gray-500 mt-3">
                 Best for: Strategic planning, detailed analysis, comprehensive {institutionType === 'HigherEd' ? 'institutional' : 'district'} roadmap
               </p>
@@ -183,7 +183,7 @@ export default function AssessmentStartPage() {
           <h3 className="text-xl font-semibold text-gray-900 mb-6">
             Both Assessments Include
           </h3>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
@@ -194,7 +194,7 @@ export default function AssessmentStartPage() {
                 AIRIX™, AIRS™, AICS™, AIMS™, AIPS™, and AIBS™ scoring systems
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -204,7 +204,7 @@ export default function AssessmentStartPage() {
                 Results and recommendations available after each section
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
                 <Clock className="w-6 h-6 text-purple-600" />

@@ -1,0 +1,52 @@
+### Dashboard API Documentation
+
+#### Get Readiness Dashboard
+GET {{baseUrl}}/api/dashboard/readiness
+Authorization: Bearer {{authToken}}
+
+#### Get Adoption Dashboard  
+GET {{baseUrl}}/api/dashboard/adoption
+Authorization: Bearer {{authToken}}
+
+#### Get Watchlist Dashboard
+GET {{baseUrl}}/api/dashboard/watchlist
+Authorization: Bearer {{authToken}}
+
+#### Dashboard with Filters
+GET {{baseUrl}}/api/dashboard/readiness?department=technology&dateRange=30
+Authorization: Bearer {{authToken}}
+
+#### Expected Response - Readiness Dashboard
+```json
+{
+  "success": true,
+  "data": {
+    "assessmentScores": {
+      "current": 75,
+      "target": 85,
+      "trend": "improving",
+      "lastUpdated": "2024-08-26T10:00:00Z"
+    },
+    "riskDistribution": {
+      "low": 12,
+      "medium": 5,
+      "high": 3,
+      "critical": 1
+    },
+    "trendData": [
+      {
+        "date": "2024-08-01",
+        "score": 68
+      },
+      {
+        "date": "2024-08-15", 
+        "score": 72
+      },
+      {
+        "date": "2024-08-26",
+        "score": 75
+      }
+    ]
+  }
+}
+```

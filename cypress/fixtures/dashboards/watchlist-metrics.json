@@ -1,0 +1,144 @@
+{
+  "success": true,
+  "data": {
+    "pendingApprovals": {
+      "policies": [
+        {
+          "id": "policy-pending-1",
+          "title": "Remote Learning Policy Update",
+          "department": "Curriculum",
+          "submittedAt": "2025-01-20T09:00:00Z",
+          "submittedBy": "Curriculum Director",
+          "priority": "medium",
+          "daysOpen": 7
+        },
+        {
+          "id": "policy-pending-2",
+          "title": "AI Ethics Guidelines",
+          "department": "Technology",
+          "submittedAt": "2025-01-18T14:30:00Z",
+          "submittedBy": "Tech Coordinator",
+          "priority": "high",
+          "daysOpen": 9
+        }
+      ],
+      "vendors": [
+        {
+          "id": "vendor-pending-1",
+          "vendorName": "EduTech Solutions",
+          "category": "Learning Analytics",
+          "submittedAt": "2025-01-22T11:00:00Z",
+          "riskLevel": "medium",
+          "priority": "medium",
+          "daysOpen": 5
+        },
+        {
+          "id": "vendor-pending-2",
+          "vendorName": "AI Tutoring Platform",
+          "category": "AI & Machine Learning",
+          "submittedAt": "2025-01-15T16:45:00Z",
+          "riskLevel": "high",
+          "priority": "high",
+          "daysOpen": 12
+        }
+      ],
+      "assessments": [
+        {
+          "id": "assessment-pending-1",
+          "title": "Network Security Assessment",
+          "department": "Technology",
+          "submittedAt": "2025-01-19T13:15:00Z",
+          "submittedBy": "Security Specialist",
+          "type": "risk",
+          "daysOpen": 8
+        }
+      ],
+      "total": 5
+    },
+    "vendorRenewals": {
+      "upcoming": [
+        {
+          "id": "renewal-1",
+          "vendorName": "Microsoft Education",
+          "category": "Productivity Suite",
+          "department": "Technology",
+          "renewalDate": "2025-03-15",
+          "daysUntilRenewal": 47,
+          "contractValue": 25000,
+          "riskLevel": "low",
+          "status": "upcoming"
+        },
+        {
+          "id": "renewal-2",
+          "vendorName": "Pearson MyWorld",
+          "category": "Educational Content",
+          "department": "Curriculum",
+          "renewalDate": "2025-04-01",
+          "daysUntilRenewal": 64,
+          "contractValue": 18500,
+          "riskLevel": "medium",
+          "status": "upcoming"
+        }
+      ],
+      "overdue": [
+        {
+          "id": "renewal-overdue-1",
+          "vendorName": "SchoolMessenger",
+          "category": "Communication Tools",
+          "department": "Administration",
+          "renewalDate": "2025-01-15",
+          "daysUntilRenewal": -12,
+          "contractValue": 8900,
+          "riskLevel": "low",
+          "status": "overdue"
+        }
+      ],
+      "total": 3
+    },
+    "actionItems": [
+      {
+        "id": "action-1",
+        "title": "Review AI Ethics Guidelines",
+        "description": "Policy approval pending for 9 days",
+        "type": "approval",
+        "priority": "high",
+        "assignedTo": "Policy Review Team",
+        "dueDate": "2025-01-25",
+        "department": "Technology",
+        "daysOverdue": 2
+      },
+      {
+        "id": "action-2",
+        "title": "Renew SchoolMessenger Contract",
+        "description": "Contract renewal overdue by 12 days",
+        "type": "renewal",
+        "priority": "high",
+        "assignedTo": "Procurement Team",
+        "dueDate": "2025-01-15",
+        "department": "Administration",
+        "daysOverdue": 12
+      },
+      {
+        "id": "action-3",
+        "title": "Complete Network Security Assessment",
+        "description": "Risk assessment pending for 8 days",
+        "type": "risk",
+        "priority": "medium",
+        "assignedTo": "Security Team",
+        "dueDate": "2025-01-30",
+        "department": "Technology"
+      },
+      {
+        "id": "action-4",
+        "title": "Review AI Tutoring Platform",
+        "description": "High-risk vendor assessment pending",
+        "type": "approval",
+        "priority": "high",
+        "assignedTo": "Vendor Review Committee",
+        "dueDate": "2025-01-28",
+        "department": "Technology"
+      }
+    ]
+  },
+  "lastUpdated": "2025-01-27T10:00:00Z"
+}

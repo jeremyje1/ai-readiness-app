@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import { runOpenAI, generateRecommendations } from '@/lib/openai';
 import { AIReportGenerator } from '@/lib/ai-report-generator';
 import { generateComprehensivePDFReport } from '@/lib/comprehensive-pdf-generator';
 import { generateEnhancedAIPDFReport } from '@/lib/enhanced-ai-pdf-generator';
 import { generateFastEnhancedAIPDFReport } from '@/lib/fast-enhanced-ai-pdf-generator';
+import { generateRecommendations, runOpenAI } from '@/lib/openai';
+import { NextRequest, NextResponse } from 'next/server';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,84 +18,84 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Generating comprehensive PDF report for tier: ${tier}...`);
-    
+
     // Validate OpenAI API key first
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.length < 10) {
       console.error('❌ CRITICAL: OpenAI API key missing or invalid - clients will get fallback reports!');
       throw new Error('OpenAI API key not properly configured');
     }
-    
+
     // Check if enhanced AI is requested and available
     const useEnhancedAI = options.enhancedAI !== false && process.env.OPENAI_API_KEY;
-    
+
     if (useEnhancedAI) {
       // Try Enhanced AI with retry mechanism
       let attempts = 0;
       const maxRetries = 2; // Try twice before falling back
-      
+
       while (attempts < maxRetries) {
         attempts++;
         try {
           console.log(`🚀 Using Fast Enhanced AI PDF Generator with GPT-4o (attempt ${attempts}/${maxRetries})...`);
-        
-        // Format data for enhanced AI generator
-        const comprehensiveAnalysis = {
-          assessmentId: `assessment-${Date.now()}`,
-          score: scores.overall || 3.0,
-          tier,
-          recommendations: [],
-          sectionScores: scores,
-          assessmentData: answers,
-          responses: answers,
-          uploadedFiles: [],
-          submissionDetails: {
-            institution_name: options.organizationName || 'Your Organization',
-            organization_type: answers.industry || 'organization',
-            submitted_at: new Date().toISOString(),
-            total_responses: Object.keys(answers).length
-          },
-          scenarios,
-          openEndedResponses
-        };
 
-        // Use fast enhanced AI generator for better performance
-        const pdfDoc = options.fullAI === true 
-          ? await generateEnhancedAIPDFReport(comprehensiveAnalysis)
-          : await generateFastEnhancedAIPDFReport(comprehensiveAnalysis);
-        
-        const pdfBytes = pdfDoc.output('arraybuffer');
+          // Format data for enhanced AI generator
+          const comprehensiveAnalysis = {
+            assessmentId: `assessment-${Date.now()}`,
+            score: scores.overall || 3.0,
+            tier,
+            recommendations: [],
+            sectionScores: scores,
+            assessmentData: answers,
+            responses: answers,
+            uploadedFiles: [],
+            submissionDetails: {
+              institution_name: options.organizationName || 'Your Organization',
+              organization_type: answers.industry || 'organization',
+              submitted_at: new Date().toISOString(),
+              total_responses: Object.keys(answers).length
+            },
+            scenarios,
+            openEndedResponses
+          };
 
-        console.log('✅ Enhanced AI PDF generated successfully!');
-        return new NextResponse(pdfBytes, {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="enhanced-ai-report-${Date.now()}.pdf"`,
-            'Content-Length': pdfBytes.byteLength.toString(),
-          },
-        });
+          // Use fast enhanced AI generator for better performance
+          const pdfDoc = options.fullAI === true
+            ? await generateEnhancedAIPDFReport(comprehensiveAnalysis)
+            : await generateFastEnhancedAIPDFReport(comprehensiveAnalysis);
+
+          const pdfBytes = pdfDoc.output('arraybuffer');
+
+          console.log('✅ Enhanced AI PDF generated successfully!');
+          return new NextResponse(pdfBytes, {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `attachment; filename="enhanced-ai-report-${Date.now()}.pdf"`,
+              'Content-Length': pdfBytes.byteLength.toString(),
+            },
+          });
 
         } catch (aiError: any) {
           console.warn(`⚠️ Enhanced AI attempt ${attempts} failed:`, aiError instanceof Error ? aiError.message : 'Unknown error');
-          
+
           // If it's a quota/billing error, don't retry - fall through to fallback
           if (aiError instanceof Error && (aiError.message?.includes('quota') || aiError.message?.includes('billing') || aiError.message?.includes('insufficient'))) {
             console.error('🔴 OpenAI quota/billing issue - using fallback immediately');
             break;
           }
-          
+
           // If this was the last attempt, continue to fallback
           if (attempts >= maxRetries) {
             console.error('🔴 All Enhanced AI attempts failed - using fallback');
             break;
           }
-          
+
           // Wait briefly before retry
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
     }
-    
+
     try {
       // Try the AI report generator first
       const generator = new AIReportGenerator();
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       });
 
       // Return AI-generated PDF response
-      return new NextResponse(pdfBytes, {
+      return new NextResponse(new Uint8Array(pdfBytes), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
@@ -119,10 +119,10 @@ export async function POST(request: NextRequest) {
     } catch (aiError: any) {
       console.error('🔴 CRITICAL: All AI generation methods failed - client will receive fallback report!');
       console.error('Error details:', aiError instanceof Error ? aiError.message : 'Unknown error');
-      
+
       // Log this as a high-priority issue since clients expect AI reports
       console.error('⚠️  CLIENT IMPACT: Delivering basic 49KB report instead of 700KB+ AI-enhanced report');
-      
+
       // Format data for comprehensive PDF generator
       const comprehensiveAnalysis = {
         assessmentId: `assessment-${Date.now()}`,
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       const pdfBytes = await generateComprehensivePDFReport(comprehensiveAnalysis);
 
       // Return comprehensive PDF response
-      return new NextResponse(pdfBytes, {
+      return new NextResponse(new Uint8Array(pdfBytes), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('PDF generation error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate PDF report',
         message: error instanceof Error ? error.message : 'Unknown error'
       },
@@ -190,7 +190,7 @@ async function generateSimplePDF(answers: any, scores: any): Promise<Uint8Array>
 
   // Create PDF document
   const pdfDoc = await PDFDocument.create();
-  
+
   // Set document metadata
   pdfDoc.setTitle('Organizational Assessment Report');
   pdfDoc.setAuthor('AI-Powered Analysis System');
@@ -201,7 +201,7 @@ async function generateSimplePDF(answers: any, scores: any): Promise<Uint8Array>
   // Add first page
   const page = pdfDoc.addPage();
   const { width, height } = page.getSize();
-  
+
   // Load fonts
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -242,13 +242,13 @@ async function generateSimplePDF(answers: any, scores: any): Promise<Uint8Array>
   // Split narrative into lines and add to PDF
   const maxLineWidth = width - (margin * 2);
   const narrativeLines = wrapText(narrative, fontRegular, bodySize, maxLineWidth);
-  
+
   for (const line of narrativeLines) {
     if (currentY < margin + 50) {
       // Add new page if needed
       const newPage = pdfDoc.addPage();
       currentY = newPage.getSize().height - margin;
-      
+
       newPage.drawText(line, {
         x: margin,
         y: currentY,
@@ -272,7 +272,7 @@ async function generateSimplePDF(answers: any, scores: any): Promise<Uint8Array>
   if (currentY < margin + 100) {
     const newPage = pdfDoc.addPage();
     currentY = newPage.getSize().height - margin;
-    
+
     newPage.drawText('Key Performance Metrics', {
       x: margin,
       y: currentY,
@@ -311,7 +311,7 @@ async function generateSimplePDF(answers: any, scores: any): Promise<Uint8Array>
   if (currentY < margin + 100) {
     const newPage = pdfDoc.addPage();
     currentY = newPage.getSize().height - margin;
-    
+
     newPage.drawText('Strategic Recommendations', {
       x: margin,
       y: currentY,
@@ -335,7 +335,7 @@ async function generateSimplePDF(answers: any, scores: any): Promise<Uint8Array>
     if (currentY < margin + 20) {
       const newPage = pdfDoc.addPage();
       currentY = newPage.getSize().height - margin;
-      
+
       newPage.drawText(line, {
         x: margin,
         y: currentY,
@@ -368,7 +368,7 @@ function wrapText(text: string, font: any, fontSize: number, maxWidth: number): 
   for (const word of words) {
     const testLine = currentLine ? `${currentLine} ${word}` : word;
     const testWidth = font.widthOfTextAtSize(testLine, fontSize);
-    
+
     if (testWidth <= maxWidth) {
       currentLine = testLine;
     } else {
@@ -378,18 +378,18 @@ function wrapText(text: string, font: any, fontSize: number, maxWidth: number): 
       currentLine = word;
     }
   }
-  
+
   if (currentLine) {
     lines.push(currentLine);
   }
-  
+
   return lines;
 }
 
 // Helper function to extract key scores for display
 function extractKeyScores(scores: any): Record<string, string> {
   const keyScores: Record<string, string> = {};
-  
+
   if (scores.organizationalHealth !== undefined) {
     keyScores['Organizational Health'] = `${scores.organizationalHealth}/10`;
   }
@@ -405,6 +405,6 @@ function extractKeyScores(scores: any): Record<string, string> {
   if (scores.overallScore !== undefined) {
     keyScores['Overall Score'] = `${scores.overallScore}/10`;
   }
-  
+
   return keyScores;
 }

@@ -620,7 +620,16 @@ BEGIN
         old_value,
         new_value
     ) VALUES (
-        TG_TABLE_NAME,
+        CASE TG_TABLE_NAME
+            WHEN 'vendor_profiles' THEN 'vendor_profile'
+            WHEN 'vendor_tools' THEN 'vendor_tool'
+            WHEN 'vendor_intake_forms' THEN 'intake_form'
+            WHEN 'risk_assessments' THEN 'risk_assessment'
+            WHEN 'decision_briefs' THEN 'decision_brief'
+            WHEN 'approved_tools_catalog' THEN 'approved_tool'
+            WHEN 'compliance_monitoring' THEN 'compliance_monitoring'
+            ELSE TG_TABLE_NAME
+        END,
         COALESCE(NEW.id, OLD.id),
         CASE 
             WHEN TG_OP = 'INSERT' THEN 'create'
@@ -628,8 +637,8 @@ BEGIN
             WHEN TG_OP = 'DELETE' THEN 'delete'
         END,
         TG_OP || ' operation on ' || TG_TABLE_NAME,
-        COALESCE(NEW.updated_by::UUID, OLD.updated_by::UUID, auth.uid()),
-        COALESCE(NEW.updated_by, OLD.updated_by, 'system'),
+        auth.uid(),
+        'system',
         CASE WHEN TG_OP = 'DELETE' THEN to_jsonb(OLD) ELSE NULL END,
         CASE WHEN TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN to_jsonb(NEW) ELSE NULL END
     );

@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "data": {
+    "id": "vendor-123",
+    "status": "pending",
+    "riskLevel": "medium",
+    "riskScore": 65,
+    "assessment": {
+      "basicInfo": {
+        "name": "TestVendor Learning Platform",
+        "description": "A comprehensive learning management system",
+        "category": "Learning Management",
+        "url": "https://testvendor.com",
+        "contactEmail": "contact@testvendor.com",
+        "contactName": "John Doe",
+        "businessJustification": "Need better student engagement tools"
+      }
+    },
+    "riskFlags": [],
+    "mitigations": [],
+    "createdAt": "2025-01-27T10:00:00Z",
+    "updatedAt": "2025-01-27T10:00:00Z"
+  }
+}

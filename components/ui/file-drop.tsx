@@ -1,13 +1,13 @@
 // components/ui/file-drop.tsx
 'use client';
 
-import * as React from 'react';
 import { cn } from '@/lib/utils';
+import * as React from 'react';
 
 interface FileDropProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   /** Fires when files are selected or dropped */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line no-unused-vars
   onFiles?: (_files: FileList) => void;
 }
 
@@ -50,7 +50,7 @@ export function FileDrop({
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
       className={cn(
-              'flex h-32 cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-gray-300 text-center text-sm text-gray-500 hover:bg-gray-50',
+        'flex h-32 cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-gray-300 text-center text-sm text-gray-500 hover:bg-gray-50',
         className,
       )}
     >
