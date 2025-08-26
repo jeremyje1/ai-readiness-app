@@ -12,19 +12,19 @@ export function useAssessmentPersistence(assessmentId: string, tier: string) {
   // Load saved progress on mount
   useEffect(() => {
     if (!assessmentId || typeof window === 'undefined') return;
-    
+
     const loadProgress = () => {
       try {
         const saved = localStorage.getItem(`assessment-progress-${assessmentId}`);
         if (saved) {
           const data = JSON.parse(saved);
           console.log('📥 Loading saved progress:', data);
-          
+
           setResponses(data.responses || {});
           setCurrentQuestionIndex(data.currentIndex || 0);
           setLastSaved(data.lastSaved ? new Date(data.lastSaved) : null);
           setHasUnsavedChanges(false);
-          
+
           console.log('✅ Progress restored:', {
             responseCount: Object.keys(data.responses || {}).length,
             currentIndex: data.currentIndex || 0
@@ -46,7 +46,7 @@ export function useAssessmentPersistence(assessmentId: string, tier: string) {
 
     try {
       if (!forceManual) setAutoSaving(true);
-      
+
       const progressData = {
         responses,
         currentIndex: currentQuestionIndex,
@@ -71,7 +71,7 @@ export function useAssessmentPersistence(assessmentId: string, tier: string) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ assessmentId, ...progressData })
         });
-        
+
         if (response.ok) {
           console.log('☁️ Progress saved to database');
         }
@@ -93,13 +93,13 @@ export function useAssessmentPersistence(assessmentId: string, tier: string) {
   // Update responses with immediate save trigger
   const updateResponse = (questionId: string, value: number) => {
     console.log('📝 Updating response:', { questionId, value });
-    
+
     setResponses(prev => {
       const updated = { ...prev, [questionId]: value };
       console.log('📋 Updated responses:', updated);
       return updated;
     });
-    
+
     setHasUnsavedChanges(true);
   };
 

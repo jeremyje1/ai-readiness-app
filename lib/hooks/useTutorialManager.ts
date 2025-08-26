@@ -86,7 +86,7 @@ export const useTutorialManager = (): TutorialManager => {
 
     const completeTutorial = () => {
         if (typeof window === 'undefined') return
-        
+
         const { tutorialType } = tutorialState
         localStorage.setItem(`tutorial-completed-${tutorialType}`, 'true')
         localStorage.setItem('tutorial-completed-at', new Date().toISOString())
@@ -100,7 +100,7 @@ export const useTutorialManager = (): TutorialManager => {
 
     const skipTutorial = () => {
         if (typeof window === 'undefined') return
-        
+
         const { tutorialType } = tutorialState
         localStorage.setItem(`tutorial-skipped-${tutorialType}`, 'true')
 
@@ -113,7 +113,7 @@ export const useTutorialManager = (): TutorialManager => {
 
     const restartTutorial = (type?: TutorialState['tutorialType']) => {
         if (typeof window === 'undefined') return
-        
+
         const tutorialType = type || tutorialState.tutorialType
 
         // Clear completion/skip status
