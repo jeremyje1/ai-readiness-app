@@ -150,6 +150,35 @@ export default function AuthDebugPage() {
                             >
                                 {loading ? 'Testing...' : 'Test Password Reset'}
                             </Button>
+                            <Button
+                                onClick={async () => {
+                                    setLoading(true);
+                                    try {
+                                        console.log('🔐 Debug: Force logout initiated');
+                                        await supabase.auth.signOut();
+                                        setAuthResult({
+                                            success: true,
+                                            error: null,
+                                            data: 'Successfully logged out of all sessions'
+                                        });
+                                        // Give a moment for the auth state to update
+                                        setTimeout(() => {
+                                            window.location.href = '/auth/login';
+                                        }, 1000);
+                                    } catch (err: any) {
+                                        setAuthResult({
+                                            success: false,
+                                            error: `Logout failed: ${err.message}`,
+                                            data: null
+                                        });
+                                    }
+                                    setLoading(false);
+                                }}
+                                disabled={loading}
+                                variant="destructive"
+                            >
+                                {loading ? 'Logging out...' : 'Force Logout'}
+                            </Button>
                         </div>
                     </div>
                 </div>

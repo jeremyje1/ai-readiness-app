@@ -53,12 +53,12 @@ export default function LoginPage() {
 
       try {
         const state = await sessionManager.getSessionState();
-        
+
         // Enhanced validation: ensure we have a truly authenticated session
-        const isValidAuthenticatedSession = state.session && 
-                                           !state.error && 
-                                           state.session.user && 
-                                           state.session.access_token;
+        const isValidAuthenticatedSession = state.session &&
+          !state.error &&
+          state.session.user &&
+          state.session.access_token;
 
         if (isValidAuthenticatedSession && state.session) {
           // Additional validation: ensure session is truly stable
@@ -71,7 +71,7 @@ export default function LoginPage() {
             try {
               const sessionTime = state.session.expires_at ? new Date(state.session.expires_at * 1000) : new Date();
               const isValidSession = sessionTime.getTime() > Date.now();
-              
+
               if (isValidSession) {
                 console.log('🔐 Existing valid authenticated session found, redirecting...');
                 setHasValidSession(true);
@@ -117,11 +117,11 @@ export default function LoginPage() {
 
       // Enhanced validation: ensure we have a truly authenticated session
       // Check that session exists, has no error, user exists, and session is not expired
-      const isValidAuthenticatedSession = state.session && 
-                                         !state.error && 
-                                         state.session.user && 
-                                         state.session.access_token &&
-                                         !hasValidSession;
+      const isValidAuthenticatedSession = state.session &&
+        !state.error &&
+        state.session.user &&
+        state.session.access_token &&
+        !hasValidSession;
 
       if (isValidAuthenticatedSession && state.session) {
         // Additional check: verify session is not from INITIAL_SESSION event
@@ -129,7 +129,7 @@ export default function LoginPage() {
         try {
           const sessionTime = state.session.expires_at ? new Date(state.session.expires_at * 1000) : new Date();
           const isRecentSession = (Date.now() - sessionTime.getTime()) < (1000 * 60 * 60); // Less than 1 hour
-          
+
           if (isRecentSession) {
             console.log('🔐 Session state changed to valid authenticated session, redirecting...');
             setHasValidSession(true);

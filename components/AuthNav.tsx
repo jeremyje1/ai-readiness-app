@@ -80,7 +80,17 @@ export default function AuthNav() {
                 </svg>
                 <span className='truncate max-w-[120px]'>{userEmail}</span>
               </Link>
-              <Button variant='outline' size='sm' onClick={logout}>Logout</Button>
+              <Button 
+                variant='outline' 
+                size='sm' 
+                onClick={logout}
+                className='bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 font-medium'
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+              </Button>
             </>
           )}
           {!loading && !userEmail && (
@@ -128,7 +138,17 @@ export default function AuthNav() {
                     <div className="text-xs text-gray-500">{userEmail}</div>
                   </div>
                 </Link>
-                <Button variant='outline' size='sm' onClick={logout}>Logout</Button>
+                <Button 
+                  variant='outline' 
+                  size='sm' 
+                  onClick={logout}
+                  className='bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 font-medium w-full mt-2'
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </Button>
               </>
             )}
             {!loading && !userEmail && (
