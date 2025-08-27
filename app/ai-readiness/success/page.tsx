@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase-enhanced';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase-enhanced';
+import { AlertCircle, ArrowRight, CheckCircle, Loader2, Mail } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function PaymentSuccessPage() {
         router.push('/ai-readiness/dashboard?verified=true');
       }
     };
-    
+
     checkAuth();
 
     // Bootstrap from Stripe session if present
@@ -127,8 +127,8 @@ export default function PaymentSuccessPage() {
               </h2>
               <p className="text-gray-600">
                 Your AI Blueprint™ Assessment access is active. We detected your purchase; {email ? 'we pre‑filled your email.' : 'enter your email.'} You can:
-                <br/>• Use a one‑time secure login link (sent to your email)
-                <br/>• Or <a href="/auth/password/setup" className="text-blue-600 underline">set a password</a> for direct sign‑ins.
+                <br />• Use a one‑time secure login link (sent to your email)
+                <br />• Or <a href="/auth/password/setup" className="text-blue-600 underline">set a password</a> for direct sign‑ins.
               </p>
             </div>
 
@@ -153,9 +153,9 @@ export default function PaymentSuccessPage() {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={loading || !email}
               >
                 {loading ? (
@@ -171,7 +171,7 @@ export default function PaymentSuccessPage() {
                 )}
               </Button>
               {showPasswordOption && (
-                <Button type="button" variant="outline" className="w-full" onClick={()=>{router.push('/auth/password/setup')}}>
+                <Button type="button" variant="outline" className="w-full" onClick={() => { router.push('/auth/password/setup') }}>
                   Prefer to Create a Password
                 </Button>
               )}
@@ -195,17 +195,17 @@ export default function PaymentSuccessPage() {
                 The link will expire in 1 hour for security.
               </p>
             </div>
-            
+
             <div className="pt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setStep('email')}
                 className="mr-2"
               >
                 Use Different Email
               </Button>
-              <Button 
-                onClick={() => handleSendMagicLink({ preventDefault: () => {} } as any)}
+              <Button
+                onClick={() => handleSendMagicLink({ preventDefault: () => { } } as any)}
                 disabled={loading}
               >
                 {loading ? (
@@ -233,7 +233,7 @@ export default function PaymentSuccessPage() {
                 You're now logged in and will be redirected to your assessment dashboard.
               </p>
             </div>
-            
+
             <Button onClick={() => router.push('/ai-readiness/dashboard?verified=true')}>
               <ArrowRight className="w-4 h-4 mr-2" />
               Go to Dashboard

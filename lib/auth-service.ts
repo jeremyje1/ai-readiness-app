@@ -5,7 +5,6 @@
  */
 
 import { AuthError, createClient, Session, SupabaseClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
 
 // Types
 export interface AuthResult<T = any> {
@@ -239,14 +238,6 @@ export class AuthService {
     async signOut(): Promise<AuthResult<void>> {
         try {
             const { error } = await this.client.auth.signOut()
-
-            // Clear any server-side cookies
-            if (typeof window === 'undefined') {
-                const cookieStore = cookies()
-                cookieStore.delete('sb-access-token')
-                cookieStore.delete('sb-refresh-token')
-            }
-
             return {
                 data: undefined,
                 error,

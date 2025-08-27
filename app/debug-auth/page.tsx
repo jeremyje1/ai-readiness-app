@@ -1,8 +1,8 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase-enhanced';
 import { authService } from '@/lib/auth-service';
+import { supabase } from '@/lib/supabase-enhanced';
 import { useEffect, useState } from 'react';
 
 export default function AuthDebugPage() {
@@ -106,7 +106,7 @@ export default function AuthDebugPage() {
         try {
             console.log('🧪 Testing Enhanced Auth Service...');
             const result = await authService.signInWithPassword(testEmail, testPassword);
-            
+
             setAuthResult({
                 success: !result.error,
                 error: result.error?.message || null,

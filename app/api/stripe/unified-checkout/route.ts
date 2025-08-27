@@ -34,7 +34,6 @@ interface CheckoutParams {
   trialDays?: number;
   contactEmail?: string;
   contactName?: string;
-  organization?: string; // organization name from registration
   returnTo?: string; // e.g. k12 | higher-ed | dashboard
   successUrl?: string;
   cancelUrl?: string;
@@ -50,14 +49,13 @@ function parseParams(request: NextRequest): CheckoutParams {
   const priceIdOverride = searchParams.get('price_id') || undefined;
   const contactEmail = searchParams.get('contact_email') || undefined;
   const contactName = searchParams.get('contact_name') || undefined;
-  const organization = searchParams.get('organization') || undefined;
   const returnTo = (searchParams.get('return_to') || '').toLowerCase() || undefined;
   const successUrl = searchParams.get('success_url') || undefined;
   const cancelUrl = searchParams.get('cancel_url') || undefined;
 
   const trialDays = trialDaysRaw ? parseInt(trialDaysRaw, 10) : 7; // Default to 7-day trial
 
-  return { product, billing, tier, userId, priceIdOverride, trialDays, contactEmail, contactName, organization, returnTo, successUrl, cancelUrl };
+  return { product, billing, tier, userId, priceIdOverride, trialDays, contactEmail, contactName, returnTo, successUrl, cancelUrl };
 }
 
 function resolvePriceId(product: string, billing: string): string | null {
@@ -133,7 +131,6 @@ async function createCheckoutSession(params: CheckoutParams, request?: NextReque
       tier: params.tier || params.product,
       billing_interval: params.billing,
       contact_name: params.contactName || '',
-      organization: params.organization || '',
       user_id: params.userId || '',
       service: 'unified-checkout'
     }

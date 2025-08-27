@@ -40,7 +40,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Test 1: Direct REST API Authentication
 async function testRestApiAuth(email, password) {
     console.log('\n📡 Testing Direct REST API Authentication...');
-    
+
     try {
         const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
             method: 'POST',
@@ -73,7 +73,7 @@ async function testRestApiAuth(email, password) {
 // Test 2: SDK Authentication with Timeout
 async function testSdkAuth(email, password) {
     console.log('\n🔐 Testing SDK Authentication...');
-    
+
     const { createClient } = require('@supabase/supabase-js');
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -110,7 +110,7 @@ async function testSdkAuth(email, password) {
 // Test 3: Create test user if needed
 async function createTestUser(email, password) {
     console.log('\n👤 Creating test user...');
-    
+
     if (!supabaseServiceKey) {
         console.log('❌ Service key required for user creation');
         return false;
@@ -180,7 +180,7 @@ async function runTests() {
     // Test with actual user email
     console.log('\n🔐 Testing with jeremy.estrella@gmail.com...');
     const actualUserRest = await testRestApiAuth('jeremy.estrella@gmail.com', 'TempPassword123!');
-    
+
     if (!actualUserRest.success) {
         console.log('ℹ️  Note: This may fail if the password is incorrect');
     }
