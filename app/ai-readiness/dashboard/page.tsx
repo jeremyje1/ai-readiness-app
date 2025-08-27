@@ -26,6 +26,7 @@ export default function AIReadinessDashboard() {
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [institutionType, setInstitutionType] = useState<'K12' | 'HigherEd'>('K12');
   const [hydrated, setHydrated] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>('');  // Add this to store actual user ID
   const debugMode = searchParams.get('debug') === '1';
   const assessmentMode = searchParams.get('assessment'); // 'quick', 'full', or null
 
@@ -58,6 +59,10 @@ export default function AIReadinessDashboard() {
         router.push('/ai-readiness');
         return;
       }
+      
+      // Store the actual user ID from session
+      setCurrentUserId(session.user.id);
+      
       const accessToken = session.access_token;
       // Prepare client-side debug details (does not expose full secrets)
       const clientDebug: any = debugMode ? {
@@ -409,7 +414,7 @@ export default function AIReadinessDashboard() {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Subscription Value</h2>
           <SubscriptionValueDashboard
-            userId={verification.email || 'unknown'}
+            userId={currentUserId || verification.email || 'unknown'}
             tier={verification.tier || 'comprehensive'}
             institutionType={institutionType}
           />

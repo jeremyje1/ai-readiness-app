@@ -7,22 +7,53 @@ export async function GET(
 ) {
   try {
     // Decode the userId parameter in case it's URL encoded
-    const userId = decodeURIComponent(params.userId);
+    const userIdentifier = decodeURIComponent(params.userId);
+    console.log('🔄 Looking up progress for:', userIdentifier);
+    
+    // Determine if userIdentifier is an email or UUID
+    const isEmail = userIdentifier.includes('@');
+    console.log('📧 Is email lookup:', isEmail);
     
     // Get user's subscription start date and assessments
-    const { data: userData, error: userError } = await supabase
-      .from('ai_readiness_assessments')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+    let userData, userError;
+    
+    if (isEmail) {
+      // Look up by email - first get user ID from auth.users or use email directly in query
+      const { data, error } = await supabase
+        .from('ai_readiness_assessments')
+        .select('*')
+        .eq('email', userIdentifier)
+        .order('created_at', { ascending: false });
+      userData = data;
+      userError = error;
+    } else {
+      // Look up by user ID
+      const { data, error } = await supabase
+        .from('ai_readiness_assessments')
+        .select('*')
+        .eq('user_id', userIdentifier)
+        .order('created_at', { ascending: false });
+      userData = data;
+      userError = error;
+    }
 
     if (userError) {
       console.error('Error fetching user data:', userError);
-      return NextResponse.json({ error: 'Failed to fetch user data' }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Failed to fetch user data', 
+        details: userError.message 
+      }, { status: 500 });
     }
 
+    console.log('📊 Found assessments:', userData?.length || 0);
+    
     if (!userData || userData.length === 0) {
-      return NextResponse.json({ error: 'No assessments found' }, { status: 404 });
+      console.log('❌ No assessments found for user:', userIdentifier);
+      return NextResponse.json({ 
+        error: 'No assessments found', 
+        userIdentifier,
+        isEmail 
+      }, { status: 404 });
     }
 
     const latestAssessment = userData[0];
@@ -72,6 +103,7 @@ export async function GET(
       }
     };
 
+    console.log('✅ Progress data calculated successfully for:', userIdentifier);
     return NextResponse.json(progressData);
 
   } catch (error) {
