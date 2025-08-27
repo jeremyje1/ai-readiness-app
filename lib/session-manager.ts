@@ -82,6 +82,27 @@ class ClientSessionManager implements SessionManager {
             })
 
             switch (event) {
+                case 'INITIAL_SESSION':
+                    // Handle initial session - only update if we have a valid authenticated session
+                    if (session && session.user && session.access_token) {
+                        const isValid = await this.validateSessionInternal(session)
+                        this.updateState({
+                            session: isValid ? session : null,
+                            user: isValid && session ? session.user : null,
+                            loading: false,
+                            error: isValid ? null : 'Initial session validation failed'
+                        })
+                    } else {
+                        // No valid session on initial load
+                        this.updateState({
+                            session: null,
+                            user: null,
+                            loading: false,
+                            error: null
+                        })
+                    }
+                    break
+
                 case 'SIGNED_IN':
                 case 'TOKEN_REFRESHED':
                     const isValid = session ? await this.validateSessionInternal(session) : false

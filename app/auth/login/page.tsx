@@ -53,19 +53,40 @@ export default function LoginPage() {
 
       try {
         const state = await sessionManager.getSessionState();
-        if (state.session && !state.error) {
+        
+        // Enhanced validation: ensure we have a truly authenticated session
+        const isValidAuthenticatedSession = state.session && 
+                                           !state.error && 
+                                           state.session.user && 
+                                           state.session.access_token;
+
+        if (isValidAuthenticatedSession && state.session) {
           // Additional validation: ensure session is truly stable
           // Wait a moment and check again to avoid race conditions
           await new Promise(resolve => setTimeout(resolve, 100));
-          
+
           // Re-check if we're still not actively logging in
           if (!isActivelyLoggingIn) {
-            console.log('🔐 Existing valid session found, redirecting...');
-            setHasValidSession(true);
-            router.push('/ai-readiness/dashboard');
+            // Verify session is not expired
+            try {
+              const sessionTime = state.session.expires_at ? new Date(state.session.expires_at * 1000) : new Date();
+              const isValidSession = sessionTime.getTime() > Date.now();
+              
+              if (isValidSession) {
+                console.log('🔐 Existing valid authenticated session found, redirecting...');
+                setHasValidSession(true);
+                router.push('/ai-readiness/dashboard');
+              } else {
+                console.log('🔐 Found expired session, staying on login page');
+              }
+            } catch (err) {
+              console.log('🔐 Error validating existing session, staying on login page:', err);
+            }
           } else {
             console.log('🔐 Session found but login started, skipping redirect');
           }
+        } else {
+          console.log('🔐 No valid authenticated session found');
         }
       } catch (err) {
         console.warn('🔐 Session check failed:', err);
@@ -94,16 +115,44 @@ export default function LoginPage() {
         return;
       }
 
-      if (state.session && !state.error && !hasValidSession) {
-        console.log('🔐 Session state changed to valid, redirecting...');
-        setHasValidSession(true);
-        
-        // Small delay to ensure we're not in a race condition
-        setTimeout(() => {
-          if (!isActivelyLoggingIn && !loading) {
-            router.push('/ai-readiness/dashboard');
+      // Enhanced validation: ensure we have a truly authenticated session
+      // Check that session exists, has no error, user exists, and session is not expired
+      const isValidAuthenticatedSession = state.session && 
+                                         !state.error && 
+                                         state.session.user && 
+                                         state.session.access_token &&
+                                         !hasValidSession;
+
+      if (isValidAuthenticatedSession && state.session) {
+        // Additional check: verify session is not from INITIAL_SESSION event
+        // by checking if the session has a recent timestamp
+        try {
+          const sessionTime = state.session.expires_at ? new Date(state.session.expires_at * 1000) : new Date();
+          const isRecentSession = (Date.now() - sessionTime.getTime()) < (1000 * 60 * 60); // Less than 1 hour
+          
+          if (isRecentSession) {
+            console.log('🔐 Session state changed to valid authenticated session, redirecting...');
+            setHasValidSession(true);
+
+            // Small delay to ensure we're not in a race condition
+            setTimeout(() => {
+              if (!isActivelyLoggingIn && !loading) {
+                router.push('/ai-readiness/dashboard');
+              }
+            }, 100);
+          } else {
+            console.log('🔐 Ignoring expired session state');
           }
-        }, 100);
+        } catch (err) {
+          console.log('🔐 Error validating session timestamp, treating as valid:', err);
+          // If we can't validate the timestamp, proceed with caution
+          setHasValidSession(true);
+          setTimeout(() => {
+            if (!isActivelyLoggingIn && !loading) {
+              router.push('/ai-readiness/dashboard');
+            }
+          }, 100);
+        }
       }
     });
 
