@@ -23,13 +23,30 @@ export default function PasswordUpdatePage() {
     e.preventDefault();
     if (password !== confirm) return setStatus('Passwords do not match');
     if (password.length < 8) return setStatus('Password must be at least 8 characters');
-    setLoading(true); setStatus(null);
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) setStatus(error.message); else {
+    
+    console.log('🔐 Password update starting...');
+    setLoading(true);
+    setStatus('Saving...');
+    
+    try {
+      console.log('🔐 Updating password with Supabase...');
+      const { error } = await supabase.auth.updateUser({ password });
+      
+      if (error) {
+        console.error('🔐 Password update error:', error);
+        setStatus(error.message);
+        return;
+      }
+      
+      console.log('🔐 Password updated successfully, redirecting...');
       setStatus('Password updated. Redirecting...');
-      setTimeout(()=> router.push('/auth/login'), 1500);
+      setTimeout(() => router.push('/auth/login?message=password-updated'), 1500);
+    } catch (err: any) {
+      console.error('🔐 Unexpected error during password update:', err);
+      setStatus(err.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

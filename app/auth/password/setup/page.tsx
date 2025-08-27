@@ -121,18 +121,18 @@ export default function PasswordSetupPage() {
       // Attempt immediate password sign-in client-side
       if (json.email) {
         console.log('🔐 Attempting automatic login with email:', json.email);
-        
+
         // Give a bit more time for password to propagate
         await new Promise(r => setTimeout(r, 1000));
-        
+
         let attempt = 0;
         let signedIn = false;
         while (attempt < 5 && !signedIn) {
           console.log(`🔐 Login attempt ${attempt + 1}/5`);
 
-          const { data: loginData, error } = await supabase.auth.signInWithPassword({ 
-            email: json.email, 
-            password 
+          const { data: loginData, error } = await supabase.auth.signInWithPassword({
+            email: json.email,
+            password
           });
 
           console.log('🔐 Login attempt result:', error ? error.message : 'Success');
@@ -158,7 +158,7 @@ export default function PasswordSetupPage() {
           setLoading(false);
           return;
         }
-        
+
         console.log('🔐 Redirecting to dashboard...');
         setStatus('Logged in! Redirecting...');
         setTimeout(() => router.push('/ai-readiness/dashboard?verified=true'), 800);

@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 export default function LoginPage() {
@@ -11,9 +11,19 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    // Check for success messages from URL parameters
+    const message = searchParams.get('message');
+    if (message === 'password-set') {
+      setSuccessMessage('✅ Password set successfully! You can now log in.');
+    } else if (message === 'password-updated') {
+      setSuccessMessage('✅ Password updated successfully! You can now log in.');
+    }
+    
     // Test Supabase connection on load
     const testConnection = async () => {
       try {
@@ -28,7 +38,7 @@ export default function LoginPage() {
       }
     };
     testConnection();
-  }, []);
+  }, [searchParams]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +82,13 @@ export default function LoginPage() {
     <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6'>
       <form onSubmit={submit} className='bg-white shadow rounded-lg p-6 w-full max-w-md space-y-4'>
         <h1 className='text-xl font-semibold'>Login</h1>
+
+        {/* Success message */}
+        {successMessage && (
+          <div className='text-sm text-green-600 bg-green-50 p-3 rounded border border-green-200'>
+            {successMessage}
+          </div>
+        )}
 
         {/* Debug info */}
         {debugInfo && (
