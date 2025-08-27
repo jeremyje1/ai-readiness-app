@@ -1,9 +1,9 @@
-import FundingJustificationGenerator from '@/components/FundingJustificationGenerator'
+import FundingJustificationGeneratorV2 from '@/components/FundingJustificationGeneratorV2'
 
 export default function FundingPage() {
   return (
     <div className="container mx-auto px-4 py-8">
-      <FundingJustificationGenerator />
+      <FundingJustificationGeneratorV2 />
     </div>
   )
 }

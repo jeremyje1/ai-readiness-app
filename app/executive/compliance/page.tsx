@@ -1,9 +1,9 @@
-import ComplianceWatchlist from '@/components/ComplianceWatchlist'
+import ComplianceWatchlistV2 from '@/components/ComplianceWatchlistV2'
 
 export default function CompliancePage() {
   return (
     <div className="container mx-auto px-4 py-8">
-      <ComplianceWatchlist />
+      <ComplianceWatchlistV2 />
     </div>
   )
 }

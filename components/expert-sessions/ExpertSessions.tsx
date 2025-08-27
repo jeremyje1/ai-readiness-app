@@ -60,7 +60,7 @@ export function ExpertSessions({
   showBookingModal = false, 
   onBookingComplete 
 }: ExpertSessionsProps) {
-  const { audience, config, copy } = useAudience();
+  const { audience, config } = useAudience();
   const analytics = useAudienceAnalytics(audience, userId);
   
   const [sessions, setSessions] = useState<ExpertSession[]>([]);
@@ -257,7 +257,7 @@ export function ExpertSessions({
           </h1>
         </div>
         <p className="text-lg text-gray-600 mb-2">
-          Connect with AI education experts tailored to your {copy.organizationType}
+          Connect with AI education experts tailored to your {audience === 'k12' ? 'district' : 'institution'}
         </p>
         <p className="text-sm text-gray-500">
           One-on-one consultations, workshops, and strategic planning sessions
@@ -437,7 +437,7 @@ export function ExpertSessions({
               Why Book an Expert Session?
             </h3>
             <p className="text-gray-600">
-              Get personalized guidance from AI education specialists who understand {copy.organizationType} challenges
+              Get personalized guidance from AI education specialists who understand {audience === 'k12' ? 'K-12' : 'higher education'} challenges
             </p>
           </div>
           

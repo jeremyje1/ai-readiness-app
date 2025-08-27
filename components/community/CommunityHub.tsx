@@ -71,7 +71,7 @@ interface CommunityHubProps {
 }
 
 export function CommunityHub({ userId, showJoinModal = false }: CommunityHubProps) {
-  const { audience, config, copy } = useAudience();
+  const { audience, config } = useAudience();
   const analytics = useAudienceAnalytics(audience, userId);
   
   const [stats, setStats] = useState<CommunityStats | null>(null);
@@ -242,7 +242,7 @@ export function CommunityHub({ userId, showJoinModal = false }: CommunityHubProp
           </h1>
         </div>
         <p className="text-lg text-gray-600 mb-2">
-          Connect with fellow {copy.organizationType} leaders navigating AI integration
+          Connect with fellow {audience === 'k12' ? 'district' : 'institutional'} leaders navigating AI integration
         </p>
         <p className="text-sm text-gray-500">
           Join discussions, share resources, and learn from peers in your field
@@ -397,7 +397,7 @@ export function CommunityHub({ userId, showJoinModal = false }: CommunityHubProp
                   <Users className="w-6 h-6 text-green-600 mx-auto mb-2" />
                   <h4 className="font-medium text-gray-900 mb-1">Peer Learning</h4>
                   <p className="text-xs text-gray-600">
-                    Learn from others facing similar challenges in {copy.organizationType}
+                    Learn from others facing similar challenges in {audience === 'k12' ? 'K-12 education' : 'higher education'}
                   </p>
                 </div>
                 <div className="text-center">

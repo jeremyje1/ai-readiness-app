@@ -188,7 +188,7 @@ export function AudienceAwareAssessment({
               <span>{question.scale.maxLabel}</span>
             </div>
             <Slider
-              value={[currentAnswer || question.scale.min]}
+              defaultValue={[currentAnswer || question.scale.min]}
               onValueChange={([value]) => handleAnswer(value)}
               min={question.scale.min}
               max={question.scale.max}

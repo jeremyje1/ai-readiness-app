@@ -214,11 +214,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Mock assessment data - in real implementation, fetch from database
-    let assessmentScore = {
+    let assessmentScore: DashboardMetrics['assessmentScore'] = {
       current: 72,
       previous: 68,
-      trend: 'up' as const,
-      level: 'proficient' as const
+      trend: 'up',
+      level: 'proficient'
     };
 
     // Try to get actual assessment data if user ID provided
@@ -276,7 +276,7 @@ export async function GET(request: NextRequest) {
     // Generate benchmarking data
     const benchmarking = {
       percentile: Math.min(95, Math.max(5, assessmentScore.current + Math.floor(Math.random() * 20) - 10)),
-      peerComparison: assessmentScore.current > 70 ? 'above' : assessmentScore.current < 50 ? 'below' : 'average' as const,
+      peerComparison: (assessmentScore.current > 70 ? 'above' : assessmentScore.current < 50 ? 'below' : 'average') as 'above' | 'below' | 'average',
       sampleSize: audience === 'k12' ? 1247 : 892
     };
 

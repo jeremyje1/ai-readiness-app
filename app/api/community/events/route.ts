@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const upcomingEvents = contentManager.getUpcomingEvents(audience, userTier, limit);
 
     // Get past events with recordings if requested
-    let pastEventsWithRecordings = [];
+    let pastEventsWithRecordings: any[] = [];
     if (includeRecordings) {
       pastEventsWithRecordings = getPastEventsWithRecordings(audience, userTier, 3);
     }
