@@ -1,7 +1,8 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-enhanced';
+import { authService } from '@/lib/auth-service';
 import { useEffect, useState } from 'react';
 
 export default function AuthDebugPage() {
@@ -98,6 +99,44 @@ export default function AuthDebugPage() {
         setLoading(false);
     };
 
+    const testEnhancedAuth = async () => {
+        setLoading(true);
+        setAuthResult(null);
+
+        try {
+            console.log('🧪 Testing Enhanced Auth Service...');
+            const result = await authService.signInWithPassword(testEmail, testPassword);
+            
+            setAuthResult({
+                success: !result.error,
+                error: result.error?.message || null,
+                data: {
+                    method: result.method,
+                    timestamp: new Date(result.timestamp).toLocaleTimeString(),
+                    user: result.data?.user ? {
+                        id: result.data.user.id,
+                        email: result.data.user.email,
+                        confirmed: result.data.user.email_confirmed_at ? true : false
+                    } : null
+                }
+            });
+
+            console.log('🧪 Auth result:', {
+                method: result.method,
+                success: !result.error,
+                error: result.error?.message
+            });
+        } catch (err: any) {
+            setAuthResult({
+                success: false,
+                error: err.message,
+                data: null
+            });
+        }
+
+        setLoading(false);
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-4xl mx-auto space-y-6">
@@ -144,40 +183,18 @@ export default function AuthDebugPage() {
                                 {loading ? 'Testing...' : 'Test Sign In'}
                             </Button>
                             <Button
+                                onClick={testEnhancedAuth}
+                                disabled={loading || !testEmail || !testPassword}
+                                variant="default"
+                            >
+                                {loading ? 'Testing...' : 'Test Enhanced Auth'}
+                            </Button>
+                            <Button
                                 onClick={testPasswordReset}
                                 disabled={loading || !testEmail}
                                 variant="outline"
                             >
                                 {loading ? 'Testing...' : 'Test Password Reset'}
-                            </Button>
-                            <Button
-                                onClick={async () => {
-                                    setLoading(true);
-                                    try {
-                                        console.log('🔐 Debug: Force logout initiated');
-                                        await supabase.auth.signOut();
-                                        setAuthResult({
-                                            success: true,
-                                            error: null,
-                                            data: 'Successfully logged out of all sessions'
-                                        });
-                                        // Give a moment for the auth state to update
-                                        setTimeout(() => {
-                                            window.location.href = '/auth/login';
-                                        }, 1000);
-                                    } catch (err: any) {
-                                        setAuthResult({
-                                            success: false,
-                                            error: `Logout failed: ${err.message}`,
-                                            data: null
-                                        });
-                                    }
-                                    setLoading(false);
-                                }}
-                                disabled={loading}
-                                variant="destructive"
-                            >
-                                {loading ? 'Logging out...' : 'Force Logout'}
                             </Button>
                         </div>
                     </div>

@@ -3,7 +3,7 @@
 import SubscriptionValueDashboard from '@/components/SubscriptionValueDashboard';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase-enhanced';
 import { AlertCircle, BarChart3, BookOpen, CheckCircle, FileText, Loader2, Lock, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';

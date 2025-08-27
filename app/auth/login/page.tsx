@@ -1,8 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { authService } from '@/lib/auth-service';
-import { sessionManager } from '@/lib/session-manager';
+import { supabase } from '@/lib/supabase-enhanced';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -13,245 +12,102 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [fallbackUsed, setFallbackUsed] = useState(false);
-  const [hasValidSession, setHasValidSession] = useState(false);
-  const [isActivelyLoggingIn, setIsActivelyLoggingIn] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     // Check for success messages from URL parameters
     const message = searchParams.get('message');
-    const fromPasswordSetup = message === 'password-set' || message === 'password-updated';
-
     if (message === 'password-set') {
       setSuccessMessage('✅ Password set successfully! You can now log in.');
     } else if (message === 'password-updated') {
       setSuccessMessage('✅ Password updated successfully! You can now log in.');
     }
 
-    // Test connection using enhanced auth service
+    // Test Supabase connection on load
     const testConnection = async () => {
       try {
-        const connectionTest = await authService.testConnection();
-        if (connectionTest.status === 'ok') {
-          setDebugInfo(`✅ Auth service ready (${connectionTest.latency}ms)`);
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          setDebugInfo(`⚠️ Auth connection issue: ${error.message}`);
         } else {
-          setDebugInfo(`⚠️ Auth service issue: ${connectionTest.message}`);
+          setDebugInfo('✅ Supabase connection OK');
         }
       } catch (err: any) {
-        setDebugInfo(`❌ Connection test failed: ${err.message}`);
+        setDebugInfo(`❌ Connection failed: ${err.message}`);
       }
     };
     testConnection();
-
-    // Initialize session manager and check for existing session
-    const checkExistingSession = async () => {
-      // Check if coming from password setup - don't auto-redirect in this case
-      const message = searchParams.get('message');
-      const fromPasswordSetup = message === 'password-set' || message === 'password-updated';
-
-      if (fromPasswordSetup) {
-        console.log('🔐 Coming from password setup - allowing manual login instead of auto-redirect');
-        return;
-      }
-
-      // Don't check for existing sessions if we're actively logging in
-      if (isActivelyLoggingIn) {
-        console.log('🔐 Skipping session check - login in progress');
-        return;
-      }
-
-      try {
-        const state = await sessionManager.getSessionState();
-
-        // Enhanced validation: ensure we have a truly authenticated session
-        const isValidAuthenticatedSession = state.session &&
-          !state.error &&
-          state.session.user &&
-          state.session.access_token;
-
-        if (isValidAuthenticatedSession && state.session) {
-          // Additional validation: ensure session is truly stable
-          // Wait a moment and check again to avoid race conditions
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          // Re-check if we're still not actively logging in
-          if (!isActivelyLoggingIn) {
-            // Verify session is not expired
-            try {
-              const sessionTime = state.session.expires_at ? new Date(state.session.expires_at * 1000) : new Date();
-              const isValidSession = sessionTime.getTime() > Date.now();
-
-              if (isValidSession) {
-                console.log('🔐 Existing valid authenticated session found, redirecting...');
-                setHasValidSession(true);
-                router.push('/ai-readiness/dashboard');
-              } else {
-                console.log('🔐 Found expired session, staying on login page');
-              }
-            } catch (err) {
-              console.log('🔐 Error validating existing session, staying on login page:', err);
-            }
-          } else {
-            console.log('🔐 Session found but login started, skipping redirect');
-          }
-        } else {
-          console.log('🔐 No valid authenticated session found');
-        }
-      } catch (err) {
-        console.warn('🔐 Session check failed:', err);
-        // Continue with login form if session check fails
-      }
-    };
-
-    // Only check for existing session on initial load, not when actively logging in
-    if (!isActivelyLoggingIn) {
-      checkExistingSession();
-    }
-  }, [searchParams, router, isActivelyLoggingIn]);
-
-  // Add session state change listener that respects login state
-  useEffect(() => {
-    const unsubscribe = sessionManager.onSessionChange((state) => {
-      // Check if coming from password setup - don't auto-redirect in this case
-      const message = searchParams.get('message');
-      const fromPasswordSetup = message === 'password-set' || message === 'password-updated';
-
-      if (fromPasswordSetup) {
-        console.log('🔐 Ignoring session change - from password setup, allowing manual login');
-        return;
-      }
-
-      // Ignore session changes during active login process
-      if (isActivelyLoggingIn) {
-        console.log('🔐 Ignoring session change during active login');
-        return;
-      }
-
-      // Additional safety: check if we're in a loading state
-      if (loading) {
-        console.log('🔐 Ignoring session change during loading state');
-        return;
-      }
-
-      // Enhanced validation: ensure we have a truly authenticated session
-      // Check that session exists, has no error, user exists, and session is not expired
-      const isValidAuthenticatedSession = state.session &&
-        !state.error &&
-        state.session.user &&
-        state.session.access_token &&
-        !hasValidSession;
-
-      if (isValidAuthenticatedSession && state.session) {
-        // Additional check: verify session is not from INITIAL_SESSION event
-        // by checking if the session has a recent timestamp
-        try {
-          const sessionTime = state.session.expires_at ? new Date(state.session.expires_at * 1000) : new Date();
-          const isRecentSession = (Date.now() - sessionTime.getTime()) < (1000 * 60 * 60); // Less than 1 hour
-
-          if (isRecentSession) {
-            console.log('🔐 Session state changed to valid authenticated session, redirecting...');
-            setHasValidSession(true);
-
-            // Small delay to ensure we're not in a race condition
-            setTimeout(() => {
-              // Check if coming from password setup - don't auto-redirect
-              const currentMessage = searchParams.get('message');
-              const fromPasswordSetup = currentMessage === 'password-set' || currentMessage === 'password-updated';
-
-              if (fromPasswordSetup) {
-                console.log('🔐 Skipping auto-redirect from session change - from password setup');
-                return;
-              }
-
-              if (!isActivelyLoggingIn && !loading) {
-                router.push('/ai-readiness/dashboard');
-              }
-            }, 100);
-          } else {
-            console.log('🔐 Ignoring expired session state');
-          }
-        } catch (err) {
-          console.log('🔐 Error validating session timestamp, treating as valid:', err);
-          // If we can't validate the timestamp, proceed with caution
-          setHasValidSession(true);
-          setTimeout(() => {
-            // Check if coming from password setup - don't auto-redirect
-            const currentMessage = searchParams.get('message');
-            const fromPasswordSetup = currentMessage === 'password-set' || currentMessage === 'password-updated';
-
-            if (fromPasswordSetup) {
-              console.log('🔐 Skipping auto-redirect from catch block - from password setup');
-              return;
-            }
-
-            if (!isActivelyLoggingIn && !loading) {
-              router.push('/ai-readiness/dashboard');
-            }
-          }, 100);
-        }
-      }
-    });
-
-    return unsubscribe;
-  }, [isActivelyLoggingIn, hasValidSession, loading, router]);
+  }, [searchParams]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Prevent form submission if we already have a valid session
-    if (hasValidSession) {
-      console.log('🔐 Form submission blocked - valid session exists');
-      return;
-    }
-
     setLoading(true);
-    setIsActivelyLoggingIn(true);
     setError(null);
-    setFallbackUsed(false);
 
-    console.log('🔐 Enhanced auth: form submission started');
+    console.log('🔐 Form submission started');
     console.log('🔐 Email:', email);
+    console.log('🔐 Loading state set to:', true);
+
+    // Add timeout protection
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        setError('Login timeout - please try again');
+        setLoading(false);
+        console.error('🔐 Login timeout after 12s');
+      }
+    }, 12000);
 
     try {
-      const result = await authService.signInWithPassword({
+      console.log('🔐 Attempting enhanced Supabase signInWithPassword...');
+
+      // Use our enhanced auth service with automatic fallback
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password
       });
 
-      if (result.error) {
-        console.error('🔐 Authentication failed:', result.error.message);
-        setError(result.error.message);
-        setIsActivelyLoggingIn(false);
-        setLoading(false);
-        return;
-      }
+      clearTimeout(timeoutId);
 
-      if (result.fallbackUsed) {
-        console.log('⚡ Fallback authentication path was used');
-        setFallbackUsed(true);
-      }
+      console.log('🔐 Supabase response received');
+      console.log('🔐 Data:', data ? 'Present' : 'Null');
+      console.log('🔐 Error:', error ? error.message : 'None');
 
-      console.log('✅ Authentication successful, redirecting...');
-
-      // Longer delay to ensure session is properly established and avoid race conditions
-      await new Promise(resolve => setTimeout(resolve, 750));
-
-      // Final check before redirect to ensure we're still in the right state
-      if (!hasValidSession) {
-        router.push('/ai-readiness/dashboard');
+      if (error) {
+        // Improved error messages
+        let errorMsg = 'Login failed: ';
+        if (error.message.includes('Invalid login credentials')) {
+          errorMsg += 'Invalid email or password';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMsg += 'Please confirm your email first';
+        } else if (error.message.includes('timeout')) {
+          errorMsg += 'Connection timeout - please try again';
+        } else {
+          errorMsg += error.message;
+        }
+        setError(errorMsg);
+        console.error('🔐 Setting error state:', error.message);
+      } else if (data?.session) {
+        console.log('✅ Login successful, session established');
+        setSuccessMessage('Login successful! Redirecting...');
+        
+        // Small delay to show success message
+        setTimeout(() => {
+          router.push('/ai-readiness/dashboard');
+        }, 500);
       } else {
-        console.log('🔐 Session already handled by listener, skipping redirect');
+        setError('Login failed: No session returned');
+        console.error('🔐 No session data returned');
       }
-
     } catch (err: any) {
-      console.error('🔐 Unexpected error during authentication:', err);
-      setError(err.message || 'An unexpected error occurred during login');
-    } finally {
-      setLoading(false);
-      setIsActivelyLoggingIn(false);
+      clearTimeout(timeoutId);
+      const errorMsg = `Unexpected error: ${err.message}`;
+      setError(errorMsg);
+      console.error('🔐 Caught exception:', err);
     }
+
+    console.log('🔐 Setting loading state to false');
+    setLoading(false);
   };
 
   return (
@@ -263,27 +119,6 @@ export default function LoginPage() {
         {successMessage && (
           <div className='text-sm text-green-600 bg-green-50 p-3 rounded border border-green-200'>
             {successMessage}
-          </div>
-        )}
-
-        {/* Session check indicator */}
-        {hasValidSession && (
-          <div className='text-sm text-blue-600 bg-blue-50 p-3 rounded border border-blue-200'>
-            🔐 Valid session detected, redirecting...
-          </div>
-        )}
-
-        {/* Active login indicator */}
-        {isActivelyLoggingIn && (
-          <div className='text-sm text-purple-600 bg-purple-50 p-3 rounded border border-purple-200'>
-            🔄 Login in progress, please wait...
-          </div>
-        )}
-
-        {/* Fallback usage indicator */}
-        {fallbackUsed && (
-          <div className='text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-200'>
-            ⚡ Fallback auth path used (please report this for optimization)
           </div>
         )}
 
@@ -302,7 +137,6 @@ export default function LoginPage() {
             onChange={e => setEmail(e.target.value)}
             required
             placeholder='jeremy.estrella@gmail.com'
-            disabled={hasValidSession || isActivelyLoggingIn}
           />
         </div>
         <div>
@@ -313,7 +147,6 @@ export default function LoginPage() {
             onChange={e => setPassword(e.target.value)}
             required
             placeholder='Enter your password'
-            disabled={hasValidSession || isActivelyLoggingIn}
           />
         </div>
 
@@ -325,17 +158,15 @@ export default function LoginPage() {
 
         <Button
           type='submit'
-          disabled={loading || hasValidSession || isActivelyLoggingIn}
+          disabled={loading}
           className='w-full'
-          onClick={(e: React.MouseEvent) => {
+          onClick={(e) => {
             console.log('🔐 Button clicked!');
             console.log('🔐 Loading state:', loading);
-            console.log('🔐 Has valid session:', hasValidSession);
-            console.log('🔐 Is actively logging in:', isActivelyLoggingIn);
-            console.log('🔐 Button disabled:', loading || hasValidSession || isActivelyLoggingIn);
+            console.log('🔐 Button disabled:', loading);
           }}
         >
-          {hasValidSession ? 'Redirecting...' : (loading || isActivelyLoggingIn) ? 'Signing in...' : 'Sign In'}
+          {loading ? 'Signing in...' : 'Sign In'}
         </Button>
 
         <div className='text-xs text-gray-500 text-center'>

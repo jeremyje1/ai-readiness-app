@@ -1,156 +1,151 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+/**
+ * Authentication Middleware Utilities
+ * Handles session validation and cookie management
+ * @version 1.0.0
+ */
 
-// Routes that require authentication
-const protectedRoutes = [
-    '/ai-readiness/dashboard',
-    '/ai-readiness/assessment',
-    '/ai-readiness/results',
-    '/admin',
-    '/api/ai-readiness',
-    '/api/auth/password'
-]
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-// Routes that should redirect to dashboard if user is already authenticated
-const authRoutes = [
-    '/auth/login',
-    '/auth/register'
-]
+// Create a middleware-specific Supabase client
+function createMiddlewareClient(req: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Routes that are always public
-const publicRoutes = [
-    '/',
-    '/start',
-    '/pricing',
-    '/contact',
-    '/privacy',
-    '/terms',
-    '/auth/password/reset',
-    '/debug-auth',
-    '/api/debug'
-]
+  // Get cookies from request
+  const cookieHeader = req.headers.get('cookie') || ''
+  const cookies = Object.fromEntries(
+    cookieHeader.split('; ').map(c => {
+      const [key, value] = c.split('=')
+      return [key, decodeURIComponent(value || '')]
+    })
+  )
 
-function isProtectedRoute(pathname: string): boolean {
-    return protectedRoutes.some(route => pathname.startsWith(route))
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+    global: {
+      headers: {
+        cookie: cookieHeader,
+      },
+    },
+  })
 }
 
-function isAuthRoute(pathname: string): boolean {
-    return authRoutes.some(route => pathname.startsWith(route))
-}
+/**
+ * Validate session in middleware
+ */
+export async function validateSession(req: NextRequest) {
+  try {
+    const supabase = createMiddlewareClient(req)
+    
+    // Try to get session from cookies
+    const accessToken = req.cookies.get('sb-access-token')?.value
+    const refreshToken = req.cookies.get('sb-refresh-token')?.value
 
-function isPublicRoute(pathname: string): boolean {
-    return publicRoutes.some(route => pathname === route || pathname.startsWith(route))
-}
-
-export async function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl
-
-    // Skip middleware for static files and API routes we don't need to protect
-    if (
-        pathname.startsWith('/_next') ||
-        pathname.startsWith('/static') ||
-        pathname.includes('.') ||
-        pathname.startsWith('/api/webhooks') ||
-        pathname.startsWith('/api/payments/webhook')
-    ) {
-        return NextResponse.next()
+    if (!accessToken) {
+      return { valid: false, session: null }
     }
 
-    try {
-        // Create a Supabase client for middleware
-        const response = NextResponse.next()
-        const supabase = createMiddlewareClient({ req: request, res: response })
+    // Verify the session
+    const { data: { user }, error } = await supabase.auth.getUser(accessToken)
 
-        // Get session with timeout to prevent hanging
-        const sessionPromise = supabase.auth.getSession()
-        const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Session check timeout')), 5000)
+    if (error || !user) {
+      // Try to refresh if we have a refresh token
+      if (refreshToken) {
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession({
+          refresh_token: refreshToken
         })
 
-        let session = null
-        try {
-            const result = await Promise.race([sessionPromise, timeoutPromise])
-            session = result.data.session
-        } catch (error) {
-            console.warn('🔐 Middleware: session check failed or timed out:', error)
-            // Continue without session - handle as unauthenticated
+        if (!refreshError && refreshData.session) {
+          return {
+            valid: true,
+            session: refreshData.session,
+            refreshed: true
+          }
         }
-
-        console.log('🔐 Middleware:', {
-            pathname,
-            hasSession: !!session,
-            userId: session?.user?.id,
-            isProtected: isProtectedRoute(pathname),
-            isAuth: isAuthRoute(pathname),
-            isPublic: isPublicRoute(pathname)
-        })
-
-        // Handle protected routes
-        if (isProtectedRoute(pathname)) {
-            if (!session) {
-                console.log('🔐 Middleware: redirecting to login (no session)')
-                const redirectUrl = new URL('/auth/login', request.url)
-                redirectUrl.searchParams.set('redirect', pathname)
-                return NextResponse.redirect(redirectUrl)
-            }
-
-            // Validate session is not expired
-            if (session.expires_at) {
-                const now = Math.floor(Date.now() / 1000)
-                if (session.expires_at < now) {
-                    console.log('🔐 Middleware: redirecting to login (expired session)')
-                    const redirectUrl = new URL('/auth/login', request.url)
-                    redirectUrl.searchParams.set('redirect', pathname)
-                    redirectUrl.searchParams.set('message', 'Session expired. Please log in again.')
-                    return NextResponse.redirect(redirectUrl)
-                }
-            }
-        }
-
-        // Handle auth routes when user is already authenticated
-        if (isAuthRoute(pathname) && session) {
-            console.log('🔐 Middleware: redirecting to dashboard (already authenticated)')
-            const redirectUrl = new URL('/ai-readiness/dashboard', request.url)
-            return NextResponse.redirect(redirectUrl)
-        }
-
-        // Special handling for password update route
-        if (pathname === '/auth/password/update') {
-            if (!session) {
-                console.log('🔐 Middleware: password update requires session')
-                const redirectUrl = new URL('/auth/password/reset', request.url)
-                redirectUrl.searchParams.set('message', 'Please use the password reset link from your email.')
-                return NextResponse.redirect(redirectUrl)
-            }
-        }
-
-        return response
-
-    } catch (error) {
-        console.error('🔐 Middleware: unexpected error:', error)
-
-        // On middleware errors, allow the request to proceed for public routes
-        // but redirect to login for protected routes
-        if (isProtectedRoute(pathname)) {
-            const redirectUrl = new URL('/auth/login', request.url)
-            redirectUrl.searchParams.set('message', 'Authentication check failed. Please log in.')
-            return NextResponse.redirect(redirectUrl)
-        }
-
-        return NextResponse.next()
+      }
+      return { valid: false, session: null }
     }
+
+    return {
+      valid: true,
+      session: { access_token: accessToken, user },
+      refreshed: false
+    }
+  } catch (error) {
+    console.error('[Auth Middleware] Session validation error:', error)
+    return { valid: false, session: null }
+  }
 }
 
-export const config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * - public folder files
-         */
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-    ],
+/**
+ * Set auth cookies in response
+ */
+export function setAuthCookies(res: NextResponse, session: any) {
+  if (!session) return res
+
+  // Set secure, httpOnly cookies
+  res.cookies.set({
+    name: 'sb-access-token',
+    value: session.access_token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: session.expires_in || 3600,
+    path: '/'
+  })
+
+  if (session.refresh_token) {
+    res.cookies.set({
+      name: 'sb-refresh-token',
+      value: session.refresh_token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/'
+    })
+  }
+
+  return res
+}
+
+/**
+ * Clear auth cookies
+ */
+export function clearAuthCookies(res: NextResponse) {
+  res.cookies.delete('sb-access-token')
+  res.cookies.delete('sb-refresh-token')
+  return res
+}
+
+/**
+ * Protected route handler
+ */
+export async function withAuth(
+  req: NextRequest,
+  handler: (req: NextRequest, session: any) => Promise<NextResponse>
+) {
+  const validation = await validateSession(req)
+
+  if (!validation.valid) {
+    // Redirect to login
+    const url = req.nextUrl.clone()
+    url.pathname = '/auth/login'
+    url.searchParams.set('redirect', req.nextUrl.pathname)
+    return NextResponse.redirect(url)
+  }
+
+  const response = await handler(req, validation.session)
+
+  // If session was refreshed, update cookies
+  if (validation.refreshed && validation.session) {
+    return setAuthCookies(response, validation.session)
+  }
+
+  return response
 }
