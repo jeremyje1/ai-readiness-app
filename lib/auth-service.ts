@@ -415,5 +415,4 @@ export class AuthService {
 // Default singleton instance
 export const authService = new AuthService()
 
-// Re-export admin client from centralized helper
-export { createAdminClient, supabaseAdmin } from './supabase-admin'
+// Note: Admin client functionality is available in ./supabase-admin.ts (server-only)
