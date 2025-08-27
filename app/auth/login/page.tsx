@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [fallbackUsed, setFallbackUsed] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -74,8 +75,8 @@ export default function LoginPage() {
         password
       });
 
-      // Timeout after 12s with explicit error to surface stalls
-      const timeoutMs = 12000;
+      // Timeout after 8s with explicit error to surface stalls
+      const timeoutMs = 8000;
       const timeout = new Promise<never>((_, reject) => setTimeout(() => {
         reject(new Error(`Login timeout after ${timeoutMs / 1000}s (no response from Supabase)`));
       }, timeoutMs));
@@ -101,6 +102,16 @@ export default function LoginPage() {
 
       if (isTimeout) {
         console.log('⏱️  Detected login timeout – initiating manual password grant fallback...');
+        
+        // Increment fallback usage counter for telemetry
+        try {
+          const currentCount = parseInt(localStorage.getItem('auth_fallback_count') || '0', 10);
+          localStorage.setItem('auth_fallback_count', String(currentCount + 1));
+          console.log(`📊 Auth fallback usage: ${currentCount + 1} times`);
+        } catch (storageErr) {
+          console.warn('Failed to update fallback counter:', (storageErr as any).message);
+        }
+        
         try {
           const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
           const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -144,6 +155,7 @@ export default function LoginPage() {
           const ms = Math.round(performance.now() - fallbackStart);
           console.log(`✅ Fallback session established in ${ms}ms`);
           setError(null);
+          setFallbackUsed(true);
           if (!redirected) {
             redirected = true;
             router.push('/ai-readiness/dashboard');
@@ -176,6 +188,13 @@ export default function LoginPage() {
         {successMessage && (
           <div className='text-sm text-green-600 bg-green-50 p-3 rounded border border-green-200'>
             {successMessage}
+          </div>
+        )}
+
+        {/* Fallback usage indicator */}
+        {fallbackUsed && (
+          <div className='text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-200'>
+            ⚡ Fallback auth path used (please report this for optimization)
           </div>
         )}
 
