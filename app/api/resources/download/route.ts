@@ -108,7 +108,7 @@ async function handleDownload(
 
     // Send email backup asynchronously (don't wait for it)
     if (sendEmailBackup && (email || userId)) {
-      sendEmailBackup(resource, { userId, email }).catch(error => {
+      sendEmailBackupAsync(resource, { userId, email }).catch(error => {
         console.error('Failed to send email backup:', error);
       });
     }
@@ -207,7 +207,7 @@ function getMimeType(format: string): string {
 /**
  * Send email backup of resource
  */
-async function sendEmailBackup(resource: any, options: { userId?: string; email?: string }): Promise<void> {
+async function sendEmailBackupAsync(resource: any, options: { userId?: string; email?: string }): Promise<void> {
   try {
     let userEmail = options.email;
 
