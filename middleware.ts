@@ -9,7 +9,7 @@ const protectedRoutes = [
   '/ai-readiness/results',
   '/admin',
   '/api/ai-readiness',
-  '/api/auth/password'
+  '/api/auth/password/update'  // Only protect password update, not setup
 ]
 
 // Routes that should redirect to dashboard if user is already authenticated

@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { rateLimit, rateLimitAsync } from '@/lib/rate-limit';
 
+// Handle GET requests with appropriate error message
+export async function GET(req: NextRequest) {
+  return NextResponse.json(
+    { error: 'Password setup requires POST request with token and password' }, 
+    { status: 405, headers: { 'Allow': 'POST' } }
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
