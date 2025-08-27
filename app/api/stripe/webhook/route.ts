@@ -1,8 +1,8 @@
+import { emailService } from '@/lib/email-service';
+import { supabaseAdmin } from '@/lib/supabase';
+import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabaseAdmin } from '@/lib/supabase';
-import { emailService } from '@/lib/email-service';
-import crypto from 'crypto';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', { apiVersion: '2025-06-30.basil' });
 
@@ -167,9 +167,9 @@ async function sendAssessmentAccessEmail(email: string, name: string, tier: stri
       dashboardUrl: `${baseUrl}/ai-readiness/dashboard`,
       passwordSetupUrl: passwordSetupTokenUrl,
       magicLinkUrl,
-  tier,
-  loginUrl: `${baseUrl}/auth/login`,
-  passwordResetUrl: `${baseUrl}/auth/password/reset`
+      tier,
+      loginUrl: `${baseUrl}/auth/login`,
+      passwordResetUrl: `${baseUrl}/auth/password/reset`
     });
     console.log(`✅ Onboarding email sent to ${email}`);
   } catch (error) {
@@ -182,7 +182,7 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
   'checkout.session.completed': async (event) => {
     const session = event.data.object as Stripe.Checkout.Session;
     console.log('[webhook] checkout.session.completed', session.id, session.metadata);
-    
+
     if (session.payment_status === 'paid' && session.customer_details?.email) {
       // Get price ID to determine tier
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
@@ -206,7 +206,7 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
       // This prevents conflicts when billing email differs from registration email
       const registrationEmail = session.customer_email || session.customer_details.email;
       const billingEmail = session.customer_details.email;
-      
+
       console.log(`📧 Email resolution: registration=${registrationEmail}, billing=${billingEmail}`);
 
       const userData: UserData = {
@@ -219,19 +219,19 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
       };
 
       // Create user account and grant access
-  const userId = await createOrFindUserAndGrantAccess(userData);
-      
+      const userId = await createOrFindUserAndGrantAccess(userData);
+
       // Send access email
       const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.k12aiblueprint.com';
       await sendAssessmentAccessEmail(userData.email, userData.name, tier, baseUrl);
-      
+
       console.log(`🎉 Customer ${userData.email} granted access to ${tier} (User ID: ${userId})`);
     }
   },
   'customer.subscription.created': async (event) => {
     const sub = event.data.object as Stripe.Subscription;
     console.log('[webhook] subscription.created', sub.id, sub.items.data[0]?.price?.id);
-    
+
     // Handle subscription-based access (if applicable)
     const customer = await stripe.customers.retrieve(sub.customer as string);
     if ('email' in customer && customer.email) {
@@ -246,7 +246,7 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
   'customer.subscription.deleted': async (event) => {
     const sub = event.data.object as Stripe.Subscription;
     console.log('[webhook] subscription.deleted', sub.id);
-    
+
     // Revoke access for cancelled subscriptions
     const cancelledCustomer = await stripe.customers.retrieve(sub.customer as string);
     if ('email' in cancelledCustomer && cancelledCustomer.email) {
@@ -255,15 +255,15 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
           console.error('Cannot revoke access - Supabase admin client not available');
           return;
         }
-        
+
         const { error } = await supabaseAdmin
           .from('user_payments')
-          .update({ 
+          .update({
             access_granted: false,
-            access_revoked_at: new Date().toISOString() 
+            access_revoked_at: new Date().toISOString()
           })
           .eq('stripe_customer_id', sub.customer);
-        
+
         if (error) {
           console.error('Failed to revoke access:', error);
         } else {

@@ -70,7 +70,7 @@ function resolvePriceId(product: string, billing: string): string | null {
 function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
   // Simple single-domain approach
   const canonical = 'https://aiblueprint.k12aiblueprint.com';
-  
+
   // Map return_to shorthand values to paths
   const destination = (() => {
     switch (returnTo) {
@@ -87,7 +87,7 @@ function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
         return '/ai-readiness/success';
     }
   })();
-  
+
   return {
     // Include session_id placeholder for post-checkout bootstrap
     success: `${canonical}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`,
@@ -100,7 +100,7 @@ async function createCheckoutSession(params: CheckoutParams, request?: NextReque
   const allowedOrigins = [
     'https://aiblueprint.k12aiblueprint.com'
   ];
-  
+
   if (params.successUrl && !allowedOrigins.some(origin => params.successUrl!.startsWith(origin))) {
     console.warn('Ignoring non-canonical successUrl param', params.successUrl);
     params.successUrl = undefined;

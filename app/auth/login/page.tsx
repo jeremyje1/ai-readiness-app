@@ -22,6 +22,8 @@ export default function LoginPage() {
   useEffect(() => {
     // Check for success messages from URL parameters
     const message = searchParams.get('message');
+    const fromPasswordSetup = message === 'password-set' || message === 'password-updated';
+
     if (message === 'password-set') {
       setSuccessMessage('✅ Password set successfully! You can now log in.');
     } else if (message === 'password-updated') {
@@ -45,6 +47,15 @@ export default function LoginPage() {
 
     // Initialize session manager and check for existing session
     const checkExistingSession = async () => {
+      // Check if coming from password setup - don't auto-redirect in this case
+      const message = searchParams.get('message');
+      const fromPasswordSetup = message === 'password-set' || message === 'password-updated';
+
+      if (fromPasswordSetup) {
+        console.log('🔐 Coming from password setup - allowing manual login instead of auto-redirect');
+        return;
+      }
+
       // Don't check for existing sessions if we're actively logging in
       if (isActivelyLoggingIn) {
         console.log('🔐 Skipping session check - login in progress');
@@ -103,6 +114,15 @@ export default function LoginPage() {
   // Add session state change listener that respects login state
   useEffect(() => {
     const unsubscribe = sessionManager.onSessionChange((state) => {
+      // Check if coming from password setup - don't auto-redirect in this case
+      const message = searchParams.get('message');
+      const fromPasswordSetup = message === 'password-set' || message === 'password-updated';
+
+      if (fromPasswordSetup) {
+        console.log('🔐 Ignoring session change - from password setup, allowing manual login');
+        return;
+      }
+
       // Ignore session changes during active login process
       if (isActivelyLoggingIn) {
         console.log('🔐 Ignoring session change during active login');
@@ -136,6 +156,15 @@ export default function LoginPage() {
 
             // Small delay to ensure we're not in a race condition
             setTimeout(() => {
+              // Check if coming from password setup - don't auto-redirect
+              const currentMessage = searchParams.get('message');
+              const fromPasswordSetup = currentMessage === 'password-set' || currentMessage === 'password-updated';
+
+              if (fromPasswordSetup) {
+                console.log('🔐 Skipping auto-redirect from session change - from password setup');
+                return;
+              }
+
               if (!isActivelyLoggingIn && !loading) {
                 router.push('/ai-readiness/dashboard');
               }
@@ -148,6 +177,15 @@ export default function LoginPage() {
           // If we can't validate the timestamp, proceed with caution
           setHasValidSession(true);
           setTimeout(() => {
+            // Check if coming from password setup - don't auto-redirect
+            const currentMessage = searchParams.get('message');
+            const fromPasswordSetup = currentMessage === 'password-set' || currentMessage === 'password-updated';
+
+            if (fromPasswordSetup) {
+              console.log('🔐 Skipping auto-redirect from catch block - from password setup');
+              return;
+            }
+
             if (!isActivelyLoggingIn && !loading) {
               router.push('/ai-readiness/dashboard');
             }

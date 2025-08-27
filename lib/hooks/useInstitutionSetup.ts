@@ -30,14 +30,14 @@ export const useInstitutionSetup = () => {
             // Check for existing slugs and generate unique one if needed
             let slug = baseSlug
             let counter = 1
-            
+
             while (true) {
                 const { data: existing } = await supabase
                     .from('institutions')
                     .select('id')
                     .eq('slug', slug)
                     .limit(1)
-                
+
                 if (!existing || existing.length === 0) {
                     // Slug is unique, use it
                     break
@@ -46,7 +46,7 @@ export const useInstitutionSetup = () => {
                     slug = `${baseSlug}-${counter}`
                     counter++
                 }
-                
+
                 // Safety check to prevent infinite loop
                 if (counter > 100) {
                     slug = `${baseSlug}-${Date.now()}`
@@ -110,7 +110,7 @@ export const useInstitutionSetup = () => {
         } catch (err) {
             console.error('Institution creation error:', err)
             let message = 'Failed to create institution'
-            
+
             if (err instanceof Error) {
                 if (err.message.includes('institutions_slug_key') || err.message.includes('duplicate key')) {
                     message = 'An institution with this name already exists. Please try a different name.'
@@ -120,7 +120,7 @@ export const useInstitutionSetup = () => {
                     message = err.message
                 }
             }
-            
+
             setError(message)
             return null
         } finally {
