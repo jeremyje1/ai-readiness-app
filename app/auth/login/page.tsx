@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
+import { authService } from '@/lib/auth-service';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -27,7 +28,7 @@ export default function LoginPage() {
     // Test Supabase connection on load
     const testConnection = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession();
+        const { error } = await supabase.auth.getSession();
         if (error) {
           setDebugInfo(`⚠️ Auth connection issue: ${error.message}`);
         } else {
@@ -49,51 +50,32 @@ export default function LoginPage() {
     console.log('🔐 Email:', email);
     console.log('🔐 Loading state set to:', true);
 
-    // Add timeout protection
-    let timeoutFired = false;
-    const timeoutId = setTimeout(() => {
-      timeoutFired = true;
-      setError('Login timeout - please try again');
-      setLoading(false);
-      console.error('🔐 Login timeout after 12s');
-    }, 12000);
-
     try {
-      console.log('🔐 Attempting Supabase signInWithPassword...');
+      console.log('🔐 Attempting AuthService signInWithPassword...');
 
-      // Use direct Supabase client
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password
-      });
+      // Use AuthService with built-in timeout and fallback
+      const result = await authService.signInWithPassword(email.trim(), password);
 
-      clearTimeout(timeoutId);
+      console.log('🔐 AuthService response received');
+      console.log('🔐 Method:', result.method);
+      console.log('🔐 Data:', result.data ? 'Present' : 'Null');
+      console.log('🔐 Error:', result.error ? result.error.message : 'None');
 
-      // Don't process results if timeout has already fired
-      if (timeoutFired) {
-        console.log('🔐 Ignoring response - timeout already fired');
-        return;
-      }
-
-      console.log('🔐 Supabase response received');
-      console.log('🔐 Data:', data ? 'Present' : 'Null');
-      console.log('🔐 Error:', error ? error.message : 'None');
-
-      if (error) {
+      if (result.error) {
         // Improved error messages
         let errorMsg = 'Login failed: ';
-        if (error.message.includes('Invalid login credentials')) {
+        if (result.error.message.includes('Invalid login credentials')) {
           errorMsg += 'Invalid email or password';
-        } else if (error.message.includes('Email not confirmed')) {
+        } else if (result.error.message.includes('Email not confirmed')) {
           errorMsg += 'Please confirm your email first';
-        } else if (error.message.includes('timeout')) {
+        } else if (result.error.message.includes('timeout')) {
           errorMsg += 'Connection timeout - please try again';
         } else {
-          errorMsg += error.message;
+          errorMsg += result.error.message;
         }
         setError(errorMsg);
-        console.error('🔐 Setting error state:', error.message);
-      } else if (data?.session) {
+        console.error('🔐 Setting error state:', result.error.message);
+      } else if (result.data?.session) {
         console.log('✅ Login successful, session established');
         setSuccessMessage('Login successful! Redirecting...');
 
@@ -106,24 +88,13 @@ export default function LoginPage() {
         console.error('🔐 No session data returned');
       }
     } catch (err: any) {
-      clearTimeout(timeoutId);
-      
-      // Don't process errors if timeout has already fired
-      if (timeoutFired) {
-        console.log('🔐 Ignoring error - timeout already fired');
-        return;
-      }
-      
       const errorMsg = `Unexpected error: ${err.message}`;
       setError(errorMsg);
       console.error('🔐 Caught exception:', err);
     }
 
-    // Only set loading to false if timeout hasn't already handled it
-    if (!timeoutFired) {
-      console.log('🔐 Setting loading state to false');
-      setLoading(false);
-    }
+    console.log('🔐 Setting loading state to false');
+    setLoading(false);
   };
 
   return (
