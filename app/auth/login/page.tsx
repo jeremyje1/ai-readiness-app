@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase-enhanced';
+import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -59,9 +59,9 @@ export default function LoginPage() {
     }, 12000);
 
     try {
-      console.log('🔐 Attempting enhanced Supabase signInWithPassword...');
+      console.log('🔐 Attempting Supabase signInWithPassword...');
 
-      // Use our enhanced auth service with automatic fallback
+      // Use direct Supabase client
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password
