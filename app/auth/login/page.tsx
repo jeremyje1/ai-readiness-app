@@ -50,7 +50,7 @@ export default function LoginPage() {
         console.log('🔐 Skipping session check - login in progress');
         return;
       }
-      
+
       try {
         const state = await sessionManager.getSessionState();
         if (state.session && !state.error) {
