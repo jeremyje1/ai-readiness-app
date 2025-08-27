@@ -75,26 +75,27 @@ export default function LoginPage() {
         }
         setError(errorMsg);
         console.error('🔐 Setting error state:', result.error.message);
+        setLoading(false);
       } else if (result.data?.session) {
         console.log('✅ Login successful, session established');
         setSuccessMessage('Login successful! Redirecting...');
 
-        // Small delay to show success message
+        // Small delay to show success message, then redirect
         setTimeout(() => {
           router.push('/ai-readiness/dashboard');
         }, 500);
+        // Don't set loading to false here - let redirect happen
       } else {
         setError('Login failed: No session returned');
         console.error('🔐 No session data returned');
+        setLoading(false);
       }
     } catch (err: any) {
       const errorMsg = `Unexpected error: ${err.message}`;
       setError(errorMsg);
       console.error('🔐 Caught exception:', err);
+      setLoading(false);
     }
-
-    console.log('🔐 Setting loading state to false');
-    setLoading(false);
   };
 
   return (
@@ -151,6 +152,9 @@ export default function LoginPage() {
             console.log('🔐 Button clicked!');
             console.log('🔐 Loading state:', loading);
             console.log('🔐 Button disabled:', loading);
+            console.log('🔐 AuthService available:', !!authService);
+            console.log('🔐 Email filled:', !!email.trim());
+            console.log('🔐 Password filled:', !!password);
           }}
         >
           {loading ? 'Signing in...' : 'Sign In'}
