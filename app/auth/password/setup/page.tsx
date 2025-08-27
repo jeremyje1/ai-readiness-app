@@ -99,11 +99,18 @@ export default function PasswordSetupPage() {
     try {
       console.log('🔐 Making API call to /api/auth/password/setup');
 
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const res = await fetch('/api/auth/password/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password })
+        body: JSON.stringify({ token, password }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       console.log('🔐 API response status:', res.status);
       console.log('🔐 API response ok:', res.ok);
@@ -115,63 +122,18 @@ export default function PasswordSetupPage() {
         throw new Error(json.error || 'Failed');
       }
 
-      setStatus('Password set! Logging you in...');
-      console.log('🔐 Password set successfully, attempting login...');
+      setStatus('Password set! Redirecting to login...');
+      console.log('🔐 Password set successfully, redirecting to login page...');
 
-      // Attempt immediate password sign-in client-side
-      if (json.email) {
-        console.log('🔐 Attempting automatic login with email:', json.email);
+      // Clear loading immediately 
+      setLoading(false);
 
-        // Give a bit more time for password to propagate
-        await new Promise(r => setTimeout(r, 1000));
-
-        let attempt = 0;
-        let signedIn = false;
-        while (attempt < 5 && !signedIn) {
-          console.log(`🔐 Login attempt ${attempt + 1}/5`);
-
-          const { data: loginData, error } = await supabase.auth.signInWithPassword({
-            email: json.email,
-            password
-          });
-
-          console.log('🔐 Login attempt result:', error ? error.message : 'Success');
-          console.log('🔐 Login data:', loginData ? 'Present' : 'Null');
-
-          if (!error && loginData?.user) {
-            signedIn = true;
-            console.log('🔐 Login successful!');
-            break;
-          }
-
-          // Longer delay between attempts
-          await new Promise(r => setTimeout(r, 800));
-          attempt++;
-        }
-
-        if (!signedIn) {
-          console.log('🔐 Auto-login failed after 5 attempts, redirecting to manual login');
-          setStatus('Password set successfully! Redirecting to login page...');
-          setLoading(false);
-          setTimeout(() => {
-            router.push('/auth/login?message=password-set');
-          }, 2000);
-          return;
-        }
-
-        console.log('🔐 Redirecting to dashboard...');
-        setStatus('Logged in! Redirecting...');
-        setLoading(false); // Clear loading state before redirect
-        setTimeout(() => router.push('/ai-readiness/dashboard?verified=true'), 800);
-      } else {
-        console.log('🔐 No email returned from API, redirecting to login');
-        setStatus('Password set successfully! Redirecting to login page...');
-        setLoading(false);
-        setTimeout(() => {
-          router.push('/auth/login?message=password-set');
-        }, 2000);
-        return;
-      }
+      // Skip auto-login attempts for now and just redirect to login
+      // This is more reliable and prevents hanging
+      setTimeout(() => {
+        router.push('/auth/login?message=password-set');
+      }, 1500);
+      return;
     } catch (err: any) {
       console.error('🔐 Password setup error:', err);
       setStatus(err.message);
