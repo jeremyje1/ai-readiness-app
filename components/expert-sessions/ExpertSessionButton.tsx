@@ -15,14 +15,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export interface ExpertSessionButtonProps {
   variant?: 'default' | 'card' | 'inline';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'lg';
   className?: string;
   userId?: string;
 }
 
 export function ExpertSessionButton({ 
   variant = 'default', 
-  size = 'md',
+  size = 'sm',
   className = '',
   userId
 }: ExpertSessionButtonProps) {

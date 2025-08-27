@@ -187,7 +187,7 @@ export class MetricsTracker {
   /**
    * Flush events to server
    */
-  private async flush(): void {
+  private async flush(): Promise<void> {
     if (this.eventQueue.length === 0) return;
 
     const events = [...this.eventQueue];
