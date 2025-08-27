@@ -1,7 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -115,11 +114,16 @@ export default function PasswordSetupPage() {
       console.log('🔐 API response status:', res.status);
       console.log('🔐 API response ok:', res.ok);
 
-      const json = await res.json();
+      let json: any = null;
+      try {
+        json = await res.json();
+      } catch (parseErr) {
+        console.warn('🔐 Failed to parse JSON response for password setup:', parseErr);
+      }
       console.log('🔐 API response data:', json);
 
       if (!res.ok) {
-        throw new Error(json.error || 'Failed');
+        throw new Error((json && json.error) || `Setup failed (status ${res.status})`);
       }
 
       setStatus('Password set! Redirecting to login...');
@@ -136,7 +140,11 @@ export default function PasswordSetupPage() {
       return;
     } catch (err: any) {
       console.error('🔐 Password setup error:', err);
-      setStatus(err.message);
+      if (err.name === 'AbortError') {
+        setStatus('Request timed out. Please try again.');
+      } else {
+        setStatus(err.message || 'Failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -171,7 +179,19 @@ export default function PasswordSetupPage() {
           <label className="block text-sm font-medium mb-1">Confirm Password</label>
           <Input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={8} />
         </div>
-        {status && token && <p className={`text-sm ${status.includes('!') ? 'text-green-600' : 'text-red-600'}`}>{status}</p>}
+        {status && token && (
+          <div
+            className={`text-sm rounded-md border px-3 py-2 ${
+              status.toLowerCase().includes('error') || status.toLowerCase().includes('fail') || status.toLowerCase().includes('missing') || status.toLowerCase().includes('expired')
+                ? 'bg-red-50 text-red-700 border-red-200'
+                : status.includes('!') || status.toLowerCase().includes('password set')
+                ? 'bg-green-50 text-green-700 border-green-200'
+                : 'bg-blue-50 text-blue-700 border-blue-200'
+            }`}
+          >
+            {status}
+          </div>
+        )}
         <Button type="submit" disabled={loading || !token}>{loading ? 'Saving...' : 'Create Password'}</Button>
       </form>
     </div>
