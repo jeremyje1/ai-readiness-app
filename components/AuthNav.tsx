@@ -80,9 +80,9 @@ export default function AuthNav() {
                 </svg>
                 <span className='truncate max-w-[120px]'>{userEmail}</span>
               </Link>
-              <Button 
-                variant='outline' 
-                size='sm' 
+              <Button
+                variant='outline'
+                size='sm'
                 onClick={logout}
                 className='bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 font-medium'
               >
@@ -138,9 +138,9 @@ export default function AuthNav() {
                     <div className="text-xs text-gray-500">{userEmail}</div>
                   </div>
                 </Link>
-                <Button 
-                  variant='outline' 
-                  size='sm' 
+                <Button
+                  variant='outline'
+                  size='sm'
                   onClick={logout}
                   className='bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 font-medium w-full mt-2'
                 >

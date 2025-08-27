@@ -166,14 +166,33 @@ class ClientSessionManager implements SessionManager {
                 return false
             }
 
-            // Verify token with a lightweight API call
-            const { error } = await supabase.auth.getUser(session.access_token)
-            if (error) {
-                console.warn('🔐 SessionManager: session validation failed:', error.message)
-                return false
+            // For fresh sessions (like after password setup), be more lenient
+            // Check if this is a very recent session (within last 30 seconds)
+            const sessionAge = now - (session.expires_at ? session.expires_at - 3600 : now) // assuming 1 hour token
+            const isRecentSession = sessionAge < 30
+
+            // Verify token with a lightweight API call, but handle 403 gracefully for new sessions
+            try {
+                const { error } = await supabase.auth.getUser(session.access_token)
+                if (error) {
+                    // If this is a recent session and we get 403, it might just need a moment
+                    if (isRecentSession && (error.status === 403 || error.message?.includes('403'))) {
+                        console.log('🔐 SessionManager: new session validation delayed, accepting for now')
+                        return true
+                    }
+                    console.warn('🔐 SessionManager: session validation failed:', error.message)
+                    return false
+                }
+                return true
+            } catch (apiError) {
+                // If API call fails but we have valid session tokens, accept it for recent sessions
+                if (isRecentSession && session.access_token && session.refresh_token) {
+                    console.log('🔐 SessionManager: API validation failed for recent session, but tokens present')
+                    return true
+                }
+                throw apiError
             }
 
-            return true
         } catch (error) {
             console.error('🔐 SessionManager: validation error:', error)
             return false

@@ -12,7 +12,7 @@ try {
     if (fs.existsSync(envPath)) {
         const envContent = fs.readFileSync(envPath, 'utf8');
         const lines = envContent.split('\n');
-        
+
         for (const line of lines) {
             if (line.startsWith('NEXT_PUBLIC_SUPABASE_URL=')) {
                 supabaseUrl = line.split('=')[1].trim().replace(/["']/g, '');
@@ -42,19 +42,19 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function forceLogout() {
     try {
         console.log('🔐 Attempting to clear all sessions...');
-        
+
         // Sign out from all sessions
         const { error } = await supabase.auth.signOut();
-        
+
         if (error) {
             console.error('❌ Logout error:', error.message);
         } else {
             console.log('✅ Successfully logged out of all sessions');
         }
-        
+
         // Also try to get current session to verify
         const { data: session, error: sessionError } = await supabase.auth.getSession();
-        
+
         if (sessionError) {
             console.log('⚠️  Session check error (this is expected after logout):', sessionError.message);
         } else if (session.session) {
@@ -66,7 +66,7 @@ async function forceLogout() {
         } else {
             console.log('✅ Confirmed: No active session found');
         }
-        
+
     } catch (err) {
         console.error('❌ Script error:', err.message);
     }
