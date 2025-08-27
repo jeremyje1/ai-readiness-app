@@ -76,7 +76,7 @@ export const audienceConfig: Record<Audience, AudienceConfig> = {
       compliance: 'Accreditation'
     },
     
-    calendlyUrl: 'https://calendly.com/ai-blueprint/highered-strategy-30min',
+    calendlyUrl: 'https://calendly.com/jeremyestrella/30min',
     slackInviteUrl: 'https://join.slack.com/t/ai-blueprint/shared_invite/highered',
     
     copy: {
@@ -143,7 +143,7 @@ export const audienceConfig: Record<Audience, AudienceConfig> = {
       compliance: 'State Standards'
     },
     
-    calendlyUrl: 'https://calendly.com/ai-blueprint/k12-strategy-30min',
+    calendlyUrl: 'https://calendly.com/jeremyestrella/30min',
     slackInviteUrl: 'https://join.slack.com/t/ai-blueprint/shared_invite/k12',
     
     copy: {
