@@ -1,6 +1,6 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server';
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Routes that require authentication
 const protectedRoutes = [
@@ -29,21 +29,21 @@ function isAuthRoute(pathname: string): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const host = request.headers.get('host') || '';
-  
+
   // Define canonical domains
   const k12Domain = 'aiblueprint.k12aiblueprint.com';
   const higherEdDomain = 'aiblueprint.higheredaiblueprint.com';
-  
+
   // Redirect legacy domain to K-12 canonical
   if (host === 'aireadiness.northpathstrategies.org') {
     const url = new URL(request.url);
     url.host = k12Domain;
     return NextResponse.redirect(url, 301);
   }
-  
+
   // Clone the request URL to modify
   const response = NextResponse.next();
-  
+
   // Set institution type and domain context based on hostname
   if (host.includes('higheredaiblueprint.com')) {
     response.headers.set('x-institution-type', 'HigherEd');
@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
     response.headers.set('x-institution-type', 'K12');
     response.headers.set('x-domain-context', 'k12');
   }
-  
+
   // Add domain info to response headers for client-side access
   response.headers.set('x-current-domain', host);
 
@@ -133,7 +133,7 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     console.error('🔐 Middleware: authentication error:', error)
-    
+
     // On middleware errors, allow the request to proceed for non-protected routes
     // but redirect to login for protected routes
     if (isProtectedRoute(pathname)) {
@@ -142,7 +142,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
   }
-  
+
   return response;
 }
 

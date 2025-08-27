@@ -1,4 +1,4 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 
 // Sanitize environment variables to avoid hidden whitespace / newline issues
 const supabaseUrlRaw = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -82,7 +82,7 @@ export const supabaseAdmin = (() => {
     // We're on the client side, return null
     return null
   }
-  
+
   if (!supabaseServiceKey) {
     console.warn('SUPABASE_SERVICE_ROLE_KEY not found - admin functions will not work')
     return null

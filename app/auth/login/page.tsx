@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [fallbackUsed, setFallbackUsed] = useState(false);
+  const [hasValidSession, setHasValidSession] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -41,17 +42,32 @@ export default function LoginPage() {
     };
     testConnection();
 
-    // Initialize session manager
-    sessionManager.getSessionState().then(state => {
-      if (state.session && !state.error) {
-        console.log('� Existing valid session found, redirecting...');
-        router.push('/ai-readiness/dashboard');
+    // Initialize session manager and check for existing session
+    const checkExistingSession = async () => {
+      try {
+        const state = await sessionManager.getSessionState();
+        if (state.session && !state.error) {
+          console.log('🔐 Existing valid session found, redirecting...');
+          setHasValidSession(true);
+          router.push('/ai-readiness/dashboard');
+        }
+      } catch (err) {
+        console.warn('🔐 Session check failed:', err);
+        // Continue with login form if session check fails
       }
-    });
+    };
+    checkExistingSession();
   }, [searchParams, router]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent form submission if we already have a valid session
+    if (hasValidSession) {
+      console.log('🔐 Form submission blocked - valid session exists');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setFallbackUsed(false);
@@ -99,6 +115,13 @@ export default function LoginPage() {
           </div>
         )}
 
+        {/* Session check indicator */}
+        {hasValidSession && (
+          <div className='text-sm text-blue-600 bg-blue-50 p-3 rounded border border-blue-200'>
+            🔐 Valid session detected, redirecting...
+          </div>
+        )}
+
         {/* Fallback usage indicator */}
         {fallbackUsed && (
           <div className='text-xs text-orange-600 bg-orange-50 p-2 rounded border border-orange-200'>
@@ -121,6 +144,7 @@ export default function LoginPage() {
             onChange={e => setEmail(e.target.value)}
             required
             placeholder='jeremy.estrella@gmail.com'
+            disabled={hasValidSession}
           />
         </div>
         <div>
@@ -131,6 +155,7 @@ export default function LoginPage() {
             onChange={e => setPassword(e.target.value)}
             required
             placeholder='Enter your password'
+            disabled={hasValidSession}
           />
         </div>
 
@@ -142,15 +167,16 @@ export default function LoginPage() {
 
         <Button
           type='submit'
-          disabled={loading}
+          disabled={loading || hasValidSession}
           className='w-full'
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent) => {
             console.log('🔐 Button clicked!');
             console.log('🔐 Loading state:', loading);
-            console.log('🔐 Button disabled:', loading);
+            console.log('🔐 Has valid session:', hasValidSession);
+            console.log('🔐 Button disabled:', loading || hasValidSession);
           }}
         >
-          {loading ? 'Signing in...' : 'Sign In'}
+          {hasValidSession ? 'Redirecting...' : loading ? 'Signing in...' : 'Sign In'}
         </Button>
 
         <div className='text-xs text-gray-500 text-center'>
