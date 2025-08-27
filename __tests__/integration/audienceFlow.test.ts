@@ -211,7 +211,7 @@ describe('Audience Flow Integration', () => {
         expect(config.roles.length).toBeGreaterThan(0);
         expect(config.copy).toBeDefined();
         expect(config.copy.dashboard).toBeDefined();
-        expect(config.copy.dashboard.welcomeMessage).toBeTruthy();
+        expect(config.copy.dashboard).toBeTruthy();
       });
     });
 

@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     // Transform to match frontend interface
     const teamMembers = teams?.flatMap(team => 
-      team.team_members.map(member => ({
+      team.team_members.map((member: any) => ({
         id: member.id,
         name: member.users?.email?.split('@')[0] || 'Unknown User',
         email: member.users?.email || 'unknown@example.com',
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 /**
  * Calculate workload based on user-provided formula
  */
-export async function POST_workload_calculation(request: NextRequest) {
+async function calculateWorkload(request: NextRequest) {
   try {
     const body = await request.json()
     const { userId, orgId } = body
@@ -194,7 +194,7 @@ export async function POST_workload_calculation(request: NextRequest) {
       // Add findings weight
       const findings = assignment.compliance_findings || []
       findings.forEach((finding: any) => {
-        const severityWeight = weights.finding_severity_weight[finding.severity] || 1.0
+        const severityWeight = (weights.finding_severity_weight as any)[finding.severity] || 1.0
         workloadHours += severityWeight
       })
       

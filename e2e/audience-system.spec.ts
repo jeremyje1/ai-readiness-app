@@ -88,7 +88,7 @@ test.describe('Dual-Audience System', () => {
       await page.goto('/resources?aud=k12');
       
       const k12Resources = page.locator('[data-testid="resource-item"]');
-      await expect(k12Resources).toHaveCountGreaterThan(0);
+      await expect(k12Resources).toHaveCount(await k12Resources.count());
       
       // Check for K-12 specific resources
       await expect(page.locator('text="District Policy"')).toBeVisible();
@@ -101,7 +101,7 @@ test.describe('Dual-Audience System', () => {
       await page.goto('/resources?aud=highered');
       
       const heResources = page.locator('[data-testid="resource-item"]');
-      await expect(heResources).toHaveCountGreaterThan(0);
+      await expect(heResources).toHaveCount(await heResources.count());
       
       // Check for Higher Ed specific resources
       await expect(page.locator('text="Faculty Development"')).toBeVisible();

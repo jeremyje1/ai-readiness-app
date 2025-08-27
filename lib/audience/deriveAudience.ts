@@ -10,6 +10,9 @@ export interface AudienceDerivationContext {
   referer?: string;
   userAgent?: string;
   cookie?: string;
+  cookies?: any;
+  referrer?: any;
+  searchParams?: URLSearchParams | Record<string, string> | any;
   userProfile?: {
     organization?: string;
     audience?: Audience;

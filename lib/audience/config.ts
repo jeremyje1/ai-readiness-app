@@ -18,6 +18,7 @@ export interface AudienceConfig {
     leader: string;        // Superintendent vs Provost/Dean
     board: string;         // School Board vs Faculty Senate
     compliance: string;    // State Standards vs Accreditation
+    organization: string;  // Organization type
   };
   
   // External Integrations
@@ -28,6 +29,7 @@ export interface AudienceConfig {
   copy: {
     welcome: string;
     dashboardTitle: string;
+    dashboard: string;
     assessmentIntro: string;
     communityCopy: string;
     expertSessionTitle: string;
@@ -73,7 +75,8 @@ export const audienceConfig: Record<Audience, AudienceConfig> = {
       unit: 'College', 
       leader: 'Provost',
       board: 'Faculty Senate',
-      compliance: 'Accreditation'
+      compliance: 'Accreditation',
+      organization: 'Institution'
     },
     
     calendlyUrl: 'https://calendly.com/jeremyestrella/30min',
@@ -82,6 +85,7 @@ export const audienceConfig: Record<Audience, AudienceConfig> = {
     copy: {
       welcome: 'Welcome to AI Blueprint for Higher Education',
       dashboardTitle: 'Your Institution\'s AI Readiness Dashboard',
+      dashboard: 'Institution Dashboard',
       assessmentIntro: 'Evaluate your institution\'s readiness for AI integration across academic and administrative functions.',
       communityCopy: 'Join provosts, deans, faculty leaders, and IR/IE professionals navigating AI transformation in higher education.',
       expertSessionTitle: 'Book a Strategy Session with Higher Ed AI Experts',
@@ -140,7 +144,8 @@ export const audienceConfig: Record<Audience, AudienceConfig> = {
       unit: 'School',
       leader: 'Superintendent', 
       board: 'School Board',
-      compliance: 'State Standards'
+      compliance: 'State Standards',
+      organization: 'District'
     },
     
     calendlyUrl: 'https://calendly.com/jeremyestrella/30min',
@@ -148,7 +153,8 @@ export const audienceConfig: Record<Audience, AudienceConfig> = {
     
     copy: {
       welcome: 'Welcome to AI Blueprint for K-12 Education',
-      dashboardTitle: 'Your District\'s AI Readiness Dashboard', 
+      dashboardTitle: 'Your District\'s AI Readiness Dashboard',
+      dashboard: 'District Dashboard',
       assessmentIntro: 'Assess your district\'s preparedness for AI implementation across instruction, operations, and student services.',
       communityCopy: 'Join superintendents, principals, curriculum directors, and education technology leaders pioneering responsible AI adoption.',
       expertSessionTitle: 'Book a Strategy Session with K-12 AI Experts',

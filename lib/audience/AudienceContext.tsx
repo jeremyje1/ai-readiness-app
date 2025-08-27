@@ -15,6 +15,7 @@ export interface AudienceContextValue {
   config: AudienceConfig;
   setAudience: (audience: Audience) => void;
   isHydrated: boolean;
+  loading: boolean;
 }
 
 const AudienceContext = createContext<AudienceContextValue | undefined>(undefined);
@@ -74,7 +75,8 @@ export function AudienceProvider({
     setAudience: allowClientOverride ? setAudience : () => {
       console.warn('Audience override disabled in production');
     },
-    isHydrated
+    isHydrated,
+    loading: !isHydrated
   };
 
   return (

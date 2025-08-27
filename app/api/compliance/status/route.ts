@@ -131,10 +131,10 @@ export async function GET(request: NextRequest) {
         // Extended data for enhanced UI
         frameworkCode: control.code,
         complexityWeight: control.complexity_weight,
-        evidenceCount: evidence.filter(e => e.is_current).length,
-        findingsCount: findings.filter(f => f.status === 'open').length,
-        hasExpiredEvidence: evidence.some(e => e.expires_at && new Date(e.expires_at) < today),
-        highSeverityFindings: findings.filter(f => f.severity === 'high' || f.severity === 'critical').length
+        evidenceCount: evidence.filter((e: any) => e.is_current).length,
+        findingsCount: findings.filter((f: any) => f.status === 'open').length,
+        hasExpiredEvidence: evidence.some((e: any) => e.expires_at && new Date(e.expires_at) < today),
+        highSeverityFindings: findings.filter((f: any) => f.severity === 'high' || f.severity === 'critical').length
       }
     }) || []
 
@@ -181,21 +181,21 @@ function computeComplianceStatus(
   findings: any[]
 ): string {
   // if open_findings_high > 0 => 'At Risk'
-  const highFindings = findings.filter(f => 
+  const highFindings = findings.filter((f: any) => 
     f.status === 'open' && (f.severity === 'high' || f.severity === 'critical')
   )
   if (highFindings.length > 0) return 'flagged' // Map to existing status
 
   // else if evidence_stale > allowed => 'Needs Update'
   const today = new Date()
-  const staleEvidence = evidence.filter(e => 
+  const staleEvidence = evidence.filter((e: any) => 
     e.expires_at && new Date(e.expires_at) < today
   )
   if (staleEvidence.length > 0) return 'review_needed'
 
   // else if control_coverage < threshold => 'Partial'
   const coverageThreshold = 0.8 // 80% as specified
-  const currentEvidence = evidence.filter(e => e.is_current).length
+  const currentEvidence = evidence.filter((e: any) => e.is_current).length
   const requiredEvidence = 3 // Assume 3 pieces of evidence needed per control
   const coverage = currentEvidence / requiredEvidence
   

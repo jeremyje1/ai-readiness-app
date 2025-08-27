@@ -22,7 +22,7 @@ function TestComponent() {
   return (
     <div>
       <div data-testid="audience">{audience}</div>
-      <div data-testid="welcome-message">{copy.dashboard.welcomeMessage}</div>
+      <div data-testid="welcome-message">{copy.dashboard}</div>
       <div data-testid="organization-noun">{nouns.organization}</div>
       <div data-testid="leader-noun">{nouns.leader}</div>
       <button 
