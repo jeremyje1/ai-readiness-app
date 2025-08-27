@@ -43,7 +43,28 @@ try {
   // already logged above
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Centralized singleton Supabase browser/client instance with consistent auth options
+// Avoid creating multiple GoTrueClient instances (which triggers console warnings and can cause race conditions)
+const enableDebug = process.env.NEXT_PUBLIC_AUTH_DEBUG === '1' || process.env.NODE_ENV === 'development'
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    detectSessionInUrl: true,
+    autoRefreshToken: true,
+    flowType: 'pkce',
+    debug: enableDebug
+  },
+  global: {
+    headers: {
+      'x-client-info': 'supabase-singleton/1.0.0'
+    }
+  }
+})
+
+// Re-export sanitized env for modules (like auth-service) that need raw URL/key for manual REST fallback
+export const SUPABASE_URL = supabaseUrl
+export const SUPABASE_ANON_KEY = supabaseAnonKey
 
 // Server-side client with service role - only initialize on server
 export const supabaseAdmin = (() => {

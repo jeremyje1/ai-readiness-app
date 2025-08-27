@@ -4,7 +4,8 @@
  * @version 1.0.0
  */
 
-import { AuthError, createClient, Session, SupabaseClient } from '@supabase/supabase-js'
+import { AuthError, Session, SupabaseClient } from '@supabase/supabase-js'
+import { supabase as sharedSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase'
 
 // Types
 export interface AuthResult<T = any> {
@@ -21,32 +22,8 @@ export interface AuthServiceConfig {
     persistSession?: boolean
 }
 
-// Environment validation
-const validateEnvironment = () => {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/$/, '')
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-
-    if (!url || !anonKey) {
-        throw new Error('Missing required Supabase environment variables')
-    }
-
-    // Validate URL format
-    try {
-        const urlObj = new URL(url)
-        const projectRef = urlObj.host.split('.supabase.co')[0]
-        if (!/^[a-z0-9]{20}$/.test(projectRef)) {
-            console.warn(`[Auth Service] Invalid Supabase project reference: ${projectRef}`)
-        }
-    } catch (e) {
-        throw new Error(`Invalid NEXT_PUBLIC_SUPABASE_URL format: ${url}`)
-    }
-
-    return { url, anonKey, serviceKey }
-}
-
-// Get validated environment
-const { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY, serviceKey: SUPABASE_SERVICE_KEY } = validateEnvironment()
+// Service key still needed for admin operations (server-side only)
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 
 /**
  * Enhanced Authentication Service
@@ -72,23 +49,9 @@ export class AuthService {
             }
             : () => { }
 
-        // Create enhanced Supabase client
-        this.client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                persistSession: this.config.persistSession,
-                detectSessionInUrl: true,
-                autoRefreshToken: true,
-                flowType: 'pkce',
-                debug: this.config.enableDebugLogging,
-            },
-            global: {
-                headers: {
-                    'x-client-info': 'auth-service/1.0.0'
-                }
-            }
-        })
-
-        this.debugLog('Auth service initialized', { url: SUPABASE_URL })
+    // Reuse shared singleton Supabase client to prevent multiple GoTrueClient instances
+    this.client = sharedSupabase
+    this.debugLog('Auth service initialized (reused shared Supabase client)', { url: SUPABASE_URL })
     }
 
     /**
@@ -469,10 +432,11 @@ export const authService = new AuthService()
 
 // Server-side admin client
 export const createAdminClient = () => {
+    // Lazy import to avoid pulling createClient into client bundle unnecessarily
+    const { createClient } = require('@supabase/supabase-js') as typeof import('@supabase/supabase-js')
     if (!SUPABASE_SERVICE_KEY) {
         throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for admin operations')
     }
-
     return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
         auth: {
             autoRefreshToken: false,
