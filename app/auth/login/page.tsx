@@ -54,16 +54,25 @@ export default function LoginPage() {
       try {
         const state = await sessionManager.getSessionState();
         if (state.session && !state.error) {
-          console.log('🔐 Existing valid session found, redirecting...');
-          setHasValidSession(true);
-          router.push('/ai-readiness/dashboard');
+          // Additional validation: ensure session is truly stable
+          // Wait a moment and check again to avoid race conditions
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Re-check if we're still not actively logging in
+          if (!isActivelyLoggingIn) {
+            console.log('🔐 Existing valid session found, redirecting...');
+            setHasValidSession(true);
+            router.push('/ai-readiness/dashboard');
+          } else {
+            console.log('🔐 Session found but login started, skipping redirect');
+          }
         }
       } catch (err) {
         console.warn('🔐 Session check failed:', err);
         // Continue with login form if session check fails
       }
     };
-    
+
     // Only check for existing session on initial load, not when actively logging in
     if (!isActivelyLoggingIn) {
       checkExistingSession();
@@ -79,15 +88,27 @@ export default function LoginPage() {
         return;
       }
 
+      // Additional safety: check if we're in a loading state
+      if (loading) {
+        console.log('🔐 Ignoring session change during loading state');
+        return;
+      }
+
       if (state.session && !state.error && !hasValidSession) {
         console.log('🔐 Session state changed to valid, redirecting...');
         setHasValidSession(true);
-        router.push('/ai-readiness/dashboard');
+        
+        // Small delay to ensure we're not in a race condition
+        setTimeout(() => {
+          if (!isActivelyLoggingIn && !loading) {
+            router.push('/ai-readiness/dashboard');
+          }
+        }, 100);
       }
     });
 
     return unsubscribe;
-  }, [isActivelyLoggingIn, hasValidSession, router]);
+  }, [isActivelyLoggingIn, hasValidSession, loading, router]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,11 +147,16 @@ export default function LoginPage() {
       }
 
       console.log('✅ Authentication successful, redirecting...');
-      
-      // Small delay to ensure session is properly established
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      router.push('/ai-readiness/dashboard');
+
+      // Longer delay to ensure session is properly established and avoid race conditions
+      await new Promise(resolve => setTimeout(resolve, 750));
+
+      // Final check before redirect to ensure we're still in the right state
+      if (!hasValidSession) {
+        router.push('/ai-readiness/dashboard');
+      } else {
+        console.log('🔐 Session already handled by listener, skipping redirect');
+      }
 
     } catch (err: any) {
       console.error('🔐 Unexpected error during authentication:', err);
