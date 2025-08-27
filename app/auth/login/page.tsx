@@ -38,6 +38,17 @@ export default function LoginPage() {
       }
     };
     testConnection();
+
+    // Expose supabase globally for deep debugging (non-production safety: only if not already set)
+    try {
+      if (typeof window !== 'undefined' && !(window as any).__sb) {
+        (window as any).__sb = supabase;
+        console.log('🔍 Global debug handle set: window.__sb (Supabase client)');
+        console.log('🔍 You can now run: const p = __sb.auth.signInWithPassword({ email:"user@example.com", password:"pass" });');
+      }
+    } catch (e) {
+      console.warn('Failed to expose global supabase client:', (e as any).message);
+    }
   }, [searchParams]);
 
   const submit = async (e: React.FormEvent) => {
