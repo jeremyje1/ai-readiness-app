@@ -3,8 +3,8 @@
  * @version 1.0.0
  */
 
-import { createClient } from '@supabase/supabase-js'
 import { supabase as sharedSupabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
 // Database client for server-side operations
 export const db = createClient(

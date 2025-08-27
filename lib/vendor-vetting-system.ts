@@ -1,11 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
 
 // Vendor Vetting & Tool Approval System
 export interface VendorIntakeForm {
   id: string
   submittedBy: string
   submissionDate: string
-  
+
   // Tool Information
   toolName: string
   vendorName: string
@@ -13,20 +12,20 @@ export interface VendorIntakeForm {
   requestedUseCase: string
   requestingDepartment: string
   targetUsers: ('Teachers' | 'Students' | 'Administrators' | 'Parents')[]
-  
+
   // Age and Grade Specifications
   minAge: number
   maxAge: number
   gradeLevel: string[]
   subjectAreas: string[]
-  
+
   // Technical Details
   websiteUrl: string
   hostingLocation: string
   dataCenter: string
   modelProvider: string
   apiIntegrations: string[]
-  
+
   // Data Flow Information
   dataCollected: string[]
   dataSharing: boolean
@@ -35,19 +34,19 @@ export interface VendorIntakeForm {
   optOutAvailable: boolean
   ageGateImplemented: boolean
   parentalConsentRequired: boolean
-  
+
   // Cost Information
   pricingModel: string
   estimatedCost: number
   contractLength: string
   trialAvailable: boolean
-  
+
   // Status
   status: 'Submitted' | 'Under Review' | 'Approved' | 'Rejected' | 'Conditional Approval'
   assignedReviewer: string
   reviewStartDate?: string
   reviewCompletedDate?: string
-  
+
   created_at: string
   updated_at: string
 }
@@ -55,31 +54,31 @@ export interface VendorIntakeForm {
 export interface RiskAssessment {
   id: string
   intakeFormId: string
-  
+
   // Automated Risk Scores (0-100)
   overallRiskScore: number
   privacyRiskScore: number
   securityRiskScore: number
   complianceRiskScore: number
   pedagogicalRiskScore: number
-  
+
   // Compliance Flags
   coppaFlags: ComplianceFlag[]
   ferpaFlags: ComplianceFlag[]
   ppraFlags: ComplianceFlag[]
   statePrivacyFlags: ComplianceFlag[]
-  
+
   // Technical Risk Factors
   hostingRisk: 'Low' | 'Medium' | 'High'
   dataFlowRisk: 'Low' | 'Medium' | 'High'
   vendorRisk: 'Low' | 'Medium' | 'High'
   modelProviderRisk: 'Low' | 'Medium' | 'High'
-  
+
   // Generated Recommendations
   recommendations: string[]
   requiredMitigations: string[]
   conditionalApprovalRequirements: string[]
-  
+
   generatedAt: string
   created_at: string
 }
@@ -97,34 +96,34 @@ export interface DecisionBrief {
   id: string
   intakeFormId: string
   riskAssessmentId: string
-  
+
   // Executive Summary
   toolName: string
   vendorName: string
   recommendedDecision: 'Approve' | 'Reject' | 'Conditional Approval'
   executiveSummary: string
-  
+
   // Key Risk Factors
   primaryRisks: string[]
   complianceIssues: string[]
   mitigationStrategies: string[]
-  
+
   // Financial Impact
   totalCostOfOwnership: number
   budgetImpact: string
   alternatives: string[]
-  
+
   // Implementation Requirements
   trainingRequired: boolean
   policyUpdatesNeeded: boolean
   technicalRequirements: string[]
   timelineToImplementation: string
-  
+
   // Board Presentation Ready
   boardSlideContent: string
   votingRecommendation: string
   nextSteps: string[]
-  
+
   generatedAt: string
   approvedBy?: string
   approvedAt?: string
@@ -135,45 +134,45 @@ export interface ApprovedTool {
   id: string
   intakeFormId: string
   decisionBriefId: string
-  
+
   // Tool Details
   toolName: string
   vendorName: string
   description: string
   category: string
-  
+
   // Approved Usage
   approvedRoles: ('Teachers' | 'Students' | 'Administrators' | 'Parents')[]
   approvedSubjects: string[]
   approvedGradeLevels: string[]
   approvedUseCases: string[]
-  
+
   // Restrictions and Requirements
   usageRestrictions: string[]
   requiredTraining: string[]
   dataHandlingRequirements: string[]
   monitoringRequirements: string[]
-  
+
   // Contract Information
   contractStartDate: string
   contractEndDate: string
   renewalDate: string
   primaryContact: string
-  
+
   // Compliance Status
   lastComplianceReview: string
   nextComplianceReview: string
   complianceStatus: 'Compliant' | 'Minor Issues' | 'Major Issues' | 'Non-Compliant'
-  
+
   // Usage Analytics
   activeUsers: number
   monthlyUsage: number
   incidentCount: number
   satisfactionScore: number
-  
+
   // Status
   status: 'Active' | 'Suspended' | 'Deprecated' | 'Under Review'
-  
+
   approvedAt: string
   created_at: string
   updated_at: string
@@ -185,35 +184,35 @@ export interface VendorProfile {
   website: string
   headquarters: string
   yearFounded: number
-  
+
   // Company Information
   employeeCount: string
   annualRevenue: string
   publiclyTraded: boolean
   parentCompany?: string
-  
+
   // Security & Compliance
   certifications: string[]
   privacyFrameworkCompliance: string[]
   securityAudits: string[]
   breachHistory: SecurityBreach[]
-  
+
   // Education Focus
   k12Experience: boolean
   higherEdExperience: boolean
   educationClientCount: number
   referenceCustomers: string[]
-  
+
   // Support & Training
   supportChannels: string[]
   trainingOffered: boolean
   implementationSupport: boolean
   dataPortability: boolean
-  
+
   // Risk Profile
   overallVendorRisk: 'Low' | 'Medium' | 'High'
   riskFactors: string[]
-  
+
   created_at: string
   updated_at: string
 }
@@ -231,8 +230,8 @@ export class VendorVettingSystem {
   private supabase: any
 
   constructor() {
-  // Use shared anon client to avoid multiple instances; elevate to admin client only in server contexts
-  this.supabase = require('./supabase').supabase
+    // Use shared anon client to avoid multiple instances; elevate to admin client only in server contexts
+    this.supabase = require('./supabase').supabase
   }
 
   // Submit new vendor intake form
@@ -318,10 +317,10 @@ export class VendorVettingSystem {
     }
 
     // FERPA Compliance Checks
-    if (intakeForm.targetUsers.includes('Students') && intakeForm.dataCollected.some(data => 
-      ['grades', 'academic records', 'student id', 'attendance', 'behavior'].some(term => 
+    if (intakeForm.targetUsers.includes('Students') && intakeForm.dataCollected.some(data =>
+      ['grades', 'academic records', 'student id', 'attendance', 'behavior'].some(term =>
         data.toLowerCase().includes(term)))) {
-      
+
       riskAssessment.ferpaFlags.push({
         regulation: 'FERPA',
         severity: 'High',
@@ -344,9 +343,9 @@ export class VendorVettingSystem {
     }
 
     // PPRA Compliance Checks (K-12 Surveys)
-    if (intakeForm.requestedUseCase.toLowerCase().includes('survey') || 
-        intakeForm.requestedUseCase.toLowerCase().includes('assessment')) {
-      
+    if (intakeForm.requestedUseCase.toLowerCase().includes('survey') ||
+      intakeForm.requestedUseCase.toLowerCase().includes('assessment')) {
+
       const protectedAreas = ['political', 'mental health', 'family', 'religion', 'sex']
       if (protectedAreas.some(area => intakeForm.toolDescription.toLowerCase().includes(area))) {
         riskAssessment.ppraFlags.push({
@@ -365,12 +364,12 @@ export class VendorVettingSystem {
     riskAssessment.securityRiskScore = this.calculateSecurityRisk(intakeForm)
     riskAssessment.complianceRiskScore = this.calculateComplianceRisk(riskAssessment)
     riskAssessment.pedagogicalRiskScore = this.calculatePedagogicalRisk(intakeForm)
-    
+
     riskAssessment.overallRiskScore = Math.round(
-      (riskAssessment.privacyRiskScore + 
-       riskAssessment.securityRiskScore + 
-       riskAssessment.complianceRiskScore + 
-       riskAssessment.pedagogicalRiskScore) / 4
+      (riskAssessment.privacyRiskScore +
+        riskAssessment.securityRiskScore +
+        riskAssessment.complianceRiskScore +
+        riskAssessment.pedagogicalRiskScore) / 4
     )
 
     // Generate recommendations
@@ -390,42 +389,42 @@ export class VendorVettingSystem {
 
   private calculatePrivacyRisk(intakeForm: VendorIntakeForm, assessment: RiskAssessment): number {
     let score = 0
-    
+
     // Base risk from data collection
     if (intakeForm.dataCollected.length > 5) score += 20
     if (intakeForm.dataSharing) score += 25
     if (intakeForm.trainingOnUserData) score += 30
     if (!intakeForm.optOutAvailable) score += 15
-    
+
     // Compliance flags increase score
     score += assessment.coppaFlags.length * 10
     score += assessment.ferpaFlags.length * 10
     score += assessment.ppraFlags.length * 10
-    
+
     return Math.min(score, 100)
   }
 
   private calculateSecurityRisk(intakeForm: VendorIntakeForm): number {
     let score = 0
-    
+
     // Hosting location risk
     const highRiskCountries = ['China', 'Russia', 'Iran', 'North Korea']
     if (highRiskCountries.includes(intakeForm.hostingLocation)) score += 40
-    
+
     // Model provider risk
     const unknownProviders = ['Unknown', 'Custom', 'Proprietary']
     if (unknownProviders.includes(intakeForm.modelProvider)) score += 20
-    
+
     // Data retention risk
     if (intakeForm.dataRetention === 'Indefinite') score += 30
     if (intakeForm.dataRetention === 'Unknown') score += 25
-    
+
     return Math.min(score, 100)
   }
 
   private calculateComplianceRisk(assessment: RiskAssessment): number {
     let score = 0
-    
+
     // Critical flags
     const criticalFlags = [
       ...assessment.coppaFlags.filter(f => f.severity === 'Critical'),
@@ -433,7 +432,7 @@ export class VendorVettingSystem {
       ...assessment.ppraFlags.filter(f => f.severity === 'Critical')
     ]
     score += criticalFlags.length * 40
-    
+
     // High severity flags
     const highFlags = [
       ...assessment.coppaFlags.filter(f => f.severity === 'High'),
@@ -441,30 +440,30 @@ export class VendorVettingSystem {
       ...assessment.ppraFlags.filter(f => f.severity === 'High')
     ]
     score += highFlags.length * 25
-    
+
     return Math.min(score, 100)
   }
 
   private calculatePedagogicalRisk(intakeForm: VendorIntakeForm): number {
     let score = 0
-    
+
     // Age appropriateness
     if (intakeForm.minAge < 8 && intakeForm.targetUsers.includes('Students')) score += 20
-    
+
     // Subject area appropriateness
     const sensitiveSubjects = ['Health', 'Sex Education', 'Religion', 'Politics']
     if (intakeForm.subjectAreas.some(subject => sensitiveSubjects.includes(subject))) score += 15
-    
+
     // Use case appropriateness
     if (intakeForm.requestedUseCase.toLowerCase().includes('assessment')) score += 10
     if (intakeForm.requestedUseCase.toLowerCase().includes('grading')) score += 15
-    
+
     return Math.min(score, 100)
   }
 
   private generateRecommendations(intakeForm: VendorIntakeForm, assessment: RiskAssessment): string[] {
     const recommendations: string[] = []
-    
+
     if (assessment.overallRiskScore < 30) {
       recommendations.push('Low risk tool suitable for approval with standard monitoring')
     } else if (assessment.overallRiskScore < 60) {
@@ -472,47 +471,47 @@ export class VendorVettingSystem {
     } else {
       recommendations.push('High risk tool requiring significant mitigations or rejection')
     }
-    
+
     if (assessment.coppaFlags.length > 0) {
       recommendations.push('Implement COPPA compliance training for all users')
       recommendations.push('Establish parental consent workflows')
     }
-    
+
     if (assessment.ferpaFlags.length > 0) {
       recommendations.push('Ensure vendor qualifies as school official under FERPA')
       recommendations.push('Update data processing agreements with FERPA clauses')
     }
-    
+
     if (intakeForm.trainingOnUserData) {
       recommendations.push('Negotiate data exclusion from AI training')
       recommendations.push('Require opt-out mechanisms for data processing')
     }
-    
+
     return recommendations
   }
 
   private generateMitigations(assessment: RiskAssessment): string[] {
     const mitigations: string[] = []
-    
+
     // Extract mitigations from compliance flags
     assessment.coppaFlags.forEach(flag => mitigations.push(flag.mitigation))
     assessment.ferpaFlags.forEach(flag => mitigations.push(flag.mitigation))
     assessment.ppraFlags.forEach(flag => mitigations.push(flag.mitigation))
-    
+
     // Remove duplicates
     return [...new Set(mitigations)]
   }
 
   // Generate board-ready decision brief
   async generateDecisionBrief(
-    intakeFormId: string, 
-    riskAssessmentId: string, 
-    intakeForm: VendorIntakeForm, 
+    intakeFormId: string,
+    riskAssessmentId: string,
+    intakeForm: VendorIntakeForm,
     riskAssessment: RiskAssessment
   ): Promise<DecisionBrief> {
-    
+
     const recommendedDecision = this.determineRecommendation(riskAssessment)
-    
+
     const decisionBrief: DecisionBrief = {
       id: `brief-${Date.now()}`,
       intakeFormId,
@@ -560,8 +559,8 @@ export class VendorVettingSystem {
   }
 
   private generateExecutiveSummary(
-    intakeForm: VendorIntakeForm, 
-    assessment: RiskAssessment, 
+    intakeForm: VendorIntakeForm,
+    assessment: RiskAssessment,
     decision: string
   ): string {
     return `
@@ -581,30 +580,30 @@ Compliance Findings:
 Recommendation: ${decision}
 
 ${decision === 'Approve' ? 'This tool meets our security and compliance standards with standard monitoring procedures.' :
-  decision === 'Conditional Approval' ? 'This tool can be approved with the implementation of specific mitigations and enhanced oversight.' :
-  'This tool presents significant risks that cannot be adequately mitigated and should be rejected.'}
+        decision === 'Conditional Approval' ? 'This tool can be approved with the implementation of specific mitigations and enhanced oversight.' :
+          'This tool presents significant risks that cannot be adequately mitigated and should be rejected.'}
 `
   }
 
   private extractPrimaryRisks(assessment: RiskAssessment): string[] {
     const risks: string[] = []
-    
+
     if (assessment.privacyRiskScore > 60) risks.push('High privacy risk due to extensive data collection')
     if (assessment.securityRiskScore > 60) risks.push('Security concerns with hosting or data handling')
     if (assessment.complianceRiskScore > 60) risks.push('Significant compliance violations identified')
     if (assessment.coppaFlags.length > 0) risks.push('COPPA compliance issues for under-13 users')
     if (assessment.ferpaFlags.length > 0) risks.push('FERPA educational records concerns')
-    
+
     return risks
   }
 
   private extractComplianceIssues(assessment: RiskAssessment): string[] {
     const issues: string[] = []
-    
+
     assessment.coppaFlags.forEach(flag => issues.push(`COPPA: ${flag.issue}`))
     assessment.ferpaFlags.forEach(flag => issues.push(`FERPA: ${flag.issue}`))
     assessment.ppraFlags.forEach(flag => issues.push(`PPRA: ${flag.issue}`))
-    
+
     return issues
   }
 
@@ -613,13 +612,13 @@ ${decision === 'Approve' ? 'This tool meets our security and compliance standard
     const baseCost = intakeForm.estimatedCost
     const trainingCost = baseCost * 0.15 // 15% for training
     const implementationCost = baseCost * 0.10 // 10% for implementation
-    
+
     return baseCost + trainingCost + implementationCost
   }
 
   private assessBudgetImpact(intakeForm: VendorIntakeForm): string {
     const totalCost = this.calculateTotalCost(intakeForm)
-    
+
     if (totalCost < 5000) return 'Low budget impact - within departmental authority'
     if (totalCost < 25000) return 'Moderate budget impact - requires administrative approval'
     return 'High budget impact - requires board approval'
@@ -635,35 +634,35 @@ ${decision === 'Approve' ? 'This tool meets our security and compliance standard
   }
 
   private determineTrainingRequirements(assessment: RiskAssessment): boolean {
-    return assessment.overallRiskScore > 30 || 
-           assessment.coppaFlags.length > 0 || 
-           assessment.ferpaFlags.length > 0
+    return assessment.overallRiskScore > 30 ||
+      assessment.coppaFlags.length > 0 ||
+      assessment.ferpaFlags.length > 0
   }
 
   private determinePolicyUpdates(assessment: RiskAssessment): boolean {
-    return assessment.complianceRiskScore > 40 || 
-           assessment.coppaFlags.length > 0 || 
-           assessment.ferpaFlags.length > 0
+    return assessment.complianceRiskScore > 40 ||
+      assessment.coppaFlags.length > 0 ||
+      assessment.ferpaFlags.length > 0
   }
 
   private identifyTechnicalRequirements(intakeForm: VendorIntakeForm): string[] {
     const requirements: string[] = []
-    
+
     if (intakeForm.apiIntegrations.length > 0) {
       requirements.push('API integration and testing')
     }
-    
+
     if (intakeForm.parentalConsentRequired) {
       requirements.push('Parental consent workflow implementation')
     }
-    
+
     if (intakeForm.ageGateImplemented) {
       requirements.push('Age verification system configuration')
     }
-    
+
     requirements.push('Single sign-on integration')
     requirements.push('Data backup and recovery procedures')
-    
+
     return requirements
   }
 
@@ -674,8 +673,8 @@ ${decision === 'Approve' ? 'This tool meets our security and compliance standard
   }
 
   private generateBoardSlideContent(
-    intakeForm: VendorIntakeForm, 
-    assessment: RiskAssessment, 
+    intakeForm: VendorIntakeForm,
+    assessment: RiskAssessment,
     decision: string
   ): string {
     return `
@@ -700,8 +699,8 @@ ${decision === 'Approve' ? 'This tool meets our security and compliance standard
 **${decision}**
 
 ${decision === 'Approve' ? '✅ Proceed with standard implementation' :
-  decision === 'Conditional Approval' ? '⚠️ Approve with required mitigations' :
-  '❌ Reject due to unacceptable risks'}
+        decision === 'Conditional Approval' ? '⚠️ Approve with required mitigations' :
+          '❌ Reject due to unacceptable risks'}
 `
   }
 
@@ -720,7 +719,7 @@ ${decision === 'Approve' ? '✅ Proceed with standard implementation' :
 
   private generateNextSteps(decision: string, assessment: RiskAssessment): string[] {
     const steps: string[] = []
-    
+
     switch (decision) {
       case 'Approve':
         steps.push('Begin procurement process')
@@ -738,11 +737,11 @@ ${decision === 'Approve' ? '✅ Proceed with standard implementation' :
         steps.push('Document decision rationale')
         break
     }
-    
+
     if (assessment.overallRiskScore > 30) {
       steps.push('Develop training program for users')
     }
-    
+
     return steps
   }
 

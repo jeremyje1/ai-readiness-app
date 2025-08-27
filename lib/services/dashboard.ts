@@ -4,6 +4,7 @@
  * @version 1.0.0
  */
 
+import { supabase } from '@/lib/supabase'
 import {
     ActionItem,
     AdoptionMetrics,
@@ -15,7 +16,6 @@ import {
     VendorRenewal,
     WatchlistMetrics
 } from '@/lib/types/dashboard'
-import { supabase } from '@/lib/supabase'
 import { endOfMonth, format, startOfMonth, subDays } from 'date-fns'
 
 // Reuse shared singleton Supabase client (avoid duplicate auth clients)

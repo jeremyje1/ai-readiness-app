@@ -165,6 +165,19 @@ export async function GET(request: Request) {
 
   const userId = session.user.id;
   const userEmail = session.user.email?.toLowerCase() || null;
+  
+  // Temporary bypass for testing - remove in production
+  if (userEmail === 'jeremy.estrella@gmail.com' || userEmail === 'estrellasandstars@outlook.com') {
+    return NextResponse.json({ 
+      isVerified: true, 
+      tier: 'team', 
+      email: userEmail, 
+      name: 'Jeremy Estrella', 
+      organization: 'Testing',
+      debug: { ...debugAggregate, phase: 'temp-bypass', note: 'Temporary bypass for testing' }
+    } as PaymentStatusResponse);
+  }
+  
   const debug: any = { ...debugAggregate, phase: 'start', userId, userEmail, tokenFallback: Boolean(accessToken), sessionError: sessionError?.message };
   if (accessToken) {
     debug.accessTokenPreview = accessToken.length > 20 ? accessToken.slice(0, 12) + '...' + accessToken.slice(-8) : accessToken;

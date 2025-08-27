@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
 
 // Policy Pack Library - Maintained templates with monthly redlines
 export interface PolicyTemplate {
@@ -7,27 +6,27 @@ export interface PolicyTemplate {
   title: string
   description: string
   institutionType: 'K12' | 'HigherEd' | 'Both'
-  
+
   // External reference anchoring
   sourceAuthority: string
   sourceUrl: string
   sourceDocument: string
   lastSourceUpdate: string
-  
+
   // Template content
   templateContent: string
   fillableFields: string[]
-  
+
   // Versioning and redlines
   version: string
   lastRedlineUpdate: string
   changeLog: PolicyChange[]
-  
+
   // Compliance mapping
   complianceFrameworks: string[]
   riskLevel: 'Low' | 'Medium' | 'High'
   implementationComplexity: 'Simple' | 'Moderate' | 'Complex'
-  
+
   created_at: string
   updated_at: string
 }
@@ -59,16 +58,16 @@ export interface PolicyPack {
   institutionType: 'K12' | 'HigherEd'
   institutionName: string
   state: string
-  
+
   // Included policies
   selectedPolicies: string[] // Policy template IDs
   customizations: Record<string, any>
-  
+
   // Delivery tracking
   generatedAt: string
   deliveryStatus: 'Generated' | 'Delivered' | 'Reviewed' | 'Implemented'
   nextRedlineUpdate: string
-  
+
   created_at: string
   updated_at: string
 }
@@ -77,8 +76,8 @@ export class PolicyPackLibrary {
   private supabase: any
 
   constructor() {
-  // Use shared anon client for read operations; server-only privileged ops should be refactored out
-  this.supabase = require('./supabase').supabase
+    // Use shared anon client for read operations; server-only privileged ops should be refactored out
+    this.supabase = require('./supabase').supabase
   }
 
   // Core policy templates with external reference anchoring
@@ -226,7 +225,7 @@ Third-party AI tools require:
       created_at: '2024-01-15T00:00:00Z',
       updated_at: '2024-08-15T00:00:00Z'
     },
-    
+
     {
       id: 'ai-vendor-tools-policy',
       category: 'governance',
@@ -686,22 +685,22 @@ Violations may result in:
   // Generate monthly redline updates
   async generateMonthlyRedlines(): Promise<PolicyChange[]> {
     const changes: PolicyChange[] = []
-    
+
     // Check for source document updates
     for (const template of PolicyPackLibrary.POLICY_TEMPLATES) {
       const sourceChanges = await this.checkSourceUpdates(template)
       changes.push(...sourceChanges)
     }
-    
+
     return changes
   }
 
   private async checkSourceUpdates(template: PolicyTemplate): Promise<PolicyChange[]> {
     // In production, this would check external sources for updates
     // For now, return simulated updates based on common change patterns
-    
+
     const changes: PolicyChange[] = []
-    
+
     // Simulate NIST AI RMF updates
     if (template.sourceAuthority === 'NIST') {
       changes.push({
@@ -725,7 +724,7 @@ Violations may result in:
         impactLevel: 'Moderate'
       })
     }
-    
+
     return changes
   }
 
@@ -738,7 +737,7 @@ Violations may result in:
   // Generate state-specific addenda
   async generateStateAddenda(state: string, institutionType: 'K12' | 'HigherEd'): Promise<string> {
     const stateGuidance = await this.getStateGuidance(state, institutionType)
-    
+
     return `
 # STATE-SPECIFIC AI GUIDANCE ADDENDUM
 ## ${state} AI Requirements for ${institutionType} Institutions
@@ -755,7 +754,7 @@ ${stateGuidance}
   private async getStateGuidance(state: string, institutionType: string): Promise<string> {
     // In production, this would fetch real state guidance
     // Simulated state-specific requirements
-    
+
     const stateRequirements: Record<string, string> = {
       'California': `
 ### California AI Transparency Requirements
@@ -779,7 +778,7 @@ ${stateGuidance}
 - Regular transparency reporting
 `
     }
-    
+
     return stateRequirements[state] || `
 ### ${state} AI Requirements
 Please consult your state education department for specific AI guidance.
@@ -803,7 +802,7 @@ This addendum will be updated as state guidance becomes available.
   private generateParentLetter(institutionType: 'K12' | 'HigherEd', institutionName: string): string {
     const audience = institutionType === 'K12' ? 'Parents and Guardians' : 'Families'
     const students = institutionType === 'K12' ? 'children' : 'students'
-    
+
     return `
 # Letter to ${audience}
 ## Artificial Intelligence in Education at ${institutionName}
@@ -856,7 +855,7 @@ ${institutionName} Administration
 
   private generateStudentGuide(institutionType: 'K12' | 'HigherEd', institutionName: string): string {
     const level = institutionType === 'K12' ? 'elementary' : 'college'
-    
+
     return `
 # What AI Means Here: A Student Guide
 ## ${institutionName}
@@ -911,7 +910,7 @@ AI is here to help you learn better, not to replace your thinking. Your creativi
   private generateFAQ(institutionType: 'K12' | 'HigherEd', institutionName: string): string {
     const students = institutionType === 'K12' ? 'students' : 'students'
     const parents = institutionType === 'K12' ? 'parents' : 'families'
-    
+
     return `
 # AI in Education FAQ
 ## ${institutionName}
@@ -997,7 +996,7 @@ In this course, you are **allowed** to use AI tools to support your learning, wi
 **Example Attribution:**
 "I used ChatGPT to help brainstorm potential research topics and to check my grammar. The analysis and conclusions are entirely my own work."
 `,
-      
+
       'Limited': `
 # AI Use Policy - ${subject}
 ## Limited Use with Prior Approval
@@ -1026,7 +1025,7 @@ AI tools may be used in this course **only with prior instructor approval** and 
 **Academic Integrity:**
 All work must demonstrate your understanding and learning. AI assistance, when approved, must be clearly documented and explained.
 `,
-      
+
       'Prohibited': `
 # AI Use Policy - ${subject}
 ## AI Use Not Permitted
@@ -1066,7 +1065,7 @@ Instead of AI tools, please use:
 **Questions:** Contact the instructor before using any digital tool if you're unsure whether it contains AI assistance.
 `
     }
-    
+
     return templates[mode]
   }
 
@@ -1118,7 +1117,7 @@ Instead of AI tools, please use:
     if (!institutionType) {
       return PolicyPackLibrary.POLICY_TEMPLATES
     }
-    
+
     return PolicyPackLibrary.POLICY_TEMPLATES.filter(
       template => template.institutionType === institutionType || template.institutionType === 'Both'
     )

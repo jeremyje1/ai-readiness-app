@@ -4,7 +4,6 @@
  * @version 2.0.0
  */
 
-import { createClient } from '@supabase/supabase-js'
 import { supabase as sharedSupabase } from '@/lib/supabase'
 import ArtifactGenerator, { GeneratedArtifact } from '../artifacts/artifact-generator'
 import { DocumentProcessor } from '../document/document-processor'
@@ -64,8 +63,8 @@ export class AssessmentPipeline {
         this.frameworkMapper = new FrameworkMapper()
         this.artifactGenerator = new ArtifactGenerator()
 
-    // Processing pipeline should normally run server-side; use shared client to avoid extra instances
-    this.supabase = sharedSupabase
+        // Processing pipeline should normally run server-side; use shared client to avoid extra instances
+        this.supabase = sharedSupabase
     }
 
     async processAssessment(request: ProcessingRequest): Promise<ProcessingResult> {

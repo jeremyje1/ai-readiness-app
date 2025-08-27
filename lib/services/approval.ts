@@ -4,20 +4,19 @@
  * @version 1.0.0
  */
 
-import { supabase as sharedSupabase } from '@/lib/supabase'
-import { 
-  Approval, 
-  CreateApprovalRequest, 
+import { supabase as sharedSupabase } from '@/lib/supabase';
+import {
+  Approval,
+  ApprovalComment,
+  ApprovalDashboard,
   ApprovalDecisionRequest,
   ApprovalEvent,
-  ApprovalComment,
+  ApprovalStatus,
   ApprovalSummary,
-  ApprovalDashboard,
-  ApprovalAuditLog,
   Approver,
-  ApprovalStatus
-} from '@/lib/types/approval'
-import { v4 as uuidv4 } from 'uuid'
+  CreateApprovalRequest
+} from '@/lib/types/approval';
+import { v4 as uuidv4 } from 'uuid';
 
 export class ApprovalService {
   private supabase = sharedSupabase
@@ -146,9 +145,9 @@ export class ApprovalService {
     } as const
 
     await this.addEvent(
-      approvalId, 
-      userId, 
-      actionMap[decision.decision], 
+      approvalId,
+      userId,
+      actionMap[decision.decision],
       decision.comment,
       userInfo
     )
@@ -257,18 +256,18 @@ export class ApprovalService {
     const totalApprovals = allApprovals.length
     const pendingApprovals = allApprovals.filter((a: any) => a.status === 'pending').length
     const overdueApprovals = allApprovals.filter((a: any) => a.is_overdue).length
-    const completedThisWeek = allApprovals.filter((a: any) => 
-      a.completed_at && 
+    const completedThisWeek = allApprovals.filter((a: any) =>
+      a.completed_at &&
       new Date(a.completed_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     ).length
 
     const completedApprovals = allApprovals.filter((a: any) => a.completed_at)
     const averageApprovalTime = completedApprovals.length > 0
       ? completedApprovals.reduce((sum: number, a: any) => {
-          const created = new Date(a.created_at).getTime()
-          const completed = new Date(a.completed_at!).getTime()
-          return sum + (completed - created)
-        }, 0) / completedApprovals.length / (1000 * 60 * 60 * 24) // Convert to days
+        const created = new Date(a.created_at).getTime()
+        const completed = new Date(a.completed_at!).getTime()
+        return sum + (completed - created)
+      }, 0) / completedApprovals.length / (1000 * 60 * 60 * 24) // Convert to days
       : 0
 
     return {
@@ -301,12 +300,11 @@ export class ApprovalService {
     let query = this.supabase.from('approval_summary').select('*', { count: 'exact' })
 
     if (filters.userId) {
-      query = query.or(`created_by.eq.${filters.userId},id.in.(${
-        this.supabase
+      query = query.or(`created_by.eq.${filters.userId},id.in.(${this.supabase
           .from('approval_approvers')
           .select('approval_id')
           .eq('user_id', filters.userId)
-      })`)
+        })`)
     }
 
     if (filters.status) {
@@ -363,9 +361,9 @@ export class ApprovalService {
 
     // Add event
     await this.addEvent(
-      approvalId, 
-      userId, 
-      'due_date_updated', 
+      approvalId,
+      userId,
+      'due_date_updated',
       dueDate ? `Due date set to ${dueDate}` : 'Due date removed',
       userInfo
     )
@@ -396,9 +394,9 @@ export class ApprovalService {
   // Private helper methods
 
   private async addEvent(
-    approvalId: string, 
-    userId: string, 
-    action: ApprovalEvent['action'], 
+    approvalId: string,
+    userId: string,
+    action: ApprovalEvent['action'],
     comment?: string,
     userInfo?: { name?: string; email?: string }
   ): Promise<void> {
@@ -477,7 +475,7 @@ export class ApprovalService {
   private async setApprovalStatus(approvalId: string, status: ApprovalStatus): Promise<void> {
     const { error } = await this.supabase
       .from('approvals')
-      .update({ 
+      .update({
         status,
         completed_at: status !== 'pending' ? new Date().toISOString() : null
       })
@@ -489,7 +487,7 @@ export class ApprovalService {
   }
 
   private async sendApprovalNotifications(
-    approvalId: string, 
+    approvalId: string,
     type: 'approval_request' | 'approval_completed' | 'changes_requested'
   ): Promise<void> {
     // This would integrate with your notification system

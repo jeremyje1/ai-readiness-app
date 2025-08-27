@@ -5,13 +5,13 @@
  */
 
 import { supabase } from '@/lib/supabase'
-import { 
-  Vendor, 
-  VendorAssessment, 
-  CreateVendorRequest, 
+import {
+  CreateVendorRequest,
+  DecisionBrief,
+  Vendor,
+  VendorAssessment,
   VendorDecisionRequest,
-  VendorStatus,
-  DecisionBrief
+  VendorStatus
 } from '@/lib/types/vendor'
 import { VendorRiskEngine } from './vendor-risk-engine'
 
@@ -35,17 +35,17 @@ export class VendorService {
         contact_email: request.assessment.basicInfo.contactEmail,
         contact_name: request.assessment.basicInfo.contactName,
         business_justification: request.assessment.basicInfo.businessJustification,
-        
+
         assessment_data: request.assessment,
         risk_score: riskResult.totalScore,
         risk_level: riskResult.riskLevel,
         risk_flags: riskResult.flags,
-        
+
         created_by: userId,
         requested_urgency: request.urgency,
         expected_launch_date: request.expectedLaunchDate,
         request_notes: request.notes,
-        
+
         status: riskResult.autoApproval ? 'approved' : 'pending'
       }
 
@@ -266,7 +266,7 @@ export class VendorService {
         vendorName: vendor.assessment.basicInfo.name,
         generatedAt: new Date().toISOString(),
         generatedBy: userId,
-        
+
         summary: {
           recommendation: this.determineRecommendation(riskResult),
           riskLevel: riskResult.riskLevel,
@@ -274,7 +274,7 @@ export class VendorService {
           keyRisks: riskResult.flags.filter(f => f.triggered).map(f => f.description),
           primaryMitigations: riskResult.requiredMitigations.map(m => m.title)
         },
-        
+
         assessment: {
           dataHandling: {
             storesPII: vendor.assessment.dataHandling.storesPII,
@@ -295,16 +295,16 @@ export class VendorService {
             recommendations: riskResult.recommendations.filter(r => r.toLowerCase().includes('ai'))
           }
         },
-        
+
         mitigations: vendor.mitigations,
         conditions: vendor.decision?.conditions || [],
-        
+
         monitoring: {
           reviewFrequency: this.determineReviewFrequency(riskResult.riskLevel),
           keyMetrics: this.getKeyMetrics(vendor.assessment),
           escalationTriggers: this.getEscalationTriggers(riskResult.flags)
         },
-        
+
         approvals: {
           requiredApprovers: this.getRequiredApprovers(riskResult),
           currentStatus: vendor.status,

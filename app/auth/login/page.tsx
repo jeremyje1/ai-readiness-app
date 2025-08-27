@@ -50,12 +50,12 @@ export default function LoginPage() {
     console.log('🔐 Loading state set to:', true);
 
     // Add timeout protection
+    let timeoutFired = false;
     const timeoutId = setTimeout(() => {
-      if (loading) {
-        setError('Login timeout - please try again');
-        setLoading(false);
-        console.error('🔐 Login timeout after 12s');
-      }
+      timeoutFired = true;
+      setError('Login timeout - please try again');
+      setLoading(false);
+      console.error('🔐 Login timeout after 12s');
     }, 12000);
 
     try {
@@ -68,6 +68,12 @@ export default function LoginPage() {
       });
 
       clearTimeout(timeoutId);
+
+      // Don't process results if timeout has already fired
+      if (timeoutFired) {
+        console.log('🔐 Ignoring response - timeout already fired');
+        return;
+      }
 
       console.log('🔐 Supabase response received');
       console.log('🔐 Data:', data ? 'Present' : 'Null');
@@ -101,13 +107,23 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       clearTimeout(timeoutId);
+      
+      // Don't process errors if timeout has already fired
+      if (timeoutFired) {
+        console.log('🔐 Ignoring error - timeout already fired');
+        return;
+      }
+      
       const errorMsg = `Unexpected error: ${err.message}`;
       setError(errorMsg);
       console.error('🔐 Caught exception:', err);
     }
 
-    console.log('🔐 Setting loading state to false');
-    setLoading(false);
+    // Only set loading to false if timeout hasn't already handled it
+    if (!timeoutFired) {
+      console.log('🔐 Setting loading state to false');
+      setLoading(false);
+    }
   };
 
   return (
@@ -160,7 +176,7 @@ export default function LoginPage() {
           type='submit'
           disabled={loading}
           className='w-full'
-          onClick={(e) => {
+          onClick={() => {
             console.log('🔐 Button clicked!');
             console.log('🔐 Loading state:', loading);
             console.log('🔐 Button disabled:', loading);
