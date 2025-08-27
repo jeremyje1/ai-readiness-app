@@ -84,8 +84,11 @@ function StartPageContent() {
         }),
       });
       if (response.ok) {
-        // Simple checkout redirect - single domain, no complexity
-        window.location.href = `/api/stripe/unified-checkout?billing=${billing}&tier=team&userId=${response.headers.get('user-id')}&institution_type=${institutionType}`;
+        // Simple checkout redirect - include user data to ensure correct account creation
+        const encodedEmail = encodeURIComponent(formData.email);
+        const encodedName = encodeURIComponent(`${formData.firstName} ${formData.lastName}`);
+        const encodedOrganization = encodeURIComponent(formData.organization);
+        window.location.href = `/api/stripe/unified-checkout?billing=${billing}&tier=team&userId=${response.headers.get('user-id')}&contact_email=${encodedEmail}&contact_name=${encodedName}&organization=${encodedOrganization}&institution_type=${institutionType}`;
       } else {
         const text = await response.text();
         alert('Registration failed: ' + text);

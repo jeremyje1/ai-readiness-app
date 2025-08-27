@@ -201,9 +201,17 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
         }
       }
 
+      // CRITICAL FIX: Use registration email from customer_email (set during checkout) 
+      // instead of billing email from customer_details.email (from payment method)
+      // This prevents conflicts when billing email differs from registration email
+      const registrationEmail = session.customer_email || session.customer_details.email;
+      const billingEmail = session.customer_details.email;
+      
+      console.log(`📧 Email resolution: registration=${registrationEmail}, billing=${billingEmail}`);
+
       const userData: UserData = {
-        email: session.customer_details.email,
-        name: session.customer_details.name || 'Customer',
+        email: registrationEmail, // Use registration email, not billing email
+        name: session.customer_details.name || session.metadata?.contact_name || 'Customer',
         organization: session.metadata?.organization,
         tier,
         stripeCustomerId: session.customer as string,
