@@ -23,7 +23,7 @@ export default function LoginPage() {
     } else if (message === 'password-updated') {
       setSuccessMessage('✅ Password updated successfully! You can now log in.');
     }
-    
+
     // Test Supabase connection on load
     const testConnection = async () => {
       try {

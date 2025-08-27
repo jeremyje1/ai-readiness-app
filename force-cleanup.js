@@ -37,7 +37,7 @@ async function forceCleanup() {
         // List all tables and try to delete any records that might reference users
         const tables = [
             'ai_readiness_assessments',
-            'enterprise_algorithm_results', 
+            'enterprise_algorithm_results',
             'institution_memberships',
             'institutions',
             'auth_password_setup_tokens',
@@ -51,12 +51,12 @@ async function forceCleanup() {
         for (const table of tables) {
             try {
                 console.log(`🗑️  Checking table: ${table}`);
-                
+
                 // First try to count records
                 const { count, error: countError } = await supabaseAdmin
                     .from(table)
                     .select('*', { count: 'exact', head: true });
-                
+
                 if (countError) {
                     console.log(`   ⚠️  Table doesn't exist or no access: ${table}`);
                     continue;
@@ -95,22 +95,22 @@ async function forceCleanup() {
         }
 
         console.log('\n🗑️  Now trying to delete the stuck user...');
-        
+
         // Try to delete the user again
         const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
         if (error) {
             console.log(`❌ Still can't delete user: ${error.message}`);
-            
+
             // Try to get more details about what's blocking the deletion
             console.log('\n🔍 Investigating what might be blocking deletion...');
-            
+
             // Check auth.users table directly if possible
             try {
                 const { data: userDetails, error: detailError } = await supabaseAdmin
                     .from('auth.users')
                     .select('*')
                     .eq('id', userId);
-                
+
                 if (!detailError && userDetails) {
                     console.log('   📋 User details:', userDetails);
                 }

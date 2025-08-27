@@ -152,23 +152,24 @@ export default function PasswordSetupPage() {
         if (!signedIn) {
           console.log('🔐 Auto-login failed after 5 attempts, redirecting to manual login');
           setStatus('Password set successfully! Redirecting to login page...');
+          setLoading(false);
           setTimeout(() => {
             router.push('/auth/login?message=password-set');
           }, 2000);
-          setLoading(false);
           return;
         }
 
         console.log('🔐 Redirecting to dashboard...');
         setStatus('Logged in! Redirecting...');
+        setLoading(false); // Clear loading state before redirect
         setTimeout(() => router.push('/ai-readiness/dashboard?verified=true'), 800);
       } else {
         console.log('🔐 No email returned from API, redirecting to login');
         setStatus('Password set successfully! Redirecting to login page...');
+        setLoading(false);
         setTimeout(() => {
           router.push('/auth/login?message=password-set');
         }, 2000);
-        setLoading(false);
         return;
       }
     } catch (err: any) {

@@ -39,14 +39,14 @@ async function listUsers() {
         }
 
         const users = userData.users;
-        
+
         if (users.length === 0) {
             console.log('✅ No users found - database is clean!');
             return;
         }
 
         console.log(`Found ${users.length} users:\n`);
-        
+
         users.forEach((user, index) => {
             console.log(`${index + 1}. 📧 ${user.email}`);
             console.log(`   🆔 ID: ${user.id}`);
@@ -58,7 +58,7 @@ async function listUsers() {
 
         // Also check database tables
         console.log('📊 Related data counts:');
-        
+
         const { count: userProfiles } = await supabaseAdmin
             .from('users')
             .select('*', { count: 'exact', head: true });

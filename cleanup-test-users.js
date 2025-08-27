@@ -125,7 +125,7 @@ async function cleanupTestUsers() {
         // Step 3: Delete auth users
         console.log('🗑️  Deleting auth users...');
         let deletedCount = 0;
-        
+
         for (const user of users) {
             try {
                 const { error } = await supabaseAdmin.auth.admin.deleteUser(user.id);
@@ -146,7 +146,7 @@ async function cleanupTestUsers() {
         console.log(`   • Deleted ${deletedCount}/${users.length} auth users`);
         console.log(`   • Cleaned database tables of related data`);
         console.log(`   • Ready for fresh testing!`);
-        
+
         if (deletedCount < users.length) {
             console.log('\n⚠️  Some users could not be deleted. You may need to:');
             console.log('   • Check for any remaining foreign key constraints');
