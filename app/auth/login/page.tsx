@@ -50,15 +50,28 @@ export default function LoginPage() {
     console.log('🔐 Loading state set to:', true);
 
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const anonKeyLen = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length || 0;
       console.log('🔐 Attempting Supabase signInWithPassword...');
+      console.log('🔐 Env URL:', supabaseUrl);
+      console.log('🔐 Anon key length:', anonKeyLen);
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const start = performance.now();
+      const loginPromise = supabase.auth.signInWithPassword({
         email: email.trim(),
         password
       });
 
-      console.log('🔐 Supabase response received');
-      console.log('🔐 Data:', data ? 'Present' : 'Null');
+      // Timeout after 12s with explicit error to surface stalls
+      const timeoutMs = 12000;
+      const timeout = new Promise<never>((_, reject) => setTimeout(() => {
+        reject(new Error(`Login timeout after ${timeoutMs / 1000}s (no response from Supabase)`));
+      }, timeoutMs));
+
+      const { data, error } = await Promise.race([loginPromise, timeout]);
+      const elapsed = Math.round(performance.now() - start);
+      console.log(`🔐 Supabase response received in ${elapsed}ms`);
+      console.log('🔐 Data:', (data as any)?.user ? 'UserPresent' : 'None');
       console.log('🔐 Error:', error ? error.message : 'None');
 
       if (error) {
@@ -69,12 +82,19 @@ export default function LoginPage() {
         router.push('/ai-readiness/dashboard');
       }
     } catch (err: any) {
-      const errorMsg = `Unexpected error: ${err.message}`;
-      setError(errorMsg);
-      console.error('🔐 Caught exception:', err);
+      console.error('🔐 Caught exception / timeout:', err);
+      setError(err.message || 'Unexpected error');
+      // Attempt lightweight env debug fetch to show if route reachable
+      try {
+        const r = await fetch('/api/debug/auth-env');
+        console.log('🔐 /api/debug/auth-env status:', r.status);
+        if (r.ok) console.log('🔐 Auth env payload:', await r.json());
+      } catch (dbgErr) {
+        console.warn('🔐 Failed fetching auth-env debug route:', (dbgErr as any).message);
+      }
     }
 
-    console.log('🔐 Setting loading state to false');
+  console.log('🔐 Setting loading state to false');
     setLoading(false);
   };
 
