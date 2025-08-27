@@ -1,0 +1,284 @@
+{
+  "bankId": "highered_v2024",
+  "version": "2.0", 
+  "audience": "highered",
+  "title": "Higher Education AI Readiness Assessment",
+  "description": "Comprehensive assessment for higher education institutions evaluating AI readiness across academic, research, and administrative functions.",
+  "lastUpdated": "2024-02-15",
+  "estimatedDuration": "30-35 minutes",
+  "sections": [
+    {
+      "id": "institutional_leadership",
+      "title": "Institutional Leadership & Governance",
+      "description": "Leadership vision and governance structures for AI in higher education",
+      "weight": 0.20,
+      "questions": [
+        {
+          "id": "il_001",
+          "type": "single_choice",
+          "question": "Does your institution have a formal AI strategy or policy framework?",
+          "options": [
+            { "value": "comprehensive", "text": "Yes, comprehensive AI strategy with implementation roadmap", "score": 4 },
+            { "value": "policy_only", "text": "Yes, formal AI policies but limited strategic planning", "score": 3 },
+            { "value": "draft", "text": "Draft policies or strategies under development", "score": 2 },
+            { "value": "none", "text": "No formal AI strategy or policies", "score": 1 }
+          ],
+          "required": true,
+          "category": "strategy"
+        },
+        {
+          "id": "il_002",
+          "type": "single_choice", 
+          "question": "How would you describe your provost/chief academic officer's engagement with AI initiatives?",
+          "options": [
+            { "value": "champion", "text": "Active champion driving AI integration across academics", "score": 4 },
+            { "value": "supportive", "text": "Supportive and engaged with AI initiatives", "score": 3 },
+            { "value": "aware", "text": "Aware but not actively engaged", "score": 2 },
+            { "value": "minimal", "text": "Minimal awareness or engagement", "score": 1 }
+          ],
+          "required": true,
+          "category": "leadership"
+        },
+        {
+          "id": "il_003",
+          "type": "multiple_choice",
+          "question": "Which governance bodies have formally addressed AI at your institution?",
+          "options": [
+            { "value": "board_trustees", "text": "Board of Trustees", "score": 2 },
+            { "value": "faculty_senate", "text": "Faculty Senate or Academic Council", "score": 2 },
+            { "value": "provost_council", "text": "Provost's Council or Academic Affairs Committee", "score": 2 },
+            { "value": "technology_committee", "text": "Institutional Technology Committee", "score": 1 },
+            { "value": "none", "text": "None of these bodies", "score": 0 }
+          ],
+          "required": true,
+          "category": "governance"
+        }
+      ]
+    },
+    {
+      "id": "academic_integration", 
+      "title": "Academic Integration & Pedagogy",
+      "description": "AI integration in curriculum, instruction, and academic programs",
+      "weight": 0.25,
+      "questions": [
+        {
+          "id": "ai_001",
+          "type": "single_choice",
+          "question": "What is your institution's policy on student use of AI tools for academic work?",
+          "options": [
+            { "value": "integrated", "text": "Actively integrated into curriculum with clear guidelines", "score": 4 },
+            { "value": "permitted", "text": "Permitted with faculty discretion and disclosure requirements", "score": 3 },
+            { "value": "limited", "text": "Limited to specific courses or assignments", "score": 2 },
+            { "value": "prohibited", "text": "Generally prohibited or strongly discouraged", "score": 1 }
+          ],
+          "required": true,
+          "category": "student_policy"
+        },
+        {
+          "id": "ai_002",
+          "type": "scale",
+          "question": "How prepared is your faculty to integrate AI tools into their teaching and research?",
+          "scale": {
+            "min": 1,
+            "max": 5,
+            "minLabel": "Not prepared at all",
+            "maxLabel": "Very well prepared"
+          },
+          "required": true,
+          "category": "faculty_readiness"
+        },
+        {
+          "id": "ai_003",
+          "type": "multiple_choice",
+          "question": "Which AI-related academic initiatives exist at your institution?",
+          "options": [
+            { "value": "ai_courses", "text": "Dedicated AI/Machine Learning courses", "score": 2 },
+            { "value": "ai_program", "text": "AI-focused degree program or concentration", "score": 3 },
+            { "value": "interdisciplinary", "text": "Interdisciplinary AI applications across departments", "score": 2 },
+            { "value": "research_center", "text": "AI research center or institute", "score": 3 },
+            { "value": "none", "text": "No specific AI academic initiatives", "score": 0 }
+          ],
+          "required": true,
+          "category": "academic_programs"
+        }
+      ]
+    },
+    {
+      "id": "faculty_development",
+      "title": "Faculty Development & Support", 
+      "description": "Professional development and support for faculty AI integration",
+      "weight": 0.20,
+      "questions": [
+        {
+          "id": "fd_001",
+          "type": "single_choice",
+          "question": "What level of AI professional development has your institution provided for faculty?",
+          "options": [
+            { "value": "comprehensive", "text": "Comprehensive program with ongoing support and resources", "score": 4 },
+            { "value": "workshops", "text": "Regular workshops or training sessions", "score": 3 },
+            { "value": "occasional", "text": "Occasional presentations or informal sessions", "score": 2 },
+            { "value": "none", "text": "No formal professional development offered", "score": 1 }
+          ],
+          "required": true,
+          "category": "professional_development"
+        },
+        {
+          "id": "fd_002",
+          "type": "multiple_choice",
+          "question": "Which support resources are available to faculty for AI integration?",
+          "options": [
+            { "value": "instructional_design", "text": "Instructional design consultation", "score": 2 },
+            { "value": "technical_support", "text": "Technical support and training", "score": 2 },
+            { "value": "funding", "text": "Funding for AI-related projects or tools", "score": 2 },
+            { "value": "community", "text": "Faculty learning communities focused on AI", "score": 1 },
+            { "value": "none", "text": "Limited or no support resources", "score": 0 }
+          ],
+          "required": true,
+          "category": "support_resources"
+        }
+      ]
+    },
+    {
+      "id": "research_innovation",
+      "title": "Research & Innovation",
+      "description": "AI applications in research and institutional innovation",
+      "weight": 0.15,
+      "questions": [
+        {
+          "id": "ri_001",
+          "type": "single_choice",
+          "question": "How active is AI-related research at your institution?",
+          "options": [
+            { "value": "leading", "text": "Leading research institution with significant AI research programs", "score": 4 },
+            { "value": "active", "text": "Active research with multiple AI-focused projects", "score": 3 },
+            { "value": "emerging", "text": "Emerging research activities in AI", "score": 2 },
+            { "value": "limited", "text": "Limited or no AI research activities", "score": 1 }
+          ],
+          "required": true,
+          "category": "research_activity"
+        },
+        {
+          "id": "ri_002",
+          "type": "multiple_choice",
+          "question": "In which areas is your institution applying AI for innovation?",
+          "options": [
+            { "value": "student_services", "text": "Student services and support", "score": 1 },
+            { "value": "enrollment", "text": "Enrollment management and admissions", "score": 1 },
+            { "value": "academic_analytics", "text": "Academic analytics and student success", "score": 2 },
+            { "value": "administrative", "text": "Administrative process automation", "score": 1 },
+            { "value": "none", "text": "No current AI innovation applications", "score": 0 }
+          ],
+          "required": true,
+          "category": "innovation_areas"
+        }
+      ]
+    },
+    {
+      "id": "compliance_ethics",
+      "title": "Compliance & Ethics",
+      "description": "Ethical considerations, compliance, and risk management for AI",
+      "weight": 0.20,
+      "questions": [
+        {
+          "id": "ce_001",
+          "type": "single_choice",
+          "question": "Has your institution established ethical guidelines for AI use?",
+          "options": [
+            { "value": "comprehensive", "text": "Comprehensive ethics framework with oversight committee", "score": 4 },
+            { "value": "guidelines", "text": "Basic ethical guidelines established", "score": 3 },
+            { "value": "informal", "text": "Informal discussions but no formal guidelines", "score": 2 },
+            { "value": "none", "text": "No ethical guidelines established", "score": 1 }
+          ],
+          "required": true,
+          "category": "ethics"
+        },
+        {
+          "id": "ce_002",
+          "type": "multiple_choice",
+          "question": "Which compliance areas has your institution considered for AI implementation?",
+          "options": [
+            { "value": "ferpa", "text": "FERPA and student data privacy", "score": 2 },
+            { "value": "accreditation", "text": "Accreditation requirements and standards", "score": 2 },
+            { "value": "accessibility", "text": "ADA accessibility compliance", "score": 1 },
+            { "value": "research_ethics", "text": "Research ethics and IRB considerations", "score": 1 },
+            { "value": "none", "text": "Limited compliance consideration", "score": 0 }
+          ],
+          "required": true,
+          "category": "compliance"
+        },
+        {
+          "id": "ce_003",
+          "type": "single_choice",
+          "question": "How does your institution address AI bias and fairness in academic applications?",
+          "options": [
+            { "value": "systematic", "text": "Systematic review processes and bias detection measures", "score": 4 },
+            { "value": "guidelines", "text": "Guidelines and training on bias awareness", "score": 3 },
+            { "value": "awareness", "text": "General awareness but limited formal processes", "score": 2 },
+            { "value": "minimal", "text": "Minimal consideration of bias issues", "score": 1 }
+          ],
+          "required": true,
+          "category": "bias_fairness"
+        }
+      ]
+    }
+  ],
+  "scoringRubric": {
+    "maxScore": 100,
+    "levels": [
+      {
+        "level": "Emerging",
+        "range": { "min": 0, "max": 45 },
+        "description": "Institution is in early stages of AI integration with limited strategic planning.",
+        "recommendations": [
+          "Develop institutional AI strategy and governance framework",
+          "Establish faculty development programs for AI integration",
+          "Create ethical guidelines and compliance procedures",
+          "Build awareness among academic leadership"
+        ]
+      },
+      {
+        "level": "Developing",
+        "range": { "min": 46, "max": 70 },
+        "description": "Institution has foundational AI capabilities with growing integration efforts.",
+        "recommendations": [
+          "Expand faculty development and support programs",
+          "Pilot AI applications in academic and administrative areas",
+          "Strengthen governance and oversight mechanisms",
+          "Develop comprehensive assessment and evaluation processes"
+        ]
+      },
+      {
+        "level": "Proficient", 
+        "range": { "min": 71, "max": 90 },
+        "description": "Institution demonstrates strong AI integration with comprehensive policies and active implementation.",
+        "recommendations": [
+          "Scale successful AI implementations across the institution",
+          "Lead regional higher education AI initiatives",
+          "Develop advanced research and innovation programs",
+          "Share best practices with peer institutions"
+        ]
+      },
+      {
+        "level": "Advanced",
+        "range": { "min": 91, "max": 100 },
+        "description": "Institution is a recognized leader in higher education AI integration and innovation.",
+        "recommendations": [
+          "Pioneer next-generation AI applications in higher education",
+          "Lead national conversations on AI in higher education",
+          "Mentor other institutions in AI transformation",
+          "Contribute to policy development and best practices"
+        ]
+      }
+    ]
+  },
+  "focusAreas": [
+    "Academic AI Integration Strategy",
+    "Faculty Development & Training Programs",
+    "Student Learning Analytics & Success",
+    "Research & Innovation Initiatives", 
+    "Administrative Process Optimization",
+    "Accreditation & Compliance Management",
+    "Ethical AI Governance Framework",
+    "Institutional Change Management"
+  ]
+}

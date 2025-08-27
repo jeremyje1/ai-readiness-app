@@ -1,0 +1,269 @@
+{
+  "bankId": "k12_v2024",
+  "version": "2.0",
+  "audience": "k12",
+  "title": "K-12 AI Readiness Assessment",
+  "description": "Comprehensive assessment for K-12 districts evaluating AI readiness across instruction, operations, and governance.",
+  "lastUpdated": "2024-02-15",
+  "estimatedDuration": "25-30 minutes",
+  "sections": [
+    {
+      "id": "leadership_governance",
+      "title": "Leadership & Governance",
+      "description": "District leadership understanding and governance structures for AI",
+      "weight": 0.20,
+      "questions": [
+        {
+          "id": "lg_001",
+          "type": "single_choice",
+          "question": "Does your district have a formal AI policy or set of guidelines?",
+          "options": [
+            { "value": "comprehensive", "text": "Yes, we have comprehensive AI policies covering student and staff use", "score": 4 },
+            { "value": "basic", "text": "Yes, we have basic guidelines or draft policies", "score": 3 },
+            { "value": "informal", "text": "We have informal guidelines but no official policy", "score": 2 },
+            { "value": "none", "text": "No, we don't have any AI policies or guidelines", "score": 1 }
+          ],
+          "required": true,
+          "category": "policy"
+        },
+        {
+          "id": "lg_002", 
+          "type": "single_choice",
+          "question": "How would you describe your superintendent's understanding of AI in education?",
+          "options": [
+            { "value": "expert", "text": "Expert level - actively leads AI discussions and strategy", "score": 4 },
+            { "value": "advanced", "text": "Advanced - strong understanding and supportive of AI initiatives", "score": 3 },
+            { "value": "basic", "text": "Basic - general awareness but limited depth", "score": 2 },
+            { "value": "minimal", "text": "Minimal - little knowledge or engagement with AI topics", "score": 1 }
+          ],
+          "required": true,
+          "category": "leadership"
+        },
+        {
+          "id": "lg_003",
+          "type": "multiple_choice",
+          "question": "Which governance bodies have discussed AI implementation in your district?",
+          "options": [
+            { "value": "school_board", "text": "School Board", "score": 2 },
+            { "value": "cabinet", "text": "Superintendent's Cabinet", "score": 2 },
+            { "value": "tech_committee", "text": "Technology Committee", "score": 1 },
+            { "value": "curriculum_committee", "text": "Curriculum Committee", "score": 1 },
+            { "value": "none", "text": "None of the above", "score": 0 }
+          ],
+          "required": true,
+          "category": "governance"
+        }
+      ]
+    },
+    {
+      "id": "curriculum_instruction",
+      "title": "Curriculum & Instruction",
+      "description": "Integration of AI tools and concepts in teaching and learning",
+      "weight": 0.25,
+      "questions": [
+        {
+          "id": "ci_001",
+          "type": "single_choice",
+          "question": "What is your district's current stance on student use of AI tools (like ChatGPT) for academic work?",
+          "options": [
+            { "value": "encouraged", "text": "Encouraged with proper training and guidelines", "score": 4 },
+            { "value": "permitted", "text": "Permitted with teacher oversight", "score": 3 },
+            { "value": "restricted", "text": "Restricted to specific situations or subjects", "score": 2 },
+            { "value": "prohibited", "text": "Prohibited or blocked entirely", "score": 1 }
+          ],
+          "required": true,
+          "category": "student_use"
+        },
+        {
+          "id": "ci_002",
+          "type": "scale",
+          "question": "How prepared are your teachers to integrate AI tools into their instruction?",
+          "scale": {
+            "min": 1,
+            "max": 5,
+            "minLabel": "Not prepared at all",
+            "maxLabel": "Very well prepared"
+          },
+          "required": true,
+          "category": "teacher_readiness"
+        },
+        {
+          "id": "ci_003",
+          "type": "multiple_choice",
+          "question": "Which AI-related topics are currently addressed in your curriculum?",
+          "options": [
+            { "value": "digital_citizenship", "text": "AI and digital citizenship", "score": 2 },
+            { "value": "ethics", "text": "AI ethics and bias", "score": 2 },
+            { "value": "career_prep", "text": "AI in career preparation", "score": 1 },
+            { "value": "computer_science", "text": "AI in computer science courses", "score": 1 },
+            { "value": "none", "text": "None of these topics", "score": 0 }
+          ],
+          "required": true,
+          "category": "curriculum_content"
+        }
+      ]
+    },
+    {
+      "id": "professional_development",
+      "title": "Professional Development", 
+      "description": "Staff training and development for AI integration",
+      "weight": 0.20,
+      "questions": [
+        {
+          "id": "pd_001",
+          "type": "single_choice",
+          "question": "Has your district provided professional development on AI for educators?",
+          "options": [
+            { "value": "comprehensive", "text": "Yes, comprehensive multi-session training program", "score": 4 },
+            { "value": "workshop", "text": "Yes, one or more workshops or presentations", "score": 3 },
+            { "value": "informal", "text": "Informal discussions or self-directed learning", "score": 2 },
+            { "value": "none", "text": "No formal or informal training provided", "score": 1 }
+          ],
+          "required": true,
+          "category": "training"
+        },
+        {
+          "id": "pd_002",
+          "type": "multiple_choice", 
+          "question": "Which stakeholder groups have received AI-related training or information?",
+          "options": [
+            { "value": "teachers", "text": "Teachers", "score": 2 },
+            { "value": "administrators", "text": "Administrators", "score": 2 },
+            { "value": "support_staff", "text": "Support staff", "score": 1 },
+            { "value": "board_members", "text": "Board members", "score": 1 },
+            { "value": "none", "text": "None of these groups", "score": 0 }
+          ],
+          "required": true,
+          "category": "stakeholder_training"
+        }
+      ]
+    },
+    {
+      "id": "technology_infrastructure",
+      "title": "Technology Infrastructure",
+      "description": "Technical capacity and infrastructure for AI implementation",
+      "weight": 0.15,
+      "questions": [
+        {
+          "id": "ti_001",
+          "type": "single_choice",
+          "question": "How would you rate your district's current technology infrastructure for supporting AI tools?",
+          "options": [
+            { "value": "excellent", "text": "Excellent - robust infrastructure ready for AI implementation", "score": 4 },
+            { "value": "good", "text": "Good - adequate with minor upgrades needed", "score": 3 },
+            { "value": "fair", "text": "Fair - significant improvements needed", "score": 2 },
+            { "value": "poor", "text": "Poor - major infrastructure overhaul required", "score": 1 }
+          ],
+          "required": true,
+          "category": "infrastructure"
+        },
+        {
+          "id": "ti_002",
+          "type": "multiple_choice",
+          "question": "What technology challenges might limit AI implementation in your district?",
+          "options": [
+            { "value": "bandwidth", "text": "Insufficient bandwidth", "score": -1 },
+            { "value": "devices", "text": "Limited student/teacher devices", "score": -1 },
+            { "value": "network_security", "text": "Network security restrictions", "score": -1 },
+            { "value": "budget", "text": "Technology budget constraints", "score": -1 },
+            { "value": "none", "text": "No significant technology challenges", "score": 2 }
+          ],
+          "required": true,
+          "category": "challenges"
+        }
+      ]
+    },
+    {
+      "id": "data_privacy",
+      "title": "Data Privacy & Security",
+      "description": "Data governance and privacy considerations for AI implementation",
+      "weight": 0.20,
+      "questions": [
+        {
+          "id": "dp_001",
+          "type": "single_choice",
+          "question": "Does your district have established procedures for evaluating AI tools' data privacy and security?",
+          "options": [
+            { "value": "formal_process", "text": "Yes, formal evaluation process with documented procedures", "score": 4 },
+            { "value": "informal_review", "text": "Informal review process case-by-case", "score": 3 },
+            { "value": "basic_check", "text": "Basic privacy policy review only", "score": 2 },
+            { "value": "no_process", "text": "No established evaluation process", "score": 1 }
+          ],
+          "required": true,
+          "category": "privacy_process"
+        },
+        {
+          "id": "dp_002",
+          "type": "multiple_choice",
+          "question": "Which privacy regulations does your district actively consider when evaluating AI tools?",
+          "options": [
+            { "value": "ferpa", "text": "FERPA (Family Educational Rights and Privacy Act)", "score": 2 },
+            { "value": "coppa", "text": "COPPA (Children's Online Privacy Protection Act)", "score": 2 },
+            { "value": "state_privacy", "text": "State student data privacy laws", "score": 1 },
+            { "value": "gdpr", "text": "GDPR considerations", "score": 1 },
+            { "value": "none", "text": "None specifically considered", "score": 0 }
+          ],
+          "required": true,
+          "category": "compliance"
+        }
+      ]
+    }
+  ],
+  "scoringRubric": {
+    "maxScore": 100,
+    "levels": [
+      {
+        "level": "Emerging",
+        "range": { "min": 0, "max": 40 },
+        "description": "District is in early stages of AI awareness with limited policies or implementation.",
+        "recommendations": [
+          "Develop foundational AI policies and guidelines",
+          "Provide leadership training on AI in education",
+          "Begin staff awareness initiatives",
+          "Establish AI evaluation criteria"
+        ]
+      },
+      {
+        "level": "Developing", 
+        "range": { "min": 41, "max": 65 },
+        "description": "District has basic AI understanding with some policies and limited implementation.",
+        "recommendations": [
+          "Expand professional development programs",
+          "Pilot AI tools in select classrooms",
+          "Enhance governance structures for AI oversight",
+          "Strengthen data privacy procedures"
+        ]
+      },
+      {
+        "level": "Proficient",
+        "range": { "min": 66, "max": 85 },
+        "description": "District demonstrates solid AI readiness with comprehensive policies and active implementation.",
+        "recommendations": [
+          "Scale successful AI implementations",
+          "Develop advanced training programs",
+          "Share best practices with other districts",
+          "Continuously evaluate and update policies"
+        ]
+      },
+      {
+        "level": "Advanced",
+        "range": { "min": 86, "max": 100 },
+        "description": "District is an AI leader with comprehensive integration and strong governance.",
+        "recommendations": [
+          "Lead regional AI education initiatives",
+          "Mentor other districts in AI implementation",
+          "Research and pilot cutting-edge AI applications",
+          "Contribute to AI in education best practices"
+        ]
+      }
+    ]
+  },
+  "focusAreas": [
+    "Instructional Technology Integration",
+    "District Policy Development",
+    "Professional Development Planning",
+    "Student Safety & Digital Citizenship",
+    "Administrative Process Improvement",
+    "Community Engagement & Communication"
+  ]
+}
