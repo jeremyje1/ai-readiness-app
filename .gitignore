@@ -10,7 +10,20 @@ node_modules/
 !.env.local.example
 !.env.local.template
 .env.production
+.env.vercel
+.env.development
+.env.staging
+*.env
 *.sh
+
+# Sensitive files
+*.key
+*.pem
+*.p12
+.temp-*
+temp-*
+secrets.json
+credentials.json
 
 # Build files
 dist/
