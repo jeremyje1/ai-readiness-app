@@ -77,10 +77,8 @@ export class PolicyPackLibrary {
   private supabase: any
 
   constructor() {
-    this.supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+  // Use shared anon client for read operations; server-only privileged ops should be refactored out
+  this.supabase = require('./supabase').supabase
   }
 
   // Core policy templates with external reference anchoring

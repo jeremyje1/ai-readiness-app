@@ -15,13 +15,10 @@ import {
     VendorRenewal,
     WatchlistMetrics
 } from '@/lib/types/dashboard'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { endOfMonth, format, startOfMonth, subDays } from 'date-fns'
 
-// Create Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321'
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-key'
-const supabase = createClient(supabaseUrl, supabaseKey)
+// Reuse shared singleton Supabase client (avoid duplicate auth clients)
 
 export class DashboardService {
     /**

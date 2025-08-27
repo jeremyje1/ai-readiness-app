@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { supabase as sharedSupabase } from '@/lib/supabase'
 import { 
   Approval, 
   CreateApprovalRequest, 
@@ -20,10 +20,7 @@ import {
 import { v4 as uuidv4 } from 'uuid'
 
 export class ApprovalService {
-  private supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  private supabase = sharedSupabase
 
   /**
    * Create a new approval request

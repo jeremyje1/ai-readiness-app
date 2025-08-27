@@ -5,7 +5,7 @@
  */
 
 import { AuthError, Session, SupabaseClient } from '@supabase/supabase-js'
-import { supabase as sharedSupabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase'
+import { supabase as sharedSupabase, SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase'
 
 // Types
 export interface AuthResult<T = any> {
@@ -22,8 +22,6 @@ export interface AuthServiceConfig {
     persistSession?: boolean
 }
 
-// Service key still needed for admin operations (server-side only)
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 
 /**
  * Enhanced Authentication Service
@@ -42,16 +40,24 @@ export class AuthService {
             persistSession: config.persistSession ?? true
         }
 
-        // Initialize debug logger
+        // Initialize debug logger - reduced verbosity to minimize logs
         this.debugLog = this.config.enableDebugLogging
             ? (message: string, data?: any) => {
-                console.log(`[Auth Service] ${message}`, data || '')
+                if (message.includes('initialized')) {
+                    // Only log initialization once per session to reduce log noise
+                    if (!(global as any).__authServiceInitialized) {
+                        console.log(`[Auth Service] ${message}`, data || '')
+                        ;(global as any).__authServiceInitialized = true
+                    }
+                } else {
+                    console.log(`[Auth Service] ${message}`, data || '')
+                }
             }
             : () => { }
 
-    // Reuse shared singleton Supabase client to prevent multiple GoTrueClient instances
-    this.client = sharedSupabase
-    this.debugLog('Auth service initialized (reused shared Supabase client)', { url: SUPABASE_URL })
+        // Reuse shared singleton Supabase client to prevent multiple GoTrueClient instances
+        this.client = sharedSupabase
+        this.debugLog('Auth service initialized (reused shared Supabase client)', { url: SUPABASE_URL })
     }
 
     /**
@@ -404,43 +410,10 @@ export class AuthService {
         return Promise.race([promise, timeoutPromise])
     }
 
-    /**
-     * Retry with exponential backoff
-     */
-    private async retryWithBackoff<T>(
-        fn: () => Promise<T>,
-        maxRetries: number = this.config.maxRetries,
-        baseDelay: number = 1000
-    ): Promise<T> {
-        for (let i = 0; i < maxRetries; i++) {
-            try {
-                return await fn()
-            } catch (error) {
-                if (i === maxRetries - 1) throw error
-
-                const delay = baseDelay * Math.pow(2, i)
-                this.debugLog(`Retry ${i + 1}/${maxRetries} after ${delay}ms`)
-                await new Promise(resolve => setTimeout(resolve, delay))
-            }
-        }
-        throw new Error('Max retries exceeded')
-    }
 }
 
 // Default singleton instance
 export const authService = new AuthService()
 
-// Server-side admin client
-export const createAdminClient = () => {
-    // Lazy import to avoid pulling createClient into client bundle unnecessarily
-    const { createClient } = require('@supabase/supabase-js') as typeof import('@supabase/supabase-js')
-    if (!SUPABASE_SERVICE_KEY) {
-        throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for admin operations')
-    }
-    return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false
-        }
-    })
-}
+// Re-export admin client from centralized helper
+export { createAdminClient, supabaseAdmin } from './supabase-admin'

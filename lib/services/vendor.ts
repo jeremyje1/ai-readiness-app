@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { 
   Vendor, 
   VendorAssessment, 
@@ -15,10 +15,7 @@ import {
 } from '@/lib/types/vendor'
 import { VendorRiskEngine } from './vendor-risk-engine'
 
-// Create Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321'
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-key'
-const supabase = createClient(supabaseUrl, supabaseKey)
+// Reuse shared singleton Supabase client to prevent multiple GoTrueClient instances in browser
 
 export class VendorService {
   /**

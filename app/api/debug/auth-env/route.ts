@@ -2,5 +2,5 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-	return NextResponse.json({ status: 'ok', message: 'auth-env placeholder' })
+    return NextResponse.json({ status: 'ok', message: 'auth-env placeholder' })
 }

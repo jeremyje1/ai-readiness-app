@@ -231,10 +231,8 @@ export class VendorVettingSystem {
   private supabase: any
 
   constructor() {
-    this.supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+  // Use shared anon client to avoid multiple instances; elevate to admin client only in server contexts
+  this.supabase = require('./supabase').supabase
   }
 
   // Submit new vendor intake form

@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { authService } from '@/lib/auth-service';
 import { v4 as uuidv4 } from 'uuid';
 import { DocumentProcessingQueue } from '@/lib/queues/document-processing';
 
@@ -21,7 +21,7 @@ const ALLOWED_TYPES = [
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
+    const { data: session } = await authService.getSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

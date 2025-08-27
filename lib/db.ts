@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { supabase as sharedSupabase } from '@/lib/supabase'
 
 // Database client for server-side operations
 export const db = createClient(
@@ -12,9 +13,6 @@ export const db = createClient(
 )
 
 // Database client for client-side operations
-export const clientDb = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+export const clientDb = sharedSupabase
 
 export default db

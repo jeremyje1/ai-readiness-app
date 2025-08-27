@@ -68,9 +68,9 @@ export default function PasswordUpdatePage() {
       }
 
       // Use enhanced auth service for password update
-  // authService currently does not expose updatePassword helper; use underlying client
-  const client = authService.getClient();
-  const { error } = await client.auth.updateUser({ password });
+      // authService currently does not expose updatePassword helper; use underlying client
+      const client = authService.getClient();
+      const { error } = await client.auth.updateUser({ password });
 
       if (error) {
         console.error('🔐 Password update failed:', error.message);
