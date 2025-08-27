@@ -1,9 +1,9 @@
 'use client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { supabase } from '@/lib/supabase';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function PasswordSetupPage() {
   const params = useSearchParams();
@@ -37,13 +37,13 @@ export default function PasswordSetupPage() {
         const json = await res.json();
         if (json.passwordSetupUrl) {
           // Preserve possible auto flag
-            const auto = params.get('auto');
-            const url = new URL(json.passwordSetupUrl, window.location.origin);
-            if (auto) url.searchParams.set('auto', auto);
-            // Pass email for prefill in case user reloads without token later
-            if (email) url.searchParams.set('email', email);
-            router.replace(url.toString());
-            return;
+          const auto = params.get('auto');
+          const url = new URL(json.passwordSetupUrl, window.location.origin);
+          if (auto) url.searchParams.set('auto', auto);
+          // Pass email for prefill in case user reloads without token later
+          if (email) url.searchParams.set('email', email);
+          router.replace(url.toString());
+          return;
         }
       }
     } catch (e) {
@@ -85,37 +85,74 @@ export default function PasswordSetupPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-  if (!token) return setStatus('Missing token');
+    if (!token) return setStatus('Missing token');
     if (password.length < 8) return setStatus('Password too short');
     if (password !== confirm) return setStatus('Passwords do not match');
+
+    console.log('🔐 Password setup starting...');
+    console.log('🔐 Token:', token ? 'Present' : 'Missing');
+    console.log('🔐 Password length:', password.length);
+
     setLoading(true);
+    setStatus('Saving...');
+
     try {
-      const res = await fetch('/api/auth/password/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, password }) });
+      console.log('🔐 Making API call to /api/auth/password/setup');
+
+      const res = await fetch('/api/auth/password/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password })
+      });
+
+      console.log('🔐 API response status:', res.status);
+      console.log('🔐 API response ok:', res.ok);
+
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Failed');
+      console.log('🔐 API response data:', json);
+
+      if (!res.ok) {
+        throw new Error(json.error || 'Failed');
+      }
+
       setStatus('Password set! Logging you in...');
-      // Attempt immediate password sign-in client-side (no service role exposure).
+      console.log('🔐 Password set successfully, attempting login...');
+
+      // Attempt immediate password sign-in client-side
       if (json.email) {
+        console.log('🔐 Attempting automatic login with email:', json.email);
         let attempt = 0;
         let signedIn = false;
         while (attempt < 3 && !signedIn) {
+          console.log(`🔐 Login attempt ${attempt + 1}/3`);
+
           const { error } = await supabase.auth.signInWithPassword({ email: json.email, password });
-            if (!error) {
-              signedIn = true;
-              break;
-            }
+
+          console.log('🔐 Login attempt result:', error ? error.message : 'Success');
+
+          if (!error) {
+            signedIn = true;
+            console.log('🔐 Login successful!');
+            break;
+          }
+
           // slight delay in case password propagation not immediate
           await new Promise(r => setTimeout(r, 400));
           attempt++;
         }
+
         if (!signedIn) {
+          console.log('🔐 Auto-login failed, manual login required');
           setStatus('Password set. Please log in manually with your new password.');
           return;
         }
       }
+
+      console.log('🔐 Redirecting to dashboard...');
       setStatus('Logged in! Redirecting...');
       setTimeout(() => router.push('/ai-readiness/dashboard?verified=true'), 800);
     } catch (err: any) {
+      console.error('🔐 Password setup error:', err);
       setStatus(err.message);
     } finally {
       setLoading(false);
@@ -133,11 +170,11 @@ export default function PasswordSetupPage() {
             <form onSubmit={requestToken} className="space-y-2">
               <div>
                 <label className="block text-sm font-medium mb-1">Email Address</label>
-                <Input ref={emailInputRef} type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="you@company.com" />
+                <Input ref={emailInputRef} type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@company.com" />
               </div>
               <Button type="submit" disabled={requesting}>{requesting ? 'Requesting...' : 'Email Me a Password Setup Link'}</Button>
             </form>
-            {status && !token && <p className={`text-xs ${status.includes('emailed') ? 'text-green-600':'text-red-600'}`}>{status}</p>}
+            {status && !token && <p className={`text-xs ${status.includes('emailed') ? 'text-green-600' : 'text-red-600'}`}>{status}</p>}
             <hr className="my-4" />
             <p className="text-xs text-gray-500">If you just completed checkout, try returning to the success page; it will attempt to generate this token automatically.</p>
             {bootstrapping && <p className="text-xs text-blue-600 animate-pulse">Attempting automatic token generation...</p>}
@@ -145,13 +182,13 @@ export default function PasswordSetupPage() {
         )}
         <div>
           <label className="block text-sm font-medium mb-1">New Password</label>
-          <Input ref={pwInputRef} type="password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={8} />
+          <Input ref={pwInputRef} type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Confirm Password</label>
-            <Input type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} required minLength={8} />
+          <Input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={8} />
         </div>
-        {status && token && <p className={`text-sm ${status.includes('!') ? 'text-green-600':'text-red-600'}`}>{status}</p>}
+        {status && token && <p className={`text-sm ${status.includes('!') ? 'text-green-600' : 'text-red-600'}`}>{status}</p>}
         <Button type="submit" disabled={loading || !token}>{loading ? 'Saving...' : 'Create Password'}</Button>
       </form>
     </div>

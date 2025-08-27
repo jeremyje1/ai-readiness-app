@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { emailService } from '@/lib/email-service';
-import { headers } from 'next/headers';
+import { supabaseAdmin } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface UserRegistrationData {
   firstName: string;
@@ -10,12 +10,13 @@ interface UserRegistrationData {
   phone?: string;
   title?: string;
   billing: 'monthly' | 'yearly';
+  password?: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: UserRegistrationData = await request.json();
-    
+
     // Validate required fields
     if (!body.firstName || !body.lastName || !body.email || !body.organization) {
       return NextResponse.json(
@@ -33,47 +34,60 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate a unique user ID (in a real app, this would save to a database)
-    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // In a production environment, you would:
-    // 1. Save user data to your database
-    // 2. Hash passwords if applicable
-    // 3. Send welcome email
-    // 4. Set up user session/token
-    
-    console.log('User Registration:', {
-      userId,
-      firstName: body.firstName,
-      lastName: body.lastName,
+    // Generate a temporary password if none provided
+    const tempPassword = body.password || `TempPass${Date.now()}!`;
+
+    // Create Supabase Auth user
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Authentication service not available' },
+        { status: 500 }
+      );
+    }
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: body.email,
-      organization: body.organization,
-      phone: body.phone,
-      title: body.title,
-      billing: body.billing,
-      createdAt: new Date().toISOString()
+      password: tempPassword,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        first_name: body.firstName,
+        last_name: body.lastName,
+        full_name: `${body.firstName} ${body.lastName}`,
+        organization: body.organization,
+        phone: body.phone,
+        title: body.title,
+        billing: body.billing,
+        created_via: 'registration_flow'
+      }
     });
 
-    // Store user data temporarily (in production, use proper database)
-    // This is a simplified example - you'd want to use a proper database
-    const userData = {
-      id: userId,
-      ...body,
-      createdAt: new Date().toISOString(),
-      status: 'pending_payment'
-    };
+    if (authError) {
+      console.error('Supabase user creation error:', authError);
+      return NextResponse.json(
+        { error: `Registration failed: ${authError.message}` },
+        { status: 400 }
+      );
+    }
 
-    // Send welcome email
+    const userId = authData.user?.id || `fallback_${Date.now()}`;
+
+    console.log('✅ User created in Supabase Auth:', {
+      userId,
+      email: body.email,
+      name: `${body.firstName} ${body.lastName}`
+    });
+
+    // Send welcome email with temporary password
     try {
       // Determine the base URL from request or use custom domain
       const host = request.headers.get('host');
       const protocol = request.headers.get('x-forwarded-proto') || 'https';
       const baseUrl = host ? `${protocol}://${host}` : 'https://aiblueprint.k12aiblueprint.com';
-      
+
       // Get institutional context from middleware headers
       const institutionType = request.headers.get('x-institution-type') as 'K12' | 'HigherEd' | 'default' || 'default';
       const domainContext = request.headers.get('x-domain-context') || undefined;
-      
+
       await emailService.sendWelcomeEmail({
         userEmail: body.email,
         userName: `${body.firstName} ${body.lastName}`,
@@ -83,6 +97,7 @@ export async function POST(request: NextRequest) {
         institutionType: institutionType,
         domainContext: domainContext
       });
+
       console.log(`✅ Welcome email sent to ${body.email}`);
     } catch (emailError) {
       console.error('❌ Failed to send welcome email:', emailError);
@@ -91,16 +106,17 @@ export async function POST(request: NextRequest) {
 
     // Create response with user ID in header
     const response = NextResponse.json(
-      { 
-        success: true, 
+      {
+        success: true,
         userId,
-        message: 'User registered successfully' 
+        message: 'User registered successfully',
+        tempPassword: !body.password ? tempPassword : undefined // Only send if we generated it
       },
       { status: 200 }
     );
-    
+
     response.headers.set('user-id', userId);
-    
+
     return response;
 
   } catch (error) {

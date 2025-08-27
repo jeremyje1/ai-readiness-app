@@ -1,31 +1,26 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+import InstitutionSelector from '@/components/InstitutionSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
+import { motion } from 'framer-motion';
+import {
   ArrowRight,
-  User,
-  Mail,
-  Building,
-  Phone,
   CheckCircle2,
-  Shield,
   Clock,
+  Shield,
   Star
 } from 'lucide-react';
-import Link from 'next/link';
-import InstitutionSelector from '@/components/InstitutionSelector';
+import { useSearchParams } from 'next/navigation';
+import React, { Suspense, useState } from 'react';
 
 function StartPageContent() {
   const searchParams = useSearchParams();
   const billing = searchParams.get('billing') || 'monthly';
   const contextParam = searchParams.get('context'); // 'HigherEd' from marketing page
-  
+
   const [step, setStep] = useState<'institution' | 'registration'>('institution');
   const [institutionType, setInstitutionType] = useState<'K12' | 'HigherEd' | null>(null);
   const [formData, setFormData] = useState({
@@ -36,10 +31,10 @@ function StartPageContent() {
     phone: '',
     title: ''
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string,string>>({});
-  
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   // Pre-select institution type if coming from marketing page
   React.useEffect(() => {
     if (contextParam === 'HigherEd' && !institutionType) {
@@ -48,7 +43,7 @@ function StartPageContent() {
       localStorage.setItem('ai_blueprint_institution_type', 'HigherEd');
     }
   }, [contextParam, institutionType]);
-  
+
   const handleInstitutionSelect = (type: 'K12' | 'HigherEd') => {
     setInstitutionType(type);
     setStep('registration');
@@ -62,9 +57,9 @@ function StartPageContent() {
       [e.target.name]: e.target.value
     });
   };
-  
+
   const validate = () => {
-    const newErrors: Record<string,string> = {};
+    const newErrors: Record<string, string> = {};
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
@@ -82,10 +77,10 @@ function StartPageContent() {
       const response = await fetch('/api/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ...formData, 
-          billing, 
-          institutionType 
+        body: JSON.stringify({
+          ...formData,
+          billing,
+          institutionType
         }),
       });
       if (response.ok) {
@@ -95,16 +90,16 @@ function StartPageContent() {
         const text = await response.text();
         alert('Registration failed: ' + text);
       }
-    } catch (error:any) {
+    } catch (error: any) {
       console.error('Registration error:', error);
       alert('Registration failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   const isFormValid = formData.firstName && formData.lastName && formData.email && formData.organization;
-  
+
   const planDetails = {
     monthly: {
       price: '$995',
@@ -119,7 +114,7 @@ function StartPageContent() {
       savings: 'Save $2,390 (17% off)'
     }
   };
-  
+
   const currentPlan = planDetails[billing as keyof typeof planDetails];
 
   // Get contextual content based on institution type
@@ -132,7 +127,7 @@ function StartPageContent() {
         orgPlaceholder: 'University of...',
         features: [
           'Faculty governance frameworks',
-          'Research integration guidance', 
+          'Research integration guidance',
           'Academic policy templates',
           'Institutional assessment tools'
         ]
@@ -175,7 +170,7 @@ function StartPageContent() {
             <p className="text-xl text-slate-300 max-w-2xl mx-auto">
               {content.subtitle}
             </p>
-            <button 
+            <button
               onClick={() => setStep('institution')}
               className="mt-2 text-sm text-blue-400 hover:text-blue-300 underline"
             >
@@ -226,7 +221,7 @@ function StartPageContent() {
                       {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email">Email Address</Label>
                     <Input
@@ -239,7 +234,7 @@ function StartPageContent() {
                     />
                     {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="organization">{content.orgLabel}</Label>
                     <Input
@@ -252,7 +247,7 @@ function StartPageContent() {
                     />
                     {errors.organization && <p className="text-red-500 text-sm mt-1">{errors.organization}</p>}
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="title">Job Title</Label>
@@ -274,7 +269,7 @@ function StartPageContent() {
                       />
                     </div>
                   </div>
-                  
+
                   <Button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700"
@@ -290,12 +285,24 @@ function StartPageContent() {
                       </>
                     )}
                   </Button>
-                  
+
                   {currentPlan.savings && (
                     <p className="text-center text-green-600 font-semibold">
                       {currentPlan.savings}
                     </p>
                   )}
+
+                  <div className="text-center pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-600">
+                      Already have an account?{' '}
+                      <a
+                        href="/auth/login"
+                        className="text-blue-600 hover:text-blue-700 font-medium underline"
+                      >
+                        Sign in here
+                      </a>
+                    </p>
+                  </div>
                 </form>
               </CardContent>
             </Card>
