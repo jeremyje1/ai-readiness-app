@@ -1,6 +1,9 @@
 import AuthNav from '@/components/AuthNav'
 import TutorialProvider from '@/components/TutorialProvider'
 import UserProvider from '@/components/UserProvider'
+import { AudienceProvider } from '@/lib/audience/AudienceContext'
+import { deriveAudience } from '@/lib/audience/deriveAudience'
+import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
@@ -22,19 +25,28 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Derive initial audience from server context
+  const headersList = headers();
+  const host = headersList.get('host') || undefined;
+  const referer = headersList.get('referer') || undefined;
+  
+  const derivation = deriveAudience({ host, referer });
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com';
+  
   return (
     <html lang="en">
       <head>
         <link rel="canonical" href={baseUrl} />
       </head>
       <body className={inter.className}>
-        <UserProvider>
-          <TutorialProvider>
-            <AuthNav />
-            {children}
-          </TutorialProvider>
-        </UserProvider>
+        <AudienceProvider initialAudience={derivation.audience}>
+          <UserProvider>
+            <TutorialProvider>
+              <AuthNav />
+              {children}
+            </TutorialProvider>
+          </UserProvider>
+        </AudienceProvider>
       </body>
     </html>
   )

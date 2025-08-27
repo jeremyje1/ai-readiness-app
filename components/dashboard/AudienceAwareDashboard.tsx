@@ -30,7 +30,8 @@ import {
   ArrowRight,
   RefreshCw,
   Calendar,
-  Award
+  Award,
+  MessageSquare
 } from 'lucide-react';
 
 interface DashboardMetrics {
@@ -86,7 +87,7 @@ interface AudienceAwareDashboardProps {
 }
 
 export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) {
-  const { audience, config, copy } = useAudience();
+  const { audience, config } = useAudience();
   const analytics = useAudienceAnalytics(audience, userId);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -225,7 +226,7 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
     );
   }
 
-  const audienceMetrics = metrics.audienceSpecificMetrics[audience];
+  const audienceMetrics = metrics.audienceSpecificMetrics;
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -243,7 +244,7 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
             </h1>
           </div>
           <p className="text-gray-600">
-            Monitor your {copy.organizationType}'s AI integration progress and insights
+            Monitor your {config.nouns.org.toLowerCase()}'s AI integration progress and insights
           </p>
           <p className="text-sm text-gray-500 mt-1">
             Last updated: {lastUpdated.toLocaleString()}
@@ -384,7 +385,7 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
               <span>Personalized Recommendations</span>
             </CardTitle>
             <CardDescription>
-              AI-powered suggestions based on your {copy.organizationType}'s profile
+              AI-powered suggestions based on your {config.nouns.org.toLowerCase()}'s profile
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -454,7 +455,7 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
           <CardDescription>
-            Common tasks for {copy.organizationType} leaders
+            Common tasks for {config.nouns.org.toLowerCase()} leaders
           </CardDescription>
         </CardHeader>
         <CardContent>
