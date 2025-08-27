@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // Sanitize environment variables to avoid hidden whitespace / newline issues
 const supabaseUrlRaw = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -43,7 +43,37 @@ try {
   // already logged above
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Enhanced client configuration with debugging and optimizations
+const clientOptions = {
+  auth: {
+    persistSession: true,
+    detectSessionInUrl: true,
+    autoRefreshToken: true,
+    debug: process.env.NODE_ENV === 'development'
+  },
+  global: {
+    headers: {
+      'x-client-info': 'ai-readiness-app/1.0.0',
+      'x-debug-trace': 'supabase-client'
+    },
+    fetch: (url: RequestInfo | URL, options?: RequestInit) => {
+      // Add request debugging in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔗 Supabase fetch: ${url}`, {
+          method: options?.method || 'GET',
+          headers: options?.headers
+        })
+      }
+      return fetch(url, options)
+    }
+  },
+  // Connection pooling and timeout optimizations
+  db: {
+    schema: 'public'
+  }
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, clientOptions)
 
 // Server-side client with service role - only initialize on server
 export const supabaseAdmin = (() => {

@@ -1,6 +1,6 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 // Routes that require authentication
 const protectedRoutes = [
@@ -18,6 +18,19 @@ const authRoutes = [
   '/auth/register'
 ]
 
+// Routes that are always public
+const publicRoutes = [
+  '/',
+  '/start',
+  '/pricing',
+  '/contact',
+  '/privacy',
+  '/terms',
+  '/auth/password/reset',
+  '/debug-auth',
+  '/api/debug'
+]
+
 function isProtectedRoute(pathname: string): boolean {
   return protectedRoutes.some(route => pathname.startsWith(route))
 }
@@ -26,55 +39,27 @@ function isAuthRoute(pathname: string): boolean {
   return authRoutes.some(route => pathname.startsWith(route))
 }
 
-export async function middleware(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
-  const host = request.headers.get('host') || '';
-  
-  // Define canonical domains
-  const k12Domain = 'aiblueprint.k12aiblueprint.com';
-  const higherEdDomain = 'aiblueprint.higheredaiblueprint.com';
-  
-  // Redirect legacy domain to K-12 canonical
-  if (host === 'aireadiness.northpathstrategies.org') {
-    const url = new URL(request.url);
-    url.host = k12Domain;
-    return NextResponse.redirect(url, 301);
-  }
-  
-  // Clone the request URL to modify
-  const response = NextResponse.next();
-  
-  // Set institution type and domain context based on hostname
-  if (host.includes('higheredaiblueprint.com')) {
-    response.headers.set('x-institution-type', 'HigherEd');
-    response.headers.set('x-domain-context', 'higher-ed');
-  } else if (host.includes('k12aiblueprint.com')) {
-    response.headers.set('x-institution-type', 'K12');
-    response.headers.set('x-domain-context', 'k12');
-  } else {
-    // Default to K12 for development/localhost
-    response.headers.set('x-institution-type', 'K12');
-    response.headers.set('x-domain-context', 'k12');
-  }
-  
-  // Add domain info to response headers for client-side access
-  response.headers.set('x-current-domain', host);
+function isPublicRoute(pathname: string): boolean {
+  return publicRoutes.some(route => pathname === route || pathname.startsWith(route))
+}
 
-  // Skip auth middleware for static files and certain API routes
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  
+  // Skip middleware for static files and API routes we don't need to protect
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
     pathname.includes('.') ||
     pathname.startsWith('/api/webhooks') ||
-    pathname.startsWith('/api/payments/webhook') ||
-    pathname.startsWith('/api/debug')
+    pathname.startsWith('/api/payments/webhook')
   ) {
-    return response
+    return NextResponse.next()
   }
 
-  // Enhanced authentication handling
   try {
     // Create a Supabase client for middleware
+    const response = NextResponse.next()
     const supabase = createMiddlewareClient({ req: request, res: response })
 
     // Get session with timeout to prevent hanging
@@ -91,6 +76,15 @@ export async function middleware(request: NextRequest) {
       console.warn('🔐 Middleware: session check failed or timed out:', error)
       // Continue without session - handle as unauthenticated
     }
+
+    console.log('🔐 Middleware:', {
+      pathname,
+      hasSession: !!session,
+      userId: session?.user?.id,
+      isProtected: isProtectedRoute(pathname),
+      isAuth: isAuthRoute(pathname),
+      isPublic: isPublicRoute(pathname)
+    })
 
     // Handle protected routes
     if (isProtectedRoute(pathname)) {
@@ -131,19 +125,21 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    return response
+
   } catch (error) {
-    console.error('🔐 Middleware: authentication error:', error)
+    console.error('🔐 Middleware: unexpected error:', error)
     
-    // On middleware errors, allow the request to proceed for non-protected routes
+    // On middleware errors, allow the request to proceed for public routes
     // but redirect to login for protected routes
     if (isProtectedRoute(pathname)) {
       const redirectUrl = new URL('/auth/login', request.url)
       redirectUrl.searchParams.set('message', 'Authentication check failed. Please log in.')
       return NextResponse.redirect(redirectUrl)
     }
+    
+    return NextResponse.next()
   }
-  
-  return response;
 }
 
 export const config = {
@@ -157,4 +153,4 @@ export const config = {
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-};
+}

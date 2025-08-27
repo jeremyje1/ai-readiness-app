@@ -1,7 +1,8 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase';
+import { authService } from '@/lib/auth-service';
+import { sessionManager } from '@/lib/session-manager';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -25,158 +26,65 @@ export default function LoginPage() {
       setSuccessMessage('✅ Password updated successfully! You can now log in.');
     }
 
-    // Test Supabase connection on load
+    // Test connection using enhanced auth service
     const testConnection = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          setDebugInfo(`⚠️ Auth connection issue: ${error.message}`);
+        const connectionTest = await authService.testConnection();
+        if (connectionTest.status === 'ok') {
+          setDebugInfo(`✅ Auth service ready (${connectionTest.latency}ms)`);
         } else {
-          setDebugInfo('✅ Supabase connection OK');
+          setDebugInfo(`⚠️ Auth service issue: ${connectionTest.message}`);
         }
       } catch (err: any) {
-        setDebugInfo(`❌ Connection failed: ${err.message}`);
+        setDebugInfo(`❌ Connection test failed: ${err.message}`);
       }
     };
     testConnection();
 
-    // Expose supabase globally for deep debugging (non-production safety: only if not already set)
-    try {
-      if (typeof window !== 'undefined' && !(window as any).__sb) {
-        (window as any).__sb = supabase;
-        console.log('🔍 Global debug handle set: window.__sb (Supabase client)');
-        console.log('🔍 You can now run: const p = __sb.auth.signInWithPassword({ email:"user@example.com", password:"pass" });');
+    // Initialize session manager
+    sessionManager.getSessionState().then(state => {
+      if (state.session && !state.error) {
+        console.log('� Existing valid session found, redirecting...');
+        router.push('/ai-readiness/dashboard');
       }
-    } catch (e) {
-      console.warn('Failed to expose global supabase client:', (e as any).message);
-    }
-  }, [searchParams]);
+    });
+  }, [searchParams, router]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setFallbackUsed(false);
 
-    console.log('🔐 Form submission started');
+    console.log('🔐 Enhanced auth: form submission started');
     console.log('🔐 Email:', email);
-    console.log('🔐 Loading state set to:', true);
 
-  let redirected = false; // prevent double redirects if fallback succeeds then original resolves
-  try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const anonKeyLen = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length || 0;
-      console.log('🔐 Attempting Supabase signInWithPassword...');
-      console.log('🔐 Env URL:', supabaseUrl);
-      console.log('🔐 Anon key length:', anonKeyLen);
-
-      const start = performance.now();
-      const loginPromise = supabase.auth.signInWithPassword({
+    try {
+      const result = await authService.signInWithPassword({
         email: email.trim(),
         password
       });
 
-      // Timeout after 8s with explicit error to surface stalls
-      const timeoutMs = 8000;
-      const timeout = new Promise<never>((_, reject) => setTimeout(() => {
-        reject(new Error(`Login timeout after ${timeoutMs / 1000}s (no response from Supabase)`));
-      }, timeoutMs));
-
-  const { data, error } = await Promise.race([loginPromise, timeout]);
-      const elapsed = Math.round(performance.now() - start);
-      console.log(`🔐 Supabase response received in ${elapsed}ms`);
-      console.log('🔐 Data:', (data as any)?.user ? 'UserPresent' : 'None');
-      console.log('🔐 Error:', error ? error.message : 'None');
-
-      if (error) {
-        setError(`Login failed: ${error.message}`);
-        console.error('🔐 Setting error state:', error.message);
-      } else {
-        console.log('✅ Login successful, attempting redirect...');
-        redirected = true;
-        router.push('/ai-readiness/dashboard');
+      if (result.error) {
+        console.error('🔐 Authentication failed:', result.error.message);
+        setError(result.error.message);
+        return;
       }
+
+      if (result.fallbackUsed) {
+        console.log('⚡ Fallback authentication path was used');
+        setFallbackUsed(true);
+      }
+
+      console.log('✅ Authentication successful, redirecting...');
+      router.push('/ai-readiness/dashboard');
+
     } catch (err: any) {
-      console.error('🔐 Caught exception / timeout:', err);
-      const isTimeout = /timeout/i.test(err?.message || '');
-      setError(err.message || 'Unexpected error');
-
-      if (isTimeout) {
-        console.log('⏱️  Detected login timeout – initiating manual password grant fallback...');
-        
-        // Increment fallback usage counter for telemetry
-        try {
-          const currentCount = parseInt(localStorage.getItem('auth_fallback_count') || '0', 10);
-          localStorage.setItem('auth_fallback_count', String(currentCount + 1));
-          console.log(`📊 Auth fallback usage: ${currentCount + 1} times`);
-        } catch (storageErr) {
-          console.warn('Failed to update fallback counter:', (storageErr as any).message);
-        }
-        
-        try {
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-          const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-          if (!supabaseUrl || !anonKey) {
-            console.warn('⚠️  Missing env variables for manual fallback.');
-            throw new Error('Configuration error (missing Supabase env)');
-          }
-          const grantUrl = `${supabaseUrl.replace(/\/$/, '')}/auth/v1/token?grant_type=password`;
-          console.log('🌐 Fallback POST ->', grantUrl);
-          const fallbackStart = performance.now();
-          const resp = await fetch(grantUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': anonKey,
-            },
-            body: JSON.stringify({ email: email.trim(), password })
-          });
-          const txt = await resp.text();
-          console.log('🌐 Fallback raw status:', resp.status);
-          console.log('🌐 Fallback raw body (truncated 500):', txt.slice(0, 500));
-          if (!resp.ok) {
-            throw new Error(`Fallback auth failed (${resp.status})`);
-          }
-          let json: any;
-          try { json = JSON.parse(txt); } catch (jErr) {
-            console.warn('⚠️  Failed to parse fallback JSON:', (jErr as any).message);
-            throw new Error('Invalid fallback response');
-          }
-            // Expected keys: access_token, refresh_token, expires_in, token_type, user
-          if (!json.access_token || !json.refresh_token) {
-            throw new Error('Fallback response missing tokens');
-          }
-          console.log('🌐 Fallback tokens received. Setting session...');
-          const setRes = await supabase.auth.setSession({
-            access_token: json.access_token,
-            refresh_token: json.refresh_token,
-          });
-          console.log('🌐 setSession result error:', setRes.error?.message || 'None');
-          if (setRes.error) throw setRes.error;
-          const ms = Math.round(performance.now() - fallbackStart);
-          console.log(`✅ Fallback session established in ${ms}ms`);
-          setError(null);
-          setFallbackUsed(true);
-          if (!redirected) {
-            redirected = true;
-            router.push('/ai-readiness/dashboard');
-          }
-        } catch (fbErr: any) {
-          console.error('❌ Fallback manual password grant failed:', fbErr);
-          setError(prev => prev ? `${prev} | Fallback failed: ${fbErr.message}` : `Fallback failed: ${fbErr.message}`);
-        }
-      }
-      // Attempt lightweight env debug fetch to show if route reachable
-      try {
-        const r = await fetch('/api/debug/auth-env');
-        console.log('🔐 /api/debug/auth-env status:', r.status);
-        if (r.ok) console.log('🔐 Auth env payload:', await r.json());
-      } catch (dbgErr) {
-        console.warn('🔐 Failed fetching auth-env debug route:', (dbgErr as any).message);
-      }
+      console.error('🔐 Unexpected error during authentication:', err);
+      setError(err.message || 'An unexpected error occurred during login');
+    } finally {
+      setLoading(false);
     }
-
-    console.log('🔐 Setting loading state to false');
-    setLoading(false);
   };
 
   return (

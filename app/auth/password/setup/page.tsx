@@ -181,13 +181,12 @@ export default function PasswordSetupPage() {
         </div>
         {status && token && (
           <div
-            className={`text-sm rounded-md border px-3 py-2 ${
-              status.toLowerCase().includes('error') || status.toLowerCase().includes('fail') || status.toLowerCase().includes('missing') || status.toLowerCase().includes('expired')
+            className={`text-sm rounded-md border px-3 py-2 ${status.toLowerCase().includes('error') || status.toLowerCase().includes('fail') || status.toLowerCase().includes('missing') || status.toLowerCase().includes('expired')
                 ? 'bg-red-50 text-red-700 border-red-200'
                 : status.includes('!') || status.toLowerCase().includes('password set')
-                ? 'bg-green-50 text-green-700 border-green-200'
-                : 'bg-blue-50 text-blue-700 border-blue-200'
-            }`}
+                  ? 'bg-green-50 text-green-700 border-green-200'
+                  : 'bg-blue-50 text-blue-700 border-blue-200'
+              }`}
           >
             {status}
           </div>
