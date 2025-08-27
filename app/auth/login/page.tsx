@@ -90,7 +90,7 @@ export default function LoginPage() {
       } else if (data?.session) {
         console.log('✅ Login successful, session established');
         setSuccessMessage('Login successful! Redirecting...');
-        
+
         // Small delay to show success message
         setTimeout(() => {
           router.push('/ai-readiness/dashboard');

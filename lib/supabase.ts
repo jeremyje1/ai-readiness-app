@@ -43,37 +43,7 @@ try {
   // already logged above
 }
 
-// Enhanced client configuration with debugging and optimizations
-const clientOptions = {
-  auth: {
-    persistSession: true,
-    detectSessionInUrl: true,
-    autoRefreshToken: true,
-    debug: process.env.NODE_ENV === 'development'
-  },
-  global: {
-    headers: {
-      'x-client-info': 'ai-readiness-app/1.0.0',
-      'x-debug-trace': 'supabase-client'
-    },
-    fetch: (url: RequestInfo | URL, options?: RequestInit) => {
-      // Add request debugging in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🔗 Supabase fetch: ${url}`, {
-          method: options?.method || 'GET',
-          headers: options?.headers
-        })
-      }
-      return fetch(url, options)
-    }
-  },
-  // Connection pooling and timeout optimizations
-  db: {
-    schema: 'public'
-  }
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, clientOptions)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Server-side client with service role - only initialize on server
 export const supabaseAdmin = (() => {

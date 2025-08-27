@@ -19,16 +19,6 @@ export default function PasswordUpdatePage() {
       try {
         const sessionState = await sessionManager.getSessionState();
 
-        if (sessionState.loading) {
-          setStatus('Verifying session...');
-          return;
-        }
-
-        if (sessionState.error) {
-          setStatus(`Session error: ${sessionState.error}`);
-          return;
-        }
-
         if (!sessionState.session) {
           setStatus('No active session found. Please use the password reset link from your email.');
           return;
@@ -78,7 +68,9 @@ export default function PasswordUpdatePage() {
       }
 
       // Use enhanced auth service for password update
-      const { error } = await authService.updatePassword(password);
+  // authService currently does not expose updatePassword helper; use underlying client
+  const client = authService.getClient();
+  const { error } = await client.auth.updateUser({ password });
 
       if (error) {
         console.error('🔐 Password update failed:', error.message);

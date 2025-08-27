@@ -46,12 +46,12 @@ async function fixJeremyAccount() {
         }
 
         const existingUser = users.users.find(u => u.email === email);
-        
+
         if (existingUser) {
             console.log('✅ User found:', existingUser.id);
             console.log('   Created:', new Date(existingUser.created_at).toLocaleString());
             console.log('   Confirmed:', existingUser.email_confirmed_at ? 'Yes' : 'No');
-            
+
             // Update password
             const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
                 password: newPassword,
@@ -68,7 +68,7 @@ async function fixJeremyAccount() {
             }
         } else {
             console.log('❌ User not found, creating new account...');
-            
+
             // Create user
             const { data, error } = await supabaseAdmin.auth.admin.createUser({
                 email: email,
