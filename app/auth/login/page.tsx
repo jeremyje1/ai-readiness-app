@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [fallbackUsed, setFallbackUsed] = useState(false);
   const [hasValidSession, setHasValidSession] = useState(false);
+  const [isActivelyLoggingIn, setIsActivelyLoggingIn] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -44,6 +45,12 @@ export default function LoginPage() {
 
     // Initialize session manager and check for existing session
     const checkExistingSession = async () => {
+      // Don't check for existing sessions if we're actively logging in
+      if (isActivelyLoggingIn) {
+        console.log('🔐 Skipping session check - login in progress');
+        return;
+      }
+      
       try {
         const state = await sessionManager.getSessionState();
         if (state.session && !state.error) {
@@ -57,18 +64,19 @@ export default function LoginPage() {
       }
     };
     checkExistingSession();
-  }, [searchParams, router]);
+  }, [searchParams, router, isActivelyLoggingIn]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Prevent form submission if we already have a valid session
     if (hasValidSession) {
       console.log('🔐 Form submission blocked - valid session exists');
       return;
     }
-    
+
     setLoading(true);
+    setIsActivelyLoggingIn(true);
     setError(null);
     setFallbackUsed(false);
 
@@ -100,6 +108,7 @@ export default function LoginPage() {
       setError(err.message || 'An unexpected error occurred during login');
     } finally {
       setLoading(false);
+      setIsActivelyLoggingIn(false);
     }
   };
 
@@ -119,6 +128,13 @@ export default function LoginPage() {
         {hasValidSession && (
           <div className='text-sm text-blue-600 bg-blue-50 p-3 rounded border border-blue-200'>
             🔐 Valid session detected, redirecting...
+          </div>
+        )}
+
+        {/* Active login indicator */}
+        {isActivelyLoggingIn && (
+          <div className='text-sm text-purple-600 bg-purple-50 p-3 rounded border border-purple-200'>
+            🔄 Login in progress, please wait...
           </div>
         )}
 
@@ -144,7 +160,7 @@ export default function LoginPage() {
             onChange={e => setEmail(e.target.value)}
             required
             placeholder='jeremy.estrella@gmail.com'
-            disabled={hasValidSession}
+            disabled={hasValidSession || isActivelyLoggingIn}
           />
         </div>
         <div>
@@ -155,7 +171,7 @@ export default function LoginPage() {
             onChange={e => setPassword(e.target.value)}
             required
             placeholder='Enter your password'
-            disabled={hasValidSession}
+            disabled={hasValidSession || isActivelyLoggingIn}
           />
         </div>
 
@@ -167,16 +183,17 @@ export default function LoginPage() {
 
         <Button
           type='submit'
-          disabled={loading || hasValidSession}
+          disabled={loading || hasValidSession || isActivelyLoggingIn}
           className='w-full'
           onClick={(e: React.MouseEvent) => {
             console.log('🔐 Button clicked!');
             console.log('🔐 Loading state:', loading);
             console.log('🔐 Has valid session:', hasValidSession);
-            console.log('🔐 Button disabled:', loading || hasValidSession);
+            console.log('🔐 Is actively logging in:', isActivelyLoggingIn);
+            console.log('🔐 Button disabled:', loading || hasValidSession || isActivelyLoggingIn);
           }}
         >
-          {hasValidSession ? 'Redirecting...' : loading ? 'Signing in...' : 'Sign In'}
+          {hasValidSession ? 'Redirecting...' : (loading || isActivelyLoggingIn) ? 'Signing in...' : 'Sign In'}
         </Button>
 
         <div className='text-xs text-gray-500 text-center'>
