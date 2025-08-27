@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const includeRecordings = searchParams.get('recordings') === 'true';
 
     // Get user tier for access control
-    const userTier = await getUserTier(userId);
+    const userTier = await getUserTier(userId || undefined);
 
     // Get upcoming events from content manager
     const upcomingEvents = contentManager.getUpcomingEvents(audience, userTier, limit);
