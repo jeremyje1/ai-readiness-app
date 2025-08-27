@@ -20,12 +20,39 @@ export const useInstitutionSetup = () => {
             setLoading(true)
             setError(null)
 
-            // Create slug from name
-            const slug = data.name.toLowerCase()
+            // Create base slug from name
+            const baseSlug = data.name.toLowerCase()
                 .replace(/[^a-z0-9\s-]/g, '')
                 .replace(/\s+/g, '-')
                 .replace(/-+/g, '-')
                 .trim()
+
+            // Check for existing slugs and generate unique one if needed
+            let slug = baseSlug
+            let counter = 1
+            
+            while (true) {
+                const { data: existing } = await supabase
+                    .from('institutions')
+                    .select('id')
+                    .eq('slug', slug)
+                    .limit(1)
+                
+                if (!existing || existing.length === 0) {
+                    // Slug is unique, use it
+                    break
+                } else {
+                    // Slug exists, try with counter
+                    slug = `${baseSlug}-${counter}`
+                    counter++
+                }
+                
+                // Safety check to prevent infinite loop
+                if (counter > 100) {
+                    slug = `${baseSlug}-${Date.now()}`
+                    break
+                }
+            }
 
             // Insert institution
             const { data: institution, error: institutionError } = await supabase
@@ -42,7 +69,14 @@ export const useInstitutionSetup = () => {
                 .single()
 
             if (institutionError) {
-                throw new Error(institutionError.message)
+                // Provide user-friendly error messages
+                if (institutionError.message?.includes('institutions_slug_key')) {
+                    throw new Error('An institution with this name already exists. Please try a different name.')
+                } else if (institutionError.message?.includes('duplicate key')) {
+                    throw new Error('This institution name is already in use. Please choose a different name.')
+                } else {
+                    throw new Error(`Failed to create institution: ${institutionError.message}`)
+                }
             }
 
             // Create membership for the user
@@ -55,7 +89,12 @@ export const useInstitutionSetup = () => {
                 })
 
             if (membershipError) {
-                throw new Error(membershipError.message)
+                // Handle membership creation errors with user-friendly messages
+                if (membershipError.message?.includes('duplicate key')) {
+                    throw new Error('You already have access to this institution.')
+                } else {
+                    throw new Error(`Failed to grant institution access: ${membershipError.message}`)
+                }
             }
 
             return {
@@ -69,7 +108,19 @@ export const useInstitutionSetup = () => {
             }
 
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Failed to create institution'
+            console.error('Institution creation error:', err)
+            let message = 'Failed to create institution'
+            
+            if (err instanceof Error) {
+                if (err.message.includes('institutions_slug_key') || err.message.includes('duplicate key')) {
+                    message = 'An institution with this name already exists. Please try a different name.'
+                } else if (err.message.includes('unique constraint')) {
+                    message = 'This institution information conflicts with existing data. Please verify your details.'
+                } else {
+                    message = err.message
+                }
+            }
+            
             setError(message)
             return null
         } finally {
