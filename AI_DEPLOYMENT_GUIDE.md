@@ -32,7 +32,7 @@ Copy `.env.production.example` and configure:
 
 ```bash
 # Critical for AI functionality
-OPENAI_API_KEY=***REMOVED***
+OPENAI_API_KEY=sk-proj-...
 ENABLE_ADVANCED_AI=true
 
 # Domain configuration

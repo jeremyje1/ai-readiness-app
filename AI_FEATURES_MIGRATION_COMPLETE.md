@@ -81,7 +81,7 @@ npm run dev
 cp .env.production.example .env.local
 
 # Configure critical variables
-OPENAI_API_KEY=***REMOVED***
+OPENAI_API_KEY=sk-proj-...
 ENABLE_ADVANCED_AI=true
 DATABASE_URL=postgresql://...
 ```

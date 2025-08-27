@@ -37,9 +37,13 @@ bfg --replace-text ../passwords.txt .git
 git reflog expire --expire=now --all && git gc --prune=now --aggressive
 ```
 
-Create `passwords.txt` with:
-```
-***REMOVED***
+## Create passwords.txt file for BFG
+```bash
+# Create file with both compromised keys (redacted here for security)
+cat > passwords.txt << 'EOF'
+sk_live_51Rxag5...REDACTED...cyJhkUxs
+sk-proj-wyfZhc...REDACTED...xtksANO4A
+EOF
 ```
 
 Option B: **git-filter-branch (Alternative)**

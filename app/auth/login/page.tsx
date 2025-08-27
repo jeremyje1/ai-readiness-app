@@ -63,8 +63,31 @@ export default function LoginPage() {
         // Continue with login form if session check fails
       }
     };
-    checkExistingSession();
+    
+    // Only check for existing session on initial load, not when actively logging in
+    if (!isActivelyLoggingIn) {
+      checkExistingSession();
+    }
   }, [searchParams, router, isActivelyLoggingIn]);
+
+  // Add session state change listener that respects login state
+  useEffect(() => {
+    const unsubscribe = sessionManager.onSessionChange((state) => {
+      // Ignore session changes during active login process
+      if (isActivelyLoggingIn) {
+        console.log('🔐 Ignoring session change during active login');
+        return;
+      }
+
+      if (state.session && !state.error && !hasValidSession) {
+        console.log('🔐 Session state changed to valid, redirecting...');
+        setHasValidSession(true);
+        router.push('/ai-readiness/dashboard');
+      }
+    });
+
+    return unsubscribe;
+  }, [isActivelyLoggingIn, hasValidSession, router]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +115,8 @@ export default function LoginPage() {
       if (result.error) {
         console.error('🔐 Authentication failed:', result.error.message);
         setError(result.error.message);
+        setIsActivelyLoggingIn(false);
+        setLoading(false);
         return;
       }
 
@@ -101,6 +126,10 @@ export default function LoginPage() {
       }
 
       console.log('✅ Authentication successful, redirecting...');
+      
+      // Small delay to ensure session is properly established
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       router.push('/ai-readiness/dashboard');
 
     } catch (err: any) {

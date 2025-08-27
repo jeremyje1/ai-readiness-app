@@ -2,7 +2,7 @@
 
 ## Incident Summary
 - **Date**: August 27, 2025
-- **Compromised Key**: `***REMOVED***`
+- **Compromised Key**: `sk-proj-wyfZhc...REDACTED...xtksANO4A` (fully redacted for security)
 - **Key Name**: "Organizational Realign App-prod" (sk-pro...O4A)
 - **Status**: DISABLED by OpenAI
 - **Impact**: AI-powered features in production application affected
@@ -51,7 +51,7 @@ vercel --prod
 
 ```bash
 # Add compromised key to cleanup file
-echo "***REMOVED***" >> passwords.txt
+echo "sk-proj-wyfZhc...REDACTED...xtksANO4A" >> passwords.txt
 
 # Use BFG to clean git history
 bfg --replace-text passwords.txt --no-blob-protection .

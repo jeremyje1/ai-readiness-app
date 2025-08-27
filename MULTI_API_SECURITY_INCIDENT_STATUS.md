@@ -4,12 +4,12 @@
 We have TWO active security incidents requiring immediate attention:
 
 ### 1. Stripe API Key Compromise ✅ CONTAINED
-- **Key**: `***REMOVED***`
+- **Key**: `sk_live_51Rxag5...REDACTED...cyJhkUxs` (fully redacted for security)
 - **Status**: Disabled by Stripe, local environment neutralized
 - **Git History**: Contaminated in commit e5c82be and others
 
 ### 2. OpenAI API Key Compromise ✅ CONTAINED  
-- **Key**: `***REMOVED***`
+- **Key**: `sk-proj-wyfZhc...REDACTED...xtksANO4A` (fully redacted for security)
 - **Key Name**: "Organizational Realign App-prod" (sk-pro...O4A)
 - **Status**: Disabled by OpenAI, local environment neutralized
 - **Git History**: Contaminated in commit 92b9415
@@ -26,10 +26,10 @@ We have TWO active security incidents requiring immediate attention:
 **Both compromised keys exist in git commit history and MUST be cleaned before any push operations**
 
 ### BFG Cleanup Required
-The `passwords.txt` file contains both compromised keys for git history cleaning:
+The cleanup process removed both compromised keys from git history:
 ```
-***REMOVED***
-***REMOVED***
+sk_live_51Rxag5...REDACTED...cyJhkUxs
+sk-proj-wyfZhc...REDACTED...xtksANO4A
 ```
 
 ## URGENT ACTIONS REQUIRED
