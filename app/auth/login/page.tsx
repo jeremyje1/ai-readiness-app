@@ -43,25 +43,60 @@ export default function LoginPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
+    
     console.log('🔐 Form submission started');
     console.log('🔐 Email:', email);
+    console.log('🔐 Password length:', password.length);
+    console.log('🔐 AuthService available:', typeof authService);
+    
+    // Set loading state
+    setLoading(true);
+    setError(null);
     console.log('🔐 Loading state set to:', true);
 
     try {
-      console.log('🔐 Attempting AuthService signInWithPassword...');
-
+      console.log('🔐 About to call authService.signInWithPassword...');
+      
+      // Add a small delay to ensure the UI updates
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
+      console.log('🔐 Calling authService.signInWithPassword now...');
+      
       // Use AuthService with built-in timeout and fallback
-      const result = await authService.signInWithPassword(email.trim(), password);
+      let result;
+      try {
+        result = await authService.signInWithPassword(email.trim(), password);
+      } catch (authServiceError: any) {
+        console.error('🔐 AuthService threw an error, falling back to direct Supabase:', authServiceError);
+        
+        // Fallback to direct Supabase client if AuthService fails
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password
+          });
+          
+          result = {
+            data,
+            error,
+            method: 'direct-fallback',
+            timestamp: Date.now()
+          };
+        } catch (directError: any) {
+          console.error('🔐 Direct Supabase also failed:', directError);
+          throw new Error(`Both AuthService and direct Supabase failed: ${authServiceError.message} | ${directError.message}`);
+        }
+      }
 
       console.log('🔐 AuthService response received');
+      console.log('🔐 Full result:', JSON.stringify(result, null, 2));
       console.log('🔐 Method:', result.method);
       console.log('🔐 Data:', result.data ? 'Present' : 'Null');
       console.log('🔐 Error:', result.error ? result.error.message : 'None');
 
       if (result.error) {
+        console.log('🔐 Processing error result...');
+        
         // Improved error messages
         let errorMsg = 'Login failed: ';
         if (result.error.message.includes('Invalid login credentials')) {
@@ -76,26 +111,36 @@ export default function LoginPage() {
         setError(errorMsg);
         console.error('🔐 Setting error state:', result.error.message);
         setLoading(false);
+        console.log('🔐 Loading state set to false after error');
       } else if (result.data?.session) {
         console.log('✅ Login successful, session established');
         setSuccessMessage('Login successful! Redirecting...');
 
         // Small delay to show success message, then redirect
         setTimeout(() => {
+          console.log('🔐 Redirecting to dashboard...');
           router.push('/ai-readiness/dashboard');
         }, 500);
         // Don't set loading to false here - let redirect happen
       } else {
+        console.log('🔐 No session in successful result');
         setError('Login failed: No session returned');
         console.error('🔐 No session data returned');
         setLoading(false);
+        console.log('🔐 Loading state set to false after no session');
       }
     } catch (err: any) {
-      const errorMsg = `Unexpected error: ${err.message}`;
+      console.error('🔐 Exception caught in submit:', err);
+      console.error('🔐 Exception stack:', err.stack);
+      
+      const errorMsg = `Unexpected error: ${err.message || 'Unknown error'}`;
       setError(errorMsg);
-      console.error('🔐 Caught exception:', err);
+      console.error('🔐 Setting error state for exception:', err.message);
       setLoading(false);
+      console.log('🔐 Loading state set to false after exception');
     }
+    
+    console.log('🔐 Submit function completed');
   };
 
   return (
