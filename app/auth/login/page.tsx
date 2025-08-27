@@ -49,7 +49,8 @@ export default function LoginPage() {
     console.log('🔐 Email:', email);
     console.log('🔐 Loading state set to:', true);
 
-    try {
+  let redirected = false; // prevent double redirects if fallback succeeds then original resolves
+  try {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const anonKeyLen = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length || 0;
       console.log('🔐 Attempting Supabase signInWithPassword...');
@@ -68,7 +69,7 @@ export default function LoginPage() {
         reject(new Error(`Login timeout after ${timeoutMs / 1000}s (no response from Supabase)`));
       }, timeoutMs));
 
-      const { data, error } = await Promise.race([loginPromise, timeout]);
+  const { data, error } = await Promise.race([loginPromise, timeout]);
       const elapsed = Math.round(performance.now() - start);
       console.log(`🔐 Supabase response received in ${elapsed}ms`);
       console.log('🔐 Data:', (data as any)?.user ? 'UserPresent' : 'None');
@@ -79,11 +80,68 @@ export default function LoginPage() {
         console.error('🔐 Setting error state:', error.message);
       } else {
         console.log('✅ Login successful, attempting redirect...');
+        redirected = true;
         router.push('/ai-readiness/dashboard');
       }
     } catch (err: any) {
       console.error('🔐 Caught exception / timeout:', err);
+      const isTimeout = /timeout/i.test(err?.message || '');
       setError(err.message || 'Unexpected error');
+
+      if (isTimeout) {
+        console.log('⏱️  Detected login timeout – initiating manual password grant fallback...');
+        try {
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+          if (!supabaseUrl || !anonKey) {
+            console.warn('⚠️  Missing env variables for manual fallback.');
+            throw new Error('Configuration error (missing Supabase env)');
+          }
+          const grantUrl = `${supabaseUrl.replace(/\/$/, '')}/auth/v1/token?grant_type=password`;
+          console.log('🌐 Fallback POST ->', grantUrl);
+          const fallbackStart = performance.now();
+          const resp = await fetch(grantUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': anonKey,
+            },
+            body: JSON.stringify({ email: email.trim(), password })
+          });
+          const txt = await resp.text();
+          console.log('🌐 Fallback raw status:', resp.status);
+          console.log('🌐 Fallback raw body (truncated 500):', txt.slice(0, 500));
+          if (!resp.ok) {
+            throw new Error(`Fallback auth failed (${resp.status})`);
+          }
+          let json: any;
+          try { json = JSON.parse(txt); } catch (jErr) {
+            console.warn('⚠️  Failed to parse fallback JSON:', (jErr as any).message);
+            throw new Error('Invalid fallback response');
+          }
+            // Expected keys: access_token, refresh_token, expires_in, token_type, user
+          if (!json.access_token || !json.refresh_token) {
+            throw new Error('Fallback response missing tokens');
+          }
+          console.log('🌐 Fallback tokens received. Setting session...');
+          const setRes = await supabase.auth.setSession({
+            access_token: json.access_token,
+            refresh_token: json.refresh_token,
+          });
+          console.log('🌐 setSession result error:', setRes.error?.message || 'None');
+          if (setRes.error) throw setRes.error;
+          const ms = Math.round(performance.now() - fallbackStart);
+          console.log(`✅ Fallback session established in ${ms}ms`);
+          setError(null);
+          if (!redirected) {
+            redirected = true;
+            router.push('/ai-readiness/dashboard');
+          }
+        } catch (fbErr: any) {
+          console.error('❌ Fallback manual password grant failed:', fbErr);
+          setError(prev => prev ? `${prev} | Fallback failed: ${fbErr.message}` : `Fallback failed: ${fbErr.message}`);
+        }
+      }
       // Attempt lightweight env debug fetch to show if route reachable
       try {
         const r = await fetch('/api/debug/auth-env');
@@ -94,7 +152,7 @@ export default function LoginPage() {
       }
     }
 
-  console.log('🔐 Setting loading state to false');
+    console.log('🔐 Setting loading state to false');
     setLoading(false);
   };
 
