@@ -21,7 +21,7 @@ async function testDirectAuth() {
     });
 
     const email = 'test@aiblueprint.com';
-    const password = 'Test1234!@#$2025';
+    const password = 'TestPassword123!';
 
     try {
         console.log('\n1. Testing direct signInWithPassword...');

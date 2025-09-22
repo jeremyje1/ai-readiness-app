@@ -42,7 +42,7 @@ export default function TestAuthPage() {
             addLog(`URL: ${supabaseUrl}`);
 
             const email = 'test@aiblueprint.com';
-            const password = 'Test1234!@#$2025';
+            const password = 'TestPassword123!';
 
             addLog(`Attempting login for: ${email}`);
 
@@ -117,7 +117,7 @@ export default function TestAuthPage() {
                 },
                 body: JSON.stringify({
                     email: 'test@aiblueprint.com',
-                    password: 'Test1234!@#$2025'
+                    password: 'TestPassword123!'
                 })
             });
 

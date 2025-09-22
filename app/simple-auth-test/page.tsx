@@ -53,7 +53,7 @@ export default function SimpleAuthTestPage() {
                 },
                 body: JSON.stringify({
                     email: 'test@aiblueprint.com',
-                    password: 'Test1234!@#$2025'
+                    password: 'TestPassword123!'
                 })
             });
             
