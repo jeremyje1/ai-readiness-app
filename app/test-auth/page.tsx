@@ -9,7 +9,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export default function TestAuthPage() {
     const [logs, setLogs] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    
+
     // Show environment info
     const envInfo = {
         url: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'NOT SET',
@@ -102,14 +102,14 @@ export default function TestAuthPage() {
             setLoading(false);
         }
     };
-    
+
     const testViaAPI = async () => {
         setLoading(true);
         setLogs([]);
-        
+
         try {
             addLog('Testing auth via server API...');
-            
+
             const response = await fetch('/api/debug-auth', {
                 method: 'POST',
                 headers: {
@@ -120,17 +120,17 @@ export default function TestAuthPage() {
                     password: 'Test1234!@#$2025'
                 })
             });
-            
+
             addLog(`API response status: ${response.status}`);
             const data = await response.json();
             addLog(`API response: ${JSON.stringify(data, null, 2)}`);
-            
+
             if (data.success) {
                 addLog('✅ Server-side auth successful!');
             } else {
                 addLog(`❌ Server-side auth failed: ${data.error}`);
             }
-            
+
         } catch (error: any) {
             addLog(`API error: ${error.message}`);
         } finally {
@@ -141,7 +141,7 @@ export default function TestAuthPage() {
     return (
         <div className="p-8 max-w-4xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Auth Test Page</h1>
-            
+
             <div className="bg-blue-50 p-4 rounded mb-6">
                 <h2 className="font-semibold mb-2">Environment Info:</h2>
                 <div className="text-sm">
@@ -167,7 +167,7 @@ export default function TestAuthPage() {
                 >
                     {loading ? 'Testing...' : 'Test Supabase Connection'}
                 </button>
-                
+
                 <button
                     onClick={testViaAPI}
                     disabled={loading}
@@ -175,7 +175,7 @@ export default function TestAuthPage() {
                 >
                     {loading ? 'Testing...' : 'Test Auth via API'}
                 </button>
-                
+
                 <button
                     onClick={async () => {
                         setLoading(true);

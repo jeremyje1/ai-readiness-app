@@ -172,7 +172,7 @@ function shouldSkipMiddleware(pathname: string): boolean {
     // Service worker and manifests
     '/sw.js',
     '/manifest.json',
-    
+
     // Debug routes (temporary)
     '/test-auth',
     '/debug-auth',
