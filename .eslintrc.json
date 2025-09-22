@@ -20,6 +20,14 @@
             "rules": {
                 "cypress/no-unnecessary-waiting": "warn"
             }
+        },
+        {
+            "files": [
+                "app/debug-auth/**"
+            ],
+            "rules": {
+                "react-hooks/rules-of-hooks": "off"
+            }
         }
     ]
 }

@@ -9,6 +9,7 @@ export default function PasswordSetupPage() {
   const token = params.get('token');
   const sessionId = params.get('session_id');
   const emailFromQuery = params.get('email') || '';
+  const returnTo = params.get('return_to') || '/'; // Handle return URL
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -121,16 +122,20 @@ export default function PasswordSetupPage() {
         throw new Error(json.error || 'Failed');
       }
 
-      setStatus('Password set! Redirecting to login...');
-      console.log('🔐 Password set successfully, redirecting to login page...');
+      setStatus('Password set! Redirecting...');
+      console.log('🔐 Password set successfully, redirecting...');
 
       // Clear loading immediately 
       setLoading(false);
 
-      // Skip auto-login attempts for now and just redirect to login
-      // This is more reliable and prevents hanging
+      // Redirect to the return URL if provided, otherwise to login with success message
       setTimeout(() => {
-        router.push('/auth/login?message=password-set');
+        if (returnTo && returnTo !== '/') {
+          console.log(`🔐 Redirecting to return URL: ${returnTo}`);
+          router.push(returnTo);
+        } else {
+          router.push('/auth/login?message=password-set');
+        }
       }, 1500);
       return;
     } catch (err: any) {

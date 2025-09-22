@@ -13,10 +13,16 @@ export default function AuthDebugPage() {
     const [loading, setLoading] = useState(false);
     const [authResult, setAuthResult] = useState<any>(null);
 
+    // Redirect if in production (middleware will handle this, but this is a fallback)
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+        window.location.href = '/auth/login';
+        return null;
+    }
+
     useEffect(() => {
         // Check Supabase configuration
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || window.location.origin.includes('localhost') ? '' : '';
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
         setConfig({
             url: supabaseUrl,
@@ -136,6 +142,24 @@ export default function AuthDebugPage() {
 
         setLoading(false);
     };
+
+    // Show warning in production
+    if (process.env.NODE_ENV === 'production') {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+                <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+                    <h2 className="text-xl font-semibold text-gray-900">Page Not Available</h2>
+                    <p className="mt-4 text-gray-600">This page is not available in production.</p>
+                    <Button
+                        onClick={() => window.location.href = '/'}
+                        className="mt-6 w-full"
+                    >
+                        Go Home
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">

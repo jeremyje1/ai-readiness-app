@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { rateLimitAsync } from '@/lib/rate-limit';
 import { supabaseAdmin } from '@/lib/supabase';
 import crypto from 'crypto';
-import { rateLimit, rateLimitAsync } from '@/lib/rate-limit';
+import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +20,15 @@ async function findOrCreateUser(email: string, name?: string) {
   const { data: list } = await supabaseAdmin.auth.admin.listUsers();
   const existing = list.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
   if (existing) return existing.id;
-  const { data, error } = await supabaseAdmin.auth.admin.createUser({ email, email_confirm: true, user_metadata: { name: name || 'Customer', payment_verified: true } });
+  const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    user_metadata: {
+      name: name || 'Customer',
+      payment_verified: true,
+      created_via: 'stripe_checkout' // Mark as created via checkout flow without password
+    }
+  });
   if (error) throw error;
   return data.user.id;
 }
@@ -28,7 +36,7 @@ async function findOrCreateUser(email: string, name?: string) {
 async function createPwToken(userId: string, email: string) {
   if (!supabaseAdmin) throw new Error('Admin client unavailable');
   const token = crypto.randomBytes(24).toString('hex');
-  const expires = new Date(Date.now() + 1000*60*60).toISOString();
+  const expires = new Date(Date.now() + 1000 * 60 * 60).toISOString();
   const { error } = await supabaseAdmin.from('auth_password_setup_tokens').insert({ user_id: userId, email, token, expires_at: expires });
   if (error) throw error;
   return token;
@@ -37,7 +45,7 @@ async function createPwToken(userId: string, email: string) {
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
-  const rl = await rateLimitAsync(`stripe_bootstrap|${ip}`, 5, 60_000);
+    const rl = await rateLimitAsync(`stripe_bootstrap|${ip}`, 5, 60_000);
     if (!rl.allowed) return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
 
     const { session_id } = await req.json();
@@ -55,7 +63,7 @@ export async function POST(req: NextRequest) {
     if (!isPaid) return NextResponse.json({ error: 'Session not paid' }, { status: 402 });
 
     // Prevent abuse: limit per email per minute
-  const rlEmail = await rateLimitAsync(`stripe_bootstrap_email|${email.toLowerCase()}`, 3, 60_000);
+    const rlEmail = await rateLimitAsync(`stripe_bootstrap_email|${email.toLowerCase()}`, 3, 60_000);
     if (!rlEmail.allowed) return NextResponse.json({ error: 'Email rate limit exceeded' }, { status: 429 });
 
     const userId = await findOrCreateUser(email, checkout.customer_details?.name || undefined);
@@ -79,7 +87,7 @@ export async function POST(req: NextRequest) {
     let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || '';
     // Normalize legacy domain if somehow present
     if (baseUrl.includes('aireadiness.northpathstrategies.org')) {
-      baseUrl = 'https://aiblueprint.k12aiblueprint.com';
+      baseUrl = 'https://aiblueprint.higheredaiblueprint.com';
     }
     const passwordSetupUrl = `${baseUrl.replace(/\/$/, '')}/auth/password/setup?token=${token}`;
     return NextResponse.json({ passwordSetupUrl, email, reused: existingTokens?.length === 1 });

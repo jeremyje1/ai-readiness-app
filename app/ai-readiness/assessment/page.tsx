@@ -41,12 +41,38 @@ export default function AIReadinessAssessmentPage() {
 
   // Initialize assessment ID and load questions
   useEffect(() => {
-    // Detect domain context
-    const hostname = window.location.hostname;
-    if (hostname.includes('k12aiblueprint.com')) {
-      setInstitutionType('K12');
-    } else if (hostname.includes('higheredaiblueprint.com')) {
-      setInstitutionType('HigherEd');
+    // First check localStorage for saved institution type
+    const savedType = localStorage.getItem('ai_blueprint_institution_type');
+    if (savedType === 'K12' || savedType === 'HigherEd') {
+      setInstitutionType(savedType);
+    } else {
+      // Then check onboarding data
+      const onboardingData = localStorage.getItem('ai_readiness_onboarding');
+      if (onboardingData) {
+        try {
+          const parsed = JSON.parse(onboardingData);
+          const orgType = parsed.organizationType;
+          if (orgType === 'K12' || orgType === 'District') {
+            setInstitutionType('K12');
+            localStorage.setItem('ai_blueprint_institution_type', 'K12');
+          } else if (orgType === 'HigherEd' || orgType === 'University' || orgType === 'Community College') {
+            setInstitutionType('HigherEd');
+            localStorage.setItem('ai_blueprint_institution_type', 'HigherEd');
+          }
+        } catch (e) {
+          console.error('Failed to parse onboarding data:', e);
+        }
+      }
+      
+      // Finally fall back to domain detection
+      const hostname = window.location.hostname;
+      if (hostname.includes('k12')) {
+        setInstitutionType('K12');
+        localStorage.setItem('ai_blueprint_institution_type', 'K12');
+      } else if (hostname.includes('highered')) {
+        setInstitutionType('HigherEd');
+        localStorage.setItem('ai_blueprint_institution_type', 'HigherEd');
+      }
     }
 
     // Generate or retrieve assessment ID

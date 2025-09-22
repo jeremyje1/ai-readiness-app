@@ -14,20 +14,28 @@ export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const host = request.headers.get('host') || '';
 
+  // Block debug routes in production
+  if (process.env.NODE_ENV === 'production') {
+    if (pathname.startsWith('/debug-auth')) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+  }
+
   // Skip middleware for certain paths
   if (shouldSkipMiddleware(pathname)) {
     return NextResponse.next();
   }
 
   try {
-    // Define canonical domains
-    const k12Domain = 'aiblueprint.k12aiblueprint.com';
-    const higherEdDomain = 'aiblueprint.higheredaiblueprint.com';
+    // Define primary domain and legacy domains
+    const primaryDomain = 'aiblueprint.higheredaiblueprint.com';
+    const legacyK12Domain = 'aiblueprint.k12aiblueprint.com';
+    const legacyHigherEdDomain = 'aiblueprint.higheredaiblueprint.com';
 
-    // Redirect legacy domain to K-12 canonical
-    if (host === 'aireadiness.northpathstrategies.org') {
+    // Redirect legacy domains to primary unified domain
+    if (host === 'aireadiness.northpathstrategies.org' || host === legacyK12Domain) {
       const url = new URL(request.url);
-      url.host = k12Domain;
+      url.host = primaryDomain;
       return NextResponse.redirect(url, 301);
     }
 

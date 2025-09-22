@@ -148,6 +148,10 @@ export default function AIReadinessOnboarding() {
             // Save onboarding data and proceed to assessment (client-side only)
             if (typeof window !== 'undefined') {
                 localStorage.setItem('ai_readiness_onboarding', JSON.stringify(data));
+                
+                // Save institution type separately for persistence
+                const institutionType = (data.organizationType === 'K12' || data.organizationType === 'District') ? 'K12' : 'HigherEd';
+                localStorage.setItem('ai_blueprint_institution_type', institutionType);
             }
             router.push(`/ai-readiness/assessment?mode=${assessmentMode}&tier=ai-readiness-comprehensive&onboarded=true`);
         }

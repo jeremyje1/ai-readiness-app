@@ -64,7 +64,8 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
       stripe_customer_id: userData.stripeCustomerId,
       stripe_session_id: userData.stripeSessionId,
       payment_verified: true,
-      access_granted_at: new Date().toISOString()
+      access_granted_at: new Date().toISOString(),
+      created_via: 'stripe_webhook' // Mark as created via webhook without password
     }
   });
 
@@ -214,7 +215,7 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
       const userId = await createOrFindUserAndGrantAccess(userData);
 
       // Send access email
-      const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.k12aiblueprint.com';
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.higheredaiblueprint.com';
       await sendAssessmentAccessEmail(userData.email, userData.name, tier, baseUrl);
 
       console.log(`🎉 Customer ${userData.email} granted access to ${tier} (User ID: ${userId})`);

@@ -1,11 +1,12 @@
 import AuthNav from '@/components/AuthNav'
+import { PasswordSetupGuard } from '@/components/PasswordSetupGuard'
 import TutorialProvider from '@/components/TutorialProvider'
 import UserProvider from '@/components/UserProvider'
 import { AudienceProvider } from '@/lib/audience/AudienceContext'
 import { deriveAudience } from '@/lib/audience/deriveAudience'
-import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { headers } from 'next/headers'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -29,10 +30,10 @@ export default function RootLayout({
   const headersList = headers();
   const host = headersList.get('host') || undefined;
   const referer = headersList.get('referer') || undefined;
-  
+
   const derivation = deriveAudience({ host, referer });
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com';
-  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.higheredaiblueprint.com';
+
   return (
     <html lang="en">
       <head>
@@ -43,7 +44,9 @@ export default function RootLayout({
           <UserProvider>
             <TutorialProvider>
               <AuthNav />
-              {children}
+              <PasswordSetupGuard>
+                {children}
+              </PasswordSetupGuard>
             </TutorialProvider>
           </UserProvider>
         </AudienceProvider>

@@ -33,12 +33,42 @@ export default function AIReadinessDashboard() {
   // Handle hydration and get institution type from localStorage or user profile
   useEffect(() => {
     setHydrated(true);
-    // Get institution type from localStorage (set during registration)
+    
+    // Try multiple sources for institution type
+    // 1. Direct localStorage setting
     const storedType = localStorage.getItem('ai_blueprint_institution_type');
     if (storedType === 'HigherEd' || storedType === 'K12') {
       setInstitutionType(storedType);
+      return;
     }
-    // TODO: Also fetch from user profile in database when user system is enhanced
+    
+    // 2. Check onboarding data
+    const onboardingData = localStorage.getItem('ai_readiness_onboarding');
+    if (onboardingData) {
+      try {
+        const parsed = JSON.parse(onboardingData);
+        const orgType = parsed.organizationType;
+        if (orgType === 'K12' || orgType === 'District') {
+          setInstitutionType('K12');
+          localStorage.setItem('ai_blueprint_institution_type', 'K12');
+        } else if (orgType === 'HigherEd' || orgType === 'University' || orgType === 'Community College') {
+          setInstitutionType('HigherEd');
+          localStorage.setItem('ai_blueprint_institution_type', 'HigherEd');
+        }
+      } catch (e) {
+        console.error('Failed to parse onboarding data:', e);
+      }
+    }
+    
+    // 3. Fall back to domain detection
+    const hostname = window.location.hostname;
+    if (hostname.includes('k12')) {
+      setInstitutionType('K12');
+      localStorage.setItem('ai_blueprint_institution_type', 'K12');
+    } else if (hostname.includes('highered')) {
+      setInstitutionType('HigherEd');
+      localStorage.setItem('ai_blueprint_institution_type', 'HigherEd');
+    }
   }, []);
 
   useEffect(() => {
@@ -343,8 +373,23 @@ export default function AIReadinessDashboard() {
 
             <Button
               onClick={() => {
-                alert('🕐 Scheduling Information\n\n✅ Expert Sessions Available!\n\n⏰ Time Zone Details:\n• Calendly shows Pacific Time by default\n• Jeremy is in Central Time (CST/CDT)\n• You can adjust time zone on the booking page\n• 30-minute sessions available\n\n📅 What to Expect:\n• AI implementation strategy discussion\n• Personalized recommendations review\n• Q&A about your assessment results\n• Next steps planning\n\nClick OK to open scheduling page.');
-                window.open('https://calendly.com/jeremyestrella/30min', '_blank');
+                // Try to open Calendly in a new window first
+                const calendlyUrl = 'https://calendly.com/jeremyestrella/30min';
+                const popup = window.open(
+                  calendlyUrl,
+                  'calendly-popup',
+                  'width=800,height=700,scrollbars=yes,resizable=yes,toolbar=no,location=no'
+                );
+                
+                // If popup is blocked, show instructions and fallback
+                if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+                  alert('🕐 Scheduling Information\n\n✅ Expert Sessions Available!\n\n⚠️ Pop-up Blocked\nYour browser blocked the scheduling window.\n\n📋 To Schedule:\n1. Allow pop-ups for this site\n2. Or copy this link: ' + calendlyUrl + '\n\n⏰ Time Zone Details:\n• Calendly shows Pacific Time by default\n• Jeremy is in Central Time (CST/CDT)\n• You can adjust time zone on the booking page\n• 30-minute sessions available\n\n📅 What to Expect:\n• AI implementation strategy discussion\n• Personalized recommendations review\n• Q&A about your assessment results\n• Next steps planning');
+                  
+                  // Fallback: Navigate in current tab after user acknowledges
+                  if (confirm('Would you like to open the scheduling page in this tab?')) {
+                    window.location.href = calendlyUrl;
+                  }
+                }
               }}
               className="flex flex-col items-center gap-2 h-20 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200"
               variant="outline"
