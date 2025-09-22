@@ -9,6 +9,13 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export default function TestAuthPage() {
     const [logs, setLogs] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
+    
+    // Show environment info
+    const envInfo = {
+        url: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'NOT SET',
+        hasAnonKey: !!supabaseAnonKey,
+        keyLength: supabaseAnonKey?.length || 0
+    };
 
     const addLog = (message: string) => {
         const timestamp = new Date().toISOString();
@@ -134,6 +141,15 @@ export default function TestAuthPage() {
     return (
         <div className="p-8 max-w-4xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Auth Test Page</h1>
+            
+            <div className="bg-blue-50 p-4 rounded mb-6">
+                <h2 className="font-semibold mb-2">Environment Info:</h2>
+                <div className="text-sm">
+                    <p>Supabase URL: {envInfo.url}</p>
+                    <p>Has Anon Key: {envInfo.hasAnonKey ? 'Yes' : 'No'}</p>
+                    <p>Key Length: {envInfo.keyLength} chars</p>
+                </div>
+            </div>
 
             <div className="space-y-4 mb-6">
                 <button
@@ -158,6 +174,28 @@ export default function TestAuthPage() {
                     className="px-4 py-2 bg-purple-500 text-white rounded disabled:opacity-50 ml-4"
                 >
                     {loading ? 'Testing...' : 'Test Auth via API'}
+                </button>
+                
+                <button
+                    onClick={async () => {
+                        setLoading(true);
+                        setLogs([]);
+                        try {
+                            addLog('Testing Supabase connectivity...');
+                            const response = await fetch('/api/test-supabase');
+                            addLog(`Response status: ${response.status}`);
+                            const data = await response.json();
+                            addLog(`Response: ${JSON.stringify(data, null, 2)}`);
+                        } catch (error: any) {
+                            addLog(`Connectivity test error: ${error.message}`);
+                        } finally {
+                            setLoading(false);
+                        }
+                    }}
+                    disabled={loading}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded disabled:opacity-50 ml-4"
+                >
+                    {loading ? 'Testing...' : 'Test Connectivity'}
                 </button>
             </div>
 

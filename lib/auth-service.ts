@@ -57,24 +57,9 @@ export class AuthService {
             }
             : () => { }
 
-        // TEMPORARY: Create fresh client to debug auth issues
-        // this.client = sharedSupabase
-        const { createClient } = require('@supabase/supabase-js')
-        this.client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                persistSession: this.config.persistSession,
-                detectSessionInUrl: true,
-                autoRefreshToken: true,
-                flowType: 'pkce',
-                debug: true
-            },
-            global: {
-                headers: {
-                    'x-client-info': 'auth-service-debug/1.0.0'
-                }
-            }
-        })
-        this.debugLog('Auth service initialized (created fresh Supabase client for debugging)', { url: SUPABASE_URL })
+        // Use shared Supabase client
+        this.client = sharedSupabase
+        this.debugLog('Auth service initialized (using shared Supabase client)', { url: SUPABASE_URL })
     }
 
     /**

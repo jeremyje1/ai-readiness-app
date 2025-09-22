@@ -14,12 +14,12 @@ export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const host = request.headers.get('host') || '';
 
-  // Block debug routes in production
-  if (process.env.NODE_ENV === 'production') {
-    if (pathname.startsWith('/debug-auth')) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
-  }
+  // Allow debug routes temporarily for troubleshooting
+  // if (process.env.NODE_ENV === 'production') {
+  //   if (pathname.startsWith('/debug-auth')) {
+  //     return NextResponse.redirect(new URL('/auth/login', request.url));
+  //   }
+  // }
 
   // Skip middleware for certain paths
   if (shouldSkipMiddleware(pathname)) {
@@ -172,6 +172,10 @@ function shouldSkipMiddleware(pathname: string): boolean {
     // Service worker and manifests
     '/sw.js',
     '/manifest.json',
+    
+    // Debug routes (temporary)
+    '/test-auth',
+    '/debug-auth',
 
     // Health checks
     '/health',
