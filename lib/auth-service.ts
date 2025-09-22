@@ -40,9 +40,11 @@ export class AuthService {
             persistSession: config.persistSession ?? true
         }
 
-        // Initialize debug logger - reduced verbosity to minimize logs
+        // Initialize debug logger - TEMPORARY: Full logging enabled for debugging
         this.debugLog = this.config.enableDebugLogging
             ? (message: string, data?: any) => {
+                // TEMPORARY: Log everything for debugging login hang
+                console.log(`[Auth Service] ${message}`, data || '')
                 if (message.includes('initialized')) {
                     // Only log initialization once per session to reduce log noise
                     if (!(global as any).__authServiceInitialized) {
@@ -84,11 +86,17 @@ export class AuthService {
 
         try {
             // Try SDK first with timeout
+            this.debugLog('Creating auth promise...')
+            const authPromise = this.client.auth.signInWithPassword({ email, password })
+            this.debugLog('Auth promise created, adding timeout wrapper...')
+            
             const sdkResult = await this.withTimeout(
-                this.client.auth.signInWithPassword({ email, password }),
+                authPromise,
                 this.config.timeoutMs,
                 'SDK sign in'
             )
+            
+            this.debugLog('Timeout wrapper completed', { hasError: !!sdkResult.error })
 
             if (sdkResult.error) throw sdkResult.error
 
@@ -403,11 +411,26 @@ export class AuthService {
         timeoutMs: number,
         operation: string
     ): Promise<T> {
+        this.debugLog(`Starting timeout wrapper for ${operation} (${timeoutMs}ms)`)
+        
         const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error(`${operation} timeout after ${timeoutMs}ms`)), timeoutMs)
+            const timeoutId = setTimeout(() => {
+                this.debugLog(`Timeout reached for ${operation} after ${timeoutMs}ms`)
+                reject(new Error(`${operation} timeout after ${timeoutMs}ms`))
+            }, timeoutMs)
+            
+            // Log that timeout was set
+            this.debugLog(`Timeout set for ${operation}, ID: ${timeoutId}`)
         })
 
-        return Promise.race([promise, timeoutPromise])
+        try {
+            const result = await Promise.race([promise, timeoutPromise])
+            this.debugLog(`${operation} completed successfully within timeout`)
+            return result
+        } catch (error) {
+            this.debugLog(`${operation} failed or timed out`, { error })
+            throw error
+        }
     }
 
 }

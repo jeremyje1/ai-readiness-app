@@ -1,0 +1,21 @@
+POSTMARK TOKEN CORRECTION - DEPLOYMENT UPDATE
+============================================
+
+Date: September 22, 2025
+Update Type: Environment Variable Correction
+
+POSTMARK SERVER TOKEN UPDATED ✅
+===============================
+
+Previous Token: 0d3ad691-28eb-48b6-891d-9bab5d0c3dc7
+Corrected Token: 455001d4-2657-4b12-bfc7-66c63734daf8
+
+Environment Variables Updated:
+- POSTMARK_SERVER_TOKEN: 455001d4-2657-4b12-bfc7-66c63734daf8
+- POSTMARK_API_TOKEN: 455001d4-2657-4b12-bfc7-66c63734daf8
+
+Deployment Status: ✅ COMPLETED
+Message Stream: aiblueprint-transactional
+From Email: info@northpathstrategies.org
+
+This ensures the correct X-Postmark-Server-Token is used for all email communications through the aiblueprint-transactional message stream.

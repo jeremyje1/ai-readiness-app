@@ -5,8 +5,8 @@
 
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { getAudienceCookie, getAudienceCookieDebugInfo, setAudienceCookie } from './lib/audience/cookie';
 import { deriveAudience, getAudienceOverride, getDerivationDebugInfo } from './lib/audience/deriveAudience';
-import { getAudienceCookie, setAudienceCookie, getAudienceCookieDebugInfo } from './lib/audience/cookie';
 
 const MIDDLEWARE_DEBUG = process.env.AUDIENCE_MIDDLEWARE_DEBUG === '1';
 
@@ -44,10 +44,10 @@ export function middleware(request: NextRequest) {
     if (override) {
       const response = NextResponse.next();
       setAudienceCookie(response, override);
-      
+
       // Set legacy headers for backwards compatibility
       setLegacyHeaders(response, override, host);
-      
+
       if (MIDDLEWARE_DEBUG) {
         console.log('[Audience Middleware] Override applied:', {
           audience: override,
@@ -55,13 +55,13 @@ export function middleware(request: NextRequest) {
           source: 'query_param'
         });
       }
-      
+
       return response;
     }
 
     // Get existing cookie
     const existingAudience = getAudienceCookie(request);
-    
+
     // Build derivation context
     const context = {
       host: request.headers.get('host') || undefined,
@@ -80,7 +80,7 @@ export function middleware(request: NextRequest) {
     // Update cookie if audience changed or doesn't exist
     if (!existingAudience || existingAudience !== audience) {
       setAudienceCookie(response, audience);
-      
+
       if (MIDDLEWARE_DEBUG) {
         console.log('[Audience Middleware] Cookie updated:', {
           audience,
@@ -100,10 +100,10 @@ export function middleware(request: NextRequest) {
     if (MIDDLEWARE_DEBUG || searchParams.get('debug_audience') === '1') {
       const debugInfo = getDerivationDebugInfo(context);
       const cookieDebugInfo = getAudienceCookieDebugInfo(request);
-      
+
       response.headers.set('x-audience-derivation', JSON.stringify(debugInfo));
       response.headers.set('x-audience-cookie-info', JSON.stringify(cookieDebugInfo));
-      
+
       // Log detailed debug info
       console.log('[Audience Middleware] Debug Info:', {
         derivation: debugInfo,
@@ -120,7 +120,7 @@ export function middleware(request: NextRequest) {
 
   } catch (error) {
     console.error('[Audience Middleware] Error:', error);
-    
+
     // Fallback: set default audience and continue
     const response = NextResponse.next();
     setAudienceCookie(response, 'k12'); // Safe default
@@ -135,7 +135,7 @@ export function middleware(request: NextRequest) {
 function setLegacyHeaders(response: NextResponse, audience: string, host: string) {
   const institutionType = audience === 'highered' ? 'HigherEd' : 'K12';
   const domainContext = audience === 'highered' ? 'higher-ed' : 'k12';
-  
+
   response.headers.set('x-institution-type', institutionType);
   response.headers.set('x-domain-context', domainContext);
   response.headers.set('x-current-domain', host);
@@ -160,19 +160,19 @@ function shouldSkipMiddleware(pathname: string): boolean {
     '/favicon.ico',
     '/robots.txt',
     '/sitemap.xml',
-    
+
     // API routes (they handle their own audience logic)
     '/api/',
-    
+
     // Public assets
     '/images/',
     '/icons/',
     '/pdf/',
-    
+
     // Service worker and manifests
     '/sw.js',
     '/manifest.json',
-    
+
     // Health checks
     '/health',
     '/ping',

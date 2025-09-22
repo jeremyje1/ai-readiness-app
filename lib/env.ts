@@ -5,27 +5,27 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().min(1, 'NEXT_PUBLIC_SUPABASE_URL is required'),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(10, 'NEXT_PUBLIC_SUPABASE_ANON_KEY is required'),
   NEXT_PUBLIC_SITE_URL: z.string().url().min(1, 'NEXT_PUBLIC_SITE_URL is required'),
-  
+
   // Server-only environment variables
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(10, 'SUPABASE_SERVICE_ROLE_KEY is required').optional(),
-  
+
   // Database (if using Prisma)
   DATABASE_URL: z.string().optional(),
-  
+
   // Stripe (if using payments)
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_PUBLISHABLE_KEY: z.string().optional(),
-  
+
   // NextAuth (if using)
   NEXTAUTH_URL: z.string().optional(),
   NEXTAUTH_SECRET: z.string().optional(),
-  
+
   // Postmark Email
   POSTMARK_SERVER_TOKEN: z.string().optional(),
   POSTMARK_API_TOKEN: z.string().optional(), // Alias for POSTMARK_SERVER_TOKEN
   POSTMARK_FROM_EMAIL: z.string().optional(),
-  
+
   // Node environment
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 })
@@ -60,15 +60,15 @@ function validateEnv(): Env {
         '  - NEXT_PUBLIC_SUPABASE_ANON_KEY\n' +
         '  - NEXT_PUBLIC_SITE_URL\n\n' +
         'See .env.local.example for reference.'
-      
+
       // In development, throw error to fail fast
       if (process.env.NODE_ENV === 'development') {
         throw new Error(errorMessage)
       }
-      
+
       // In production, log error but don't crash
       console.error('[ENV VALIDATION ERROR]', errorMessage)
-      
+
       // Return minimal valid config to prevent crash
       return {
         NEXT_PUBLIC_SUPABASE_URL: '',
