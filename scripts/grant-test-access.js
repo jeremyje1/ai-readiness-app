@@ -30,7 +30,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 async function grantTestAccess() {
     const email = process.argv[2];
-    
+
     if (!email) {
         console.log('❌ Usage: node scripts/grant-test-access.js email@example.com');
         process.exit(1);

@@ -49,7 +49,7 @@ export class AuthService {
                     // Only log initialization once per session to reduce log noise
                     if (!(global as any).__authServiceInitialized) {
                         console.log(`[Auth Service] ${message}`, data || '')
-                        ;(global as any).__authServiceInitialized = true
+                            ; (global as any).__authServiceInitialized = true
                     }
                 } else {
                     console.log(`[Auth Service] ${message}`, data || '')
@@ -57,9 +57,24 @@ export class AuthService {
             }
             : () => { }
 
-        // Reuse shared singleton Supabase client to prevent multiple GoTrueClient instances
-        this.client = sharedSupabase
-        this.debugLog('Auth service initialized (reused shared Supabase client)', { url: SUPABASE_URL })
+        // TEMPORARY: Create fresh client to debug auth issues
+        // this.client = sharedSupabase
+        const { createClient } = require('@supabase/supabase-js')
+        this.client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: this.config.persistSession,
+                detectSessionInUrl: true,
+                autoRefreshToken: true,
+                flowType: 'pkce',
+                debug: true
+            },
+            global: {
+                headers: {
+                    'x-client-info': 'auth-service-debug/1.0.0'
+                }
+            }
+        })
+        this.debugLog('Auth service initialized (created fresh Supabase client for debugging)', { url: SUPABASE_URL })
     }
 
     /**
@@ -89,13 +104,13 @@ export class AuthService {
             this.debugLog('Creating auth promise...')
             const authPromise = this.client.auth.signInWithPassword({ email, password })
             this.debugLog('Auth promise created, adding timeout wrapper...')
-            
+
             const sdkResult = await this.withTimeout(
                 authPromise,
                 this.config.timeoutMs,
                 'SDK sign in'
             )
-            
+
             this.debugLog('Timeout wrapper completed', { hasError: !!sdkResult.error })
 
             if (sdkResult.error) throw sdkResult.error
@@ -412,13 +427,13 @@ export class AuthService {
         operation: string
     ): Promise<T> {
         this.debugLog(`Starting timeout wrapper for ${operation} (${timeoutMs}ms)`)
-        
+
         const timeoutPromise = new Promise<never>((_, reject) => {
             const timeoutId = setTimeout(() => {
                 this.debugLog(`Timeout reached for ${operation} after ${timeoutMs}ms`)
                 reject(new Error(`${operation} timeout after ${timeoutMs}ms`))
             }, timeoutMs)
-            
+
             // Log that timeout was set
             this.debugLog(`Timeout set for ${operation}, ID: ${timeoutId}`)
         })

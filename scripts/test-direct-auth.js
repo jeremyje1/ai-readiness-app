@@ -12,29 +12,29 @@ if (!supabaseUrl || !supabaseAnonKey) {
 async function testDirectAuth() {
     console.log('🔐 Testing direct authentication...');
     console.log('URL:', supabaseUrl);
-    
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
             autoRefreshToken: false,
             persistSession: false
         }
     });
-    
+
     const email = 'test@aiblueprint.com';
     const password = 'Test1234!@#$2025';
-    
+
     try {
         console.log('\n1. Testing direct signInWithPassword...');
         const start = Date.now();
-        
+
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password
         });
-        
+
         const duration = Date.now() - start;
         console.log(`Response received in ${duration}ms`);
-        
+
         if (error) {
             console.error('❌ Auth Error:', error.message);
             console.error('Error details:', error);
@@ -43,7 +43,7 @@ async function testDirectAuth() {
             console.log('User ID:', data.user.id);
             console.log('Email:', data.user.email);
             console.log('Session:', data.session ? 'Present' : 'Missing');
-            
+
             // Test getting session
             console.log('\n2. Testing getSession...');
             const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -52,7 +52,7 @@ async function testDirectAuth() {
             } else {
                 console.log('Session retrieved:', sessionData.session ? 'Present' : 'Missing');
             }
-            
+
             // Sign out
             console.log('\n3. Signing out...');
             const { error: signOutError } = await supabase.auth.signOut();
@@ -65,11 +65,11 @@ async function testDirectAuth() {
             console.log('⚠️ No error but also no session data');
             console.log('Data:', data);
         }
-        
+
     } catch (err) {
         console.error('❌ Unexpected error:', err);
     }
-    
+
     // Test network connectivity
     console.log('\n4. Testing Supabase connectivity...');
     try {
