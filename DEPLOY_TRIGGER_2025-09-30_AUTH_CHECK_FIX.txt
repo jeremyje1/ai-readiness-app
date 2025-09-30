@@ -1,0 +1,48 @@
+DEPLOYMENT TRIGGER - Fix Authentication Check on Start Page
+==========================================================
+Date: 2025-09-30
+Time: 10:54 AM PST
+Commit: 595675e
+
+ISSUE FIXED:
+-----------
+- Start page was showing "Checking authentication status..." indefinitely
+- PasswordSetupGuard was checking authentication on public pages
+- This prevented new users from accessing the signup/start flow
+
+CHANGES DEPLOYED:
+-----------------
+
+1. Updated PasswordSetupGuard.tsx:
+   - Added public paths that don't require authentication check
+   - Excluded these paths: /auth/, /login, /start, /pricing, /privacy, /terms, /contact, /services, /
+   - Changed isAuthPage to isPublicPage for clarity
+   - Fixed all references to use the new variable name
+
+TECHNICAL DETAILS:
+------------------
+- The PasswordSetupGuard wraps the entire app in layout.tsx
+- It was checking for password setup requirements on all pages
+- Public pages (like /start) don't have authenticated sessions
+- This caused the guard to get stuck in the "checking" state
+
+DEPLOYMENT STATUS:
+------------------
+- Git Push: ✓ Successful
+- Commit Hash: 595675e
+- Branch: main
+- Vercel should auto-deploy from this push
+
+VERIFICATION STEPS:
+-------------------
+1. Check Vercel dashboard for new deployment
+2. Test https://aiblueprint.higheredaiblueprint.com/start?billing=monthly
+3. Verify the page loads without showing "Checking authentication status..."
+4. Test that the start flow works for new users
+5. Verify authenticated pages still check for password setup when needed
+
+NOTES:
+------
+- This fix allows unauthenticated users to access public pages
+- The guard still protects authenticated areas of the app
+- Password setup flow remains intact for users who need it

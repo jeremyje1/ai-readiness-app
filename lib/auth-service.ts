@@ -413,8 +413,10 @@ export class AuthService {
     ): Promise<T> {
         this.debugLog(`Starting timeout wrapper for ${operation} (${timeoutMs}ms)`)
 
+        let timeoutId: NodeJS.Timeout | null = null;
+
         const timeoutPromise = new Promise<never>((_, reject) => {
-            const timeoutId = setTimeout(() => {
+            timeoutId = setTimeout(() => {
                 this.debugLog(`Timeout reached for ${operation} after ${timeoutMs}ms`)
                 reject(new Error(`${operation} timeout after ${timeoutMs}ms`))
             }, timeoutMs)
@@ -425,9 +427,18 @@ export class AuthService {
 
         try {
             const result = await Promise.race([promise, timeoutPromise])
+            // Clear the timeout since we got a result
+            if (timeoutId) {
+                clearTimeout(timeoutId)
+                this.debugLog(`Timeout cleared for ${operation}`)
+            }
             this.debugLog(`${operation} completed successfully within timeout`)
             return result
         } catch (error) {
+            // Clear timeout on error too
+            if (timeoutId) {
+                clearTimeout(timeoutId)
+            }
             this.debugLog(`${operation} failed or timed out`, { error })
             throw error
         }
