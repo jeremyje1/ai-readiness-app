@@ -36,20 +36,18 @@ export class AuthService {
         this.config = {
             maxRetries: config.maxRetries ?? 3,
             timeoutMs: config.timeoutMs ?? 8000, // Increased to match observed behavior
-            enableDebugLogging: config.enableDebugLogging ?? true,
+            enableDebugLogging: config.enableDebugLogging ?? (process.env.NODE_ENV === 'development'),
             persistSession: config.persistSession ?? true
         }
 
-        // Initialize debug logger - TEMPORARY: Full logging enabled for debugging
+        // Initialize debug logger
         this.debugLog = this.config.enableDebugLogging
             ? (message: string, data?: any) => {
-                // TEMPORARY: Log everything for debugging login hang
-                console.log(`[Auth Service] ${message}`, data || '')
                 if (message.includes('initialized')) {
                     // Only log initialization once per session to reduce log noise
                     if (!(global as any).__authServiceInitialized) {
                         console.log(`[Auth Service] ${message}`, data || '')
-                            ; (global as any).__authServiceInitialized = true
+                        ;(global as any).__authServiceInitialized = true
                     }
                 } else {
                     console.log(`[Auth Service] ${message}`, data || '')

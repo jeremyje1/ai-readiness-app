@@ -45,7 +45,8 @@ try {
 
 // Centralized singleton Supabase browser/client instance with consistent auth options
 // Avoid creating multiple GoTrueClient instances (which triggers console warnings and can cause race conditions)
-const enableDebug = process.env.NEXT_PUBLIC_AUTH_DEBUG === '1' || process.env.NODE_ENV === 'development'
+// Only enable debug in development or when explicitly set
+const enableDebug = process.env.NEXT_PUBLIC_AUTH_DEBUG === '1' && process.env.NODE_ENV !== 'production'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
