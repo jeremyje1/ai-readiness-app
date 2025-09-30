@@ -18,18 +18,19 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
     const router = useRouter();
     const pathname = usePathname();
 
-    // Don't check on auth-related pages to avoid redirect loops
-    const isAuthPage = pathname?.startsWith('/auth/') || pathname === '/login';
+    // Don't check on auth-related pages and public pages to avoid redirect loops
+    const publicPaths = ['/auth/', '/login', '/start', '/pricing', '/privacy', '/terms', '/contact', '/services'];
+    const isPublicPage = publicPaths.some(path => pathname?.startsWith(path)) || pathname === '/';
     const isPasswordSetupPage = pathname === '/auth/password/setup';
 
     useEffect(() => {
-        if (isAuthPage) {
+        if (isPublicPage) {
             setIsChecking(false);
             return;
         }
 
         checkPasswordSetupRequired();
-    }, [pathname, isAuthPage]);
+    }, [pathname, isPublicPage]);
 
     const checkPasswordSetupRequired = async () => {
         try {
@@ -79,7 +80,7 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
     };
 
     // Show loading state while checking
-    if (isChecking && !isAuthPage) {
+    if (isChecking && !isPublicPage) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
                 <div className="bg-white shadow rounded-lg p-8 text-center">
