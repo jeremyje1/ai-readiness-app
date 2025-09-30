@@ -28,12 +28,11 @@ export function middleware(request: NextRequest) {
 
   try {
     // Define primary domain and legacy domains
-    const primaryDomain = 'aiblueprint.higheredaiblueprint.com';
-    const legacyK12Domain = 'aiblueprint.k12aiblueprint.com';
+    const primaryDomain = 'aiblueprint.k12aiblueprint.com';
     const legacyHigherEdDomain = 'aiblueprint.higheredaiblueprint.com';
 
     // Redirect legacy domains to primary unified domain
-    if (host === 'aireadiness.northpathstrategies.org' || host === legacyK12Domain) {
+    if (host === 'aireadiness.northpathstrategies.org' || host === legacyHigherEdDomain) {
       const url = new URL(request.url);
       url.host = primaryDomain;
       return NextResponse.redirect(url, 301);
