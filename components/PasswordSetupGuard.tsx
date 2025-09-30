@@ -34,47 +34,71 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
 
     const checkPasswordSetupRequired = async () => {
         try {
-            // Get current session
-            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            // Get current session with timeout
+            const sessionPromise = supabase.auth.getSession();
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Session check timeout')), 5000)
+            );
+
+            const { data: { session }, error: sessionError } = await Promise.race([
+                sessionPromise,
+                timeoutPromise
+            ]) as any;
 
             if (sessionError || !session) {
                 // No session, let normal auth flow handle this
+                console.log('🔐 No session or session error, skipping password check');
                 setIsChecking(false);
                 return;
             }
 
-            // Check if user needs password setup
-            const response = await fetch('/api/auth/password/check-required', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`,
-                    'Content-Type': 'application/json'
+            // Check if user needs password setup with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            try {
+                const response = await fetch('/api/auth/password/check-required', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.needsPasswordSetup && !isPasswordSetupPage) {
+                        console.log('🔐 User needs password setup, redirecting...');
+                        setNeedsSetup(true);
+
+                        // Redirect to password setup page, preserving the current URL for return
+                        const returnUrl = encodeURIComponent(pathname || '/');
+                        router.push(`/auth/password/setup?return_to=${returnUrl}`);
+                        return;
+                    }
+                } else if (response.status === 401) {
+                    // Session is invalid, let normal auth flow handle this
+                    console.log('🔐 Invalid session during password check');
+                } else {
+                    console.warn('🔐 Password setup check failed:', response.status);
                 }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-
-                if (data.needsPasswordSetup && !isPasswordSetupPage) {
-                    console.log('🔐 User needs password setup, redirecting...');
-                    setNeedsSetup(true);
-
-                    // Redirect to password setup page, preserving the current URL for return
-                    const returnUrl = encodeURIComponent(pathname || '/');
-                    router.push(`/auth/password/setup?return_to=${returnUrl}`);
-                    return;
+            } catch (fetchError: any) {
+                if (fetchError.name === 'AbortError') {
+                    console.warn('🔐 Password check timed out, skipping');
+                } else {
+                    console.error('🔐 Password check fetch error:', fetchError);
                 }
-            } else if (response.status === 401) {
-                // Session is invalid, let normal auth flow handle this
-                console.log('🔐 Invalid session during password check');
-            } else {
-                console.warn('🔐 Password setup check failed:', response.status);
             }
 
             setIsChecking(false);
 
-        } catch (error) {
-            console.error('🔐 Password setup check error:', error);
+        } catch (error: any) {
+            console.error('🔐 Password setup check error:', error.message);
+            // On error, allow the page to load rather than blocking
             setIsChecking(false);
         }
     };
