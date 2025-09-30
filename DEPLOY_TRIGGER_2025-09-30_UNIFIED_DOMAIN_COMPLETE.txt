@@ -1,0 +1,59 @@
+DEPLOYMENT TRIGGER: Complete Unified Domain Migration
+==================================================
+
+Date: September 30, 2025
+Commits: 3963aab (K12), 603531a (Higher Ed)
+Branch: main
+
+CRITICAL CHANGE: UNIFIED DOMAIN MIGRATION
+----------------------------------------
+Both K-12 and Higher Ed marketing pages now use the unified domain:
+https://aiblueprint.k12aiblueprint.com
+
+CHANGES MADE:
+------------
+1. K12 Marketing Page (k12-marketing-page.html):
+   - Updated 36 domain references from higheredaiblueprint.com to k12aiblueprint.com
+   - Changed contact email to info@k12aiblueprint.com
+
+2. Higher Ed Marketing Page (highered-marketing-page.html):
+   - Updated 22 domain references from higheredaiblueprint.com to k12aiblueprint.com  
+   - Changed contact email to info@k12aiblueprint.com
+   - APP_BASE already correctly set to k12aiblueprint.com
+
+UPDATED ELEMENTS IN BOTH PAGES:
+------------------------------
+- Navigation links (Services, Contact, Privacy, Terms, Login, Start)
+- Logo image URLs
+- CTA buttons throughout pages
+- Meta tags (canonical, og:url, og:image, twitter:image)
+- Schema.org structured data
+- Footer links
+- Contact emails
+
+DEPLOYMENT REQUIREMENTS:
+-----------------------
+1. Deploy both marketing pages to production
+2. Ensure all image assets exist on k12aiblueprint.com:
+   - /logo-k12.png
+   - /logo-highered.png
+   - /og-image-k12.png
+   - /og-image-highered.png
+3. Set up email routing for info@k12aiblueprint.com
+4. Verify domain redirects:
+   - aiblueprint.k12aiblueprint.com → aiblueprint.k12aiblueprint.com (primary)
+   - aiblueprint.higheredaiblueprint.com → aiblueprint.k12aiblueprint.com (redirect)
+
+VERIFICATION STEPS:
+------------------
+1. Test both marketing pages in production
+2. Verify all navigation links work correctly
+3. Test Start and Login buttons with correct context parameters
+4. Ensure images load from the unified domain
+5. Check that Higher Ed links include context=HigherEd parameter
+6. Verify email delivery to info@k12aiblueprint.com
+
+CONTEXT:
+--------
+This completes the migration to a unified platform where both K-12 and Higher Ed
+services share the single domain https://aiblueprint.k12aiblueprint.com
