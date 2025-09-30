@@ -62,31 +62,46 @@ export default function LoginPage() {
       
       console.log('🔐 Calling authService.signInWithPassword now...');
       
-      // Use AuthService with built-in timeout and fallback
-      let result;
-      try {
-        result = await authService.signInWithPassword(email.trim(), password);
-      } catch (authServiceError: any) {
-        console.error('🔐 AuthService threw an error, falling back to direct Supabase:', authServiceError);
-        
-        // Fallback to direct Supabase client if AuthService fails
+      // Wrap entire login process in a timeout
+      const loginProcess = async () => {
+        // Use AuthService with built-in timeout and fallback
+        let result;
         try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password
-          });
+          result = await authService.signInWithPassword(email.trim(), password);
+        } catch (authServiceError: any) {
+          console.error('🔐 AuthService threw an error, falling back to direct Supabase:', authServiceError);
           
-          result = {
-            data,
-            error,
-            method: 'direct-fallback',
-            timestamp: Date.now()
-          };
-        } catch (directError: any) {
-          console.error('🔐 Direct Supabase also failed:', directError);
-          throw new Error(`Both AuthService and direct Supabase failed: ${authServiceError.message} | ${directError.message}`);
+          // Fallback to direct Supabase client if AuthService fails
+          try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email: email.trim(),
+              password
+            });
+            
+            result = {
+              data,
+              error,
+              method: 'direct-fallback',
+              timestamp: Date.now()
+            };
+          } catch (directError: any) {
+            console.error('🔐 Direct Supabase also failed:', directError);
+            throw new Error(`Both AuthService and direct Supabase failed: ${authServiceError.message} | ${directError.message}`);
+          }
         }
-      }
+        return result;
+      };
+
+      // Add 15-second timeout to entire login process
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => {
+          console.error('🔐 Login timeout after 15 seconds');
+          reject(new Error('Login timeout - server not responding. Please try again.'));
+        }, 15000)
+      );
+
+      console.log('🔐 Starting login with 15s timeout...');
+      const result = await Promise.race([loginProcess(), timeoutPromise]) as any;
 
       console.log('🔐 AuthService response received');
       console.log('🔐 Full result:', JSON.stringify(result, null, 2));
