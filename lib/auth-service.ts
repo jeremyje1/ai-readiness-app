@@ -47,7 +47,7 @@ export class AuthService {
                     // Only log initialization once per session to reduce log noise
                     if (!(global as any).__authServiceInitialized) {
                         console.log(`[Auth Service] ${message}`, data || '')
-                        ;(global as any).__authServiceInitialized = true
+                            ; (global as any).__authServiceInitialized = true
                     }
                 } else {
                     console.log(`[Auth Service] ${message}`, data || '')
