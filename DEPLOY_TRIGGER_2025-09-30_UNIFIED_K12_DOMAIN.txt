@@ -1,0 +1,48 @@
+DEPLOYMENT TRIGGER: K12 Marketing Page Domain Update
+==================================================
+
+Date: September 30, 2025
+Commit: 3963aab
+Branch: main
+
+CHANGES MADE:
+------------
+Updated all domain references in k12-marketing-page.html from:
+- FROM: https://aiblueprint.higheredaiblueprint.com
+- TO: https://aiblueprint.k12aiblueprint.com
+
+CRITICAL CONTEXT:
+----------------
+The unified platform now uses https://aiblueprint.k12aiblueprint.com as the primary domain.
+The old K-12 domain automatically redirects to this unified domain.
+Both K-12 and Higher Ed services share this single domain.
+
+UPDATED ELEMENTS:
+----------------
+1. Navigation links (header and mobile menu)
+2. Logo image URLs
+3. CTA buttons (Start, Login, Demo)
+4. Meta tags (canonical, og:url, og:image, twitter:image)
+5. Schema.org structured data
+6. Footer links
+7. JavaScript APP_BASE constant
+8. Contact email changed from info@higheredaiblueprint.com to info@k12aiblueprint.com
+
+FILES CHANGED:
+-------------
+- k12-marketing-page.html (36 insertions, 36 deletions)
+
+DEPLOYMENT REQUIREMENTS:
+-----------------------
+1. Ensure k12-marketing-page.html is deployed to production
+2. Verify all image assets exist on k12aiblueprint.com domain
+3. Confirm email routing for info@k12aiblueprint.com
+4. Test all links and CTAs after deployment
+
+VERIFICATION STEPS:
+------------------
+1. Access k12-marketing-page.html in production
+2. Click all navigation links to ensure they work
+3. Test Start and Login buttons
+4. Verify images load properly
+5. Check that internal links use the correct domain
