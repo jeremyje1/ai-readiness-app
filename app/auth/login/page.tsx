@@ -1,8 +1,8 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase';
 import { authService } from '@/lib/auth-service';
+import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -43,12 +43,12 @@ export default function LoginPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     console.log('🔐 Form submission started');
     console.log('🔐 Email:', email);
     console.log('🔐 Password length:', password.length);
     console.log('🔐 AuthService available:', typeof authService);
-    
+
     // Set loading state
     setLoading(true);
     setError(null);
@@ -56,12 +56,12 @@ export default function LoginPage() {
 
     try {
       console.log('🔐 About to call authService.signInWithPassword...');
-      
+
       // Add a small delay to ensure the UI updates
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       console.log('🔐 Calling authService.signInWithPassword now...');
-      
+
       // Wrap entire login process in a timeout
       const loginProcess = async () => {
         // Use AuthService with built-in timeout and fallback
@@ -70,14 +70,14 @@ export default function LoginPage() {
           result = await authService.signInWithPassword(email.trim(), password);
         } catch (authServiceError: any) {
           console.error('🔐 AuthService threw an error, falling back to direct Supabase:', authServiceError);
-          
+
           // Fallback to direct Supabase client if AuthService fails
           try {
             const { data, error } = await supabase.auth.signInWithPassword({
               email: email.trim(),
               password
             });
-            
+
             result = {
               data,
               error,
@@ -93,7 +93,7 @@ export default function LoginPage() {
       };
 
       // Add 15-second timeout to entire login process
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => {
           console.error('🔐 Login timeout after 15 seconds');
           reject(new Error('Login timeout - server not responding. Please try again.'));
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
       if (result.error) {
         console.log('🔐 Processing error result...');
-        
+
         // Improved error messages
         let errorMsg = 'Login failed: ';
         if (result.error.message.includes('Invalid login credentials')) {
@@ -129,12 +129,15 @@ export default function LoginPage() {
         console.log('🔐 Loading state set to false after error');
       } else if (result.data?.session) {
         console.log('✅ Login successful, session established');
+        console.log('✅ Session user:', result.data.session.user?.email);
+        console.log('✅ Access token exists:', !!result.data.session.access_token);
         setSuccessMessage('Login successful! Redirecting...');
 
-        // Small delay to show success message, then redirect
+        // Use window.location instead of router.push to force full page reload
+        // This ensures Supabase client picks up the new session from cookies
         setTimeout(() => {
-          console.log('🔐 Redirecting to dashboard...');
-          router.push('/ai-readiness/dashboard');
+          console.log('🔐 Redirecting to dashboard with full page reload...');
+          window.location.href = '/ai-readiness/dashboard';
         }, 500);
         // Don't set loading to false here - let redirect happen
       } else {
@@ -147,14 +150,14 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error('🔐 Exception caught in submit:', err);
       console.error('🔐 Exception stack:', err.stack);
-      
+
       const errorMsg = `Unexpected error: ${err.message || 'Unknown error'}`;
       setError(errorMsg);
       console.error('🔐 Setting error state for exception:', err.message);
       setLoading(false);
       console.log('🔐 Loading state set to false after exception');
     }
-    
+
     console.log('🔐 Submit function completed');
   };
 
