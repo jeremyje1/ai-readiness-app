@@ -122,21 +122,52 @@ export default function PasswordSetupPage() {
         throw new Error(json.error || 'Failed');
       }
 
-      setStatus('Password set! Redirecting...');
-      console.log('🔐 Password set successfully, redirecting...');
+      setStatus('Password set! Signing you in...');
+      console.log('🔐 Password set successfully');
 
-      // Clear loading immediately 
-      setLoading(false);
-
-      // Redirect to the return URL if provided, otherwise to login with success message
-      setTimeout(() => {
-        if (returnTo && returnTo !== '/') {
-          console.log(`🔐 Redirecting to return URL: ${returnTo}`);
-          router.push(returnTo);
-        } else {
-          router.push('/auth/login?message=password-set');
+      // Automatically sign in the user with their new password
+      try {
+        // Get email from the API response (the API should return it)
+        const userEmail = json.email;
+        
+        if (!userEmail) {
+          throw new Error('Email not returned from password setup');
         }
-      }, 1500);
+
+        console.log('🔐 Auto-signing in user:', userEmail);
+
+        // Import authService dynamically to avoid circular dependencies
+        const { authService } = await import('@/lib/auth-service');
+        
+        const signInResult = await authService.signInWithPassword(userEmail, password);
+
+        if (signInResult.error) {
+          console.error('🔐 Auto sign-in failed:', signInResult.error);
+          // Fall back to login page
+          setStatus('Password set! Please log in.');
+          setTimeout(() => {
+            router.push('/auth/login?message=password-set');
+          }, 1500);
+          return;
+        }
+
+        console.log('🔐 Auto sign-in successful, redirecting to dashboard');
+        setStatus('Success! Redirecting to dashboard...');
+
+        // Use window.location.href for full page reload to ensure session is picked up
+        setTimeout(() => {
+          const destination = returnTo && returnTo !== '/' ? returnTo : '/ai-readiness/dashboard';
+          console.log('🔐 Redirecting to:', destination);
+          window.location.href = destination;
+        }, 1000);
+      } catch (autoSignInError: any) {
+        console.error('🔐 Auto sign-in error:', autoSignInError);
+        // Fall back to login page
+        setStatus('Password set! Please log in.');
+        setTimeout(() => {
+          router.push('/auth/login?message=password-set');
+        }, 1500);
+      }
       return;
     } catch (err: any) {
       console.error('🔐 Password setup error:', err);

@@ -36,7 +36,7 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
         try {
             // Get current session with timeout
             const sessionPromise = supabase.auth.getSession();
-            const timeoutPromise = new Promise((_, reject) => 
+            const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Session check timeout')), 5000)
             );
 
