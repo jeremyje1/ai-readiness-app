@@ -635,15 +635,48 @@ export default function AIReadinessAssessmentPage() {
             <div className="space-y-6">
               {currentQuestion.type === 'scale_with_context' && (
                 <>
-                  {/* Scale Response */}
-                  <div className="space-y-3">
-                    {[
-                      { value: 1, label: currentQuestion.scaleLabels?.low || "Low", color: "bg-red-100 border-red-300 text-red-700" },
-                      { value: 2, label: "Below Average", color: "bg-orange-100 border-orange-300 text-orange-700" },
-                      { value: 3, label: "Average", color: "bg-yellow-100 border-yellow-300 text-yellow-700" },
-                      { value: 4, label: "Above Average", color: "bg-blue-100 border-blue-300 text-blue-700" },
-                      { value: 5, label: currentQuestion.scaleLabels?.high || "High", color: "bg-green-100 border-green-300 text-green-700" }
-                    ].map((option) => (
+                  {/* Check if this is a percentage question */}
+                  {currentQuestion.question.toLowerCase().includes('percentage') || 
+                   currentQuestion.question.includes('%') ? (
+                    // Percentage input for percentage questions
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="5"
+                          value={responses[currentQuestion.id]?.value || ''}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value) || 0;
+                            if (value >= 0 && value <= 100) {
+                              handleResponse(
+                                currentQuestion.id,
+                                value,
+                                responses[currentQuestion.id]?.context,
+                                responses[currentQuestion.id]?.text
+                              );
+                            }
+                          }}
+                          className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="0"
+                        />
+                        <span className="text-lg font-medium">%</span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Enter a percentage between 0 and 100
+                      </div>
+                    </div>
+                  ) : (
+                    // Regular scale for non-percentage questions
+                    <div className="space-y-3">
+                      {[
+                        { value: 1, label: currentQuestion.scaleLabels?.low || "Low", color: "bg-red-100 border-red-300 text-red-700" },
+                        { value: 2, label: "Below Average", color: "bg-orange-100 border-orange-300 text-orange-700" },
+                        { value: 3, label: "Average", color: "bg-yellow-100 border-yellow-300 text-yellow-700" },
+                        { value: 4, label: "Above Average", color: "bg-blue-100 border-blue-300 text-blue-700" },
+                        { value: 5, label: currentQuestion.scaleLabels?.high || "High", color: "bg-green-100 border-green-300 text-green-700" }
+                      ].map((option) => (
                       <button
                         key={option.value}
                         onClick={() => handleResponse(
@@ -666,6 +699,7 @@ export default function AIReadinessAssessmentPage() {
                       </button>
                     ))}
                   </div>
+                  )}
 
                   {/* Context Input */}
                   <div>
