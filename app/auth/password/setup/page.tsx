@@ -129,7 +129,7 @@ export default function PasswordSetupPage() {
       try {
         // Get email from the API response (the API should return it)
         const userEmail = json.email;
-        
+
         if (!userEmail) {
           throw new Error('Email not returned from password setup');
         }
@@ -138,7 +138,7 @@ export default function PasswordSetupPage() {
 
         // Import authService dynamically to avoid circular dependencies
         const { authService } = await import('@/lib/auth-service');
-        
+
         const signInResult = await authService.signInWithPassword(userEmail, password);
 
         if (signInResult.error) {

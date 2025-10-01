@@ -218,6 +218,22 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
       const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.higheredaiblueprint.com';
       await sendAssessmentAccessEmail(userData.email, userData.name, tier, baseUrl);
 
+      // Send admin notification about new customer
+      try {
+        await emailService.sendNewCustomerNotification({
+          customerEmail: userData.email,
+          customerName: userData.name,
+          tier: tier,
+          organization: userData.organization,
+          stripeSessionId: session.id,
+          stripeCustomerId: session.customer as string,
+          dashboardUrl: `${baseUrl}/admin/dashboard`
+        });
+        console.log(`📧 Admin notification sent for new customer: ${userData.email}`);
+      } catch (error) {
+        console.error('❌ Failed to send admin notification (customer email still sent):', error);
+      }
+
       console.log(`🎉 Customer ${userData.email} granted access to ${tier} (User ID: ${userId})`);
     }
   },

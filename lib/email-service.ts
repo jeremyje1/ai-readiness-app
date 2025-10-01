@@ -65,7 +65,7 @@ class EmailService {
         HtmlBody: options.htmlBody,
         TextBody: options.textBody,
         ReplyTo: replyToEmail,
-        MessageStream: process.env.POSTMARK_MESSAGE_STREAM || 'outbound'
+        MessageStream: process.env.POSTMARK_MESSAGE_STREAM || 'aiblueprint-transactional'
       });
 
       console.log(`✅ Email sent successfully to ${options.to}, MessageID: ${result.MessageID}`);
@@ -479,6 +479,80 @@ class EmailService {
       </div>
     `;
     return this.sendEmail({ to, subject, htmlBody, replyTo: email });
+  }
+
+  /**
+   * Send admin notification for new customer signup
+   */
+  async sendNewCustomerNotification(params: {
+    customerEmail: string;
+    customerName: string;
+    tier: string;
+    organization?: string;
+    stripeSessionId: string;
+    stripeCustomerId: string;
+    dashboardUrl?: string;
+  }): Promise<boolean> {
+    const { customerEmail, customerName, tier, organization, stripeSessionId, stripeCustomerId, dashboardUrl } = params;
+    const to = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_EMAIL || 'info@northpathstrategies.org';
+    const subject = `🎉 New Customer: ${customerName} (${tier})`;
+    
+    const tierDisplay = tier.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://aiblueprint.k12aiblueprint.com';
+    const adminDashboard = dashboardUrl || `${baseUrl}/admin/dashboard`;
+    
+    const htmlBody = `
+      <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
+        <div style="background:#10b981;color:white;padding:16px;border-radius:6px;text-align:center;margin-bottom:24px;">
+          <h2 style="margin:0;font-size:24px;">🎉 New Customer Signup!</h2>
+        </div>
+        
+        <div style="background:white;padding:20px;border-radius:6px;margin-bottom:16px;">
+          <h3 style="margin:0 0 12px;color:#111;font-size:18px;">Customer Details</h3>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td style="padding:8px 0;color:#666;font-size:14px;"><strong>Name:</strong></td>
+              <td style="padding:8px 0;color:#111;font-size:14px;">${customerName}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;color:#666;font-size:14px;"><strong>Email:</strong></td>
+              <td style="padding:8px 0;color:#111;font-size:14px;"><a href="mailto:${customerEmail}" style="color:#2563eb;">${customerEmail}</a></td>
+            </tr>
+            ${organization ? `
+            <tr>
+              <td style="padding:8px 0;color:#666;font-size:14px;"><strong>Organization:</strong></td>
+              <td style="padding:8px 0;color:#111;font-size:14px;">${organization}</td>
+            </tr>
+            ` : ''}
+            <tr>
+              <td style="padding:8px 0;color:#666;font-size:14px;"><strong>Tier:</strong></td>
+              <td style="padding:8px 0;color:#111;font-size:14px;"><span style="background:#dbeafe;color:#1e40af;padding:4px 8px;border-radius:4px;font-weight:600;">${tierDisplay}</span></td>
+            </tr>
+          </table>
+        </div>
+        
+        <div style="background:white;padding:20px;border-radius:6px;margin-bottom:16px;">
+          <h3 style="margin:0 0 12px;color:#111;font-size:18px;">Stripe Information</h3>
+          <p style="font-size:14px;color:#444;margin:4px 0;"><strong>Session ID:</strong> <code style="background:#f3f4f6;padding:2px 6px;border-radius:3px;font-size:12px;">${stripeSessionId}</code></p>
+          <p style="font-size:14px;color:#444;margin:4px 0;"><strong>Customer ID:</strong> <code style="background:#f3f4f6;padding:2px 6px;border-radius:3px;font-size:12px;">${stripeCustomerId}</code></p>
+          <p style="margin-top:12px;">
+            <a href="https://dashboard.stripe.com/customers/${stripeCustomerId}" style="color:#2563eb;text-decoration:none;font-size:14px;">View in Stripe Dashboard →</a>
+          </p>
+        </div>
+        
+        <div style="text-align:center;margin-top:24px;">
+          <a href="${adminDashboard}" style="display:inline-block;background:#2563eb;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;">
+            View Admin Dashboard
+          </a>
+        </div>
+        
+        <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb;" />
+        <p style="font-size:12px;color:#666;text-align:center;">This is an automated notification from AI Blueprint. Customer has been sent their welcome email with access credentials.</p>
+      </div>
+    `;
+    
+    console.log(`📧 Sending new customer notification to admin: ${to}`);
+    return this.sendEmail({ to, subject, htmlBody });
   }
 }
 
