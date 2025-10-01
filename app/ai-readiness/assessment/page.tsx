@@ -11,6 +11,7 @@ import { Textarea } from '@/components/textarea';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 interface Question {
   id: string;
@@ -39,6 +40,54 @@ export default function AIReadinessAssessmentPage() {
   const [assessmentId, setAssessmentId] = useState<string>('');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autoSaving, setAutoSaving] = useState(false);
+  
+  // User data
+  const [userData, setUserData] = useState<{
+    email: string;
+    userId: string;
+    institutionName: string;
+    institutionType: string;
+    institutionId: string;
+  } | null>(null);
+
+  // Fetch user data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Fetch user's institution
+        const { data: membership } = await supabase
+          .from('institution_memberships')
+          .select(`
+            *,
+            institutions(*)
+          `)
+          .eq('user_id', user.id)
+          .single();
+          
+        if (membership?.institutions) {
+          setUserData({
+            email: user.email || 'admin@institution.edu',
+            userId: user.id,
+            institutionName: membership.institutions.name,
+            institutionType: membership.institutions.org_type || 'higher_ed',
+            institutionId: membership.institutions.id
+          });
+          
+          // Update institution type based on actual data
+          if (membership.institutions.org_type === 'K12') {
+            setInstitutionType('K12');
+          } else if (membership.institutions.org_type === 'higher_ed') {
+            setInstitutionType('HigherEd');
+          }
+        }
+      }
+    };
+    
+    fetchUserData();
+  }, []);
 
   // Initialize assessment ID and load questions
   useEffect(() => {
@@ -267,11 +316,12 @@ export default function AIReadinessAssessmentPage() {
       const submissionData = {
         responses,
         mode,
-        institutionName: 'Educational Institution',
-        contactEmail: 'admin@institution.edu',
-        contactName: 'Assessment Administrator',
-        industry: 'higher-education',
-        userId: `user-${Date.now()}`,
+        institutionName: userData?.institutionName || 'Educational Institution',
+        contactEmail: userData?.email || 'admin@institution.edu',
+        contactName: userData?.institutionName ? `${userData.institutionName} Administrator` : 'Assessment Administrator',
+        industry: userData?.institutionType === 'K12' ? 'k12-education' : 'higher-education',
+        userId: userData?.userId || `user-${Date.now()}`,
+        institutionId: userData?.institutionId,
         uploadedFiles: [],
         testMode: false,
         assessmentType: 'ai-readiness'
