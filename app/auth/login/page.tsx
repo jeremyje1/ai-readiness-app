@@ -31,18 +31,18 @@ export default function LoginPage() {
         // Create a timeout wrapper for getSession to prevent hanging in Chrome incognito
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
-        
+
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => {
           controller.signal.addEventListener('abort', () => {
             reject(new Error('Session check timeout - this is normal in private browsing mode'));
           });
         });
-        
+
         try {
           const { error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
           clearTimeout(timeoutId);
-          
+
           if (error) {
             setDebugInfo(`⚠️ Auth connection issue: ${error.message}`);
           } else {
@@ -90,11 +90,11 @@ export default function LoginPage() {
       const loginProcess = async () => {
         // Use direct Supabase auth to avoid hanging issues
         console.log('🔐 Calling supabase.auth.signInWithPassword...');
-        
+
         // Chrome workaround: Use fetch API directly for Chrome browsers
         const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
         console.log('🔐 Is Chrome browser:', isChrome);
-        
+
         if (isChrome) {
           console.log('🔐 Using Chrome workaround with direct API call...');
           try {
@@ -110,9 +110,9 @@ export default function LoginPage() {
                 gotrue_meta_security: {}
               })
             });
-            
+
             const data = await response.json();
-            
+
             if (!response.ok) {
               return {
                 data: null,
@@ -121,13 +121,13 @@ export default function LoginPage() {
                 timestamp: Date.now()
               };
             }
-            
+
             // Set the session manually
             await supabase.auth.setSession({
               access_token: data.access_token,
               refresh_token: data.refresh_token
             });
-            
+
             return {
               data: { session: data, user: data.user },
               error: null,
@@ -144,7 +144,7 @@ export default function LoginPage() {
             };
           }
         }
-        
+
         // Standard approach for other browsers
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
@@ -250,7 +250,7 @@ export default function LoginPage() {
         {/* Chrome notice */}
         {(debugInfo === 'ℹ️ Running in private browsing mode' || debugInfo === 'ℹ️ Chrome detected - using compatibility mode') && (
           <div className='text-xs text-blue-600 bg-blue-50 p-2 rounded mt-2'>
-            <strong>Note:</strong> {debugInfo === 'ℹ️ Chrome detected - using compatibility mode' 
+            <strong>Note:</strong> {debugInfo === 'ℹ️ Chrome detected - using compatibility mode'
               ? 'Chrome browser detected. Using compatibility mode for best performance.'
               : "You're using private browsing mode. Some features may be limited, but login should still work."}
           </div>

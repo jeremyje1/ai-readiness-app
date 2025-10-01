@@ -8,10 +8,10 @@ import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Progress } from '@/components/progress';
 import { Textarea } from '@/components/textarea';
+import { createClient } from '@/lib/supabase/client';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 interface Question {
   id: string;
@@ -40,7 +40,7 @@ export default function AIReadinessAssessmentPage() {
   const [assessmentId, setAssessmentId] = useState<string>('');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autoSaving, setAutoSaving] = useState(false);
-  
+
   // User data
   const [userData, setUserData] = useState<{
     email: string;
@@ -55,7 +55,7 @@ export default function AIReadinessAssessmentPage() {
     const fetchUserData = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (user) {
         // Fetch user's institution
         const { data: membership } = await supabase
@@ -66,7 +66,7 @@ export default function AIReadinessAssessmentPage() {
           `)
           .eq('user_id', user.id)
           .single();
-          
+
         if (membership?.institutions) {
           setUserData({
             email: user.email || 'admin@institution.edu',
@@ -75,7 +75,7 @@ export default function AIReadinessAssessmentPage() {
             institutionType: membership.institutions.org_type || 'higher_ed',
             institutionId: membership.institutions.id
           });
-          
+
           // Update institution type based on actual data
           if (membership.institutions.org_type === 'K12') {
             setInstitutionType('K12');
@@ -85,7 +85,7 @@ export default function AIReadinessAssessmentPage() {
         }
       }
     };
-    
+
     fetchUserData();
   }, []);
 
@@ -113,7 +113,7 @@ export default function AIReadinessAssessmentPage() {
           console.error('Failed to parse onboarding data:', e);
         }
       }
-      
+
       // Finally fall back to domain detection
       const hostname = window.location.hostname;
       if (hostname.includes('k12')) {
@@ -649,8 +649,8 @@ export default function AIReadinessAssessmentPage() {
                           responses[currentQuestion.id]?.text
                         )}
                         className={`w-full p-4 text-left border-2 rounded-lg transition-all ${responses[currentQuestion.id]?.value === option.value
-                            ? option.color
-                            : 'bg-white border-gray-200 hover:border-gray-300'
+                          ? option.color
+                          : 'bg-white border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <div className="flex items-center justify-between">
@@ -743,7 +743,7 @@ export default function AIReadinessAssessmentPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Show uploaded file info or option to skip */}
                   {responses[currentQuestion.id]?.text ? (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
