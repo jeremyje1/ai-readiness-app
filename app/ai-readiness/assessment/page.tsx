@@ -383,6 +383,8 @@ export default function AIReadinessAssessmentPage() {
       return response.value !== undefined;
     } else if (currentQuestion.type === 'open_ended') {
       return response.text && response.text.trim().length > 0;
+    } else if (currentQuestion.type === 'upload') {
+      return response.text && response.text.trim().length > 0;
     }
     return false;
   })() : false;
@@ -397,6 +399,8 @@ export default function AIReadinessAssessmentPage() {
     if (q.type === 'scale_with_context') {
       return response.value !== undefined;
     } else if (q.type === 'open_ended') {
+      return response.text && response.text.trim().length > 0;
+    } else if (q.type === 'upload') {
       return response.text && response.text.trim().length > 0;
     }
     return false;
