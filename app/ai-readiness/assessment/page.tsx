@@ -636,35 +636,51 @@ export default function AIReadinessAssessmentPage() {
               {currentQuestion.type === 'scale_with_context' && (
                 <>
                   {/* Check if this is a percentage question */}
-                  {currentQuestion.question.toLowerCase().includes('percentage') || 
-                   currentQuestion.question.includes('%') ? (
+                  {(() => {
+                    const isPercentageQuestion = currentQuestion.question.toLowerCase().includes('percentage') || 
+                                                currentQuestion.question.includes('%');
+                    console.log('Question:', currentQuestion.question);
+                    console.log('Is percentage question:', isPercentageQuestion);
+                    return isPercentageQuestion;
+                  })() ? (
                     // Percentage input for percentage questions
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-4">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="5"
-                          value={responses[currentQuestion.id]?.value || ''}
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value) || 0;
-                            if (value >= 0 && value <= 100) {
-                              handleResponse(
-                                currentQuestion.id,
-                                value,
-                                responses[currentQuestion.id]?.context,
-                                responses[currentQuestion.id]?.text
-                              );
-                            }
-                          }}
-                          className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="0"
-                        />
-                        <span className="text-lg font-medium">%</span>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Enter a percentage between 0 and 100
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-sm text-blue-800 mb-3">This question asks for a percentage value:</p>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="5"
+                            value={responses[currentQuestion.id]?.value !== undefined ? responses[currentQuestion.id]?.value : ''}
+                            onChange={(e) => {
+                              const inputValue = e.target.value;
+                              const value = inputValue === '' ? undefined : parseInt(inputValue);
+                              console.log('Percentage input changed:', inputValue, 'Parsed value:', value);
+                              
+                              if (value === undefined || (value >= 0 && value <= 100)) {
+                                handleResponse(
+                                  currentQuestion.id,
+                                  value,
+                                  responses[currentQuestion.id]?.context,
+                                  responses[currentQuestion.id]?.text
+                                );
+                              }
+                            }}
+                            className="w-32 px-4 py-3 text-lg border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center font-medium"
+                            placeholder="0"
+                          />
+                          <span className="text-2xl font-bold text-blue-700">%</span>
+                        </div>
+                        <div className="text-sm text-blue-600 mt-2">
+                          Enter a percentage between 0 and 100
+                        </div>
+                        {responses[currentQuestion.id]?.value !== undefined && (
+                          <div className="mt-2 text-sm text-green-600">
+                            ✓ Current value: {responses[currentQuestion.id]?.value}%
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : (
