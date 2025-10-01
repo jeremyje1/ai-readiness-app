@@ -11,6 +11,23 @@ export default function DiagnosePage() {
     setRunning(true);
     const diagnostics: any = {};
 
+    // Helper to run tests with timeout
+    const runTest = async (name: string, testFn: () => Promise<any>) => {
+      try {
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Test timeout after 5s')), 5000);
+        });
+        const result = await Promise.race([testFn(), timeoutPromise]);
+        return result;
+      } catch (error: any) {
+        return {
+          test: name,
+          result: 'TIMEOUT',
+          details: { error: error.message }
+        };
+      }
+    };
+
     // 1. Check if Supabase client is initialized
     diagnostics.clientInitialized = {
       test: 'Supabase Client',
@@ -35,41 +52,45 @@ export default function DiagnosePage() {
     };
 
     // 3. Test basic fetch to Supabase
-    try {
+    diagnostics.healthCheck = await runTest('Supabase Health Check', async () => {
       const start = Date.now();
-      const response = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY }
-      });
-      const elapsed = Date.now() - start;
-      const data = await response.json();
       
-      diagnostics.healthCheck = {
-        test: 'Supabase Health Check',
-        result: response.ok ? 'PASS' : 'FAIL',
-        details: {
-          status: response.status,
-          responseTime: `${elapsed}ms`,
-          data
-        }
-      };
-    } catch (error: any) {
-      diagnostics.healthCheck = {
-        test: 'Supabase Health Check',
-        result: 'FAIL',
-        details: {
-          error: error.message,
-          type: error.name
-        }
-      };
-    }
+      // Create abort controller with fallback for older browsers
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      try {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
+          headers: { 'apikey': SUPABASE_ANON_KEY },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
+        const elapsed = Date.now() - start;
+        const data = await response.json();
+        
+        return {
+          test: 'Supabase Health Check',
+          result: response.ok ? 'PASS' : 'FAIL',
+          details: {
+            status: response.status,
+            responseTime: `${elapsed}ms`,
+            data
+          }
+        };
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
+    });
 
     // 4. Test auth.getSession
-    try {
+    diagnostics.getSession = await runTest('Get Session', async () => {
       const start = Date.now();
       const { data, error } = await supabase.auth.getSession();
       const elapsed = Date.now() - start;
       
-      diagnostics.getSession = {
+      return {
         test: 'Get Session',
         result: error ? 'FAIL' : 'PASS',
         details: {
@@ -78,16 +99,7 @@ export default function DiagnosePage() {
           error: error?.message
         }
       };
-    } catch (error: any) {
-      diagnostics.getSession = {
-        test: 'Get Session',
-        result: 'FAIL',
-        details: {
-          error: error.message,
-          type: error.name
-        }
-      };
-    }
+    });
 
     // 5. Check localStorage access
     try {
@@ -124,34 +136,76 @@ export default function DiagnosePage() {
     };
 
     // 7. Network timing test
-    try {
+    diagnostics.networkTiming = await runTest('Network Performance', async () => {
       const timings = [];
       for (let i = 0; i < 3; i++) {
         const start = Date.now();
-        await fetch(`${SUPABASE_URL}/auth/v1/health`, {
-          headers: { 'apikey': SUPABASE_ANON_KEY }
-        });
-        timings.push(Date.now() - start);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        
+        try {
+          await fetch(`${SUPABASE_URL}/auth/v1/health`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY },
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          timings.push(Date.now() - start);
+        } catch (error) {
+          clearTimeout(timeoutId);
+          timings.push(-1); // Mark failed requests
+        }
       }
       
-      diagnostics.networkTiming = {
+      const validTimings = timings.filter(t => t > 0);
+      
+      return {
         test: 'Network Performance',
-        result: Math.max(...timings) < 1000 ? 'PASS' : 'WARN',
+        result: validTimings.length === 0 ? 'FAIL' : (Math.max(...validTimings) < 1000 ? 'PASS' : 'WARN'),
         details: {
           timings,
-          average: Math.round(timings.reduce((a, b) => a + b) / timings.length),
-          max: Math.max(...timings)
+          successfulRequests: validTimings.length,
+          average: validTimings.length > 0 ? Math.round(validTimings.reduce((a, b) => a + b) / validTimings.length) : 'N/A',
+          max: validTimings.length > 0 ? Math.max(...validTimings) : 'N/A'
         }
       };
-    } catch (error: any) {
-      diagnostics.networkTiming = {
-        test: 'Network Performance',
-        result: 'FAIL',
-        details: { error: error.message }
-      };
-    }
+    });
 
-    // 8. Browser info
+    // 8. Test simple fetch (non-Supabase)
+    diagnostics.simpleFetch = await runTest('Basic Network Test', async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      try {
+        const start = Date.now();
+        // Test with a simple, reliable endpoint
+        const response = await fetch('https://api.github.com/zen', {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
+        const elapsed = Date.now() - start;
+        const text = await response.text();
+        
+        return {
+          test: 'Basic Network Test',
+          result: response.ok ? 'PASS' : 'FAIL',
+          details: {
+            status: response.status,
+            responseTime: `${elapsed}ms`,
+            responsePreview: text.substring(0, 50)
+          }
+        };
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        return {
+          test: 'Basic Network Test',
+          result: 'FAIL',
+          details: { error: error.message }
+        };
+      }
+    });
+
+    // 9. Browser info
     diagnostics.browser = {
       test: 'Browser Info',
       result: 'INFO',
@@ -177,6 +231,7 @@ export default function DiagnosePage() {
       case 'PASS': return 'text-green-600';
       case 'FAIL': return 'text-red-600';
       case 'WARN': return 'text-yellow-600';
+      case 'TIMEOUT': return 'text-orange-600';
       default: return 'text-gray-600';
     }
   };
