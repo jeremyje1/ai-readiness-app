@@ -1,0 +1,57 @@
+🚀 DEPLOYMENT TRIGGER - EMAIL DELIVERY FIXES
+==============================================
+Timestamp: 2025-10-01
+Commit: aa1c23f
+
+✅ CHANGES INCLUDED:
+1. Fixed Postmark MessageStream (outbound → aiblueprint-transactional)
+2. Added admin notification email method
+3. Modified Stripe webhook to send admin notifications
+4. Password setup auto-sign-in fix
+
+⚠️ REQUIRED VERCEL ENVIRONMENT VARIABLES:
+------------------------------------------
+Before testing, ensure these are set in Vercel production:
+
+POSTMARK_API_TOKEN=455001d4-2657-4b12-bfc7-66c63734daf8
+POSTMARK_MESSAGE_STREAM=aiblueprint-transactional
+ADMIN_EMAIL=info@northpathstrategies.org
+ADMIN_NOTIFICATION_EMAIL=info@northpathstrategies.org
+FROM_EMAIL=info@northpathstrategies.org
+REPLY_TO_EMAIL=info@northpathstrategies.org
+
+🧪 TESTING CHECKLIST:
+--------------------
+After deployment:
+1. ✅ Complete test purchase with Stripe test card (4242 4242 4242 4242)
+2. ✅ Verify customer receives welcome email
+3. ✅ Verify admin receives new customer notification at info@northpathstrategies.org
+4. ✅ Check Postmark dashboard Activity tab for both emails
+5. ✅ Test reply-to functionality on admin notification
+6. ✅ Verify links in both emails work correctly
+
+📧 EMAIL TEMPLATES:
+------------------
+Customer Email:
+- Subject: "Welcome to AI Blueprint – [tier]"
+- Contains: Dashboard link, password setup, magic link
+- From: info@northpathstrategies.org
+
+Admin Notification (NEW):
+- Subject: "🎉 New Customer: [name] ([tier])"
+- Contains: Customer details, tier badge, Stripe session/customer IDs
+- Links: Stripe dashboard, Admin panel
+- From: info@northpathstrategies.org
+- Design: Professional HTML with green header, white content boxes
+
+🔍 MONITORING:
+--------------
+Watch for:
+- Email delivery success logs in Vercel function logs
+- "📧 Admin notification sent for new customer: [email]" log message
+- Any "❌ Failed to send admin notification" error messages
+- Postmark Activity dashboard for delivery confirmation
+
+📖 DOCUMENTATION:
+-----------------
+See EMAIL_FIXES_2025-10-01.md for complete technical details
