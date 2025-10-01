@@ -1,0 +1,38 @@
+SESSION TIMEOUT FIX - DEPLOYMENT TRIGGER
+Deployed: October 1, 2025
+Commit: 72b9c08
+
+CHANGES:
+1. Extended JWT expiry from 1 hour to 24 hours (supabase/config.toml)
+2. Added proactive session refresh in dashboard (< 5 min to expiry)
+3. Added TOKEN_REFRESHED event listener for automatic re-authentication
+4. Prevents "session expired" errors during active use
+
+CRITICAL POST-DEPLOYMENT ACTION REQUIRED:
+⚠️  You MUST update Supabase Dashboard settings manually:
+    1. Go to: https://supabase.com/dashboard/project/[YOUR_PROJECT]/settings/auth
+    2. Find: JWT Settings → JWT expiry time
+    3. Change from: 3600 seconds → 86400 seconds (24 hours)
+    4. Click: Save
+
+    The config.toml change only affects LOCAL development.
+    Production JWT expiry is controlled in Supabase Dashboard.
+
+TESTING AFTER DEPLOYMENT:
+1. Wait for Vercel deployment to complete (2-3 minutes)
+2. Update Supabase Dashboard JWT expiry setting (see above)
+3. Log in to production site
+4. Check browser DevTools → Application → Local Storage → supabase.auth.token
+5. Verify expires_at is ~24 hours from now (not 1 hour)
+6. Click email address in top right - should work smoothly
+7. Console should show "[Dashboard] Session token refreshed" logs
+
+FIXES ISSUE:
+- User reported "Verifying access checking your payment status" hanging
+- Console showed "session expired" errors during active sessions
+- Sessions were expiring after 1 hour, interrupting workflows
+
+VERCEL DEPLOYMENT:
+- Auto-deployment triggered by Git push
+- Expected completion: ~2-3 minutes from push time
+- Check: https://vercel.com/[your-account]/[your-project]/deployments
