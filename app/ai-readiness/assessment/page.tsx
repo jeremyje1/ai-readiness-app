@@ -637,10 +637,22 @@ export default function AIReadinessAssessmentPage() {
                 <>
                   {/* Check if this is a percentage question */}
                   {(() => {
-                    const isPercentageQuestion = currentQuestion.question.toLowerCase().includes('percentage') || 
-                                                currentQuestion.question.includes('%');
+                    const questionText = currentQuestion.question.toLowerCase();
+                    const isPercentageQuestion = questionText.includes('percentage') || 
+                                                questionText.includes('percent') ||
+                                                currentQuestion.question.includes('%') ||
+                                                // Specific check for faculty percentage question
+                                                questionText.includes('what percentage of faculty');
                     console.log('Question:', currentQuestion.question);
+                    console.log('Question ID:', currentQuestion.id);
                     console.log('Is percentage question:', isPercentageQuestion);
+                    
+                    // Force percentage input for question about faculty AI usage
+                    if (questionText.includes('faculty') && questionText.includes('ai tools')) {
+                      console.log('Forcing percentage input for faculty AI usage question');
+                      return true;
+                    }
+                    
                     return isPercentageQuestion;
                   })() ? (
                     // Percentage input for percentage questions
@@ -716,6 +728,45 @@ export default function AIReadinessAssessmentPage() {
                     ))}
                   </div>
                   )}
+
+                  {/* Manual percentage entry failsafe for percentage questions */}
+                  {(() => {
+                    const questionText = currentQuestion.question.toLowerCase();
+                    if (questionText.includes('percentage') || questionText.includes('percent') || 
+                        (questionText.includes('faculty') && questionText.includes('ai tools'))) {
+                      return (
+                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                          <p className="text-sm text-yellow-800 mb-2">
+                            <strong>Note:</strong> This appears to be asking for a percentage. 
+                            If you see a 1-5 scale above, you can enter a percentage here instead:
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={responses[currentQuestion.id]?.value || ''}
+                              onChange={(e) => {
+                                const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                                if (value === undefined || (value >= 0 && value <= 100)) {
+                                  handleResponse(
+                                    currentQuestion.id,
+                                    value,
+                                    responses[currentQuestion.id]?.context,
+                                    responses[currentQuestion.id]?.text
+                                  );
+                                }
+                              }}
+                              className="w-24 px-3 py-2 border-2 border-yellow-400 rounded"
+                              placeholder="0-100"
+                            />
+                            <span className="font-medium">%</span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
 
                   {/* Context Input */}
                   <div>
