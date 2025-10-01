@@ -50,8 +50,13 @@ export default function LoginPage() {
           }
         } catch (timeoutErr: any) {
           clearTimeout(timeoutId);
-          // Don't show scary error for timeout in private mode
-          setDebugInfo('ℹ️ Running in private browsing mode');
+          // Check if actually in private mode or just Chrome issue
+          const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+          if (isChrome) {
+            setDebugInfo('ℹ️ Chrome detected - using compatibility mode');
+          } else {
+            setDebugInfo('ℹ️ Running in private browsing mode');
+          }
         }
       } catch (err: any) {
         setDebugInfo(`❌ Connection failed: ${err.message}`);
@@ -85,6 +90,62 @@ export default function LoginPage() {
       const loginProcess = async () => {
         // Use direct Supabase auth to avoid hanging issues
         console.log('🔐 Calling supabase.auth.signInWithPassword...');
+        
+        // Chrome workaround: Use fetch API directly for Chrome browsers
+        const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+        console.log('🔐 Is Chrome browser:', isChrome);
+        
+        if (isChrome) {
+          console.log('🔐 Using Chrome workaround with direct API call...');
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+              },
+              body: JSON.stringify({
+                email: email.trim(),
+                password,
+                gotrue_meta_security: {}
+              })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+              return {
+                data: null,
+                error: { message: data.error_description || data.msg || 'Authentication failed' },
+                method: 'chrome-api',
+                timestamp: Date.now()
+              };
+            }
+            
+            // Set the session manually
+            await supabase.auth.setSession({
+              access_token: data.access_token,
+              refresh_token: data.refresh_token
+            });
+            
+            return {
+              data: { session: data, user: data.user },
+              error: null,
+              method: 'chrome-api',
+              timestamp: Date.now()
+            };
+          } catch (err: any) {
+            console.error('🔐 Chrome API error:', err);
+            return {
+              data: null,
+              error: { message: err.message },
+              method: 'chrome-api',
+              timestamp: Date.now()
+            };
+          }
+        }
+        
+        // Standard approach for other browsers
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password
@@ -186,10 +247,12 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Chrome incognito notice */}
-        {debugInfo === 'ℹ️ Running in private browsing mode' && (
+        {/* Chrome notice */}
+        {(debugInfo === 'ℹ️ Running in private browsing mode' || debugInfo === 'ℹ️ Chrome detected - using compatibility mode') && (
           <div className='text-xs text-blue-600 bg-blue-50 p-2 rounded mt-2'>
-            <strong>Note:</strong> You're using private browsing mode. Some features may be limited, but login should still work.
+            <strong>Note:</strong> {debugInfo === 'ℹ️ Chrome detected - using compatibility mode' 
+              ? 'Chrome browser detected. Using compatibility mode for best performance.'
+              : "You're using private browsing mode. Some features may be limited, but login should still work."}
           </div>
         )}
 
