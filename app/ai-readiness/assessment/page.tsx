@@ -16,7 +16,8 @@ interface Question {
   id: string;
   section: string;
   question: string;
-  type: 'scale_with_context' | 'open_ended';
+  type: 'scale_with_context' | 'open_ended' | 'upload';
+  required: boolean;
   helpText?: string;
   scaleLabels?: {
     low: string;
@@ -650,6 +651,81 @@ export default function AIReadinessAssessmentPage() {
                     rows={6}
                     className="w-full"
                   />
+                </div>
+              )}
+
+              {currentQuestion.type === 'upload' && (
+                <div className="space-y-4">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div className="space-y-3">
+                      <div className="text-gray-400 text-4xl">📄</div>
+                      <div>
+                        <p className="text-sm text-gray-600 mb-2">
+                          Drag and drop files here, or click to browse
+                        </p>
+                        <input
+                          type="file"
+                          id={`file-upload-${currentQuestion.id}`}
+                          multiple
+                          accept=".pdf,.doc,.docx,.txt,.ppt,.pptx"
+                          className="hidden"
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            if (files.length > 0) {
+                              handleResponse(
+                                currentQuestion.id,
+                                undefined,
+                                undefined,
+                                `Uploaded ${files.length} file(s): ${files.map(f => f.name).join(', ')}`
+                              );
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`file-upload-${currentQuestion.id}`}
+                          className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors"
+                        >
+                          Browse Files
+                        </label>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Supported: PDF, DOC, DOCX, TXT, PPT, PPTX
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Show uploaded file info or option to skip */}
+                  {responses[currentQuestion.id]?.text ? (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm text-green-800 font-medium">Files uploaded</p>
+                          <p className="text-xs text-green-700 mt-1">{responses[currentQuestion.id].text}</p>
+                        </div>
+                        <button
+                          onClick={() => handleResponse(currentQuestion.id, undefined, undefined, undefined)}
+                          className="text-xs text-green-600 hover:text-green-700 underline"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <button
+                        onClick={() => handleResponse(
+                          currentQuestion.id,
+                          undefined,
+                          undefined,
+                          'No files available - will provide later'
+                        )}
+                        className="text-sm text-blue-600 hover:text-blue-700 underline"
+                      >
+                        Skip - I don't have these materials yet
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
