@@ -64,7 +64,7 @@ export default function AIReadinessAssessmentPage() {
           console.error('Failed to parse onboarding data:', e);
         }
       }
-      
+
       // Finally fall back to domain detection
       const hostname = window.location.hostname;
       if (hostname.includes('k12')) {
@@ -599,8 +599,8 @@ export default function AIReadinessAssessmentPage() {
                           responses[currentQuestion.id]?.text
                         )}
                         className={`w-full p-4 text-left border-2 rounded-lg transition-all ${responses[currentQuestion.id]?.value === option.value
-                            ? option.color
-                            : 'bg-white border-gray-200 hover:border-gray-300'
+                          ? option.color
+                          : 'bg-white border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <div className="flex items-center justify-between">
@@ -693,7 +693,7 @@ export default function AIReadinessAssessmentPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Show uploaded file info or option to skip */}
                   {responses[currentQuestion.id]?.text ? (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">

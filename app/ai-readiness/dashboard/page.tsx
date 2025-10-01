@@ -73,13 +73,58 @@ export default function AIReadinessDashboard() {
 
   useEffect(() => {
     verifyPaymentAccess();
+    
+    // Set up session refresh listener to automatically handle token refresh
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('[Dashboard] Session token refreshed automatically');
+        // Re-verify access with new token
+        await verifyPaymentAccess();
+      } else if (event === 'SIGNED_OUT') {
+        router.push('/auth/login');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const verifyPaymentAccess = async () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Try to refresh session first if it's close to expiring
       const { data: { session }, error: authError } = await supabase.auth.getSession();
+      
+      // If session exists, check if it's expired or close to expiring (within 5 minutes)
+      if (session?.expires_at) {
+        const expiresAt = session.expires_at * 1000; // Convert to milliseconds
+        const now = Date.now();
+        const fiveMinutes = 5 * 60 * 1000;
+        
+        // If expired or expiring soon, try to refresh
+        if (expiresAt < now + fiveMinutes) {
+          console.log('[Dashboard] Session expiring soon, refreshing...');
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession({
+            refresh_token: session.refresh_token
+          });
+          
+          if (refreshError) {
+            console.error('[Dashboard] Session refresh failed:', refreshError);
+            setError('Your session has expired. Please log in again.');
+            setLoading(false);
+            router.push('/auth/login');
+            return;
+          }
+          
+          if (refreshData?.session) {
+            console.log('[Dashboard] Session refreshed successfully');
+          }
+        }
+      }
+      
       if (authError) {
         setError('Authentication error: ' + authError.message);
         setLoading(false);
