@@ -28,11 +28,30 @@ export default function LoginPage() {
     // Test Supabase connection on load
     const testConnection = async () => {
       try {
-        const { error } = await supabase.auth.getSession();
-        if (error) {
-          setDebugInfo(`⚠️ Auth connection issue: ${error.message}`);
-        } else {
-          setDebugInfo('✅ Supabase connection OK');
+        // Create a timeout wrapper for getSession to prevent hanging in Chrome incognito
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+        
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => {
+          controller.signal.addEventListener('abort', () => {
+            reject(new Error('Session check timeout - this is normal in private browsing mode'));
+          });
+        });
+        
+        try {
+          const { error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+          clearTimeout(timeoutId);
+          
+          if (error) {
+            setDebugInfo(`⚠️ Auth connection issue: ${error.message}`);
+          } else {
+            setDebugInfo('✅ Supabase connection OK');
+          }
+        } catch (timeoutErr: any) {
+          clearTimeout(timeoutId);
+          // Don't show scary error for timeout in private mode
+          setDebugInfo('ℹ️ Running in private browsing mode');
         }
       } catch (err: any) {
         setDebugInfo(`❌ Connection failed: ${err.message}`);
@@ -164,6 +183,13 @@ export default function LoginPage() {
         {debugInfo && (
           <div className='text-xs text-gray-600 bg-gray-50 p-2 rounded'>
             {debugInfo}
+          </div>
+        )}
+
+        {/* Chrome incognito notice */}
+        {debugInfo === 'ℹ️ Running in private browsing mode' && (
+          <div className='text-xs text-blue-600 bg-blue-50 p-2 rounded mt-2'>
+            <strong>Note:</strong> You're using private browsing mode. Some features may be limited, but login should still work.
           </div>
         )}
 
