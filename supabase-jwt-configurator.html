@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase JWT Expiry Configurator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 3rem;
+        }
+        
+        h1 {
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+        
+        .step {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            margin-right: 0.75rem;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        
+        .step-content {
+            color: #4a5568;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-left: 2.5rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #68d391;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1.5rem;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #c6f6d5;
+            border: 1px solid #68d391;
+            color: #22543d;
+        }
+        
+        .alert-error {
+            background: #fed7d7;
+            border: 1px solid #fc8181;
+            color: #742a2a;
+        }
+        
+        .alert-info {
+            background: #bee3f8;
+            border: 1px solid #63b3ed;
+            color: #2c5282;
+        }
+        
+        .input-group {
+            margin: 1rem 0;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .current-value {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .current-value strong {
+            color: #dc3545;
+        }
+        
+        .new-value {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .new-value strong {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Supabase JWT Expiry Configurator</h1>
+        <p class="subtitle">Update JWT expiry from 1 hour to 24 hours - No code deployment needed</p>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">1</span>
+                Open Supabase Dashboard
+            </div>
+            <div class="step-content">
+                Go to <a href="https://supabase.com/dashboard" target="_blank" style="color: #667eea; font-weight: 600;">https://supabase.com/dashboard</a> and sign in
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">2</span>
+                Select Your Project
+            </div>
+            <div class="step-content">
+                Click on: <strong>AI Readiness Assessment</strong> (jocigzsthcpspxfdfxae)
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">3</span>
+                Navigate to Authentication Settings
+            </div>
+            <div class="step-content">
+                Click: <strong>⚙️ Settings</strong> (left sidebar) → <strong>Authentication</strong>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">4</span>
+                Update JWT Expiry
+            </div>
+            <div class="step-content">
+                <div class="current-value">
+                    <strong>Current:</strong> JWT expiry time = <strong>3600</strong> seconds (1 hour)
+                </div>
+                <div class="new-value">
+                    <strong>Change to:</strong> JWT expiry time = <strong>86400</strong> seconds (24 hours)
+                </div>
+                <p style="margin-top: 0.75rem;">
+                    Scroll down to find <strong>"JWT Settings"</strong> section, update the value, and click <strong>Save</strong>
+                </p>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">5</span>
+                Alternative: Use Browser Console (If You Can't Find the Setting)
+            </div>
+            <div class="step-content">
+                <p style="margin-bottom: 0.75rem;">If you can't find the JWT settings in the dashboard, use this automated script:</p>
+                
+                <div class="input-group">
+                    <label for="accessToken">Your Supabase Access Token (from browser):</label>
+                    <input type="password" id="accessToken" placeholder="Paste your access token here..." />
+                    <p style="font-size: 0.85rem; color: #718096; margin-top: 0.25rem;">
+                        Get this from Supabase Dashboard → Open DevTools (F12) → Console → Run: <code style="background: #edf2f7; padding: 2px 4px; border-radius: 3px;">localStorage.getItem('supabase.auth.token')</code>
+                    </p>
+                </div>
+                
+                <button class="btn" onclick="updateJWTExpiry()">🚀 Update JWT Expiry via API</button>
+                
+                <div id="result" class="alert"></div>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">6</span>
+                Verify the Change
+            </div>
+            <div class="step-content">
+                <p>After updating, log in to your app and run this in browser console:</p>
+                <div class="code-block">supabase.auth.getSession().then(({data: {session}}) => {
+  console.log('Expires:', new Date(session.expires_at * 1000));
+  const hours = Math.round((session.expires_at * 1000 - Date.now()) / 1000 / 60 / 60);
+  console.log('Hours until expiry:', hours);
+  console.log(hours > 20 ? '✅ Success! 24hr sessions enabled' : '❌ Still 1hr sessions');
+});</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function updateJWTExpiry() {
+            const token = document.getElementById('accessToken').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!token) {
+                resultDiv.className = 'alert alert-error';
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = '❌ Please enter your access token first';
+                return;
+            }
+            
+            resultDiv.className = 'alert alert-info';
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = '⏳ Updating JWT expiry setting...';
+            
+            try {
+                const response = await fetch('https://api.supabase.com/v1/projects/jocigzsthcpspxfdfxae/config/auth', {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        JWT_EXP: 86400
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'alert alert-success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        JWT expiry has been updated to 24 hours (86400 seconds).<br>
+                        <br>
+                        <strong>Next steps:</strong><br>
+                        1. Log out of your app<br>
+                        2. Log back in<br>
+                        3. New sessions will last 24 hours!
+                    `;
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'alert alert-error';
+                resultDiv.innerHTML = `
+                    <strong>❌ Error:</strong> ${error.message}<br>
+                    <br>
+                    <strong>Common issues:</strong><br>
+                    • Invalid or expired access token<br>
+                    • Missing permissions<br>
+                    • Network error<br>
+                    <br>
+                    <strong>Solution:</strong> Try updating via Supabase Dashboard instead (Steps 1-4 above)
+                `;
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('accessToken').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                updateJWTExpiry();
+            }
+        });
+    </script>
+</body>
+</html>
