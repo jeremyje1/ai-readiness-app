@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { authService } from '@/lib/auth-service';
+// import { authService } from '@/lib/auth-service'; // Bypassed due to hanging issues
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -44,10 +44,10 @@ export default function LoginPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log('🔐 Form submission started');
-    console.log('🔐 Email:', email);
+    console.log('🔐 Starting form submission');
+    console.log('🔐 Email:', email.trim());
+    console.log('🔐 Supabase client available:', typeof supabase);
     console.log('🔐 Password length:', password.length);
-    console.log('🔐 AuthService available:', typeof authService);
 
     // Set loading state
     setLoading(true);
@@ -60,36 +60,23 @@ export default function LoginPage() {
       // Add a small delay to ensure the UI updates
       await new Promise(resolve => setTimeout(resolve, 10));
 
-      console.log('🔐 Calling authService.signInWithPassword now...');
+      console.log('🔐 Using direct Supabase auth (bypassing auth service)...');
 
       // Wrap entire login process in a timeout
       const loginProcess = async () => {
-        // Use AuthService with built-in timeout and fallback
-        let result;
-        try {
-          result = await authService.signInWithPassword(email.trim(), password);
-        } catch (authServiceError: any) {
-          console.error('🔐 AuthService threw an error, falling back to direct Supabase:', authServiceError);
+        // Use direct Supabase auth to avoid hanging issues
+        console.log('🔐 Calling supabase.auth.signInWithPassword...');
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password
+        });
 
-          // Fallback to direct Supabase client if AuthService fails
-          try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-              email: email.trim(),
-              password
-            });
-
-            result = {
-              data,
-              error,
-              method: 'direct-fallback',
-              timestamp: Date.now()
-            };
-          } catch (directError: any) {
-            console.error('🔐 Direct Supabase also failed:', directError);
-            throw new Error(`Both AuthService and direct Supabase failed: ${authServiceError.message} | ${directError.message}`);
-          }
-        }
-        return result;
+        return {
+          data,
+          error,
+          method: 'direct',
+          timestamp: Date.now()
+        };
       };
 
       // Add 15-second timeout to entire login process
@@ -215,7 +202,6 @@ export default function LoginPage() {
             console.log('🔐 Button clicked!');
             console.log('🔐 Loading state:', loading);
             console.log('🔐 Button disabled:', loading);
-            console.log('🔐 AuthService available:', !!authService);
             console.log('🔐 Email filled:', !!email.trim());
             console.log('🔐 Password filled:', !!password);
           }}
