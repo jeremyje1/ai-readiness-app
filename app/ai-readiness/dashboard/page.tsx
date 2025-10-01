@@ -33,7 +33,7 @@ export default function AIReadinessDashboard() {
   // Handle hydration and get institution type from localStorage or user profile
   useEffect(() => {
     setHydrated(true);
-    
+
     // Try multiple sources for institution type
     // 1. Direct localStorage setting
     const storedType = localStorage.getItem('ai_blueprint_institution_type');
@@ -41,7 +41,7 @@ export default function AIReadinessDashboard() {
       setInstitutionType(storedType);
       return;
     }
-    
+
     // 2. Check onboarding data
     const onboardingData = localStorage.getItem('ai_readiness_onboarding');
     if (onboardingData) {
@@ -59,7 +59,7 @@ export default function AIReadinessDashboard() {
         console.error('Failed to parse onboarding data:', e);
       }
     }
-    
+
     // 3. Fall back to domain detection
     const hostname = window.location.hostname;
     if (hostname.includes('k12')) {
@@ -89,10 +89,32 @@ export default function AIReadinessDashboard() {
         router.push('/ai-readiness');
         return;
       }
-      
+
+      // Quick check first - especially helpful for new users
+      try {
+        const quickCheckRes = await fetch('/api/payments/quick-check', {
+          cache: 'no-store'
+        });
+
+        if (quickCheckRes.ok) {
+          const quickCheck = await quickCheckRes.json();
+          if (!quickCheck.hasPayment) {
+            // New user without payment - skip the full check
+            console.log('[Dashboard] User has no payments, skipping full verification');
+            setVerification({ isVerified: false });
+            setError('No payment found. Please complete the signup process to access the dashboard.');
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (quickCheckError) {
+        // If quick check fails, continue with full check
+        console.warn('[Dashboard] Quick check failed, continuing with full verification');
+      }
+
       // Store the actual user ID from session
       setCurrentUserId(session.user.id);
-      
+
       const accessToken = session.access_token;
       // Prepare client-side debug details (does not expose full secrets)
       const clientDebug: any = debugMode ? {
@@ -132,12 +154,31 @@ export default function AIReadinessDashboard() {
       // Call unified status endpoint with bearer token (propagate debug flag)
       const statusEndpoint = debugMode ? '/api/payments/status?debug=1' : '/api/payments/status';
       console.log('[verifyPaymentAccess] sending Authorization header?', Boolean(accessToken));
-      let res = await fetch(statusEndpoint, {
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-        cache: 'no-store'
-      });
+
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      let res;
       let json: any = {};
-      try { json = await res.json(); } catch (e) { json = { parseError: true }; }
+      try {
+        res = await fetch(statusEndpoint, {
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        try { json = await res.json(); } catch (e) { json = { parseError: true }; }
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          console.error('Payment status check timed out after 10 seconds');
+          setError('Payment verification timed out. Please refresh the page to try again.');
+          setLoading(false);
+          return;
+        }
+        throw error;
+      }
       if (debugMode) clientDebug.primaryFetch = { ok: res.ok, status: res.status, url: statusEndpoint, hadAuthHeader: Boolean(accessToken) };
       if (debugMode) setDebugInfo({ server: json.debug || json, client: clientDebug });
 
@@ -380,11 +421,11 @@ export default function AIReadinessDashboard() {
                   'calendly-popup',
                   'width=800,height=700,scrollbars=yes,resizable=yes,toolbar=no,location=no'
                 );
-                
+
                 // If popup is blocked, show instructions and fallback
                 if (!popup || popup.closed || typeof popup.closed === 'undefined') {
                   alert('🕐 Scheduling Information\n\n✅ Expert Sessions Available!\n\n⚠️ Pop-up Blocked\nYour browser blocked the scheduling window.\n\n📋 To Schedule:\n1. Allow pop-ups for this site\n2. Or copy this link: ' + calendlyUrl + '\n\n⏰ Time Zone Details:\n• Calendly shows Pacific Time by default\n• Jeremy is in Central Time (CST/CDT)\n• You can adjust time zone on the booking page\n• 30-minute sessions available\n\n📅 What to Expect:\n• AI implementation strategy discussion\n• Personalized recommendations review\n• Q&A about your assessment results\n• Next steps planning');
-                  
+
                   // Fallback: Navigate in current tab after user acknowledges
                   if (confirm('Would you like to open the scheduling page in this tab?')) {
                     window.location.href = calendlyUrl;

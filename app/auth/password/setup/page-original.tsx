@@ -1,8 +1,8 @@
 'use client';
 
-import { supabase } from '@/lib/supabase';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function PasswordSetupSimple() {
   const [password, setPassword] = useState('');
@@ -15,7 +15,7 @@ export default function PasswordSetupSimple() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (password !== confirmPassword) {
       setStatus('Passwords do not match');
       return;
@@ -63,12 +63,12 @@ export default function PasswordSetupSimple() {
 
       console.log('Sign in successful:', data.user?.email);
       setStatus('Success! Redirecting...');
-
+      
       // Step 3: Redirect to dashboard
       setTimeout(() => {
         window.location.href = '/ai-readiness/dashboard';
       }, 1000);
-
+      
     } catch (error: any) {
       console.error('Setup error:', error);
       setStatus(error.message || 'An error occurred');
@@ -88,7 +88,7 @@ export default function PasswordSetupSimple() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
         <h2 className="text-3xl font-bold text-center">Set Your Password</h2>
-
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -123,10 +123,11 @@ export default function PasswordSetupSimple() {
           </div>
 
           {status && (
-            <div className={`p-3 rounded ${status.includes('error') || status.includes('do not match') || status.includes('must be')
-                ? 'bg-red-100 text-red-700'
+            <div className={`p-3 rounded ${
+              status.includes('error') || status.includes('do not match') || status.includes('must be') 
+                ? 'bg-red-100 text-red-700' 
                 : 'bg-blue-100 text-blue-700'
-              }`}>
+            }`}>
               {status}
             </div>
           )}

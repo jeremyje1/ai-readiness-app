@@ -1,6 +1,6 @@
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '../../../../lib/supabase';
-import { createClient } from '@supabase/supabase-js';
 
 // Unified payment status endpoint.
 // - Authenticates user via Supabase session cookie.
@@ -104,15 +104,15 @@ export async function GET(request: Request) {
         try {
           const host = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '').host;
           envProjectRef = host.split('.supabase.co')[0];
-        } catch (_) {}
+        } catch (_) { }
         // Provide richer diagnostics when Supabase rejects the provided token
         const debugAuthErr = {
           phase: 'auth-error-get-user',
           phaseCanonical: 'auth-error-get-user',
           suppliedAccessToken: true,
           accessTokenPreview: accessToken.length > 16 ? accessToken.slice(0, 8) + '...' + accessToken.slice(-6) : accessToken,
-            accessTokenLength: accessToken.length,
-          tokenLooksPlaceholder: ['undefined','null',''].includes(accessToken.trim()),
+          accessTokenLength: accessToken.length,
+          tokenLooksPlaceholder: ['undefined', 'null', ''].includes(accessToken.trim()),
           qpTokenPresent: Boolean(qpToken),
           hadAuthHeader: Boolean(request.headers.get('authorization') || request.headers.get('Authorization')),
           hadCookie: Boolean(request.headers.get('cookie')),
@@ -155,8 +155,8 @@ export async function GET(request: Request) {
       if (adminErr) {
         return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: { ...debugUnauth, adminBypassTried: true, adminErr: adminErr.message } }, { status: 401 });
       }
-  if (rows && rows.length === 1) {
-    return NextResponse.json({ isVerified: true, tier: rows[0].tier, email: rows[0].email, name: rows[0].name, organization: rows[0].organization, rowId: rows[0].id, debug: { ...debugAggregate, phase: 'verified-admin-bypass', note: 'Bypassed normal auth for diagnostics', originalAuthIssue: debugUnauth } });
+      if (rows && rows.length === 1) {
+        return NextResponse.json({ isVerified: true, tier: rows[0].tier, email: rows[0].email, name: rows[0].name, organization: rows[0].organization, rowId: rows[0].id, debug: { ...debugAggregate, phase: 'verified-admin-bypass', note: 'Bypassed normal auth for diagnostics', originalAuthIssue: debugUnauth } });
       }
       return NextResponse.json({ isVerified: false, error: 'not_authenticated', debug: { ...debugUnauth, adminBypassTried: true, adminFound: 0 } }, { status: 401 });
     }
@@ -165,19 +165,19 @@ export async function GET(request: Request) {
 
   const userId = session.user.id;
   const userEmail = session.user.email?.toLowerCase() || null;
-  
+
   // Temporary bypass for testing - remove in production
   if (userEmail === 'jeremy.estrella@gmail.com' || userEmail === 'estrellasandstars@outlook.com') {
-    return NextResponse.json({ 
-      isVerified: true, 
-      tier: 'team', 
-      email: userEmail, 
-      name: 'Jeremy Estrella', 
+    return NextResponse.json({
+      isVerified: true,
+      tier: 'team',
+      email: userEmail,
+      name: 'Jeremy Estrella',
       organization: 'Testing',
       debug: { ...debugAggregate, phase: 'temp-bypass', note: 'Temporary bypass for testing' }
     } as PaymentStatusResponse);
   }
-  
+
   const debug: any = { ...debugAggregate, phase: 'start', userId, userEmail, tokenFallback: Boolean(accessToken), sessionError: sessionError?.message };
   if (accessToken) {
     debug.accessTokenPreview = accessToken.length > 20 ? accessToken.slice(0, 12) + '...' + accessToken.slice(-8) : accessToken;
@@ -196,7 +196,7 @@ export async function GET(request: Request) {
         global: { headers: { Authorization: `Bearer ${accessToken}` } }
       });
       debug.createdAuthedClient = true;
-    } catch (e:any) {
+    } catch (e: any) {
       debug.authedClientError = e.message;
     }
   }
@@ -210,15 +210,44 @@ export async function GET(request: Request) {
   debug.excludeTestEnv = excludeTestEnv;
   debug.includeTestOverride = includeTestOverride;
   debug.excludeTestActive = excludeTest;
-  const baseUserQuery = queryClient
-    .from('user_payments')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('access_granted', true);
-  if (excludeTest) baseUserQuery.eq('is_test', false);
-  const { data: byUser, error: byUserErr } = await baseUserQuery
-    .order('created_at', { ascending: false })
-    .limit(1);
+
+  // Add timeout wrapper for database queries to prevent hanging
+  const withTimeout = async <T>(promise: Promise<T>, ms: number): Promise<T> => {
+    const timeout = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(`Query timeout after ${ms}ms`)), ms);
+    });
+    return Promise.race([promise, timeout]);
+  };
+
+  // Execute primary query with timeout
+  let byUser: any[] | null = null;
+  let byUserErr: any = null;
+
+  try {
+    const baseUserQuery = queryClient
+      .from('user_payments')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('access_granted', true);
+    if (excludeTest) baseUserQuery.eq('is_test', false);
+
+    const result = await withTimeout(
+      baseUserQuery.order('created_at', { ascending: false }).limit(1),
+      5000 // 5 second timeout
+    ) as { data: any[] | null, error: any };
+
+    byUser = result.data;
+    byUserErr = result.error;
+  } catch (error: any) {
+    if (error.message.includes('timeout')) {
+      console.error('[Payment Status] Primary query timed out for user:', userId);
+      debug.primaryQueryTimeout = true;
+      byUserErr = error;
+    } else {
+      byUserErr = error;
+      debug.primaryQueryError = error.message;
+    }
+  }
 
   if (byUserErr) {
     debug.byUserErr = byUserErr.message;
@@ -230,40 +259,64 @@ export async function GET(request: Request) {
 
   // 2. Fallback by email (RLS now reveals matching unclaimed row)
   if (!row && userEmail) {
-    const baseEmailQuery = queryClient
-      .from('user_payments')
-      .select('*')
-      .eq('email', userEmail)
-      .eq('access_granted', true);
-    if (excludeTest) baseEmailQuery.eq('is_test', false);
-    const { data: byEmail, error: byEmailErr } = await baseEmailQuery
-      .order('created_at', { ascending: false })
-      .limit(1);
-    if (byEmailErr) {
-      debug.byEmailErr = byEmailErr.message;
-    }
-    if (byEmail) debug.byEmailCount = byEmail.length;
-    if (byEmail && byEmail.length === 1) {
-      row = byEmail[0];
-      // Attempt claim if user_id is null
-      if (row && !row.user_id) {
-  const { error: claimErr } = await queryClient
-          .from('user_payments')
-          .update({ user_id: userId })
-          .eq('id', row.id);
-        if (!claimErr) {
-          claimed = true;
-          row.user_id = userId;
-        } else {
-          debug.claimErr = claimErr.message;
+    try {
+      const baseEmailQuery = queryClient
+        .from('user_payments')
+        .select('*')
+        .eq('email', userEmail)
+        .eq('access_granted', true);
+      if (excludeTest) baseEmailQuery.eq('is_test', false);
+
+      const emailResult = await withTimeout(
+        baseEmailQuery.order('created_at', { ascending: false }).limit(1),
+        5000 // 5 second timeout
+      ) as { data: any[] | null, error: any };
+
+      const byEmail = emailResult.data;
+      const byEmailErr = emailResult.error;
+
+      if (byEmailErr) {
+        debug.byEmailErr = byEmailErr.message;
+      }
+      if (byEmail) debug.byEmailCount = byEmail.length;
+      if (byEmail && byEmail.length === 1) {
+        row = byEmail[0];
+        // Attempt claim if user_id is null
+        if (row && !row.user_id) {
+          try {
+            const claimResult = await withTimeout(
+              queryClient
+                .from('user_payments')
+                .update({ user_id: userId })
+                .eq('id', row.id),
+              3000 // 3 second timeout for update
+            ) as { error: any };
+
+            if (!claimResult.error) {
+              claimed = true;
+              row.user_id = userId;
+            } else {
+              debug.claimErr = claimResult.error.message;
+            }
+          } catch (claimError: any) {
+            debug.claimError = claimError.message;
+            console.error('[Payment Status] Claim query timed out');
+          }
         }
+      }
+    } catch (error: any) {
+      if (error.message.includes('timeout')) {
+        console.error('[Payment Status] Email query timed out for:', userEmail);
+        debug.emailQueryTimeout = true;
+      } else {
+        debug.emailQueryError = error.message;
       }
     }
   }
 
   if (!row) {
-  debug.phase = 'not-found';
-  return NextResponse.json({ isVerified: false, debug } as PaymentStatusResponse, { status: 404 });
+    debug.phase = 'not-found';
+    return NextResponse.json({ isVerified: false, debug } as PaymentStatusResponse, { status: 404 });
   }
 
   debug.phase = 'verified';
