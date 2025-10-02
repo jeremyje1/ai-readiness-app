@@ -22,14 +22,17 @@ export default function LoginPage() {
   useEffect(() => {
     // Check for success messages from URL parameters
     const message = searchParams.get('message');
-    if (message === 'password-set') {
+    const urlEmail = searchParams.get('email');
+
+    if (message === 'password-set' && urlEmail) {
+      setSuccessMessage(`✅ Password set successfully for ${urlEmail}! Please log in with this email.`);
+    } else if (message === 'password-set') {
       setSuccessMessage('✅ Password set successfully! You can now log in.');
     } else if (message === 'password-updated') {
       setSuccessMessage('✅ Password updated successfully! You can now log in.');
     }
 
     // Update email if URL parameter changes
-    const urlEmail = searchParams.get('email');
     if (urlEmail) {
       setEmail(urlEmail);
     }
@@ -378,7 +381,13 @@ export default function LoginPage() {
             onChange={e => setEmail(e.target.value)}
             required
             placeholder='jeremy.estrella@gmail.com'
+            className={searchParams.get('message') === 'password-set' ? 'border-green-500 bg-green-50' : ''}
           />
+          {searchParams.get('message') === 'password-set' && email && (
+            <p className='text-xs text-green-600 mt-1'>
+              ✓ Use this email address to log in
+            </p>
+          )}
         </div>
         <div>
           <label className='block text-sm mb-1'>Password</label>
