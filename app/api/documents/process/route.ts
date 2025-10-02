@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import pdf from 'pdf-parse';
+import * as pdf from 'pdf-parse';
 import mammoth from 'mammoth';
 
 export async function POST(request: NextRequest) {

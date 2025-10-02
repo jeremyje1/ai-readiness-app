@@ -46,7 +46,7 @@ export async function DELETE(req: NextRequest) {
         } else {
           results.tablesCleared.push(table);
         }
-      } catch (e) {
+      } catch (e: any) {
         results.errors.push(`${table}: ${e.message}`);
       }
     }
@@ -68,7 +68,7 @@ export async function DELETE(req: NextRequest) {
           } else {
             results.usersDeleted++;
           }
-        } catch (e) {
+        } catch (e: any) {
           results.errors.push(`Delete user ${user.email}: ${e.message}`);
         }
       }
@@ -80,7 +80,7 @@ export async function DELETE(req: NextRequest) {
       results
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Cleanup error:', error);
     return NextResponse.json({
       error: 'Cleanup failed',
