@@ -14,8 +14,10 @@ if (!supabaseAdmin) {
 // Define tier mapping based on Stripe price IDs (current canonical production)
 // NOTE: Keep legacy IDs for backward compatibility; add new production IDs from pricing reference.
 const tierMapping: Record<string, string> = {
-  // New $199/month platform access (7-day trial)
-  'price_1SDnMYK8PKpLCKDZEa0MRCBf': 'platform-monthly', // $199/month with 7-day trial
+  // Production $199/month platform access (7-day trial)
+  'price_1SDnhlRMpSG47vNmDQr1WeJ3': 'platform-monthly', // $199/month LIVE with 7-day trial
+  // Test price
+  'price_1SDnMYK8PKpLCKDZEa0MRCBf': 'platform-monthly', // $199/month TEST with 7-day trial
   // Legacy pricing (kept for backward compatibility)
   'price_1RxbFkRMpSG47vNmLp4LCRHZ': 'team-monthly', // $995/month (correct)
   'price_1RxbFkRMpSG47vNmLp4CRHZ': 'team-monthly',  // legacy/typo variant retained for safety

@@ -6,14 +6,14 @@ import Stripe from 'stripe';
 // We intentionally read env lazily so that missing vars surface as runtime errors with clear messages.
 const PRODUCT_PRICE_ENV: Record<string, Record<string, string | undefined>> = {
   team: {
-    monthly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf',
-    yearly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf',
-    annual: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf'
+    monthly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3',
+    yearly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3',
+    annual: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3'
   },
   platform: {
-    monthly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf',
-    yearly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf',
-    annual: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf'
+    monthly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3',
+    yearly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3',
+    annual: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3'
   }
 };
 
