@@ -97,39 +97,57 @@ export default function OnboardingPage() {
     };
 
     const handleComplete = async () => {
-        if (!userId) return;
+        if (!userId) {
+            console.error('No user ID found');
+            return;
+        }
 
+        console.log('Starting onboarding completion...', { userId, data });
         setLoading(true);
         const supabase = createClient();
 
         try {
             // Save user profile
-            const { error: profileError } = await supabase
+            console.log('Saving user profile...');
+            const profileData = {
+                user_id: userId,
+                institution_name: data.institutionName,
+                institution_type: data.institutionType,
+                student_count: parseInt(data.studentCount) || null,
+                full_name: data.userName,
+                job_title: data.userRole,
+                department: data.department,
+                ai_experience: data.aiExperience,
+                top_priority: data.topPriority,
+                implementation_timeline: data.timeline,
+                onboarding_completed: true,
+                updated_at: new Date().toISOString()
+            };
+
+            console.log('Profile data:', profileData);
+
+            const { data: savedProfile, error: profileError } = await supabase
                 .from('user_profiles')
-                .upsert({
-                    user_id: userId,
-                    institution_name: data.institutionName,
-                    institution_type: data.institutionType,
-                    student_count: parseInt(data.studentCount) || null,
-                    full_name: data.userName,
-                    job_title: data.userRole,
-                    department: data.department,
-                    ai_experience: data.aiExperience,
-                    top_priority: data.topPriority,
-                    implementation_timeline: data.timeline,
-                    onboarding_completed: true,
-                    updated_at: new Date().toISOString()
-                });
+                .upsert(profileData, {
+                    onConflict: 'user_id'
+                })
+                .select();
 
             if (profileError) {
                 console.error('Error saving profile:', profileError);
+                alert('Error saving your profile. Please try again or contact support.');
+                setLoading(false);
+                return;
             }
 
+            console.log('Profile saved successfully:', savedProfile);
+
             // Redirect to streamlined assessment
-            router.push('/assessment/streamlined');
+            console.log('Redirecting to assessment...');
+            window.location.href = '/assessment/streamlined';
         } catch (error) {
             console.error('Error completing onboarding:', error);
-        } finally {
+            alert('An error occurred. Please try again or contact support.');
             setLoading(false);
         }
     };
