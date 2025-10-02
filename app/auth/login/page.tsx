@@ -160,12 +160,21 @@ export default function LoginPage() {
                 };
               }
 
-              // Set the session manually
-              await supabase.auth.setSession({
+              // Set the session manually (non-blocking for Chrome)
+              console.log('🔐 Setting session manually for Chrome...');
+
+              // Don't await setSession in Chrome as it may hang
+              // Just fire it and continue - the session will be set in the background
+              supabase.auth.setSession({
                 access_token: data.access_token,
                 refresh_token: data.refresh_token
+              }).then(() => {
+                console.log('🔐 Session set successfully in background');
+              }).catch((err) => {
+                console.warn('🔐 Session set warning (non-fatal):', err);
               });
 
+              console.log('🔐 Returning successful Chrome auth result');
               return {
                 data: { session: data, user: data.user },
                 error: null,

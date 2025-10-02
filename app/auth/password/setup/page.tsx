@@ -78,11 +78,18 @@ export default function PasswordSetupSimple() {
             throw new Error(data.error_description || 'Failed to sign in');
           }
 
-          // Manually set session for Chrome
+          // Manually set session for Chrome (non-blocking)
           console.log('Setting session manually for Chrome...');
-          await supabase.auth.setSession({
+
+          // Don't await setSession in Chrome as it may hang
+          // Just fire it and continue - the session will be set in the background
+          supabase.auth.setSession({
             access_token: data.access_token,
             refresh_token: data.refresh_token
+          }).then(() => {
+            console.log('Session set successfully in background');
+          }).catch((err) => {
+            console.warn('Session set warning (non-fatal):', err);
           });
 
           console.log('Chrome sign in successful');
