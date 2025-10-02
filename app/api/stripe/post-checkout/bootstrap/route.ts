@@ -17,9 +17,17 @@ function getStripe() {
 
 async function findOrCreateUser(email: string, name?: string) {
   if (!supabaseAdmin) throw new Error('Admin client unavailable');
+  console.log(`[Bootstrap] Looking for user with email: ${email}`);
+
   const { data: list } = await supabaseAdmin.auth.admin.listUsers();
   const existing = list.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-  if (existing) return existing.id;
+
+  if (existing) {
+    console.log(`[Bootstrap] Found existing user: ${existing.id} with email: ${existing.email}`);
+    return existing.id;
+  }
+
+  console.log(`[Bootstrap] Creating new user with email: ${email}`);
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email,
     email_confirm: true,
@@ -29,7 +37,13 @@ async function findOrCreateUser(email: string, name?: string) {
       created_via: 'stripe_checkout' // Mark as created via checkout flow without password
     }
   });
-  if (error) throw error;
+
+  if (error) {
+    console.error(`[Bootstrap] Failed to create user:`, error);
+    throw error;
+  }
+
+  console.log(`[Bootstrap] Created new user: ${data.user.id} with email: ${data.user.email}`);
   return data.user.id;
 }
 
@@ -37,8 +51,21 @@ async function createPwToken(userId: string, email: string) {
   if (!supabaseAdmin) throw new Error('Admin client unavailable');
   const token = crypto.randomBytes(24).toString('hex');
   const expires = new Date(Date.now() + 1000 * 60 * 60).toISOString();
-  const { error } = await supabaseAdmin.from('auth_password_setup_tokens').insert({ user_id: userId, email, token, expires_at: expires });
-  if (error) throw error;
+
+  console.log(`[Bootstrap] Creating password token for user ${userId} with email: ${email}`);
+  const { error } = await supabaseAdmin.from('auth_password_setup_tokens').insert({
+    user_id: userId,
+    email,
+    token,
+    expires_at: expires
+  });
+
+  if (error) {
+    console.error(`[Bootstrap] Failed to create password token:`, error);
+    throw error;
+  }
+
+  console.log(`[Bootstrap] Password token created successfully`);
   return token;
 }
 

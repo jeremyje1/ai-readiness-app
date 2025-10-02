@@ -19,8 +19,14 @@ export async function POST(req: NextRequest) {
     // Get the user to verify email
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(data.user_id);
     if (userError || !userData?.user) {
+      console.error(`User not found for ID ${data.user_id}:`, userError);
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    // Log what email we're dealing with
+    console.log(`Setting password for user ${data.user_id}:`);
+    console.log(`- Token email: ${data.email}`);
+    console.log(`- User email in Supabase: ${userData.user.email}`);
 
     // Update user password
     const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, { password });
@@ -31,12 +37,12 @@ export async function POST(req: NextRequest) {
 
     await supabaseAdmin.from('auth_password_setup_tokens').update({ used_at: new Date().toISOString() }).eq('id', data.id);
 
-    // Return the actual user email from Supabase, not the token
-    // This ensures we're using the exact email the user should login with
-    const userEmail = userData.user.email || data.email;
-    console.log(`Password set for user ${data.user_id}, email: ${userEmail}`);
+    // IMPORTANT: Always return the email from the token, not from the user
+    // The token has the exact email that was used during checkout
+    const returnEmail = data.email;
+    console.log(`Password set successfully, returning email: ${returnEmail}`);
 
-    return NextResponse.json({ success: true, email: userEmail });
+    return NextResponse.json({ success: true, email: returnEmail });
   } catch (e: any) {
     console.error('Password setup error', e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
