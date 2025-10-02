@@ -56,7 +56,7 @@ const DOCUMENT_TYPES = [
 
 export default function UploadDocumentsPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<UploadedDocument[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -69,29 +69,58 @@ export default function UploadDocumentsPage() {
   }, []);
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const supabase = createClient();
+    try {
+      // Add timeout for auth check
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth timeout')), 5000)
+      );
+
+      const authPromise = supabase.auth.getUser();
+      const { data: { user }, error } = await Promise.race([
+        authPromise,
+        timeoutPromise
+      ]) as any;
+
+      if (error || !user) {
+        console.error('Auth check failed:', error);
+        router.push('/auth/login');
+        return;
+      }
+
+      setUserId(user.id);
+      await loadExistingDocuments(user.id);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error checking user:', error);
       router.push('/auth/login');
-      return;
     }
-    setUserId(user.id);
-    loadExistingDocuments(user.id);
   };
 
   const loadExistingDocuments = async (uid: string) => {
-    const { data, error } = await supabase
-      .from('uploaded_documents')
-      .select('*')
-      .eq('user_id', uid)
-      .order('upload_date', { ascending: false });
+    const supabase = createClient();
+    try {
+      const { data, error } = await supabase
+        .from('uploaded_documents')
+        .select('*')
+        .eq('user_id', uid)
+        .order('upload_date', { ascending: false });
 
-    if (data) {
-      setUploadedDocs(data);
+      if (error) {
+        console.error('Error loading documents:', error);
+        // Don't block the page if documents can't load
+      } else if (data) {
+        setUploadedDocs(data);
+      }
+    } catch (err) {
+      console.error('Failed to load existing documents:', err);
+      // Continue anyway - don't block the upload functionality
     }
   };
 
   const handleFileSelect = async (documentType: string, file: File) => {
     if (!userId) return;
+    const supabase = createClient();
 
     // Validate file type
     const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
@@ -175,6 +204,7 @@ export default function UploadDocumentsPage() {
 
   const handleAnalyze = async () => {
     if (!userId) return;
+    const supabase = createClient();
     setAnalyzing(true);
 
     try {
@@ -213,6 +243,17 @@ export default function UploadDocumentsPage() {
   };
 
   const canProceed = uploadedDocs.length >= 2 && hasRequiredDocuments();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading document upload...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50 py-12">
