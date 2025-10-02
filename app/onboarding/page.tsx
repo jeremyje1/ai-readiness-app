@@ -64,21 +64,58 @@ export default function OnboardingPage() {
 
     const checkUser = async () => {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
 
-        if (!user) {
-            router.push('/auth/login');
-            return;
-        }
+        try {
+            // Add timeout protection
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Auth timeout')), 5000)
+            );
 
-        setUserId(user.id);
+            const authPromise = supabase.auth.getUser();
+            const { data: { user }, error } = await Promise.race([authPromise, timeoutPromise]) as any;
 
-        // Pre-fill email if available
-        if (user.email) {
-            setData(prev => ({
-                ...prev,
-                userName: user.user_metadata?.full_name || ''
-            }));
+            if (error) {
+                console.error('Auth error:', error);
+                router.push('/auth/login');
+                return;
+            }
+
+            if (!user) {
+                console.error('No user found, redirecting to login');
+                router.push('/auth/login');
+                return;
+            }
+
+            console.log('User authenticated:', user.id);
+            setUserId(user.id);
+
+            // Pre-fill data if available
+            if (user.email) {
+                setData(prev => ({
+                    ...prev,
+                    userName: user.user_metadata?.full_name || user.user_metadata?.name || ''
+                }));
+            }
+        } catch (error) {
+            console.error('Error checking user:', error);
+            // Don't redirect on timeout - user might still be logged in
+            // Just try to get session from cookies as fallback
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    console.log('User found via session:', session.user.id);
+                    setUserId(session.user.id);
+                    setData(prev => ({
+                        ...prev,
+                        userName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || ''
+                    }));
+                } else {
+                    router.push('/auth/login');
+                }
+            } catch (sessionError) {
+                console.error('Session fallback failed:', sessionError);
+                router.push('/auth/login');
+            }
         }
     };
 
