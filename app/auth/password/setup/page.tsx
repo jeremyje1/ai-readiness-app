@@ -43,93 +43,16 @@ export default function PasswordSetupSimple() {
         throw new Error(json.error || 'Failed to set password');
       }
 
-      setStatus('Password set! Signing you in...');
+      setStatus('✅ Password set successfully! Redirecting to login...');
       console.log('Password set successfully, email:', json.email);
 
-      // Step 2: Sign in directly with Supabase (Chrome workaround for hanging issue)
-      const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
-      console.log('Is Chrome browser:', isChrome);
-
-      if (isChrome) {
-        // Chrome workaround: Use fetch API directly for Chrome browsers
-        console.log('Using Chrome workaround with direct API call...');
-        try {
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://jocigzsthcpspxfdfxae.supabase.co';
-          const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvY2lnenN0aGNwc3B4ZmRmeGFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMzExNzYsImV4cCI6MjA2ODgwNzE3Nn0.krJk0mzZQ3wmo_isokiYkm5eCTfMpIZcGP6qfSKYrHA';
-
-          const authUrl = `${supabaseUrl}/auth/v1/token?grant_type=password`;
-          const response = await fetch(authUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': supabaseKey
-            },
-            body: JSON.stringify({
-              email: json.email,
-              password: password,
-              gotrue_meta_security: {}
-            })
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            console.error('Chrome auth failed:', data);
-            throw new Error(data.error_description || 'Failed to sign in');
-          }
-
-          // Manually set session for Chrome (non-blocking)
-          console.log('Setting session manually for Chrome...');
-
-          // Don't await setSession in Chrome as it may hang
-          // Just fire it and continue - the session will be set in the background
-          supabase.auth.setSession({
-            access_token: data.access_token,
-            refresh_token: data.refresh_token
-          }).then(() => {
-            console.log('Session set successfully in background');
-          }).catch((err) => {
-            console.warn('Session set warning (non-fatal):', err);
-          });
-
-          console.log('Chrome sign in successful');
-          setStatus('Success! Redirecting...');
-
-          // Redirect to personalized dashboard
-          setTimeout(() => {
-            window.location.href = '/dashboard/personalized';
-          }, 1000);
-        } catch (chromeError: any) {
-          console.error('Chrome auth error:', chromeError);
-          setStatus('Password set! Redirecting to login...');
-          setTimeout(() => {
-            router.push('/auth/login?message=password-set');
-          }, 1500);
-        }
-      } else {
-        // Standard flow for non-Chrome browsers
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: json.email,
-          password: password
-        });
-
-        if (error) {
-          console.error('Sign in error:', error);
-          setStatus('Password set! Redirecting to login...');
-          setTimeout(() => {
-            router.push('/auth/login?message=password-set');
-          }, 1500);
-          return;
-        }
-
-        console.log('Sign in successful:', data.user?.email);
-        setStatus('Success! Redirecting...');
-
-        // Step 3: Redirect to personalized dashboard
-        setTimeout(() => {
-          window.location.href = '/dashboard/personalized';
-        }, 1000);
-      }
+      // Don't try to sign in immediately - just redirect to login
+      // This avoids session management issues
+      setTimeout(() => {
+        // Pass the email to pre-fill the login form
+        const loginUrl = `/auth/login?message=password-set&email=${encodeURIComponent(json.email)}`;
+        router.push(loginUrl);
+      }, 1500);
 
     } catch (error: any) {
       console.error('Setup error:', error);

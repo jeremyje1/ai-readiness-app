@@ -7,14 +7,17 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Pre-fill email from URL parameter if provided
+  const emailParam = searchParams.get('email') || '';
+  const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Check for success messages from URL parameters
@@ -23,6 +26,12 @@ export default function LoginPage() {
       setSuccessMessage('✅ Password set successfully! You can now log in.');
     } else if (message === 'password-updated') {
       setSuccessMessage('✅ Password updated successfully! You can now log in.');
+    }
+
+    // Update email if URL parameter changes
+    const urlEmail = searchParams.get('email');
+    if (urlEmail) {
+      setEmail(urlEmail);
     }
 
     // Test Supabase connection on load
