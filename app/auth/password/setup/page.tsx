@@ -1,6 +1,6 @@
 'use client';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -43,14 +43,38 @@ export default function PasswordSetupSimple() {
         throw new Error(json.error || 'Failed to set password');
       }
 
-      setStatus('✅ Password set successfully! Starting your assessment...');
+      setStatus('✅ Password set successfully! Logging you in...');
       console.log('Password set successfully, email:', json.email);
 
-      // Redirect directly to streamlined assessment
-      // The user is now ready to start their assessment
-      setTimeout(() => {
-        router.push('/assessment/streamlined');
-      }, 1500);
+      // Now log the user in with their new password
+      try {
+        const supabase = createClient();
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: json.email,
+          password: password
+        });
+
+        if (signInError) {
+          console.error('Auto-login failed:', signInError);
+          // If auto-login fails, redirect to login page
+          setTimeout(() => {
+            router.push(`/auth/login?email=${encodeURIComponent(json.email)}&message=password-set`);
+          }, 1500);
+        } else {
+          console.log('Auto-login successful, redirecting to assessment...');
+          setStatus('✅ Logged in! Starting your assessment...');
+          // Successfully logged in, redirect to streamlined assessment
+          setTimeout(() => {
+            router.push('/assessment/streamlined');
+          }, 1500);
+        }
+      } catch (loginError) {
+        console.error('Login error:', loginError);
+        // Fallback to login page
+        setTimeout(() => {
+          router.push(`/auth/login?email=${encodeURIComponent(json.email)}&message=password-set`);
+        }, 1500);
+      }
 
     } catch (error: any) {
       console.error('Setup error:', error);
