@@ -1,5 +1,4 @@
 import { AIReportGenerator } from '@/lib/ai-report-generator';
-import { generateComprehensivePDFReport } from '@/lib/comprehensive-pdf-generator';
 import { generateEnhancedAIPDFReport } from '@/lib/enhanced-ai-pdf-generator';
 import { generateFastEnhancedAIPDFReport } from '@/lib/fast-enhanced-ai-pdf-generator';
 import { generateRecommendations, runOpenAI } from '@/lib/openai';
@@ -143,7 +142,8 @@ export async function POST(request: NextRequest) {
       };
 
       // Use comprehensive PDF generator as fallback
-      const pdfBytes = await generateComprehensivePDFReport(comprehensiveAnalysis);
+      const pdfDoc = await generateEnhancedAIPDFReport(comprehensiveAnalysis);
+      const pdfBytes = pdfDoc.output('arraybuffer');
 
       // Return comprehensive PDF response
       return new NextResponse(new Uint8Array(pdfBytes), {
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename="comprehensive-report-${Date.now()}.pdf"`,
-          'Content-Length': pdfBytes.length.toString(),
+          'Content-Length': pdfBytes.byteLength.toString(),
         },
       });
     }

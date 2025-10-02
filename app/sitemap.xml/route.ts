@@ -7,12 +7,14 @@ const CANONICAL = 'https://aiblueprint.k12aiblueprint.com';
 
 const STATIC_PATHS: string[] = [
   '/',
+  '/pricing',
   '/start',
-  '/higher-ed',
-  '/ai-readiness',
-  '/ai-readiness/assessment',
-  '/ai-readiness/pricing',
-  '/ai-readiness/success'
+  '/assessment',
+  '/dashboard/personalized',
+  '/auth/login',
+  '/contact',
+  '/privacy',
+  '/terms'
 ];
 
 export async function GET() {

@@ -1,8 +1,7 @@
 import jsPDF from 'jspdf';
-import { runOpenAI } from './openai';
 import { HistoricalTrendAnalyzer } from './historical-trend-analyzer';
 import { IndustryDataIntegrator } from './industry-data-integrator';
-import { LivePeerBenchmarking } from './live-peer-benchmarking';
+import { runOpenAI } from './openai';
 
 interface ComprehensiveAnalysis {
   assessmentId: string;
@@ -36,7 +35,7 @@ interface AIInsights {
 
 export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysis): Promise<jsPDF> {
   console.log('Generating enhanced AI-powered PDF report with tier-based scaling, historical trends, and live benchmarks...');
-  
+
   // Get tier-based content settings
   const assessmentTier = analysis.tier || 'express-diagnostic';
   const tierSettings = {
@@ -45,7 +44,7 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
     'comprehensive-package': { targetPages: 45, analysisDepth: 'comprehensive', includeAdvanced: true },
     'enterprise-transformation': { targetPages: 55, analysisDepth: 'enterprise', includeAdvanced: true }
   };
-  
+
   const settings = tierSettings[assessmentTier as keyof typeof tierSettings] || tierSettings['express-diagnostic'];
 
   // Initialize PDF with enhanced configuration
@@ -63,7 +62,7 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
   const margin = 20;
   const colors = {
     primary: [41, 128, 185] as [number, number, number],
-    secondary: [52, 73, 94] as [number, number, number], 
+    secondary: [52, 73, 94] as [number, number, number],
     accent: [231, 76, 60] as [number, number, number],
     success: [39, 174, 96] as [number, number, number],
     warning: [241, 196, 15] as [number, number, number],
@@ -80,7 +79,7 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
       doc.addPage();
       yPosition = margin;
       currentPage++;
-      
+
       // Add page number and footer
       doc.setFontSize(8);
       doc.setTextColor(...colors.secondary);
@@ -94,13 +93,13 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
     const fontStyle = options.fontStyle || 'normal';
     const textColor = options.color || colors.text;
     const maxWidth = options.maxWidth || pageWidth - 2 * margin;
-    
+
     doc.setFontSize(fontSize);
     doc.setFont('helvetica', fontStyle);
     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-    
+
     const lines = doc.splitTextToSize(text, maxWidth);
-    
+
     lines.forEach((line: string, index: number) => {
       if (index > 0 || yPosition + fontSize > pageHeight - margin) {
         checkPageBreak();
@@ -108,7 +107,7 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
       doc.text(line, margin, yPosition);
       yPosition += fontSize * 0.5;
     });
-    
+
     yPosition += 5;
   };
 
@@ -119,12 +118,12 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
     doc.setTextColor(...color);
     doc.text(title, margin, yPosition);
     yPosition += 15;
-    
+
     // Add underline
     doc.setDrawColor(...color);
     doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
     yPosition += 5;
-    
+
     doc.setTextColor(...colors.text);
   };
 
@@ -153,7 +152,7 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...colors.primary);
   doc.text('AI READINESS ASSESSMENT', pageWidth / 2, 60, { align: 'center' });
-  
+
   doc.setFontSize(18);
   doc.setTextColor(...colors.secondary);
   doc.text('Comprehensive Strategic Analysis', pageWidth / 2, 80, { align: 'center' });
@@ -184,19 +183,19 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
   checkPageBreak(40);
   doc.setFillColor(...colors.lightGray);
   doc.roundedRect(margin, yPosition, pageWidth - 2 * margin, 35, 5, 5, 'F');
-  
+
   yPosition += 10;
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...colors.primary);
   doc.text(`Overall AI Readiness Score: ${analysis.score}/100`, margin + 10, yPosition);
-  
+
   yPosition += 8;
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...colors.text);
   doc.text(`Assessment Tier: ${assessmentTier.replace('-', ' ').toUpperCase()}`, margin + 10, yPosition);
-  
+
   yPosition += 6;
   doc.text(`Institution Type: ${organizationType}`, margin + 10, yPosition);
   yPosition += 15;
@@ -253,60 +252,47 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
       console.log('🔬 Initializing advanced analytics engines...');
       const historicalAnalyzer = new HistoricalTrendAnalyzer();
       const industryIntegrator = new IndustryDataIntegrator();
-      const peerBenchmarking = new LivePeerBenchmarking();
+      // const peerBenchmarking = new LivePeerBenchmarking(); // Removed
 
       // HISTORICAL TREND ANALYSIS
       checkPageBreak(0, true);
       addSectionHeader('LONGITUDINAL PERFORMANCE ANALYSIS', colors.accent);
       addSubHeader('Historical Performance Trends');
-      
+
       const historicalInsights = await historicalAnalyzer.generateHistoricalAIInsights(
         analysis.submissionDetails?.institution_name || 'unknown',
         analysis
       );
-      
+
       addText(historicalInsights);
 
       // REAL-TIME INDUSTRY DATA
       checkPageBreak(0, true);
       addSectionHeader('LIVE INDUSTRY INTELLIGENCE', colors.warning);
       addSubHeader('Current Market Conditions & Trends');
-      
+
       const liveBenchmarks = await industryIntegrator.getLiveBenchmarks(
         organizationType === 'Educational Institution' ? 'higher_education' : 'nonprofit',
         'medium',
         'mixed'
       );
-      
+
       const industryData = await industryIntegrator.generateIndustryContextAI(
         analysis,
         liveBenchmarks
       );
-      
+
       addText(industryData);
 
-      // PEER COMPETITIVE ANALYSIS
-      checkPageBreak(0, true);
-      addSectionHeader('COMPETITIVE INTELLIGENCE ANALYSIS', colors.success);
-      addSubHeader('Live Peer Performance Benchmarking');
-      
-      const similarPeers = await peerBenchmarking.findSimilarPeers(analysis);
-      const competitiveIntel = await peerBenchmarking.generateCompetitiveIntelligence(analysis, similarPeers);
-      
-      const peerAnalysis = await peerBenchmarking.generatePeerBenchmarkingAI(
-        analysis,
-        similarPeers,
-        competitiveIntel
-      );
-      
-      addText(peerAnalysis);
+      // PEER COMPETITIVE ANALYSIS - Removed for EDU SaaS
+      // Peer benchmarking functionality has been removed as part of the EDU SaaS simplification
 
       // INTEGRATED STRATEGIC SYNTHESIS
       checkPageBreak(0, true);
       addSectionHeader('AI-POWERED STRATEGIC SYNTHESIS', colors.success);
       addSubHeader('Integrated Intelligence Summary');
       addText('Comprehensive analysis combining historical performance, industry context, peer benchmarking, and predictive modeling to provide definitive strategic guidance.');
-      
+
       // Generate synthesized recommendations
       const synthesizedInsights = await runOpenAI(`
         As a senior strategic consultant, provide integrated strategic recommendations for ${analysis.submissionDetails?.institution_name} based on comprehensive intelligence analysis.
@@ -321,7 +307,7 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
         maxTokens: 2000,
         temperature: 0.4
       });
-      
+
       addText(synthesizedInsights);
 
     } catch (error) {
@@ -334,14 +320,14 @@ export async function generateEnhancedAIPDFReport(analysis: ComprehensiveAnalysi
   checkPageBreak(0, true);
   addSectionHeader('CONCLUSION & NEXT STEPS', colors.primary);
   addSubHeader('Report Summary');
-  
-  const finalSummary = settings.includeAdvanced ? 
+
+  const finalSummary = settings.includeAdvanced ?
     'This comprehensive AI-enhanced assessment leverages historical data analysis, real-time industry intelligence, and live peer benchmarking to provide unparalleled strategic insights. The recommendations are based on actual market data and proven best practices from similar high-performing institutions.' :
     'This AI-enhanced assessment provides strategic recommendations based on your institutional profile and assessment responses. For more comprehensive analysis including historical trends and competitive intelligence, consider upgrading to a higher-tier assessment.';
-  
+
   addText(finalSummary);
   yPosition += 10;
-  
+
   addSubHeader('Implementation Support');
   addText(`As a ${assessmentTier} client, you have access to specific implementation resources and support channels. Contact your assessment team to discuss next steps and implementation planning.`);
 

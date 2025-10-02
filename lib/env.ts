@@ -16,6 +16,7 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  STRIPE_PRICE_EDU_MONTHLY_199: z.string().optional(),
 
   // NextAuth (if using)
   NEXTAUTH_URL: z.string().optional(),
@@ -43,6 +44,7 @@ function validateEnv(): Env {
       STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
       STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
       STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+      STRIPE_PRICE_EDU_MONTHLY_199: process.env.STRIPE_PRICE_EDU_MONTHLY_199,
       NEXTAUTH_URL: process.env.NEXTAUTH_URL,
       NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
       POSTMARK_SERVER_TOKEN: process.env.POSTMARK_SERVER_TOKEN,

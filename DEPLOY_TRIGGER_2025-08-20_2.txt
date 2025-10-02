@@ -1,2 +1,0 @@
-Redeploy trigger #2 - forcing Vercel build to pick up latest payment/RLS + version endpoint changes.
-Timestamp: 2025-08-20TUTC placeholder.

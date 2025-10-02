@@ -14,6 +14,9 @@ if (!supabaseAdmin) {
 // Define tier mapping based on Stripe price IDs (current canonical production)
 // NOTE: Keep legacy IDs for backward compatibility; add new production IDs from pricing reference.
 const tierMapping: Record<string, string> = {
+  // AI Blueprint EDU pricing - these will be set via environment variables
+  [process.env.STRIPE_PRICE_EDU_MONTHLY_199 || '']: 'ai-blueprint-edu',
+  [process.env.STRIPE_PRICE_EDU_YEARLY_1990 || '']: 'ai-blueprint-edu',
   // Production $199/month platform access (7-day trial)
   'price_1SDnhlRMpSG47vNmDQr1WeJ3': 'platform-monthly', // $199/month LIVE with 7-day trial
   // Test price
