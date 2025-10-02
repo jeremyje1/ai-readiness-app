@@ -25,7 +25,7 @@ export default function AuthSuccessPage() {
         // If user has payment verified, redirect directly to dashboard
         if (user?.user_metadata?.payment_verified || user?.user_metadata?.tier) {
             console.log('User has paid subscription, redirecting to dashboard...');
-            router.push('/ai-readiness/dashboard');
+            router.push('/dashboard/personalized');
         }
     };
 

@@ -28,7 +28,7 @@ export default function PaymentSuccessPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         // Already logged in, redirect to dashboard
-        router.push('/ai-readiness/dashboard?verified=true');
+        router.push('/dashboard/personalized?verified=true');
       }
     };
 
@@ -80,7 +80,7 @@ export default function PaymentSuccessPage() {
         setStep('complete');
         // Small delay to show success message, then redirect
         setTimeout(() => {
-          router.push('/ai-readiness/dashboard?verified=true');
+          router.push('/dashboard/personalized?verified=true');
         }, 2000);
       }
     });
@@ -99,7 +99,7 @@ export default function PaymentSuccessPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/ai-readiness/dashboard?verified=true`,
+          emailRedirectTo: `${window.location.origin}/dashboard/personalized?verified=true`,
         },
       });
 
@@ -234,7 +234,7 @@ export default function PaymentSuccessPage() {
               </p>
             </div>
 
-            <Button onClick={() => router.push('/ai-readiness/dashboard?verified=true')}>
+            <Button onClick={() => router.push('/dashboard/personalized?verified=true')}>
               <ArrowRight className="w-4 h-4 mr-2" />
               Go to Dashboard
             </Button>
