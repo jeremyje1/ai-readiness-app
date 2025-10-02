@@ -13,7 +13,11 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const results = {
+    const results: {
+      tablesCleared: string[];
+      usersDeleted: number;
+      errors: string[];
+    } = {
       tablesCleared: [],
       usersDeleted: 0,
       errors: []
