@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
     department TEXT,
 
     -- Institutional Information
-    institution_id UUID REFERENCES public.institutions(id) ON DELETE SET NULL,
+    institution_id UUID, -- No FK constraint, institutions table may not exist
     institution_name TEXT,
     institution_type TEXT CHECK (institution_type IN ('K12', 'HigherEd', 'District', 'University', 'Community College', 'Trade School', 'default')),
     institution_size TEXT CHECK (institution_size IN ('Small', 'Medium', 'Large', 'Extra Large')),

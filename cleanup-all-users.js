@@ -2,9 +2,14 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Initialize Supabase client with service role key for admin operations
 const supabaseUrl = 'https://jocigzsthcpspxfdfxae.supabase.co';
-const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvY2lnenN0aGNwc3B4ZmRmeGFlIiwicm9sZSI6InNlcnZpY2Vfa2V5IiwiaWF0IjoxNzUzMjMxMTc2LCJleHAiOjI2ODg4MDcxNzZ9.SWFmf85IiPb-JRRoJ8dJH_PlBvOUJJOZvNPBBBB3iuI';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvY2lnenN0aGNwc3B4ZmRmeGFlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzIzMTE3NiwiZXhwIjoyMDY4ODA3MTc2fQ.-o5WI0bTZ7fExVlaP38Rf4FetsIP7XtBsmSMJGbt2N0';
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 async function cleanupAllUsers() {
     console.log('🧹 Starting complete user cleanup...\n');
