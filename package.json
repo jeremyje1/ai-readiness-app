@@ -20,7 +20,11 @@
     "validate:env": "node scripts/validate-env.js",
     "health:check": "curl -s http://localhost:3001/api/health | jq",
     "predeploy": "npm run validate:env && npm run typecheck && npm run lint",
-    "prepare": "husky"
+    "prepare": "husky",
+    "setup:database": "node scripts/setup-database.js",
+    "setup:storage": "node scripts/setup-storage.js",
+    "setup:all": "npm run setup:database && npm run setup:storage",
+    "verify:setup": "node scripts/verify-setup.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
