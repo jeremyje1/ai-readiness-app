@@ -4,16 +4,21 @@ import Stripe from 'stripe';
 // Supported product definitions. Add additional products and billing cycles here.
 // Each entry maps billing interval -> Stripe Price ID (from environment variables)
 // We intentionally read env lazily so that missing vars surface as runtime errors with clear messages.
+// Helper function to clean environment variables
+const cleanEnvVar = (envVar: string | undefined, defaultValue: string): string => {
+  return envVar ? envVar.trim().replace(/\\n/g, '') : defaultValue;
+};
+
 const PRODUCT_PRICE_ENV: Record<string, Record<string, string | undefined>> = {
   team: {
-    monthly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3',
-    yearly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3',
-    annual: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3'
+    monthly: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3'),
+    yearly: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3'),
+    annual: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3')
   },
   platform: {
-    monthly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3',
-    yearly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3',
-    annual: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnhlRMpSG47vNmDQr1WeJ3'
+    monthly: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3'),
+    yearly: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3'),
+    annual: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3')
   }
 };
 
