@@ -7,29 +7,57 @@ import { useEffect, useState } from 'react';
 
 export default function AuthSuccessPage() {
     const [user, setUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const supabase = createClient();
 
     useEffect(() => {
         checkUser();
     }, []);
 
     const checkUser = async () => {
+        const supabase = createClient();
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error) {
             console.error('Error getting user:', error);
+            setLoading(false);
             return;
         }
         setUser(user);
 
-        // If user has payment verified, redirect directly to dashboard
+        // Check user metadata first
         if (user?.user_metadata?.payment_verified || user?.user_metadata?.tier) {
-            console.log('User has paid subscription, redirecting to dashboard...');
+            console.log('User has paid subscription (metadata), redirecting to dashboard...');
+            router.push('/dashboard/personalized');
+            return;
+        }
+
+        // Also check user_payments table in case webhook hasn't updated metadata yet
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('payment_status', 'completed')
+            .maybeSingle();
+
+        if (payment) {
+            console.log('User has paid subscription (payment record), redirecting to dashboard...');
+
+            // Update user metadata to reflect payment
+            await supabase.auth.updateUser({
+                data: {
+                    payment_verified: true,
+                    tier: payment.tier || 'platform-monthly'
+                }
+            });
+
             router.push('/dashboard/personalized');
         }
+
+        setLoading(false);
     };
 
     const handleSignOut = async () => {
+        const supabase = createClient();
         await supabase.auth.signOut();
         router.push('/auth/login');
     };
@@ -41,6 +69,17 @@ export default function AuthSuccessPage() {
     const navigateToPricing = () => {
         router.push('/pricing');
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
+                <div className="bg-white shadow rounded-lg p-8 max-w-md w-full text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Checking your payment status...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
