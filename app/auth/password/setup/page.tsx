@@ -61,11 +61,11 @@ export default function PasswordSetupSimple() {
             router.push(`/auth/login?email=${encodeURIComponent(json.email)}&message=password-set`);
           }, 1500);
         } else {
-          console.log('Auto-login successful, redirecting to assessment...');
-          setStatus('✅ Logged in! Starting your assessment...');
-          // Successfully logged in, redirect to streamlined assessment
+          console.log('Auto-login successful, redirecting to onboarding...');
+          setStatus('✅ Logged in! Let\'s get you set up...');
+          // Successfully logged in, redirect to onboarding
           setTimeout(() => {
-            router.push('/assessment/streamlined');
+            router.push('/onboarding');
           }, 1500);
         }
       } catch (loginError) {

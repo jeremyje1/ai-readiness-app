@@ -22,11 +22,9 @@ export function UserProvider({ children }: UserProviderProps) {
     const userContextData = useUser()
     const [showInstitutionSetup, setShowInstitutionSetup] = useState(false)
 
-    // Show institution setup if user is logged in but has no institution
-    const shouldShowSetup = userContextData.user &&
-        !userContextData.loading &&
-        !userContextData.institution &&
-        !showInstitutionSetup
+    // DISABLED: No longer forcing institution setup - users go directly to assessment
+    // This was blocking the streamlined flow after payment
+    const shouldShowSetup = false
 
     return (
         <UserContext.Provider value={userContextData}>
