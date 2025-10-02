@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import * as pdf from 'pdf-parse';
 import mammoth from 'mammoth';
+
+// Dynamic import for pdf-parse to avoid build issues
+let pdfParse: any = null;
+try {
+  pdfParse = require('pdf-parse');
+} catch (error) {
+  console.warn('pdf-parse not available, PDF processing will be skipped');
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,8 +60,12 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(await fileData.arrayBuffer());
 
       if (document.file_name.toLowerCase().endsWith('.pdf')) {
-        const pdfData = await pdf(buffer);
-        extractedText = pdfData.text;
+        if (pdfParse) {
+          const pdfData = await pdfParse(buffer);
+          extractedText = pdfData.text;
+        } else {
+          extractedText = '[PDF processing not available - please use DOCX format]';
+        }
       } else if (document.file_name.toLowerCase().endsWith('.docx')) {
         const result = await mammoth.extractRawText({ buffer });
         extractedText = result.value;
