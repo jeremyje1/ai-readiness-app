@@ -43,15 +43,13 @@ export default function PasswordSetupSimple() {
         throw new Error(json.error || 'Failed to set password');
       }
 
-      setStatus('✅ Password set successfully! Redirecting to login...');
+      setStatus('✅ Password set successfully! Starting your assessment...');
       console.log('Password set successfully, email:', json.email);
 
-      // Don't try to sign in immediately - just redirect to login
-      // This avoids session management issues
+      // Redirect directly to streamlined assessment
+      // The user is now ready to start their assessment
       setTimeout(() => {
-        // Pass the email to pre-fill the login form
-        const loginUrl = `/auth/login?message=password-set&email=${encodeURIComponent(json.email)}`;
-        router.push(loginUrl);
+        router.push('/assessment/streamlined');
       }, 1500);
 
     } catch (error: any) {

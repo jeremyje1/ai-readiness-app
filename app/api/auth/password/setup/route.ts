@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
 
     await supabaseAdmin.from('auth_password_setup_tokens').update({ used_at: new Date().toISOString() }).eq('id', data.id);
 
-    // IMPORTANT: Always return the email from the token, not from the user
-    // The token has the exact email that was used during checkout
-    const returnEmail = data.email;
+    // Return the user's actual email from Supabase auth
+    // This ensures we're using the correct email that can actually log in
+    const returnEmail = userData.user.email || data.email;
     console.log(`Password set successfully, returning email: ${returnEmail}`);
 
     return NextResponse.json({ success: true, email: returnEmail });
