@@ -183,7 +183,7 @@ async function sendAssessmentAccessEmail(email: string, name: string, tier: stri
     await emailService.sendOnboardingEmail({
       to: email,
       name,
-      dashboardUrl: `${baseUrl}/ai-readiness/dashboard`,
+      dashboardUrl: `${baseUrl}/dashboard/personalized`,
       passwordSetupUrl: passwordSetupTokenUrl,
       magicLinkUrl,
       tier,

@@ -95,9 +95,9 @@ export default function PasswordSetupSimple() {
           console.log('Chrome sign in successful');
           setStatus('Success! Redirecting...');
 
-          // Redirect to dashboard
+          // Redirect to personalized dashboard
           setTimeout(() => {
-            window.location.href = '/ai-readiness/dashboard';
+            window.location.href = '/dashboard/personalized';
           }, 1000);
         } catch (chromeError: any) {
           console.error('Chrome auth error:', chromeError);
@@ -125,9 +125,9 @@ export default function PasswordSetupSimple() {
         console.log('Sign in successful:', data.user?.email);
         setStatus('Success! Redirecting...');
 
-        // Step 3: Redirect to dashboard
+        // Step 3: Redirect to personalized dashboard
         setTimeout(() => {
-          window.location.href = '/ai-readiness/dashboard';
+          window.location.href = '/dashboard/personalized';
         }, 1000);
       }
 
