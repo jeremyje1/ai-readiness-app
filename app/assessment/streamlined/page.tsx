@@ -70,9 +70,9 @@ const TIMELINES = [
 
 export default function StreamlinedAssessment() {
   const router = useRouter();
-  const supabase = createClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<AssessmentData>({
@@ -95,44 +95,61 @@ export default function StreamlinedAssessment() {
   }, []);
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const supabase = createClient();
+    try {
+      // Add timeout protection
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth timeout')), 5000)
+      );
+
+      const authPromise = supabase.auth.getUser();
+      const { data: { user } } = await Promise.race([authPromise, timeoutPromise]) as any;
+
+      if (!user) {
+        router.push('/auth/login');
+        return;
+      }
+      setUserId(user.id);
+
+      // Load existing assessment data if any - use maybeSingle() to avoid error for new users
+      const { data: existingAssessment, error } = await supabase
+        .from('streamlined_assessment_responses')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingAssessment && !error) {
+        setFormData({
+          institutionType: existingAssessment.institution_type || '',
+          institutionSize: existingAssessment.institution_size || '',
+          institutionState: existingAssessment.institution_state || '',
+          aiJourneyStage: existingAssessment.ai_journey_stage || '',
+          biggestChallenge: existingAssessment.biggest_challenge || '',
+          topPriorities: existingAssessment.top_priorities || [],
+          implementationTimeline: existingAssessment.implementation_timeline || '',
+          contactName: existingAssessment.contact_name || '',
+          contactEmail: existingAssessment.contact_email || user.email || '',
+          contactRole: existingAssessment.contact_role || '',
+          preferredConsultationTime: existingAssessment.preferred_consultation_time || '',
+          specialConsiderations: existingAssessment.special_considerations || '',
+        });
+      } else {
+        // Pre-fill email from user
+        setFormData(prev => ({ ...prev, contactEmail: user.email || '' }));
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      // If auth times out or fails, redirect to login
       router.push('/auth/login');
-      return;
-    }
-    setUserId(user.id);
-
-    // Load existing assessment data if any
-    const { data: existingAssessment } = await supabase
-      .from('streamlined_assessment_responses')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (existingAssessment) {
-      setFormData({
-        institutionType: existingAssessment.institution_type || '',
-        institutionSize: existingAssessment.institution_size || '',
-        institutionState: existingAssessment.institution_state || '',
-        aiJourneyStage: existingAssessment.ai_journey_stage || '',
-        biggestChallenge: existingAssessment.biggest_challenge || '',
-        topPriorities: existingAssessment.top_priorities || [],
-        implementationTimeline: existingAssessment.implementation_timeline || '',
-        contactName: existingAssessment.contact_name || '',
-        contactEmail: existingAssessment.contact_email || user.email || '',
-        contactRole: existingAssessment.contact_role || '',
-        preferredConsultationTime: existingAssessment.preferred_consultation_time || '',
-        specialConsiderations: existingAssessment.special_considerations || '',
-      });
-    } else {
-      // Pre-fill email from user
-      setFormData(prev => ({ ...prev, contactEmail: user.email || '' }));
+    } finally {
+      setInitialLoading(false);
     }
   };
 
   const saveProgress = async () => {
     if (!userId) return;
 
+    const supabase = createClient();
     await supabase
       .from('streamlined_assessment_responses')
       .upsert({
@@ -176,6 +193,7 @@ export default function StreamlinedAssessment() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      const supabase = createClient();
       await supabase
         .from('streamlined_assessment_responses')
         .upsert({
@@ -241,6 +259,17 @@ export default function StreamlinedAssessment() {
         return false;
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading assessment...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50 py-12">
