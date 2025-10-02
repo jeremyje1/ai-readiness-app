@@ -64,7 +64,6 @@ interface Document {
 
 export default function PersonalizedDashboard() {
   const router = useRouter();
-  const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [gapAnalysis, setGapAnalysis] = useState<GapAnalysis | null>(null);
@@ -76,46 +75,65 @@ export default function PersonalizedDashboard() {
   }, []);
 
   const loadDashboardData = async () => {
+    const supabase = createClient();
     try {
-      // Check authentication
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      // Add timeout for authentication check
+      const authTimeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Authentication timeout')), 5000)
+      );
+
+      // Check authentication with timeout
+      const authPromise = supabase.auth.getUser();
+      const { data: { user }, error: authError } = await Promise.race([
+        authPromise,
+        authTimeout
+      ]) as any;
+
       if (authError || !user) {
+        console.error('Authentication failed:', authError);
         router.push('/auth/login');
         return;
       }
       setUserId(user.id);
 
       // Load gap analysis
-      const { data: gapData } = await supabase
+      const { data: gapData, error: gapError } = await supabase
         .from('gap_analysis_results')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (gapData) {
+      if (gapData && !gapError) {
         setGapAnalysis(gapData);
+      } else if (gapError && gapError.code !== 'PGRST116') {
+        // PGRST116 is "no rows returned" which is expected for new users
+        console.error('Error loading gap analysis:', gapError);
       }
 
       // Load roadmaps
-      const { data: roadmapData } = await supabase
+      const { data: roadmapData, error: roadmapError } = await supabase
         .from('implementation_roadmaps')
         .select('*')
         .eq('user_id', user.id)
         .order('roadmap_type');
 
-      if (roadmapData) {
+      if (roadmapData && !roadmapError) {
         setRoadmaps(roadmapData);
+      } else if (roadmapError) {
+        console.error('Error loading roadmaps:', roadmapError);
       }
 
       // Load documents
-      const { data: docData } = await supabase
+      const { data: docData, error: docError } = await supabase
         .from('uploaded_documents')
         .select('*')
         .eq('user_id', user.id)
         .order('upload_date', { ascending: false });
 
-      if (docData) {
+      if (docData && !docError) {
         setDocuments(docData);
+      } else if (docError) {
+        console.error('Error loading documents:', docError);
       }
 
       setLoading(false);
