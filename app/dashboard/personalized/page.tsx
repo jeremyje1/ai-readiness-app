@@ -179,21 +179,115 @@ export default function PersonalizedDashboard() {
   if (!gapAnalysis) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50 py-12">
-        <div className="container max-w-4xl mx-auto px-4">
-          <Card>
-            <CardContent className="p-12 text-center">
-              <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">No Analysis Available Yet</h2>
-              <p className="text-gray-600 mb-6">
-                Complete the assessment and upload your documents to generate your personalized AI readiness analysis.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button onClick={() => router.push('/assessment/streamlined')}>
-                  Take Assessment
-                </Button>
-                <Button variant="outline" onClick={() => router.push('/assessment/upload-documents')}>
-                  Upload Documents
-                </Button>
+        <div className="container max-w-5xl mx-auto px-4">
+          {/* Welcome Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">
+              Welcome to Your AI Readiness Journey! 🎯
+            </h1>
+            <p className="text-xl text-gray-600">
+              Let's build your personalized AI implementation roadmap
+            </p>
+          </div>
+
+          <Card className="border-2 border-indigo-100">
+            <CardContent className="p-10">
+              {/* How It Works Section */}
+              <div className="mb-10">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
+                  Your Path to AI Excellence
+                </h2>
+
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  <div className="text-center">
+                    <div className="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl font-bold text-indigo-600">1</span>
+                    </div>
+                    <h3 className="font-semibold mb-2">Quick Assessment</h3>
+                    <p className="text-sm text-gray-600">
+                      Answer 5 strategic questions about your institution's AI goals and challenges (5 minutes)
+                    </p>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl font-bold text-indigo-600">2</span>
+                    </div>
+                    <h3 className="font-semibold mb-2">Document Upload</h3>
+                    <p className="text-sm text-gray-600">
+                      Share your existing policies and plans - our AI will analyze them instantly
+                    </p>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl font-bold text-indigo-600">3</span>
+                    </div>
+                    <h3 className="font-semibold mb-2">Get Your Roadmap</h3>
+                    <p className="text-sm text-gray-600">
+                      Receive your NIST-aligned gap analysis and personalized 30/60/90-day action plan
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* What You'll Get Section */}
+              <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-6 mb-8">
+                <h3 className="font-semibold text-lg mb-3">What You'll Receive:</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">AI Readiness Score (0-100)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">NIST Framework Gap Analysis</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Personalized Implementation Roadmap</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Priority Actions & Quick Wins</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Detailed Recommendations</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Downloadable Reports</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Call to Action */}
+              <div className="text-center">
+                <p className="text-gray-600 mb-6">
+                  Ready to transform your institution's AI strategy? Let's get started!
+                </p>
+                <div className="flex gap-4 justify-center">
+                  <Button
+                    size="lg"
+                    onClick={() => router.push('/assessment/streamlined')}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    <Target className="h-5 w-5 mr-2" />
+                    Start Assessment
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => router.push('/assessment/upload-documents')}
+                  >
+                    <FileText className="h-5 w-5 mr-2" />
+                    Upload Documents
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-500 mt-4">
+                  Most institutions complete the entire process in under 15 minutes
+                </p>
               </div>
             </CardContent>
           </Card>
