@@ -13,7 +13,7 @@ export default function PaymentSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<'email' | 'sent' | 'verifying' | 'complete'>('email');
   const [showPasswordOption, setShowPasswordOption] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,49 +29,57 @@ export default function PaymentSuccessPage() {
       if (session?.user) {
         // Already logged in, redirect to dashboard
         router.push('/dashboard/personalized?verified=true');
+        return;
       }
     };
 
     checkAuth();
 
-    // Bootstrap from Stripe session if present
+    // Bootstrap from Stripe session and automatically redirect to password setup
     const bootstrap = async () => {
-      if (!sessionId) return;
+      if (!sessionId) {
+        setLoading(false);
+        return;
+      }
+
       try {
+        // First get the session details
         const res = await fetch(`/api/stripe/session?id=${sessionId}`);
         if (res.ok) {
           const data = await res.json();
           if (data.email) {
             setEmail(data.email);
-            if (auto === '1' && !autoTried) {
-              setAutoTried(true);
-              // Try direct password token bootstrap first
-              try {
-                const r2 = await fetch('/api/stripe/post-checkout/bootstrap', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ session_id: sessionId })
-                });
-                if (r2.ok) {
-                  const b = await r2.json();
-                  if (b.passwordSetupUrl) {
-                    // Optionally could surface if token reused: b.reused
-                    router.replace(b.passwordSetupUrl + '&auto=1');
-                    return; // stop further actions
-                  }
+
+            // Always try to get password setup URL
+            try {
+              const r2 = await fetch('/api/stripe/post-checkout/bootstrap', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId })
+              });
+
+              if (r2.ok) {
+                const b = await r2.json();
+                if (b.passwordSetupUrl) {
+                  // Directly redirect to password setup - no intermediate screen
+                  window.location.href = b.passwordSetupUrl;
+                  return;
                 }
-              } catch (e) {
-                console.warn('Password bootstrap failed, fallback to magic link');
               }
-              // Fallback: send magic link silently
-              handleSendMagicLink(new Event('submit') as any, true);
+            } catch (e) {
+              console.warn('Password bootstrap failed:', e);
             }
+
+            // If password setup failed, show the email form
+            setLoading(false);
           }
         }
       } catch (e) {
         console.warn('Session bootstrap failed', e);
+        setLoading(false);
       }
     };
+
     bootstrap();
 
     // Listen for auth state changes
@@ -116,6 +124,17 @@ export default function PaymentSuccessPage() {
   };
 
   const renderStep = () => {
+    // Show loading spinner while bootstrapping
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+          <p className="text-gray-600 text-lg">Setting up your account...</p>
+          <p className="text-gray-500 text-sm mt-2">You'll be redirected in a moment</p>
+        </div>
+      );
+    }
+
     switch (step) {
       case 'email':
         return (
@@ -126,9 +145,7 @@ export default function PaymentSuccessPage() {
                 Payment Successful!
               </h2>
               <p className="text-gray-600">
-                Your AI Blueprint™ Assessment access is active. We detected your purchase; {email ? 'we pre‑filled your email.' : 'enter your email.'} You can:
-                <br />• Use a one‑time secure login link (sent to your email)
-                <br />• Or <a href="/auth/password/setup" className="text-blue-600 underline">set a password</a> for direct sign‑ins.
+                Your AI Blueprint™ Assessment access is active. {email ? 'Please check your email to set up your password.' : 'Enter your email to continue.'}
               </p>
             </div>
 

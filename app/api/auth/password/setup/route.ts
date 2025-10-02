@@ -16,13 +16,27 @@ export async function POST(req: NextRequest) {
     if (data.used_at) return NextResponse.json({ error: 'Token already used' }, { status: 400 });
     if (new Date(data.expires_at) < new Date()) return NextResponse.json({ error: 'Token expired' }, { status: 400 });
 
+    // Get the user to verify email
+    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(data.user_id);
+    if (userError || !userData?.user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     // Update user password
     const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, { password });
-    if (pwError) return NextResponse.json({ error: 'Failed to set password' }, { status: 500 });
+    if (pwError) {
+      console.error('Password update error:', pwError);
+      return NextResponse.json({ error: 'Failed to set password: ' + pwError.message }, { status: 500 });
+    }
 
     await supabaseAdmin.from('auth_password_setup_tokens').update({ used_at: new Date().toISOString() }).eq('id', data.id);
 
-    return NextResponse.json({ success: true, email: data.email });
+    // Return the actual user email from Supabase, not the token
+    // This ensures we're using the exact email the user should login with
+    const userEmail = userData.user.email || data.email;
+    console.log(`Password set for user ${data.user_id}, email: ${userEmail}`);
+
+    return NextResponse.json({ success: true, email: userEmail });
   } catch (e: any) {
     console.error('Password setup error', e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
