@@ -53,42 +53,56 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
   const normalizedEmail = userData.email.toLowerCase();
   let userId: string | null = null;
 
-  // 1. Try create user
-  const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-    email: normalizedEmail,
-    email_confirm: true,
-    user_metadata: {
-      name: userData.name,
-      organization: userData.organization,
-      tier: userData.tier,
-      stripe_customer_id: userData.stripeCustomerId,
-      stripe_session_id: userData.stripeSessionId,
-      payment_verified: true,
-      access_granted_at: new Date().toISOString(),
-      created_via: 'stripe_webhook' // Mark as created via webhook without password
-    }
-  });
+  // 1. First, try to find existing user (they should have been created during registration)
+  const { data: list } = await supabaseAdmin.auth.admin.listUsers();
+  const existing = list?.users?.find((u: any) => u.email?.toLowerCase() === normalizedEmail);
 
-  if (createErr) {
-    // If already exists, fetch existing user id instead of aborting
-    const alreadyExists = /already registered|User already exists/i.test(createErr.message || '');
-    if (alreadyExists) {
-      const { data: list } = await supabaseAdmin.auth.admin.listUsers();
-      const existing = list?.users?.find((u: any) => u.email?.toLowerCase() === normalizedEmail);
-      if (existing) {
-        userId = existing.id;
-        console.log(`ℹ️  Using existing user for email ${normalizedEmail}: ${userId}`);
-      } else {
-        console.error('Unable to locate existing user after duplicate error');
-        throw createErr;
+  if (existing) {
+    userId = existing.id;
+    console.log(`ℹ️  Found existing user for email ${normalizedEmail}: ${userId}`);
+
+    // Update the existing user's metadata with payment info
+    const { error: updateErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        ...existing.user_metadata,
+        tier: userData.tier,
+        stripe_customer_id: userData.stripeCustomerId,
+        stripe_session_id: userData.stripeSessionId,
+        payment_verified: true,
+        access_granted_at: new Date().toISOString(),
       }
+    });
+
+    if (updateErr) {
+      console.error('Failed to update user metadata:', updateErr);
     } else {
+      console.log(`✅ Updated user ${userId} with payment info`);
+    }
+  } else {
+    // Only create a new user if they don't exist (fallback for direct Stripe payments)
+    console.warn(`⚠️  No existing user found for ${normalizedEmail}, creating new user`);
+    const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+      email: normalizedEmail,
+      email_confirm: true,
+      user_metadata: {
+        name: userData.name,
+        organization: userData.organization,
+        tier: userData.tier,
+        stripe_customer_id: userData.stripeCustomerId,
+        stripe_session_id: userData.stripeSessionId,
+        payment_verified: true,
+        access_granted_at: new Date().toISOString(),
+        created_via: 'stripe_webhook' // Mark as created via webhook without password
+      }
+    });
+
+    if (createErr) {
       console.error('Failed to create user:', createErr);
       throw createErr;
+    } else if (created?.user?.id) {
+      userId = created.user.id;
+      console.log(`✅ User account created: ${userId}`);
     }
-  } else if (created?.user?.id) {
-    userId = created.user.id;
-    console.log(`✅ User account created: ${userId}`);
   }
 
   if (!userId) throw new Error('User ID unresolved');
