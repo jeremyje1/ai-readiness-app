@@ -46,28 +46,83 @@ export default function PasswordSetupSimple() {
       setStatus('Password set! Signing you in...');
       console.log('Password set successfully, email:', json.email);
 
-      // Step 2: Sign in directly with Supabase (no auth service wrapper)
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: json.email,
-        password: password
-      });
+      // Step 2: Sign in directly with Supabase (Chrome workaround for hanging issue)
+      const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+      console.log('Is Chrome browser:', isChrome);
 
-      if (error) {
-        console.error('Sign in error:', error);
-        setStatus('Password set! Redirecting to login...');
+      if (isChrome) {
+        // Chrome workaround: Use fetch API directly for Chrome browsers
+        console.log('Using Chrome workaround with direct API call...');
+        try {
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://jocigzsthcpspxfdfxae.supabase.co';
+          const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvY2lnenN0aGNwc3B4ZmRmeGFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMzExNzYsImV4cCI6MjA2ODgwNzE3Nn0.krJk0mzZQ3wmo_isokiYkm5eCTfMpIZcGP6qfSKYrHA';
+
+          const authUrl = `${supabaseUrl}/auth/v1/token?grant_type=password`;
+          const response = await fetch(authUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabaseKey
+            },
+            body: JSON.stringify({
+              email: json.email,
+              password: password,
+              gotrue_meta_security: {}
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            console.error('Chrome auth failed:', data);
+            throw new Error(data.error_description || 'Failed to sign in');
+          }
+
+          // Manually set session for Chrome
+          console.log('Setting session manually for Chrome...');
+          await supabase.auth.setSession({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token
+          });
+
+          console.log('Chrome sign in successful');
+          setStatus('Success! Redirecting...');
+
+          // Redirect to dashboard
+          setTimeout(() => {
+            window.location.href = '/ai-readiness/dashboard';
+          }, 1000);
+        } catch (chromeError: any) {
+          console.error('Chrome auth error:', chromeError);
+          setStatus('Password set! Redirecting to login...');
+          setTimeout(() => {
+            router.push('/auth/login?message=password-set');
+          }, 1500);
+        }
+      } else {
+        // Standard flow for non-Chrome browsers
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: json.email,
+          password: password
+        });
+
+        if (error) {
+          console.error('Sign in error:', error);
+          setStatus('Password set! Redirecting to login...');
+          setTimeout(() => {
+            router.push('/auth/login?message=password-set');
+          }, 1500);
+          return;
+        }
+
+        console.log('Sign in successful:', data.user?.email);
+        setStatus('Success! Redirecting...');
+
+        // Step 3: Redirect to dashboard
         setTimeout(() => {
-          router.push('/auth/login?message=password-set');
-        }, 1500);
-        return;
+          window.location.href = '/ai-readiness/dashboard';
+        }, 1000);
       }
-
-      console.log('Sign in successful:', data.user?.email);
-      setStatus('Success! Redirecting...');
-
-      // Step 3: Redirect to dashboard
-      setTimeout(() => {
-        window.location.href = '/ai-readiness/dashboard';
-      }, 1000);
 
     } catch (error: any) {
       console.error('Setup error:', error);
