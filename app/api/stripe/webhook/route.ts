@@ -14,8 +14,9 @@ if (!supabaseAdmin) {
 // Define tier mapping based on Stripe price IDs (current canonical production)
 // NOTE: Keep legacy IDs for backward compatibility; add new production IDs from pricing reference.
 const tierMapping: Record<string, string> = {
-  // NOTE: The original monthly price ID below was missing an 'L' after 'Lp4'.
-  // Add the correct production ID while keeping the typo variant for any already-created sessions.
+  // New $199/month platform access (7-day trial)
+  'price_1SDnMYK8PKpLCKDZEa0MRCBf': 'platform-monthly', // $199/month with 7-day trial
+  // Legacy pricing (kept for backward compatibility)
   'price_1RxbFkRMpSG47vNmLp4LCRHZ': 'team-monthly', // $995/month (correct)
   'price_1RxbFkRMpSG47vNmLp4CRHZ': 'team-monthly',  // legacy/typo variant retained for safety
   'price_1RxbGlRMpSG47vNmWEOu1otZ': 'team-yearly',  // $10,000/year
@@ -147,7 +148,8 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
 
 function getTierPrice(tier: string): number {
   const prices: Record<string, number> = {
-    'team-monthly': 995,
+    'platform-monthly': 199, // New $199/month tier
+    'team-monthly': 995, // Legacy
     'team-yearly': 10000,
   };
   return prices[tier] || 0;

@@ -102,16 +102,16 @@ function StartPageContent() {
 
   const planDetails = {
     monthly: {
-      price: '$995',
+      price: '$199',
       period: 'per month',
-      total: '$995',
+      total: '$199',
       savings: null
     },
     yearly: {
-      price: '$9,950',
-      period: 'per year',
-      total: '$9,950',
-      savings: 'Save $2,390 (17% off)'
+      price: '$199',
+      period: 'per month',
+      total: '$199',
+      savings: null
     }
   };
 

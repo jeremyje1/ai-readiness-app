@@ -6,12 +6,15 @@ import Stripe from 'stripe';
 // We intentionally read env lazily so that missing vars surface as runtime errors with clear messages.
 const PRODUCT_PRICE_ENV: Record<string, Record<string, string | undefined>> = {
   team: {
-    monthly: process.env.STRIPE_PRICE_TEAM_MONTHLY,
-    yearly: process.env.STRIPE_PRICE_TEAM_YEARLY,
-    annual: process.env.STRIPE_PRICE_TEAM_YEARLY // allow "annual" synonym
+    monthly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf',
+    yearly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf',
+    annual: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf'
+  },
+  platform: {
+    monthly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf',
+    yearly: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf',
+    annual: process.env.STRIPE_PRICE_PLATFORM_MONTHLY || 'price_1SDnMYK8PKpLCKDZEa0MRCBf'
   }
-  // Add more products here, e.g.:
-  // professional: { monthly: process.env.STRIPE_PRICE_PRO_MONTHLY, yearly: process.env.STRIPE_PRICE_PRO_YEARLY }
 };
 
 let stripe: Stripe | null = null;
