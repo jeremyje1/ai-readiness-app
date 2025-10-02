@@ -35,7 +35,7 @@ export default function AuthSuccessPage() {
     };
 
     const navigateToAssessment = () => {
-        router.push('/ai-readiness/assessment');
+        router.push('/assessment/streamlined');
     };
 
     const navigateToPricing = () => {
