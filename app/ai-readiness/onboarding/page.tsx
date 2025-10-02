@@ -18,11 +18,12 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { useUserProfile } from '@/lib/hooks/useUserProfile';
 
 interface OnboardingData {
     // Organization Info
     organizationName: string;
-    organizationType: 'K12' | 'HigherEd' | 'District' | 'University' | 'Community College' | 'Other';
+    organizationType: 'K12' | 'HigherEd' | 'District' | 'University' | 'Community College' | 'Trade School' | 'default';
     role: string;
     department: string;
 
@@ -61,17 +62,46 @@ export default function AIReadinessOnboarding() {
         uploadedFiles: []
     });
     const [isDragOver, setIsDragOver] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Use the database-backed user profile hook
+    const { profile, updateProfile, saveOnboardingData, completeOnboarding, loading } = useUserProfile();
 
     const totalSteps = 4;
     const progress = (currentStep / totalSteps) * 100;
 
+    // Load existing profile data if available
+    useEffect(() => {
+        if (profile && !loading) {
+            setData(prev => ({
+                ...prev,
+                organizationName: profile.institution_name || '',
+                organizationType: (profile.institution_type as any) || 'K12',
+                role: profile.job_title || '',
+                department: profile.department || '',
+                name: profile.full_name || '',
+                email: profile.email || '',
+                phone: profile.phone || '',
+                currentAIUse: profile.onboarding_data?.currentAIUse || '',
+                primaryGoals: profile.onboarding_data?.primaryGoals || '',
+                challenges: profile.onboarding_data?.challenges || '',
+                timeline: profile.onboarding_data?.timeline || ''
+            }));
+
+            // If onboarding already completed, redirect to assessment
+            if (profile.onboarding_completed) {
+                router.push('/ai-readiness/assessment?mode=' + assessmentMode);
+            }
+        }
+    }, [profile, loading, router, assessmentMode]);
+
     useEffect(() => {
         // Auto-detect institution type from URL/domain
         const hostname = window.location.hostname;
-        if (hostname.includes('highered')) {
+        if (hostname.includes('highered') && !profile?.institution_type) {
             setData(prev => ({ ...prev, organizationType: 'HigherEd' }));
         }
-    }, []);
+    }, [profile]);
 
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     const ALLOWED_TYPES = [
@@ -141,19 +171,60 @@ export default function AIReadinessOnboarding() {
         }));
     };
 
-    const nextStep = () => {
+    const nextStep = async () => {
         if (currentStep < totalSteps) {
+            // Save progress to database at each step
+            setIsSaving(true);
+            await updateProfile({
+                institution_name: data.organizationName,
+                institution_type: data.organizationType,
+                job_title: data.role,
+                department: data.department,
+                full_name: data.name,
+                email: data.email,
+                phone: data.phone,
+                onboarding_step: currentStep,
+                onboarding_data: {
+                    currentAIUse: data.currentAIUse,
+                    primaryGoals: data.primaryGoals,
+                    challenges: data.challenges,
+                    timeline: data.timeline,
+                    step: currentStep
+                }
+            });
+            setIsSaving(false);
             setCurrentStep(currentStep + 1);
         } else {
-            // Save onboarding data and proceed to assessment (client-side only)
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('ai_readiness_onboarding', JSON.stringify(data));
-                
-                // Save institution type separately for persistence
-                const institutionType = (data.organizationType === 'K12' || data.organizationType === 'District') ? 'K12' : 'HigherEd';
-                localStorage.setItem('ai_blueprint_institution_type', institutionType);
-            }
-            router.push(`/ai-readiness/assessment?mode=${assessmentMode}&tier=ai-readiness-comprehensive&onboarded=true`);
+            // Final step - save complete onboarding data to database
+            setIsSaving(true);
+
+            const institutionType = (data.organizationType === 'K12' || data.organizationType === 'District') ? 'K12' : 'HigherEd';
+
+            await updateProfile({
+                institution_name: data.organizationName,
+                institution_type: data.organizationType,
+                job_title: data.role,
+                department: data.department,
+                full_name: data.name,
+                email: data.email,
+                phone: data.phone,
+                preferred_mode: assessmentMode as any,
+                onboarding_data: {
+                    currentAIUse: data.currentAIUse,
+                    primaryGoals: data.primaryGoals,
+                    challenges: data.challenges,
+                    timeline: data.timeline,
+                    institutionType: institutionType,
+                    completedAt: new Date().toISOString()
+                }
+            });
+
+            // Mark onboarding as complete
+            await completeOnboarding();
+
+            setIsSaving(false);
+            // Route to streamlined assessment
+            router.push(`/ai-readiness/assessment-streamlined?onboarded=true`);
         }
     };
 
@@ -207,10 +278,12 @@ export default function AIReadinessOnboarding() {
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
                                     <option value="K12">K-12 School District</option>
+                                    <option value="District">District</option>
                                     <option value="HigherEd">Higher Education</option>
                                     <option value="University">University</option>
                                     <option value="Community College">Community College</option>
-                                    <option value="Other">Other</option>
+                                    <option value="Trade School">Trade School</option>
+                                    <option value="default">Other</option>
                                 </select>
                             </div>
 
@@ -470,11 +543,11 @@ export default function AIReadinessOnboarding() {
 
                     <Button
                         onClick={nextStep}
-                        disabled={!isStepValid()}
+                        disabled={!isStepValid() || isSaving || loading}
                         className="flex items-center gap-2"
                     >
-                        {currentStep === totalSteps ? 'Start Assessment' : 'Next'}
-                        {currentStep === totalSteps ? <CheckCircle className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                        {isSaving ? 'Saving...' : currentStep === totalSteps ? 'Start Assessment' : 'Next'}
+                        {isSaving ? null : currentStep === totalSteps ? <CheckCircle className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                     </Button>
                 </div>
 

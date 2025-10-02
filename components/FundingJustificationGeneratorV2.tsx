@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useUserContext } from '@/components/UserProvider'
+import { useUserProfile } from '@/lib/hooks/useUserProfile'
 import {
   ArrowLeft,
   ArrowRight,
@@ -22,7 +23,7 @@ import {
   Upload,
   Users
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 
 interface FundingOpportunity {
   id: string
@@ -91,19 +92,38 @@ export default function FundingJustificationGeneratorV2() {
   const [generatedNarrative, setGeneratedNarrative] = useState<string>('')
   const [isGenerating, setIsGenerating] = useState(false)
   const { user, institution } = useUserContext()
+  const { profile, loading } = useUserProfile()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Pre-populate with user's institution data if available
-  useState(() => {
-    if (institution) {
+  // Pre-populate with user's profile data from database (NO MOCK DATA)
+  useEffect(() => {
+    if (profile && !loading) {
       setSchoolInfo(prev => ({
         ...prev,
-        schoolName: institution.name || '',
+        schoolName: profile.institution_name || '[Please complete your profile]',
+        districtName: profile.onboarding_data?.districtName || '',
+        studentCount: profile.student_count || 0,
+        teacherCount: profile.faculty_count || 0,
+        administratorCount: profile.staff_count || 0,
+        currentTechBudget: profile.annual_budget || 0,
+        schoolType: profile.institution_type === 'K12' || profile.institution_type === 'District' ? 'k12'
+                  : profile.institution_type === 'University' ? 'university'
+                  : profile.institution_type === 'Community College' ? 'college'
+                  : 'k12',
+        aiExperience: (profile.onboarding_data?.aiExperience || 'none') as any,
+        primaryChallenges: profile.onboarding_data?.challenges ? [profile.onboarding_data.challenges] : [],
+        specificNeeds: profile.onboarding_data?.primaryGoals || profile.onboarding_data?.currentAIUse || ''
+      }))
+    } else if (institution) {
+      // Fallback to old UserContext if profile not available
+      setSchoolInfo(prev => ({
+        ...prev,
+        schoolName: institution.name || '[Please complete your profile]',
         studentCount: institution.headcount || 0,
         schoolType: institution.org_type === 'K12' ? 'k12' : 'university'
       }))
     }
-  })
+  }, [profile, loading, institution])
 
   const fundingOpportunities: FundingOpportunity[] = [
     {

@@ -98,42 +98,99 @@ export default function LoginPage() {
         if (isChrome) {
           console.log('🔐 Using Chrome workaround with direct API call...');
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-              },
-              body: JSON.stringify({
-                email: email.trim(),
-                password,
-                gotrue_meta_security: {}
-              })
+            // Use hardcoded URL as fallback since env vars might not be available in browser
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://jocigzsthcpspxfdfxae.supabase.co';
+            const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvY2lnenN0aGNwc3B4ZmRmeGFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMzExNzYsImV4cCI6MjA2ODgwNzE3Nn0.krJk0mzZQ3wmo_isokiYkm5eCTfMpIZcGP6qfSKYrHA';
+
+            console.log('🔐 Using Supabase URL:', supabaseUrl);
+
+            const requestBody = JSON.stringify({
+              email: email.trim(),
+              password,
+              gotrue_meta_security: {}
             });
 
-            const data = await response.json();
+            const authUrl = `${supabaseUrl}/auth/v1/token?grant_type=password`;
+            console.log('🔐 Making request to:', authUrl);
+            console.log('🔐 Request body:', requestBody);
+            console.log('🔐 Request headers:', { 'Content-Type': 'application/json', 'apikey': supabaseKey.substring(0, 20) + '...' });
 
-            if (!response.ok) {
+            // Create AbortController for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+            try {
+              const response = await fetch(authUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': supabaseKey
+                },
+                body: requestBody,
+                signal: controller.signal
+              });
+
+              clearTimeout(timeoutId);
+
+              console.log('🔐 Response received:', response);
+              console.log('🔐 Response status:', response.status);
+              console.log('🔐 Response ok:', response.ok);
+
+              const data = await response.json();
+              console.log('🔐 Response data:', data);
+
+              if (!response.ok) {
+                console.error('🔐 Chrome auth failed with status:', response.status, data);
+
+                // Specific handling for invalid credentials
+                if (data.error_code === 'invalid_credentials' || data.msg === 'Invalid login credentials') {
+                  return {
+                    data: null,
+                    error: { message: 'Invalid email or password. Please check your credentials and try again.' },
+                    method: 'chrome-api',
+                    timestamp: Date.now()
+                  };
+                }
+
+                return {
+                  data: null,
+                  error: { message: data.error_description || data.msg || 'Authentication failed' },
+                  method: 'chrome-api',
+                  timestamp: Date.now()
+                };
+              }
+
+              // Set the session manually
+              await supabase.auth.setSession({
+                access_token: data.access_token,
+                refresh_token: data.refresh_token
+              });
+
               return {
-                data: null,
-                error: { message: data.error_description || data.msg || 'Authentication failed' },
+                data: { session: data, user: data.user },
+                error: null,
                 method: 'chrome-api',
                 timestamp: Date.now()
               };
+            } catch (fetchError: any) {
+              clearTimeout(timeoutId);
+              if (fetchError.name === 'AbortError') {
+                console.error('🔐 Chrome auth request timed out after 10 seconds');
+                return {
+                  data: null,
+                  error: { message: 'Request timed out - please try again' },
+                  method: 'chrome-api-timeout',
+                  timestamp: Date.now()
+                };
+              }
+              console.error('🔐 Chrome auth fetch error:', fetchError);
+              return {
+                data: null,
+                error: { message: fetchError.message || 'Network error occurred' },
+                method: 'chrome-api-error',
+                timestamp: Date.now()
+              };
             }
-
-            // Set the session manually
-            await supabase.auth.setSession({
-              access_token: data.access_token,
-              refresh_token: data.refresh_token
-            });
-
-            return {
-              data: { session: data, user: data.user },
-              error: null,
-              method: 'chrome-api',
-              timestamp: Date.now()
-            };
           } catch (err: any) {
             console.error('🔐 Chrome API error:', err);
             return {
@@ -160,15 +217,44 @@ export default function LoginPage() {
       };
 
       // Add 15-second timeout to entire login process
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => {
-          console.error('🔐 Login timeout after 15 seconds');
-          reject(new Error('Login timeout - server not responding. Please try again.'));
-        }, 15000)
-      );
+      let timeoutId: NodeJS.Timeout;
+      let isResolved = false;
+
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          if (!isResolved) {
+            console.error('🔐 Login timeout after 15 seconds');
+            reject(new Error('Login timeout - server not responding. Please try again.'));
+          }
+        }, 15000);
+      });
+
+      const loginWithCleanup = async () => {
+        try {
+          const result = await loginProcess();
+          isResolved = true;
+          clearTimeout(timeoutId);
+          console.log('🔐 Login completed successfully, timeout cleared');
+          return result;
+        } catch (error) {
+          isResolved = true;
+          clearTimeout(timeoutId);
+          throw error;
+        }
+      };
 
       console.log('🔐 Starting login with 15s timeout...');
-      const result = await Promise.race([loginProcess(), timeoutPromise]) as any;
+
+      let result;
+      try {
+        result = await Promise.race([loginWithCleanup(), timeoutPromise]) as any;
+        console.log('🔐 Login process completed');
+      } catch (timeoutError: any) {
+        console.error('🔐 Login failed:', timeoutError.message);
+        setError(timeoutError.message);
+        setLoading(false);
+        return;
+      }
 
       console.log('🔐 AuthService response received');
       console.log('🔐 Full result:', JSON.stringify(result, null, 2));
@@ -181,17 +267,26 @@ export default function LoginPage() {
 
         // Improved error messages
         let errorMsg = 'Login failed: ';
-        if (result.error.message.includes('Invalid login credentials')) {
-          errorMsg += 'Invalid email or password';
+        const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+
+        if (result.error.message.includes('Invalid login credentials') || result.error.message.includes('Invalid email or password')) {
+          errorMsg += 'Invalid email or password. Please check your credentials.';
         } else if (result.error.message.includes('Email not confirmed')) {
           errorMsg += 'Please confirm your email first';
         } else if (result.error.message.includes('timeout')) {
-          errorMsg += 'Connection timeout - please try again';
+          if (isChrome) {
+            errorMsg = 'Chrome is having connection issues. Please try using Safari, Firefox, or Edge instead.';
+          } else {
+            errorMsg += 'Connection timeout - please try again';
+          }
+        } else if (result.method === 'chrome-api-error' || result.method === 'chrome-api-timeout') {
+          errorMsg = 'Chrome authentication issue detected. Please use Safari, Firefox, or Edge for a better experience.';
         } else {
           errorMsg += result.error.message;
         }
         setError(errorMsg);
         console.error('🔐 Setting error state:', result.error.message);
+        console.error('🔐 Auth method was:', result.method);
         setLoading(false);
         console.log('🔐 Loading state set to false after error');
       } else if (result.data?.session) {
@@ -203,8 +298,9 @@ export default function LoginPage() {
         // Use window.location instead of router.push to force full page reload
         // This ensures Supabase client picks up the new session from cookies
         setTimeout(() => {
-          console.log('🔐 Redirecting to dashboard with full page reload...');
-          window.location.href = '/ai-readiness/dashboard';
+          console.log('🔐 Redirecting to success page with full page reload...');
+          // Changed to redirect to /auth/success instead of dashboard which requires payment
+          window.location.href = '/auth/success';
         }, 500);
         // Don't set loading to false here - let redirect happen
       } else {

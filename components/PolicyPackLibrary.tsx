@@ -6,14 +6,15 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
-import { 
-  FileText, 
-  Download, 
-  Shield, 
-  BookOpen, 
-  Users, 
-  Map, 
-  MessageSquare, 
+import { useUserProfile } from '@/lib/hooks/useUserProfile'
+import {
+  FileText,
+  Download,
+  Shield,
+  BookOpen,
+  Users,
+  Map,
+  MessageSquare,
   GraduationCap,
   ExternalLink,
   Calendar,
@@ -81,11 +82,11 @@ const riskColors = {
   High: 'bg-red-100 text-red-800'
 }
 
-export default function PolicyPackLibrary({ 
-  assessmentId, 
-  institutionType, 
-  institutionName, 
-  state 
+export default function PolicyPackLibrary({
+  assessmentId,
+  institutionType,
+  institutionName,
+  state
 }: PolicyPackLibraryProps) {
   const [templates, setTemplates] = useState<PolicyTemplate[]>([])
   const [selectedTemplates, setSelectedTemplates] = useState<string[]>([])
@@ -94,14 +95,22 @@ export default function PolicyPackLibrary({
   const [generating, setGenerating] = useState(false)
   const [activeCategory, setActiveCategory] = useState<string>('all')
 
+  // Use real user profile data instead of props
+  const { profile } = useUserProfile()
+
+  // Override props with real user data from database (NO MOCK DATA)
+  const actualInstitutionType = (profile?.institution_type === 'K12' || profile?.institution_type === 'District') ? 'K12' : 'HigherEd'
+  const actualInstitutionName = profile?.institution_name || institutionName || '[Please complete your profile]'
+  const actualState = profile?.state || state || '[State - Please complete your profile]'
+
   useEffect(() => {
     loadTemplates()
     loadRedlines()
-  }, [institutionType])
+  }, [profile?.institution_type])
 
   const loadTemplates = async () => {
     try {
-      const response = await fetch(`/api/policy-packs?action=getAvailableTemplates&institutionType=${institutionType}`)
+      const response = await fetch(`/api/policy-packs?action=getAvailableTemplates&institutionType=${actualInstitutionType}`)
       const data = await response.json()
       
       if (data.success) {
@@ -145,8 +154,8 @@ export default function PolicyPackLibrary({
         body: JSON.stringify({
           action: 'generatePolicyPack',
           assessmentId,
-          institutionType,
-          institutionName,
+          institutionType: actualInstitutionType,
+          institutionName: actualInstitutionName,
           state,
           selectedPolicies: selectedTemplates
         })
@@ -228,7 +237,7 @@ export default function PolicyPackLibrary({
         <h1 className="text-2xl font-bold mb-2">Policy Pack Library</h1>
         <p className="text-blue-100">
           Maintained templates with monthly redlines • Anchored to external authorities • 
-          Ready for {institutionType} institutions in {state}
+          Ready for {actualInstitutionType} institutions in {actualState}
         </p>
       </div>
 

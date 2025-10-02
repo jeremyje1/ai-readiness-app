@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAIReadinessPDFReport, type AIReadinessReportData } from '@/lib/ai-readiness-pdf-generator';
 import type { AIReadinessResults } from '@/lib/aiReadinessEngine';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { results, institutionInfo, tier = 'basic' } = body;
+    const { results, institutionInfo, tier = 'basic', userId } = body;
 
     // Validate input
     if (!results || !results.scores) {
@@ -16,15 +17,51 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🎯 Generating AI Readiness PDF report...');
-    
-    // Prepare report data for the AI readiness PDF generator
+
+    // Fetch user profile data from database for personalized report
+    const supabase = createClient();
+    let userProfile = null;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const actualUserId = user?.id || userId;
+
+      if (actualUserId) {
+        const { data: profile } = await supabase
+          .from('user_profile_with_institution')
+          .select('*')
+          .eq('user_id', actualUserId)
+          .single();
+
+        if (profile) {
+          userProfile = profile;
+          console.log('✅ Retrieved user profile for report:', profile.institution_name);
+        }
+      }
+    } catch (profileError) {
+      console.warn('⚠️  Could not fetch user profile, using provided data:', profileError);
+    }
+
+    // Prepare report data with user profile data (NO MOCK DATA)
     const reportData: AIReadinessReportData = {
       results,
       institutionInfo: {
-        name: institutionInfo?.name || results.institutionName || 'Your Institution',
-        type: institutionInfo?.type || 'Higher Education Institution',
-        size: institutionInfo?.size,
-        location: institutionInfo?.location
+        // Use real user data from database, or prompt for missing data
+        name: userProfile?.institution_name || institutionInfo?.name || results.institutionName || '[Institution Name - Please complete your profile]',
+        type: userProfile?.institution_type || institutionInfo?.type || '[Institution Type - Please complete your profile]',
+        size: userProfile?.institution_size || institutionInfo?.size || '[Size - Please complete your profile]',
+        location: userProfile?.city && userProfile?.state
+          ? `${userProfile.city}, ${userProfile.state}`
+          : institutionInfo?.location || '[Location - Please complete your profile]',
+        // Additional real user data
+        contactName: userProfile?.full_name || '[Contact Name - Please complete your profile]',
+        contactEmail: userProfile?.email || '[Email - Please complete your profile]',
+        contactTitle: userProfile?.job_title || '[Title - Please complete your profile]',
+        department: userProfile?.department || '[Department - Please complete your profile]',
+        studentCount: userProfile?.student_count,
+        facultyCount: userProfile?.faculty_count,
+        staffCount: userProfile?.staff_count,
+        annualBudget: userProfile?.annual_budget
       },
       tier: tier as 'basic' | 'custom',
       submissionDate: new Date().toISOString()

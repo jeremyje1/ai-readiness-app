@@ -635,42 +635,32 @@ export default function AIReadinessAssessmentPage() {
             <div className="space-y-6">
               {currentQuestion.type === 'scale_with_context' && (
                 <>
-                  {/* Check if this is a percentage question */}
+                  {/* Determine if this is a percentage question */}
                   {(() => {
                     const questionText = currentQuestion.question.toLowerCase();
-                    const isPercentageQuestion = questionText.includes('percentage') || 
-                                                questionText.includes('percent') ||
-                                                currentQuestion.question.includes('%') ||
-                                                // Specific check for faculty percentage question
-                                                questionText.includes('what percentage of faculty');
-                    console.log('Question:', currentQuestion.question);
-                    console.log('Question ID:', currentQuestion.id);
-                    console.log('Is percentage question:', isPercentageQuestion);
-                    
-                    // Force percentage input for question about faculty AI usage
-                    if (questionText.includes('faculty') && questionText.includes('ai tools')) {
-                      console.log('Forcing percentage input for faculty AI usage question');
-                      return true;
-                    }
-                    
+                    const isPercentageQuestion = questionText.includes('percentage') ||
+                      questionText.includes('percent') ||
+                      questionText.includes('%') ||
+                      (questionText.includes('what percentage')) ||
+                      (questionText.includes('faculty') && questionText.includes('ai'));
+
                     return isPercentageQuestion;
                   })() ? (
                     // Percentage input for percentage questions
                     <div className="space-y-4">
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <p className="text-sm text-blue-800 mb-3">This question asks for a percentage value:</p>
+                        <p className="text-sm text-blue-800 mb-3">Enter a percentage value (0-100):</p>
                         <div className="flex items-center gap-4">
                           <input
                             type="number"
                             min="0"
                             max="100"
-                            step="5"
+                            step="1"
                             value={responses[currentQuestion.id]?.value !== undefined ? responses[currentQuestion.id]?.value : ''}
                             onChange={(e) => {
                               const inputValue = e.target.value;
                               const value = inputValue === '' ? undefined : parseInt(inputValue);
-                              console.log('Percentage input changed:', inputValue, 'Parsed value:', value);
-                              
+
                               if (value === undefined || (value >= 0 && value <= 100)) {
                                 handleResponse(
                                   currentQuestion.id,
@@ -686,11 +676,12 @@ export default function AIReadinessAssessmentPage() {
                           <span className="text-2xl font-bold text-blue-700">%</span>
                         </div>
                         <div className="text-sm text-blue-600 mt-2">
-                          Enter a percentage between 0 and 100
+                          Enter any percentage from 0 to 100
                         </div>
                         {responses[currentQuestion.id]?.value !== undefined && (
-                          <div className="mt-2 text-sm text-green-600">
-                            ✓ Current value: {responses[currentQuestion.id]?.value}%
+                          <div className="mt-2 text-sm text-green-600 flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>Answered: {responses[currentQuestion.id]?.value}%</span>
                           </div>
                         )}
                       </div>
@@ -705,68 +696,29 @@ export default function AIReadinessAssessmentPage() {
                         { value: 4, label: "Above Average", color: "bg-blue-100 border-blue-300 text-blue-700" },
                         { value: 5, label: currentQuestion.scaleLabels?.high || "High", color: "bg-green-100 border-green-300 text-green-700" }
                       ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => handleResponse(
-                          currentQuestion.id,
-                          option.value,
-                          responses[currentQuestion.id]?.context,
-                          responses[currentQuestion.id]?.text
-                        )}
-                        className={`w-full p-4 text-left border-2 rounded-lg transition-all ${responses[currentQuestion.id]?.value === option.value
-                          ? option.color
-                          : 'bg-white border-gray-200 hover:border-gray-300'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{option.label}</span>
-                          {responses[currentQuestion.id]?.value === option.value && (
-                            <CheckCircle className="w-5 h-5 text-current" />
+                        <button
+                          key={option.value}
+                          onClick={() => handleResponse(
+                            currentQuestion.id,
+                            option.value,
+                            responses[currentQuestion.id]?.context,
+                            responses[currentQuestion.id]?.text
                           )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                  )}
-
-                  {/* Manual percentage entry failsafe for percentage questions */}
-                  {(() => {
-                    const questionText = currentQuestion.question.toLowerCase();
-                    if (questionText.includes('percentage') || questionText.includes('percent') || 
-                        (questionText.includes('faculty') && questionText.includes('ai tools'))) {
-                      return (
-                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
-                          <p className="text-sm text-yellow-800 mb-2">
-                            <strong>Note:</strong> This appears to be asking for a percentage. 
-                            If you see a 1-5 scale above, you can enter a percentage here instead:
-                          </p>
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={responses[currentQuestion.id]?.value || ''}
-                              onChange={(e) => {
-                                const value = e.target.value === '' ? undefined : parseInt(e.target.value);
-                                if (value === undefined || (value >= 0 && value <= 100)) {
-                                  handleResponse(
-                                    currentQuestion.id,
-                                    value,
-                                    responses[currentQuestion.id]?.context,
-                                    responses[currentQuestion.id]?.text
-                                  );
-                                }
-                              }}
-                              className="w-24 px-3 py-2 border-2 border-yellow-400 rounded"
-                              placeholder="0-100"
-                            />
-                            <span className="font-medium">%</span>
+                          className={`w-full p-4 text-left border-2 rounded-lg transition-all ${responses[currentQuestion.id]?.value === option.value
+                            ? option.color
+                            : 'bg-white border-gray-200 hover:border-gray-300'
+                            }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">{option.label}</span>
+                            {responses[currentQuestion.id]?.value === option.value && (
+                              <CheckCircle className="w-5 h-5 text-current" />
+                            )}
                           </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Context Input */}
                   <div>
