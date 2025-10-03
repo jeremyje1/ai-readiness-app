@@ -1,6 +1,6 @@
 'use client'
 
-import { FundingTutorialTrigger } from '@/components/TutorialTrigger'
+// FundingTutorialTrigger removed - using simplified tutorial system
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -280,7 +280,6 @@ ${institutionName} is committed to responsible AI integration that enhances educ
             Auto-generate grant narratives aligned with federal funding guidelines for AI initiatives
           </p>
         </div>
-        <FundingTutorialTrigger showNewBadge={true} variant="floating" />
       </div>
 
       <Tabs defaultValue="opportunities" className="w-full">

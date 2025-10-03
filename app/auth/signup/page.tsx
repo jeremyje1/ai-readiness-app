@@ -3,9 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function StartPage() {
+export default function SignUpPage() {
   const router = useRouter();
-
+  
   useEffect(() => {
     router.push('/get-started');
   }, [router]);

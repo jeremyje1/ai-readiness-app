@@ -8,7 +8,7 @@ const CANONICAL = 'https://aiblueprint.k12aiblueprint.com';
 const STATIC_PATHS: string[] = [
   '/',
   '/pricing',
-  '/start',
+  '/get-started',
   '/assessment',
   '/dashboard/personalized',
   '/auth/login',

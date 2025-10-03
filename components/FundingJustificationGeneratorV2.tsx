@@ -1,6 +1,6 @@
 'use client'
 
-import { FundingTutorialTrigger } from '@/components/TutorialTrigger'
+// FundingTutorialTrigger removed - using simplified tutorial system
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,7 +23,7 @@ import {
   Upload,
   Users
 } from 'lucide-react'
-import { useRef, useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface FundingOpportunity {
   id: string
@@ -61,7 +61,7 @@ interface GrantRequirements {
 
 const STEP_TITLES = [
   'Select Funding Opportunity',
-  'School/Institution Information', 
+  'School/Institution Information',
   'Grant Requirements & Context',
   'AI Implementation Needs',
   'Generate & Review Narrative'
@@ -107,9 +107,9 @@ export default function FundingJustificationGeneratorV2() {
         administratorCount: profile.staff_count || 0,
         currentTechBudget: profile.annual_budget || 0,
         schoolType: profile.institution_type === 'K12' || profile.institution_type === 'District' ? 'k12'
-                  : profile.institution_type === 'University' ? 'university'
-                  : profile.institution_type === 'Community College' ? 'college'
-                  : 'k12',
+          : profile.institution_type === 'University' ? 'university'
+            : profile.institution_type === 'Community College' ? 'college'
+              : 'k12',
         aiExperience: (profile.onboarding_data?.aiExperience || 'none') as any,
         primaryChallenges: profile.onboarding_data?.challenges ? [profile.onboarding_data.challenges] : [],
         specificNeeds: profile.onboarding_data?.primaryGoals || profile.onboarding_data?.currentAIUse || ''
@@ -246,12 +246,12 @@ export default function FundingJustificationGeneratorV2() {
 
   const generateNarrative = async () => {
     if (!selectedOpportunity) return
-    
+
     setIsGenerating(true)
-    
+
     // Simulate API call with more sophisticated processing
     await new Promise(resolve => setTimeout(resolve, 3000))
-    
+
     const narrative = `
 **COMPREHENSIVE GRANT NARRATIVE: ${selectedOpportunity.program}**
 
@@ -423,7 +423,6 @@ This comprehensive initiative positions ${schoolInfo.schoolName} as a model for 
             Step-by-step grant narrative generator with contextualized requirements
           </p>
         </div>
-        <FundingTutorialTrigger showNewBadge={true} variant="floating" />
       </div>
 
       {/* Progress Indicator */}
@@ -434,8 +433,8 @@ This comprehensive initiative positions ${schoolInfo.schoolName} as a model for 
             <span className="text-sm text-muted-foreground">{Math.round(((currentStep + 1) / STEP_TITLES.length) * 100)}% Complete</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${((currentStep + 1) / STEP_TITLES.length) * 100}%` }}
             />
           </div>
@@ -458,13 +457,12 @@ This comprehensive initiative positions ${schoolInfo.schoolName} as a model for 
             </CardHeader>
             <CardContent className="space-y-4">
               {fundingOpportunities.map((opportunity) => (
-                <Card 
-                  key={opportunity.id} 
-                  className={`border-2 cursor-pointer transition-all ${
-                    selectedOpportunity?.id === opportunity.id 
-                      ? 'border-blue-500 bg-blue-50' 
+                <Card
+                  key={opportunity.id}
+                  className={`border-2 cursor-pointer transition-all ${selectedOpportunity?.id === opportunity.id
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                    }`}
                   onClick={() => setSelectedOpportunity(opportunity)}
                 >
                   <CardContent className="p-6">
@@ -785,10 +783,10 @@ This comprehensive initiative positions ${schoolInfo.schoolName} as a model for 
                         <div>
                           <div className="font-medium">{option}</div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            {selectedOpportunity?.eligibleUses.find(use => 
+                            {selectedOpportunity?.eligibleUses.find(use =>
                               use.toLowerCase().includes(option.toLowerCase().split(' ')[0]) ||
                               option.toLowerCase().includes(use.toLowerCase().split(' ')[0])
-                            ) && `Aligns with: ${selectedOpportunity.eligibleUses.find(use => 
+                            ) && `Aligns with: ${selectedOpportunity.eligibleUses.find(use =>
                               use.toLowerCase().includes(option.toLowerCase().split(' ')[0]) ||
                               option.toLowerCase().includes(use.toLowerCase().split(' ')[0])
                             )}`}
@@ -860,9 +858,9 @@ This comprehensive initiative positions ${schoolInfo.schoolName} as a model for 
                     </div>
                   </div>
 
-                  <Button 
-                    onClick={generateNarrative} 
-                    className="w-full" 
+                  <Button
+                    onClick={generateNarrative}
+                    className="w-full"
                     size="lg"
                     disabled={isGenerating}
                   >
@@ -907,9 +905,9 @@ This comprehensive initiative positions ${schoolInfo.schoolName} as a model for 
 
       {/* Navigation */}
       <div className="flex justify-between">
-        <Button 
-          onClick={prevStep} 
-          variant="outline" 
+        <Button
+          onClick={prevStep}
+          variant="outline"
           disabled={currentStep === 0}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -917,16 +915,16 @@ This comprehensive initiative positions ${schoolInfo.schoolName} as a model for 
         </Button>
 
         {currentStep < STEP_TITLES.length - 1 ? (
-          <Button 
-            onClick={nextStep} 
+          <Button
+            onClick={nextStep}
             disabled={!canProceedToNextStep()}
           >
             Next
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         ) : (
-          <Button 
-            onClick={generateNarrative} 
+          <Button
+            onClick={generateNarrative}
             disabled={isGenerating || !canProceedToNextStep()}
           >
             {isGenerating ? 'Generating...' : 'Generate Narrative'}

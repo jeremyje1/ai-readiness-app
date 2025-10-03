@@ -19,7 +19,7 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
     const pathname = usePathname();
 
     // Don't check on auth-related pages and public pages to avoid redirect loops
-    const publicPaths = ['/auth/', '/login', '/start', '/pricing', '/privacy', '/terms', '/contact', '/services'];
+    const publicPaths = ['/auth/', '/login', '/get-started', '/pricing', '/privacy', '/terms', '/contact', '/welcome'];
     const isPublicPage = publicPaths.some(path => pathname?.startsWith(path)) || pathname === '/';
     const isPasswordSetupPage = pathname === '/auth/password/setup';
 

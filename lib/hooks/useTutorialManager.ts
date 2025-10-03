@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 
 interface TutorialState {
     isOpen: boolean
-    tutorialType: 'dashboard' | 'assessment' | 'executive' | 'compliance' | 'funding'
+    tutorialType: 'dashboard' | 'assessment'
     shouldShow: boolean
 }
 
@@ -21,11 +21,8 @@ interface TutorialManager {
 }
 
 const TUTORIAL_ROUTES = {
-    '/ai-readiness/dashboard': 'dashboard',
-    '/ai-readiness/assessment': 'assessment',
-    '/executive': 'executive',
-    '/executive/compliance': 'compliance',
-    '/executive/funding': 'funding'
+    '/dashboard/personalized': 'dashboard',
+    '/assessment': 'assessment'
 } as const
 
 export const useTutorialManager = (): TutorialManager => {

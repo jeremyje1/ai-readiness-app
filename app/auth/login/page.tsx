@@ -10,6 +10,13 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Check if this is a signup request and redirect
+  useEffect(() => {
+    if (searchParams.get('signup') === 'true') {
+      router.push('/get-started');
+    }
+  }, [searchParams, router]);
+
   // Pre-fill email from URL parameter if provided
   const emailParam = searchParams.get('email') || '';
   const [email, setEmail] = useState(emailParam);
@@ -425,9 +432,12 @@ export default function LoginPage() {
           <a href='/auth/password/reset' className='text-blue-600 underline'>
             Forgot password?
           </a>
-          {' • '}
-          <a href='/debug-auth' className='text-blue-600 underline'>
-            Debug Auth
+        </div>
+
+        <div className='text-sm text-gray-600 text-center mt-4'>
+          Don't have an account?{' '}
+          <a href='/get-started' className='font-medium text-indigo-600 hover:text-indigo-500'>
+            Start your free trial
           </a>
         </div>
       </form>

@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, CheckCircle2, ArrowRight, FileText, Building2, Target, Clock } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
+import { ArrowRight, Building2, CheckCircle2, Clock, FileText, Target, Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface AssessmentData {
   // Step 1: Institution Context
@@ -96,26 +97,57 @@ export default function StreamlinedAssessment() {
 
   const checkUser = async () => {
     const supabase = createClient();
+
+    const waitForAuthenticatedUser = () =>
+      new Promise<User | null>((resolve) => {
+        let resolved = false;
+        let authSubscription: { unsubscribe: () => void } | null = null;
+
+        const timeoutId = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            authSubscription?.unsubscribe();
+            resolve(null);
+          }
+        }, 5000);
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          if (session?.user && !resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            subscription.unsubscribe();
+            resolve(session.user);
+          }
+        });
+
+        authSubscription = subscription;
+      });
+
     try {
-      // Add timeout protection
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Auth timeout')), 5000)
-      );
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      const authPromise = supabase.auth.getUser();
-      const { data: { user } } = await Promise.race([authPromise, timeoutPromise]) as any;
+      if (sessionError) {
+        console.warn('Auth session lookup failed:', sessionError.message);
+      }
 
-      if (!user) {
-        router.push('/auth/login');
+      let activeUser: User | null = session?.user ?? null;
+
+      if (!activeUser) {
+        activeUser = await waitForAuthenticatedUser();
+      }
+
+      if (!activeUser) {
+        router.replace('/auth/login?redirect=/assessment');
         return;
       }
-      setUserId(user.id);
+
+      setUserId(activeUser.id);
 
       // Load existing assessment data if any - use maybeSingle() to avoid error for new users
       const { data: existingAssessment, error } = await supabase
         .from('streamlined_assessment_responses')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', activeUser.id)
         .maybeSingle();
 
       if (existingAssessment && !error) {
@@ -128,19 +160,19 @@ export default function StreamlinedAssessment() {
           topPriorities: existingAssessment.top_priorities || [],
           implementationTimeline: existingAssessment.implementation_timeline || '',
           contactName: existingAssessment.contact_name || '',
-          contactEmail: existingAssessment.contact_email || user.email || '',
+          contactEmail: existingAssessment.contact_email || activeUser?.email || '',
           contactRole: existingAssessment.contact_role || '',
           preferredConsultationTime: existingAssessment.preferred_consultation_time || '',
           specialConsiderations: existingAssessment.special_considerations || '',
         });
       } else {
         // Pre-fill email from user
-        setFormData(prev => ({ ...prev, contactEmail: user.email || '' }));
+        setFormData(prev => ({ ...prev, contactEmail: activeUser?.email || '' }));
       }
     } catch (error) {
       console.error('Auth check error:', error);
       // If auth times out or fails, redirect to login
-      router.push('/auth/login');
+      router.replace('/auth/login?redirect=/assessment');
     } finally {
       setInitialLoading(false);
     }
@@ -310,11 +342,10 @@ export default function StreamlinedAssessment() {
                       <button
                         key={type.value}
                         onClick={() => setFormData({ ...formData, institutionType: type.value })}
-                        className={`p-4 border-2 rounded-lg text-left transition-all ${
-                          formData.institutionType === type.value
+                        className={`p-4 border-2 rounded-lg text-left transition-all ${formData.institutionType === type.value
                             ? 'border-indigo-600 bg-indigo-50'
                             : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                          }`}
                       >
                         <div className="text-2xl mb-2">{type.icon}</div>
                         <div className="font-semibold">{type.label}</div>
@@ -363,11 +394,10 @@ export default function StreamlinedAssessment() {
                       <button
                         key={stage.value}
                         onClick={() => setFormData({ ...formData, aiJourneyStage: stage.value })}
-                        className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
-                          formData.aiJourneyStage === stage.value
+                        className={`w-full p-4 border-2 rounded-lg text-left transition-all ${formData.aiJourneyStage === stage.value
                             ? 'border-indigo-600 bg-indigo-50'
                             : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                          }`}
                       >
                         <div className="font-semibold">{stage.label}</div>
                         <div className="text-sm text-gray-600 mt-1">{stage.desc}</div>
@@ -409,11 +439,10 @@ export default function StreamlinedAssessment() {
                           !formData.topPriorities.includes(priority.value) &&
                           formData.topPriorities.length >= 3
                         }
-                        className={`p-4 border-2 rounded-lg text-left transition-all ${
-                          formData.topPriorities.includes(priority.value)
+                        className={`p-4 border-2 rounded-lg text-left transition-all ${formData.topPriorities.includes(priority.value)
                             ? 'border-indigo-600 bg-indigo-50'
                             : 'border-gray-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-start gap-3">
                           <span className="text-2xl">{priority.icon}</span>
@@ -439,11 +468,10 @@ export default function StreamlinedAssessment() {
                       <button
                         key={timeline.value}
                         onClick={() => setFormData({ ...formData, implementationTimeline: timeline.value })}
-                        className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
-                          formData.implementationTimeline === timeline.value
+                        className={`w-full p-4 border-2 rounded-lg text-left transition-all ${formData.implementationTimeline === timeline.value
                             ? 'border-indigo-600 bg-indigo-50'
                             : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                          }`}
                       >
                         <span className="mr-3">{timeline.icon}</span>
                         <span className="font-semibold">{timeline.label}</span>

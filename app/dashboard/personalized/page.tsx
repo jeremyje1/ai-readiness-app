@@ -1,23 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createClient } from '@/lib/supabase/client';
 import {
-  CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  FileText,
+  ArrowRight,
   Calendar,
-  Target,
-  Zap,
+  CheckCircle2,
   Download,
-  ArrowRight
+  FileText,
+  Target,
+  TrendingUp,
+  Zap
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface GapAnalysis {
   id: string;
@@ -270,7 +269,7 @@ export default function PersonalizedDashboard() {
                 <div className="flex gap-4 justify-center">
                   <Button
                     size="lg"
-                    onClick={() => router.push('/assessment/streamlined')}
+                    onClick={() => router.push('/assessment')}
                     className="bg-indigo-600 hover:bg-indigo-700"
                   >
                     <Target className="h-5 w-5 mr-2" />
@@ -279,7 +278,7 @@ export default function PersonalizedDashboard() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => router.push('/assessment/upload-documents')}
+                    onClick={() => router.push('/assessment')}
                   >
                     <FileText className="h-5 w-5 mr-2" />
                     Upload Documents
@@ -575,9 +574,8 @@ export default function PersonalizedDashboard() {
                         </p>
                       </div>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      doc.processing_status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
+                    <span className={`text-xs px-2 py-1 rounded ${doc.processing_status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
                       {doc.processing_status}
                     </span>
                   </div>
