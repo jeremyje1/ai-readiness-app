@@ -67,7 +67,7 @@ export default function WelcomePage() {
 
             // If profile still doesn't exist after retries, create one
             console.log('⚠️ Profile not found after retries, creating minimal profile...');
-            
+
             // First, check if user has an institution
             const { data: existingMembership } = await supabase
                 .from('institution_memberships')
@@ -97,7 +97,7 @@ export default function WelcomePage() {
 
                 if (newInstitution) {
                     institutionId = newInstitution.id;
-                    
+
                     // Create membership
                     await supabase
                         .from('institution_memberships')
@@ -294,9 +294,9 @@ export default function WelcomePage() {
                                 {onboardingSteps[currentStep].action}
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
-                            <Button 
-                                onClick={skipToChDashboard} 
-                                variant="ghost" 
+                            <Button
+                                onClick={skipToChDashboard}
+                                variant="ghost"
                                 className="w-full"
                             >
                                 Skip Tour → Go to Dashboard

@@ -136,9 +136,74 @@ export default function GetStartedPage() {
             if (authData.user && authData.session) {
                 console.log('✅ Session created automatically');
 
-                // Don't create profile here - let the webhook handle it
-                // This avoids race conditions and duplicate key errors
-                console.log('⏭️ Skipping manual profile creation (webhook will handle it)');
+                // Create profile immediately (webhook may not be configured)
+                console.log('📝 Creating user profile and institution...');
+                try {
+                    // Create institution first
+                    const orgName = formData.organization || formData.email.split('@')[1]?.split('.')[0] || 'My Institution';
+                    const { data: institution, error: instError } = await supabase
+                        .from('institutions')
+                        .insert({
+                            name: orgName,
+                            slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
+                            headcount: '100-500',
+                            budget: 'Under $1M',
+                            org_type: institutionType,
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        })
+                        .select()
+                        .single();
+
+                    if (instError) {
+                        console.error('Failed to create institution:', instError);
+                    } else if (institution) {
+                        console.log('✅ Institution created:', institution.id);
+
+                        // Create institution membership
+                        await supabase
+                            .from('institution_memberships')
+                            .insert({
+                                user_id: authData.user.id,
+                                institution_id: institution.id,
+                                role: 'admin',
+                                active: true,
+                                created_at: new Date().toISOString()
+                            });
+
+                        console.log('✅ Institution membership created');
+                    }
+
+                    // Create user profile
+                    const trialEndsAt = new Date();
+                    trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
+                    const { error: profileError } = await supabase
+                        .from('user_profiles')
+                        .insert({
+                            id: authData.user.id,
+                            email: formData.email,
+                            name: formData.name || formData.email.split('@')[0],
+                            organization: formData.organization || '',
+                            institution_type: institutionType,
+                            title: formData.title || '',
+                            phone: formData.phone || '',
+                            subscription_tier: 'trial',
+                            subscription_status: 'trialing',
+                            trial_ends_at: trialEndsAt.toISOString(),
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        });
+
+                    if (profileError) {
+                        console.error('Failed to create profile:', profileError);
+                    } else {
+                        console.log('✅ Profile created');
+                    }
+                } catch (setupError) {
+                    console.error('Error during user setup:', setupError);
+                    // Continue anyway - welcome page will handle missing data
+                }
 
                 // Send welcome email
                 try {
