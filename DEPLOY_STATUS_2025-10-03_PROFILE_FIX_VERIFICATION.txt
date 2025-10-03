@@ -1,0 +1,75 @@
+DEPLOYMENT STATUS - PROFILE CREATION FIX
+========================================
+
+Date: 2025-10-03
+Time: 18:00 UTC
+Latest Commit: 7e580ac
+Branch: chore/ai-blueprint-edu-cleanup-20251002-1625
+
+ISSUE IDENTIFIED:
+-----------------
+Previous deployment (commit 488b575) was deploying OLD CODE that still had:
+```
+console.log('⏭️ Skipping manual profile creation (webhook will handle it)');
+```
+
+This is why users were still getting 406 errors even after I "fixed" it.
+
+ROOT CAUSE:
+The code fix (commit a780ca4) was in the git history but Vercel was somehow
+deploying an older version. This created confusion where locally the code
+looked correct but production was running old code.
+
+RESOLUTION:
+Created empty commit (7e580ac) to force Vercel to do a fresh deployment
+with the correct code that includes profile creation.
+
+WHAT THE FIX DOES:
+------------------
+When a user signs up, the system now immediately:
+
+1. Creates Institution
+   - Uses organization name or email domain
+   - Unique slug to avoid conflicts
+   - Default values for headcount, budget, type
+
+2. Creates Institution Membership  
+   - Links user to institution
+   - Assigns admin role
+   - Activates membership
+
+3. Creates User Profile
+   - All signup data included
+   - 7-day trial configured
+   - Proper timestamps
+
+CODE LOCATION:
+app/get-started/page.tsx (lines ~136-195)
+
+VERIFICATION STEPS:
+-------------------
+After deployment completes, verify:
+
+1. Sign up with new email
+2. Check browser console - should see:
+   ✓ "📝 Creating user profile and institution..."
+   ✓ "✅ Institution created: <id>"
+   ✓ "✅ Institution membership created"
+   ✓ "✅ Profile created"
+   
+3. Should NOT see:
+   ✗ "⏭️ Skipping manual profile creation (webhook will handle it)"
+   ✗ 406 errors
+   ✗ "No institution membership found"
+
+4. User should smoothly proceed to dashboard
+
+EXPECTED BEHAVIOR:
+------------------
+Signup → Welcome (with profile ready) → Dashboard
+No 406 errors, no retry loops, no getting stuck
+
+DEPLOYMENT URL:
+https://aiblueprint.educationaiblueprint.com
+
+This should be the FINAL fix that actually works in production.
