@@ -251,6 +251,26 @@ export default function StreamlinedAssessment() {
         activity_data: formData,
       });
 
+      // Send assessment completion email
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          const userMetadata = user.user_metadata || {};
+          await fetch('/api/email/assessment-complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user.email,
+              name: userMetadata.name || formData.contactName,
+              organization: userMetadata.organization || 'Your Institution',
+              assessmentData: formData,
+            }),
+          });
+        }
+      } catch (emailError) {
+        console.error('Failed to send assessment completion email:', emailError);
+      }
+
       // Redirect to dashboard after assessment completion
       router.push('/dashboard/personalized');
     } catch (error) {
@@ -341,8 +361,8 @@ export default function StreamlinedAssessment() {
                         key={type.value}
                         onClick={() => setFormData({ ...formData, institutionType: type.value })}
                         className={`p-4 border-2 rounded-lg text-left transition-all ${formData.institutionType === type.value
-                            ? 'border-indigo-600 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-indigo-600 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <div className="text-2xl mb-2">{type.icon}</div>
@@ -393,8 +413,8 @@ export default function StreamlinedAssessment() {
                         key={stage.value}
                         onClick={() => setFormData({ ...formData, aiJourneyStage: stage.value })}
                         className={`w-full p-4 border-2 rounded-lg text-left transition-all ${formData.aiJourneyStage === stage.value
-                            ? 'border-indigo-600 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-indigo-600 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <div className="font-semibold">{stage.label}</div>
@@ -438,8 +458,8 @@ export default function StreamlinedAssessment() {
                           formData.topPriorities.length >= 3
                         }
                         className={`p-4 border-2 rounded-lg text-left transition-all ${formData.topPriorities.includes(priority.value)
-                            ? 'border-indigo-600 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed'
+                          ? 'border-indigo-600 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed'
                           }`}
                       >
                         <div className="flex items-start gap-3">
@@ -467,8 +487,8 @@ export default function StreamlinedAssessment() {
                         key={timeline.value}
                         onClick={() => setFormData({ ...formData, implementationTimeline: timeline.value })}
                         className={`w-full p-4 border-2 rounded-lg text-left transition-all ${formData.implementationTimeline === timeline.value
-                            ? 'border-indigo-600 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-indigo-600 bg-indigo-50'
+                          : 'border-gray-200 hover:border-gray-300'
                           }`}
                       >
                         <span className="mr-3">{timeline.icon}</span>

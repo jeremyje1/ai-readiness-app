@@ -140,6 +140,24 @@ export default function GetStartedPage() {
                 // This avoids race conditions and duplicate key errors
                 console.log('⏭️ Skipping manual profile creation (webhook will handle it)');
 
+                // Send welcome email
+                try {
+                    console.log('📧 Sending welcome email...');
+                    await fetch('/api/email/welcome', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: formData.email,
+                            name: formData.name,
+                            organization: formData.organization,
+                            institutionType: institutionType,
+                        }),
+                    });
+                } catch (emailError) {
+                    console.error('Failed to send welcome email:', emailError);
+                    // Don't block signup if email fails
+                }
+
                 // Navigate to welcome page immediately
                 console.log('🎉 Redirecting to welcome page...');
                 console.log('🔍 Current URL:', window.location.href);
