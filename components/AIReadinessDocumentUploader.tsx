@@ -15,7 +15,7 @@ import {
   Upload,
   X
 } from 'lucide-react';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface UploadedDocument {
   id: string;
@@ -63,7 +63,7 @@ export default function AIReadinessDocumentUploader({
         setIsRealAnalysisAvailable(false);
       }
     };
-    
+
     checkAnalysisAvailability();
   }, []);
 
@@ -142,18 +142,18 @@ export default function AIReadinessDocumentUploader({
       try {
         const formData = new FormData();
         formData.append('file', file);
-        
+
         const response = await fetch('/api/documents/analyze', {
           method: 'POST',
           body: formData
         });
-        
+
         if (!response.ok) {
           const error = await response.json();
           console.error('Analysis API error:', error);
           throw new Error(error.error || 'Analysis failed');
         }
-        
+
         const result = await response.json();
         return result.analysis;
       } catch (error) {
@@ -164,7 +164,7 @@ export default function AIReadinessDocumentUploader({
 
     // Mock analysis for demo/free users
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
-    
+
     const fileName = file.name.toLowerCase();
     let documentType = 'general_document';
 
@@ -477,7 +477,7 @@ export default function AIReadinessDocumentUploader({
 
             <div className="mt-4">
               <p className="text-sm text-green-700">
-                {isRealAnalysisAvailable 
+                {isRealAnalysisAvailable
                   ? 'AI-powered analysis using GPT-4 to extract document content and identify AI readiness opportunities aligned with NIST framework.'
                   : 'Demo analysis based on document titles. Full AI-powered analysis extracts content and provides deep insights for subscribers.'
                 }
