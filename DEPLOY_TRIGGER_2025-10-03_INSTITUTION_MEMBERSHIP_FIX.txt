@@ -1,0 +1,51 @@
+DEPLOYMENT TRIGGER - INSTITUTION MEMBERSHIP FIX
+==============================================
+
+Date: 2025-10-03
+Time: 17:38 UTC
+Branch: chore/ai-blueprint-edu-cleanup-20251002-1625
+Author: Jeremy Estrella
+
+FIX SUMMARY:
+------------
+Fixed 406 errors on welcome page caused by missing institution membership for new users.
+
+ERROR OBSERVED:
+- "No institution membership found for user"
+- 406 Not Acceptable errors when loading profile
+- Welcome page stuck in retry loop
+
+ROOT CAUSE:
+The system expects all users to have an institution membership, but new signups
+don't have one created automatically.
+
+SOLUTION IMPLEMENTED:
+1. Welcome page now checks for existing institution membership
+2. If none exists, automatically creates:
+   - A new institution based on user's email domain or metadata
+   - An institution membership with admin role
+3. Then creates the user profile with all required fields
+
+CHANGES MADE:
+- app/welcome/page.tsx - Added institution and membership creation logic
+
+USER FLOW:
+1. User signs up
+2. Redirected to welcome page
+3. System creates institution & membership if needed
+4. Profile is created
+5. User can continue to tour or skip to dashboard
+
+TESTING NOTES:
+1. Sign up with a new account
+2. Verify no 406 errors on welcome page
+3. Check that institution is created in database
+4. Verify user can progress past welcome page
+
+ALL FIXES IN THIS DEPLOYMENT:
+1. Welcome page infinite loop fix
+2. Build failures fixed (OpenAI & Stripe)  
+3. Assessment flow fixed with document upload
+4. Institution membership auto-creation
+
+DEPLOYMENT URL: https://aiblueprint.educationaiblueprint.com
