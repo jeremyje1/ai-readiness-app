@@ -42,6 +42,7 @@ export default function AssessmentUploadDocumentsPage() {
     };
 
     const handleDocumentsAnalyzed = (documents: any[]) => {
+        console.log('📄 Documents analyzed:', documents.length, 'documents');
         setUploadedFiles(documents);
     };
 

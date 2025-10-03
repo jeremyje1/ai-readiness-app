@@ -113,9 +113,10 @@ export default function AIReadinessDocumentUploader({
 
     setIsAnalyzing(false);
     
-    // Notify parent component
+    // Notify parent component with ALL documents (both uploaded and analyzed)
     const updatedDocuments = documents.concat(newDocuments);
-    onDocumentsAnalyzed(updatedDocuments.filter(d => d.status === 'analyzed'));
+    setDocuments(updatedDocuments);
+    onDocumentsAnalyzed(updatedDocuments);
   };
 
   const analyzeDocument = async (file: File): Promise<UploadedDocument['analysis']> => {
@@ -235,7 +236,9 @@ export default function AIReadinessDocumentUploader({
   };
 
   const removeDocument = (id: string) => {
-    setDocuments(prev => prev.filter(d => d.id !== id));
+    const updatedDocuments = documents.filter(d => d.id !== id);
+    setDocuments(updatedDocuments);
+    onDocumentsAnalyzed(updatedDocuments);
   };
 
   const getFileIcon = (type: string) => {
