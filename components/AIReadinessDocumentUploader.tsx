@@ -373,7 +373,7 @@ export default function AIReadinessDocumentUploader({
                           {doc.status === 'analyzed' && doc.analysis && (
                             <div className="space-y-2">
                               <p className="text-xs text-green-600 font-medium">
-                                Analysis complete • {doc.analysis.confidenceScore}% confidence
+                                Demo analysis • {doc.analysis.confidenceScore}% match
                               </p>
                               <div className="text-xs text-gray-600">
                                 <p><strong>Type:</strong> {doc.analysis.documentType}</p>
@@ -408,6 +408,7 @@ export default function AIReadinessDocumentUploader({
           <Card className="p-6 bg-green-50 border-green-200">
             <h4 className="text-lg font-semibold text-green-900 mb-4">
               Document Analysis Summary
+              <span className="text-xs font-normal text-green-700 ml-2">(Demo)</span>
             </h4>
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -437,8 +438,8 @@ export default function AIReadinessDocumentUploader({
 
             <div className="mt-4">
               <p className="text-sm text-green-700">
-                Your documents have been analyzed and will enhance your AI readiness assessment
-                with strategic context and alignment recommendations.
+                Demo analysis based on document titles. Full AI-powered analysis extracts content 
+                and provides deep insights for subscribers.
               </p>
             </div>
           </Card>
