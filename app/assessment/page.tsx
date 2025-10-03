@@ -71,6 +71,7 @@ const TIMELINES = [
 
 export default function StreamlinedAssessment() {
   const router = useRouter();
+  const supabase = createClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -96,8 +97,6 @@ export default function StreamlinedAssessment() {
   }, []);
 
   const checkUser = async () => {
-    const supabase = createClient();
-
     const waitForAuthenticatedUser = () =>
       new Promise<User | null>((resolve) => {
         let resolved = false;
@@ -225,7 +224,6 @@ export default function StreamlinedAssessment() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const supabase = createClient();
       await supabase
         .from('streamlined_assessment_responses')
         .upsert({
@@ -253,8 +251,8 @@ export default function StreamlinedAssessment() {
         activity_data: formData,
       });
 
-      // Redirect to document upload
-      router.push('/assessment/upload-documents');
+      // Redirect to dashboard after assessment completion
+      router.push('/dashboard/personalized');
     } catch (error) {
       console.error('Error submitting assessment:', error);
       alert('Failed to save assessment. Please try again.');
