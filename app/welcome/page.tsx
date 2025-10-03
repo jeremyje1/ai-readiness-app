@@ -65,10 +65,38 @@ export default function WelcomePage() {
                 attempts++;
             }
 
-            // If profile still doesn't exist after retries, create a minimal one
-            console.log('⚠️ Profile not found after retries, proceeding without profile or redirecting to dashboard');
-            // Redirect to dashboard which will handle profile creation
-            router.push('/dashboard/personalized');
+            // If profile still doesn't exist after retries, create one
+            console.log('⚠️ Profile not found after retries, creating minimal profile...');
+            const { data: newProfile, error: createError } = await supabase
+                .from('user_profiles')
+                .insert({
+                    id: user.id,
+                    email: user.email,
+                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+                    organization: user.user_metadata?.organization || '',
+                    institution_type: user.user_metadata?.institution_type || 'K12',
+                    title: user.user_metadata?.title || '',
+                    phone: user.user_metadata?.phone || '',
+                    subscription_tier: 'trial',
+                    subscription_status: 'trialing',
+                    trial_ends_at: user.user_metadata?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (newProfile) {
+                console.log('✅ Profile created:', newProfile);
+                setProfile(newProfile);
+            } else {
+                console.error('❌ Failed to create profile:', createError);
+                // Continue without profile data
+                setProfile({
+                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+                    organization: user.user_metadata?.organization || ''
+                });
+            }
         };
         loadUser();
     }, [router]);
@@ -217,10 +245,17 @@ export default function WelcomePage() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-3">
                             <Button onClick={handleStepAction} size="lg" className="w-full">
                                 {onboardingSteps[currentStep].action}
                                 <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                            <Button 
+                                onClick={skipToChDashboard} 
+                                variant="ghost" 
+                                className="w-full"
+                            >
+                                Skip Tour → Go to Dashboard
                             </Button>
                         </CardContent>
                     </Card>

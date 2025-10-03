@@ -4,27 +4,27 @@ import { NextResponse } from 'next/server';
 const ADMIN_EMAIL = 'info@northpathstrategies.org';
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { email, name, organization, assessmentData } = body;
+    try {
+        const body = await request.json();
+        const { email, name, organization, assessmentData } = body;
 
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
-    }
+        if (!email) {
+            return NextResponse.json(
+                { error: 'Email is required' },
+                { status: 400 }
+            );
+        }
 
-    // Send customer email
-    await sendAssessmentCompletionEmail({
-      email,
-      name: name || '',
-      organization: organization || '',
-      assessmentData,
-    });
+        // Send customer email
+        await sendAssessmentCompletionEmail({
+            email,
+            name: name || '',
+            organization: organization || '',
+            assessmentData,
+        });
 
-    // Send admin notification
-    const adminHtml = `
+        // Send admin notification
+        const adminHtml = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -75,18 +75,18 @@ export async function POST(request: Request) {
       </html>
     `;
 
-    await sendEmail({
-      to: ADMIN_EMAIL,
-      subject: `Assessment Completed: ${organization || email}`,
-      html: adminHtml,
-    });
+        await sendEmail({
+            to: ADMIN_EMAIL,
+            subject: `Assessment Completed: ${organization || email}`,
+            html: adminHtml,
+        });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error in assessment completion email endpoint:', error);
-    return NextResponse.json(
-      { error: 'Failed to send assessment completion email' },
-      { status: 500 }
-    );
-  }
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error in assessment completion email endpoint:', error);
+        return NextResponse.json(
+            { error: 'Failed to send assessment completion email' },
+            { status: 500 }
+        );
+    }
 }

@@ -5,57 +5,57 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@northpathstrategies.org';
 const MESSAGE_STREAM = process.env.POSTMARK_MESSAGE_STREAM || 'aiblueprint-transactional';
 
 interface EmailData {
-  to: string;
-  subject: string;
-  html: string;
-  text?: string;
+    to: string;
+    subject: string;
+    html: string;
+    text?: string;
 }
 
 export async function sendEmail({ to, subject, html, text }: EmailData) {
-  try {
-    const response = await fetch(POSTMARK_API_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-Postmark-Server-Token': POSTMARK_TOKEN,
-      },
-      body: JSON.stringify({
-        From: FROM_EMAIL,
-        To: to,
-        Subject: subject,
-        HtmlBody: html,
-        TextBody: text,
-        MessageStream: MESSAGE_STREAM,
-      }),
-    });
+    try {
+        const response = await fetch(POSTMARK_API_URL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Postmark-Server-Token': POSTMARK_TOKEN,
+            },
+            body: JSON.stringify({
+                From: FROM_EMAIL,
+                To: to,
+                Subject: subject,
+                HtmlBody: html,
+                TextBody: text,
+                MessageStream: MESSAGE_STREAM,
+            }),
+        });
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('Postmark API error:', error);
-      throw new Error(`Failed to send email: ${error.Message || response.statusText}`);
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Postmark API error:', error);
+            throw new Error(`Failed to send email: ${error.Message || response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('Email sent successfully:', result.MessageID);
+        return result;
+    } catch (error) {
+        console.error('Failed to send email:', error);
+        throw error;
     }
-
-    const result = await response.json();
-    console.log('Email sent successfully:', result.MessageID);
-    return result;
-  } catch (error) {
-    console.error('Failed to send email:', error);
-    throw error;
-  }
 }
 
 export async function sendWelcomeEmail(userData: {
-  email: string;
-  name: string;
-  organization: string;
-  institutionType: string;
-  assessmentData?: any;
+    email: string;
+    name: string;
+    organization: string;
+    institutionType: string;
+    assessmentData?: any;
 }) {
-  const { email, name, organization, institutionType, assessmentData } = userData;
+    const { email, name, organization, institutionType, assessmentData } = userData;
 
-  // Customer welcome email
-  const customerHtml = `
+    // Customer welcome email
+    const customerHtml = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -126,8 +126,8 @@ export async function sendWelcomeEmail(userData: {
     </html>
   `;
 
-  // Admin notification email
-  const adminHtml = `
+    // Admin notification email
+    const adminHtml = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -171,40 +171,40 @@ export async function sendWelcomeEmail(userData: {
     </html>
   `;
 
-  // Send both emails
-  const emailPromises = [
-    // Customer email
-    sendEmail({
-      to: email,
-      subject: 'Welcome to AI Blueprint for Education - Your AI Transformation Journey Begins!',
-      html: customerHtml,
-    }),
-    // Admin notification
-    sendEmail({
-      to: ADMIN_EMAIL,
-      subject: `New AI Blueprint Sign-up: ${organization || email}`,
-      html: adminHtml,
-    }),
-  ];
+    // Send both emails
+    const emailPromises = [
+        // Customer email
+        sendEmail({
+            to: email,
+            subject: 'Welcome to AI Blueprint for Education - Your AI Transformation Journey Begins!',
+            html: customerHtml,
+        }),
+        // Admin notification
+        sendEmail({
+            to: ADMIN_EMAIL,
+            subject: `New AI Blueprint Sign-up: ${organization || email}`,
+            html: adminHtml,
+        }),
+    ];
 
-  try {
-    await Promise.all(emailPromises);
-    console.log('Welcome emails sent successfully');
-  } catch (error) {
-    console.error('Error sending welcome emails:', error);
-    // Don't throw - we don't want email failures to break the signup flow
-  }
+    try {
+        await Promise.all(emailPromises);
+        console.log('Welcome emails sent successfully');
+    } catch (error) {
+        console.error('Error sending welcome emails:', error);
+        // Don't throw - we don't want email failures to break the signup flow
+    }
 }
 
 export async function sendAssessmentCompletionEmail(userData: {
-  email: string;
-  name: string;
-  organization: string;
-  assessmentData: any;
+    email: string;
+    name: string;
+    organization: string;
+    assessmentData: any;
 }) {
-  const { email, name, organization, assessmentData } = userData;
+    const { email, name, organization, assessmentData } = userData;
 
-  const html = `
+    const html = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -256,13 +256,13 @@ export async function sendAssessmentCompletionEmail(userData: {
     </html>
   `;
 
-  try {
-    await sendEmail({
-      to: email,
-      subject: 'Your AI Blueprint Assessment Results Are Ready!',
-      html: html,
-    });
-  } catch (error) {
-    console.error('Error sending assessment completion email:', error);
-  }
+    try {
+        await sendEmail({
+            to: email,
+            subject: 'Your AI Blueprint Assessment Results Are Ready!',
+            html: html,
+        });
+    } catch (error) {
+        console.error('Error sending assessment completion email:', error);
+    }
 }
