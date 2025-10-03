@@ -144,9 +144,9 @@ export default function GetStartedPage() {
                     const orgName = formData.organization || formData.email.split('@')[1]?.split('.')[0] || 'My Institution';
                     // institutions.org_type is just TEXT, no constraint - can use any value
                     const orgType = institutionType; // Use as-is
-                    
+
                     console.log('🏫 Institution type:', institutionType);
-                    
+
                     const { data: institution, error: instError } = await supabase
                         .from('institutions')
                         .insert({
@@ -181,7 +181,7 @@ export default function GetStartedPage() {
                     // Create or update user profile (trigger may have already created it)
                     const trialEndsAt = new Date();
                     trialEndsAt.setDate(trialEndsAt.getDate() + 7);
-                    
+
                     // user_profiles table expects: 'K12', 'HigherEd', 'District', 'University', 'Community College', 'Trade School', 'default'
                     const profileInstType = institutionType; // Use as-is: 'K12' or 'HigherEd'
 

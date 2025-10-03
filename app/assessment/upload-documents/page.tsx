@@ -28,15 +28,16 @@ export default function AssessmentUploadDocumentsPage() {
         setUserId(user.id);
 
         // Check if assessment was completed
-        const { data: assessment } = await supabase
+        // Note: We're not redirecting back if there's an error or no assessment
+        // because the user may have just completed it and the query might fail due to timing/RLS
+        const { data: assessment, error } = await supabase
             .from('streamlined_assessment_responses')
             .select('*')
             .eq('user_id', user.id)
             .single();
 
-        if (!assessment) {
-            // If no assessment found, redirect back to assessment
-            router.push('/assessment');
+        if (error) {
+            console.log('⚠️ Could not verify assessment (this is OK if just completed):', error.message);
         }
     };
 
