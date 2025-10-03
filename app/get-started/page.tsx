@@ -152,11 +152,9 @@ export default function GetStartedPage() {
                         .insert({
                             name: orgName,
                             slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
-                            headcount: '100-500',
-                            budget: 'Under $1M',
-                            org_type: orgType,
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
+                            headcount: 500, // Integer, not string
+                            budget: 1000000, // Decimal(15,2), not string
+                            org_type: orgType
                         })
                         .select()
                         .single();
@@ -190,18 +188,16 @@ export default function GetStartedPage() {
                     const { error: profileError } = await supabase
                         .from('user_profiles')
                         .insert({
-                            id: authData.user.id,
+                            user_id: authData.user.id,
                             email: formData.email,
-                            name: formData.name || formData.email.split('@')[0],
-                            organization: formData.organization || '',
+                            full_name: formData.name || formData.email.split('@')[0],
+                            institution_name: formData.organization || '',
                             institution_type: profileInstType,
-                            title: formData.title || '',
+                            job_title: formData.title || '',
                             phone: formData.phone || '',
                             subscription_tier: 'trial',
-                            subscription_status: 'trialing',
-                            trial_ends_at: trialEndsAt.toISOString(),
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
+                            subscription_status: 'trial',
+                            trial_ends_at: trialEndsAt.toISOString()
                         });
 
                     if (profileError) {
