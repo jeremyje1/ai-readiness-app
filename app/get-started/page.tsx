@@ -142,6 +142,11 @@ export default function GetStartedPage() {
                 try {
                     // Create institution first
                     const orgName = formData.organization || formData.email.split('@')[1]?.split('.')[0] || 'My Institution';
+                    // Convert institutionType to match database enum
+                    const orgType = institutionType === 'K12' ? 'K-12' : institutionType === 'HigherEd' ? 'higher_ed' : 'K-12';
+                    
+                    console.log('🏫 Institution type:', institutionType, '→', orgType);
+                    
                     const { data: institution, error: instError } = await supabase
                         .from('institutions')
                         .insert({
@@ -149,7 +154,7 @@ export default function GetStartedPage() {
                             slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
                             headcount: '100-500',
                             budget: 'Under $1M',
-                            org_type: institutionType,
+                            org_type: orgType,
                             created_at: new Date().toISOString(),
                             updated_at: new Date().toISOString()
                         })
@@ -157,7 +162,7 @@ export default function GetStartedPage() {
                         .single();
 
                     if (instError) {
-                        console.error('Failed to create institution:', instError);
+                        console.error('❌ Failed to create institution:', instError.message, instError.details, instError.hint);
                     } else if (institution) {
                         console.log('✅ Institution created:', institution.id);
 
@@ -178,6 +183,9 @@ export default function GetStartedPage() {
                     // Create user profile
                     const trialEndsAt = new Date();
                     trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+                    
+                    // Convert institutionType for profile
+                    const profileInstType = institutionType === 'K12' ? 'K-12' : institutionType === 'HigherEd' ? 'higher_ed' : 'K-12';
 
                     const { error: profileError } = await supabase
                         .from('user_profiles')
@@ -186,7 +194,7 @@ export default function GetStartedPage() {
                             email: formData.email,
                             name: formData.name || formData.email.split('@')[0],
                             organization: formData.organization || '',
-                            institution_type: institutionType,
+                            institution_type: profileInstType,
                             title: formData.title || '',
                             phone: formData.phone || '',
                             subscription_tier: 'trial',
@@ -197,7 +205,7 @@ export default function GetStartedPage() {
                         });
 
                     if (profileError) {
-                        console.error('Failed to create profile:', profileError);
+                        console.error('❌ Failed to create profile:', profileError.message, profileError.details, profileError.hint);
                     } else {
                         console.log('✅ Profile created');
                     }
