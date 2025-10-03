@@ -1,6 +1,6 @@
 'use client';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -17,6 +17,7 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
     const [needsSetup, setNeedsSetup] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
+    const supabase = createClient();
 
     // Don't check on auth-related pages and public pages to avoid redirect loops
     const publicPaths = ['/auth/', '/login', '/get-started', '/pricing', '/privacy', '/terms', '/contact', '/welcome'];

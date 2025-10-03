@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
 import {
     ArrowRight,
@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 
 export default function WelcomePage() {
     const router = useRouter();
+    const supabase = createClient();
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState(0);

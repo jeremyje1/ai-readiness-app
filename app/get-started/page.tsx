@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
 import {
     AlertCircle,
@@ -24,6 +24,7 @@ import { useEffect, useState } from 'react';
 
 export default function GetStartedPage() {
     const router = useRouter();
+    const supabase = createClient();
 
     // Form state
     const [institutionType, setInstitutionType] = useState<'K12' | 'HigherEd'>('K12');

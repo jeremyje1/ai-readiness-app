@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ export default function AuthNav() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const supabase = createClient();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
