@@ -4,9 +4,12 @@ import { NextResponse } from 'next/server';
 const ADMIN_EMAIL = 'info@northpathstrategies.org';
 
 export async function POST(request: Request) {
+    console.log('📧 Assessment completion email endpoint called');
     try {
         const body = await request.json();
         const { email, name, organization, assessmentData } = body;
+
+        console.log('📧 Assessment completion email request:', { email, name, organization });
 
         if (!email) {
             return NextResponse.json(
@@ -15,13 +18,19 @@ export async function POST(request: Request) {
             );
         }
 
-        // Send customer email
-        await sendAssessmentCompletionEmail({
-            email,
-            name: name || '',
-            organization: organization || '',
-            assessmentData,
-        });
+        // Send customer email - wrap in try-catch to prevent blocking
+        try {
+            await sendAssessmentCompletionEmail({
+                email,
+                name: name || '',
+                organization: organization || '',
+                assessmentData: assessmentData || {},
+            });
+            console.log('✅ Assessment completion email sent to user');
+        } catch (emailError) {
+            console.error('⚠️ Failed to send assessment completion email to user:', emailError);
+            // Don't fail the entire request if user email fails
+        }
 
         // Send admin notification
         const adminHtml = `
@@ -75,18 +84,26 @@ export async function POST(request: Request) {
       </html>
     `;
 
-        await sendEmail({
-            to: ADMIN_EMAIL,
-            subject: `Assessment Completed: ${organization || email}`,
-            html: adminHtml,
-        });
+        try {
+            await sendEmail({
+                to: ADMIN_EMAIL,
+                subject: `Assessment Completed: ${organization || email}`,
+                html: adminHtml,
+            });
+            console.log('✅ Admin notification email sent');
+        } catch (adminEmailError) {
+            console.error('⚠️ Failed to send admin notification email:', adminEmailError);
+            // Don't fail the entire request if admin email fails
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error in assessment completion email endpoint:', error);
-        return NextResponse.json(
-            { error: 'Failed to send assessment completion email' },
-            { status: 500 }
-        );
+        console.error('❌ Error in assessment completion email endpoint:', error);
+        // Return success anyway since the assessment is saved
+        // Email failures shouldn't block the user
+        return NextResponse.json({ 
+            success: true,
+            warning: 'Assessment saved but email notification may have failed'
+        });
     }
 }

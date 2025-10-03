@@ -251,24 +251,22 @@ export default function StreamlinedAssessment() {
         activity_data: formData,
       });
 
-      // Send assessment completion email
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email) {
-          const userMetadata = user.user_metadata || {};
-          await fetch('/api/email/assessment-complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: user.email,
-              name: userMetadata.name || formData.contactName,
-              organization: userMetadata.organization || 'Your Institution',
-              assessmentData: formData,
-            }),
-          });
-        }
-      } catch (emailError) {
-        console.error('Failed to send assessment completion email:', emailError);
+      // Send assessment completion email (fire and forget - don't block redirect)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        const userMetadata = user.user_metadata || {};
+        fetch('/api/email/assessment-complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email,
+            name: userMetadata.name || formData.contactName,
+            organization: userMetadata.organization || 'Your Institution',
+            assessmentData: formData,
+          }),
+        }).catch(emailError => {
+          console.error('⚠️ Failed to send assessment completion email (non-blocking):', emailError);
+        });
       }
 
       // Redirect to document upload after assessment completion
