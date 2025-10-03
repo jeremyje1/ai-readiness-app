@@ -178,7 +178,7 @@ export default function GetStartedPage() {
                         console.log('✅ Institution membership created');
                     }
 
-                    // Create user profile
+                    // Create or update user profile (trigger may have already created it)
                     const trialEndsAt = new Date();
                     trialEndsAt.setDate(trialEndsAt.getDate() + 7);
                     
@@ -187,21 +187,25 @@ export default function GetStartedPage() {
 
                     const { error: profileError } = await supabase
                         .from('user_profiles')
-                        .insert({
+                        .upsert({
                             user_id: authData.user.id,
                             email: formData.email,
                             full_name: formData.name || formData.email.split('@')[0],
+                            institution_id: institution?.id || null,
                             institution_name: formData.organization || '',
                             institution_type: profileInstType,
                             job_title: formData.title || '',
                             phone: formData.phone || '',
                             subscription_tier: 'trial',
                             subscription_status: 'trial',
-                            trial_ends_at: trialEndsAt.toISOString()
+                            trial_ends_at: trialEndsAt.toISOString(),
+                            onboarding_completed: false
+                        }, {
+                            onConflict: 'user_id'
                         });
 
                     if (profileError) {
-                        console.error('❌ Failed to create profile:', profileError.message, profileError.details, profileError.hint);
+                        console.error('❌ Failed to upsert profile:', profileError.message, profileError.details, profileError.hint);
                     } else {
                         console.log('✅ Profile created');
                     }
