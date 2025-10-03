@@ -107,6 +107,10 @@ export default function PersonalizedDashboard() {
       } else if (gapError && gapError.code !== 'PGRST116') {
         // PGRST116 is "no rows returned" which is expected for new users
         console.error('Error loading gap analysis:', gapError);
+        // Don't let 406 errors prevent dashboard access
+        if (gapError.code === '406') {
+          console.log('⚠️ Gap analysis query failed due to auth issue, continuing anyway');
+        }
       }
 
       // Load roadmaps
@@ -182,10 +186,10 @@ export default function PersonalizedDashboard() {
           {/* Welcome Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-3">
-              Welcome to Your AI Readiness Journey! 🎯
+              Welcome to Your Dashboard! 🎯
             </h1>
             <p className="text-xl text-gray-600">
-              Let's build your personalized AI implementation roadmap
+              Your AI readiness analysis is being prepared...
             </p>
           </div>
 
@@ -269,19 +273,19 @@ export default function PersonalizedDashboard() {
                 <div className="flex gap-4 justify-center">
                   <Button
                     size="lg"
-                    onClick={() => router.push('/assessment')}
+                    onClick={() => window.location.reload()}
                     className="bg-indigo-600 hover:bg-indigo-700"
                   >
                     <Target className="h-5 w-5 mr-2" />
-                    Start Assessment
+                    Refresh Dashboard
                   </Button>
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => router.push('/assessment')}
+                    onClick={() => router.push('/dashboard')}
                   >
                     <FileText className="h-5 w-5 mr-2" />
-                    Upload Documents
+                    View Main Dashboard
                   </Button>
                 </div>
                 <p className="text-sm text-gray-500 mt-4">

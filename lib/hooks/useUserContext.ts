@@ -39,7 +39,7 @@ export const useUserContext = () => {
 export const fetchUserInstitution = async (userId: string): Promise<UserInstitution | null> => {
     try {
         const supabase = createClient()
-        
+
         // First, get the user's institution membership
         const { data: membership, error: membershipError } = await supabase
             .from('institution_memberships')
@@ -87,7 +87,7 @@ export const useUser = () => {
 
     useEffect(() => {
         const supabase = createClient()
-        
+
         const loadUserData = async () => {
             try {
                 setLoading(true)

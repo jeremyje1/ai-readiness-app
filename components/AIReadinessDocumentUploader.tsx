@@ -1,21 +1,21 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { 
-  Upload, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle, 
-  X, 
-  Loader2,
-  BookOpen,
-  FileSpreadsheet,
-  Image
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  AlertCircle,
+  BookOpen,
+  CheckCircle,
+  FileSpreadsheet,
+  FileText,
+  Image,
+  Loader2,
+  Upload,
+  X
+} from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 
 interface UploadedDocument {
   id: string;
@@ -85,34 +85,34 @@ export default function AIReadinessDocumentUploader({
 
       try {
         // Update status to processing
-        setDocuments(prev => prev.map(d => 
+        setDocuments(prev => prev.map(d =>
           d.id === document.id ? { ...d, status: 'processing' } : d
         ));
 
         // Simulate file upload and AI analysis
         const analysisResult = await analyzeDocument(file);
 
-        setDocuments(prev => prev.map(d => 
-          d.id === document.id 
+        setDocuments(prev => prev.map(d =>
+          d.id === document.id
             ? { ...d, status: 'analyzed', analysis: analysisResult }
             : d
         ));
 
       } catch (error) {
-        setDocuments(prev => prev.map(d => 
-          d.id === document.id 
-            ? { 
-                ...d, 
-                status: 'error', 
-                error: error instanceof Error ? error.message : 'Analysis failed'
-              }
+        setDocuments(prev => prev.map(d =>
+          d.id === document.id
+            ? {
+              ...d,
+              status: 'error',
+              error: error instanceof Error ? error.message : 'Analysis failed'
+            }
             : d
         ));
       }
     }
 
     setIsAnalyzing(false);
-    
+
     // Notify parent component with ALL documents (both uploaded and analyzed)
     const updatedDocuments = documents.concat(newDocuments);
     setDocuments(updatedDocuments);
@@ -132,7 +132,7 @@ export default function AIReadinessDocumentUploader({
     // Mock analysis based on file name/type
     const fileName = file.name.toLowerCase();
     let documentType = 'general_document';
-    
+
     if (fileName.includes('strategic') || fileName.includes('plan')) {
       documentType = 'strategic_plan';
     } else if (fileName.includes('slo') || fileName.includes('outcome')) {
@@ -260,7 +260,7 @@ export default function AIReadinessDocumentUploader({
   return (
     <div className={cn("w-full", className)}>
       {/* Upload Area */}
-      <Card 
+      <Card
         className={cn(
           "border-2 border-dashed transition-colors cursor-pointer",
           isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
@@ -315,10 +315,10 @@ export default function AIReadinessDocumentUploader({
             <h4 className="text-lg font-semibold text-gray-900">
               Uploaded Documents
             </h4>
-            
+
             {documents.map((doc) => {
               const FileIcon = getFileIcon(doc.type);
-              
+
               return (
                 <motion.div
                   key={doc.id}
@@ -329,7 +329,7 @@ export default function AIReadinessDocumentUploader({
                   <Card className="p-4">
                     <div className="flex items-start space-x-4">
                       <FileIcon className="w-8 h-8 text-blue-600 flex-shrink-0 mt-1" />
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <div>
@@ -340,7 +340,7 @@ export default function AIReadinessDocumentUploader({
                               {formatFileSize(doc.size)}
                             </p>
                           </div>
-                          
+
                           <div className="flex items-center space-x-2">
                             {doc.status === 'uploading' && (
                               <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
@@ -362,7 +362,7 @@ export default function AIReadinessDocumentUploader({
                             </button>
                           </div>
                         </div>
-                        
+
                         <div className="mt-2">
                           {doc.status === 'uploading' && (
                             <p className="text-xs text-blue-600">Uploading...</p>
@@ -409,7 +409,7 @@ export default function AIReadinessDocumentUploader({
             <h4 className="text-lg font-semibold text-green-900 mb-4">
               Document Analysis Summary
             </h4>
-            
+
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <h5 className="text-sm font-medium text-green-800 mb-2">
@@ -419,7 +419,7 @@ export default function AIReadinessDocumentUploader({
                   {documents.filter(d => d.status === 'analyzed').length}
                 </p>
               </div>
-              
+
               <div>
                 <h5 className="text-sm font-medium text-green-800 mb-2">
                   Average Confidence
@@ -434,10 +434,10 @@ export default function AIReadinessDocumentUploader({
                 </p>
               </div>
             </div>
-            
+
             <div className="mt-4">
               <p className="text-sm text-green-700">
-                Your documents have been analyzed and will enhance your AI readiness assessment 
+                Your documents have been analyzed and will enhance your AI readiness assessment
                 with strategic context and alignment recommendations.
               </p>
             </div>

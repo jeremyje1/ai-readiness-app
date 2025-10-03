@@ -101,7 +101,7 @@ export async function POST(request: Request) {
         console.error('❌ Error in assessment completion email endpoint:', error);
         // Return success anyway since the assessment is saved
         // Email failures shouldn't block the user
-        return NextResponse.json({ 
+        return NextResponse.json({
             success: true,
             warning: 'Assessment saved but email notification may have failed'
         });
