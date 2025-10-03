@@ -47,7 +47,7 @@ export default function WelcomePage() {
                 const { data: profileData, error } = await supabase
                     .from('user_profiles')
                     .select('*')
-                    .eq('id', user.id)
+                    .eq('user_id', user.id)
                     .single();
 
                 if (profileData) {
@@ -85,12 +85,10 @@ export default function WelcomePage() {
                     .from('institutions')
                     .insert({
                         name: orgName,
-                        slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                        headcount: '100-500',
-                        budget: 'Under $1M',
-                        org_type: user.user_metadata?.institution_type || 'K12',
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
+                        slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
+                        headcount: 500,
+                        budget: 1000000,
+                        org_type: user.user_metadata?.institution_type || 'K12'
                     })
                     .select()
                     .single();
@@ -105,27 +103,28 @@ export default function WelcomePage() {
                             user_id: user.id,
                             institution_id: institutionId,
                             role: 'admin',
-                            active: true,
-                            created_at: new Date().toISOString()
+                            active: true
                         });
                 }
             }
 
             const { data: newProfile, error: createError } = await supabase
                 .from('user_profiles')
-                .insert({
-                    id: user.id,
+                .upsert({
+                    user_id: user.id,
                     email: user.email,
-                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                    organization: user.user_metadata?.organization || '',
+                    full_name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+                    institution_id: institutionId || null,
+                    institution_name: user.user_metadata?.organization || '',
                     institution_type: user.user_metadata?.institution_type || 'K12',
-                    title: user.user_metadata?.title || '',
+                    job_title: user.user_metadata?.title || '',
                     phone: user.user_metadata?.phone || '',
                     subscription_tier: 'trial',
-                    subscription_status: 'trialing',
+                    subscription_status: 'trial',
                     trial_ends_at: user.user_metadata?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
+                    onboarding_completed: false
+                }, {
+                    onConflict: 'user_id'
                 })
                 .select()
                 .single();
