@@ -2,13 +2,21 @@ import { AI_BLUEPRINT_EDU_PRODUCT } from '@/lib/ai-blueprint-edu-product';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+// Initialize Stripe only if API key is available
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2025-06-30.basil'
-});
+}) : null;
 
 export async function POST(request: NextRequest) {
     try {
+        // Check if Stripe is configured
+        if (!stripe) {
+            return NextResponse.json(
+                { error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.' },
+                { status: 503 }
+            );
+        }
+
         const body = await request.json();
         const { billingPeriod = 'monthly' } = body;
 
@@ -68,6 +76,13 @@ export async function GET(request: NextRequest) {
     const billingPeriod = searchParams.get('billing') || 'monthly';
 
     try {
+        // Check if Stripe is configured
+        if (!stripe) {
+            return NextResponse.json(
+                { error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.' },
+                { status: 503 }
+            );
+        }
         const priceId = billingPeriod === 'yearly'
             ? process.env.STRIPE_PRICE_EDU_YEARLY_1990
             : process.env.STRIPE_PRICE_EDU_MONTHLY_199;
