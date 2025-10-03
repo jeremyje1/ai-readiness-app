@@ -271,8 +271,8 @@ export default function StreamlinedAssessment() {
         console.error('Failed to send assessment completion email:', emailError);
       }
 
-      // Redirect to dashboard after assessment completion
-      router.push('/dashboard/personalized');
+      // Redirect to document upload after assessment completion
+      router.push('/assessment/upload-documents');
     } catch (error) {
       console.error('Error submitting assessment:', error);
       alert('Failed to save assessment. Please try again.');
