@@ -142,10 +142,10 @@ export default function GetStartedPage() {
                 try {
                     // Create institution first
                     const orgName = formData.organization || formData.email.split('@')[1]?.split('.')[0] || 'My Institution';
-                    // Convert institutionType to match database enum
-                    const orgType = institutionType === 'K12' ? 'K-12' : institutionType === 'HigherEd' ? 'higher_ed' : 'K-12';
+                    // institutions.org_type is just TEXT, no constraint - can use any value
+                    const orgType = institutionType; // Use as-is
                     
-                    console.log('🏫 Institution type:', institutionType, '→', orgType);
+                    console.log('🏫 Institution type:', institutionType);
                     
                     const { data: institution, error: instError } = await supabase
                         .from('institutions')
@@ -182,8 +182,8 @@ export default function GetStartedPage() {
                     const trialEndsAt = new Date();
                     trialEndsAt.setDate(trialEndsAt.getDate() + 7);
                     
-                    // Convert institutionType for profile
-                    const profileInstType = institutionType === 'K12' ? 'K-12' : institutionType === 'HigherEd' ? 'higher_ed' : 'K-12';
+                    // user_profiles table expects: 'K12', 'HigherEd', 'District', 'University', 'Community College', 'Trade School', 'default'
+                    const profileInstType = institutionType; // Use as-is: 'K12' or 'HigherEd'
 
                     const { error: profileError } = await supabase
                         .from('user_profiles')
