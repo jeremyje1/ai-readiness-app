@@ -1,0 +1,31 @@
+DEPLOYMENT TRIGGER - CRITICAL WELCOME PAGE FIX
+===========================================
+
+Date: 2025-10-02
+Time: 17:15 UTC
+Branch: chore/ai-blueprint-edu-cleanup-20251002-1625
+Author: Jeremy Estrella
+
+CRITICAL ISSUE FIXED:
+---------------------
+Users have been stuck at the /welcome page for weeks. This deployment fixes the infinite loop.
+
+CHANGES MADE:
+1. Modified welcome page to create profile if missing after retries
+2. Added "Skip Tour" button for immediate dashboard access  
+3. Ensured profile creation with fallback data prevents loops
+4. Fixed profile loading logic to avoid infinite retries
+
+FILES MODIFIED:
+- app/welcome/page.tsx
+
+DEPLOYMENT URGENCY: CRITICAL
+This has been blocking users for weeks and needs immediate deployment.
+
+TESTING NOTES:
+1. After deployment, test signup flow completely
+2. Verify users can progress from welcome to dashboard
+3. Check that profile is created properly
+4. Ensure Skip Tour button works
+
+DEPLOYMENT URL: https://aiblueprint.educationaiblueprint.com
