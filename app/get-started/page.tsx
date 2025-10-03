@@ -135,6 +135,7 @@ export default function GetStartedPage() {
 
             if (authData.user && authData.session) {
                 console.log('✅ Session created automatically');
+                console.log('🔥 CACHE BUST v2 - October 3, 2025 13:45 CST');
 
                 // Create profile immediately (webhook may not be configured)
                 console.log('📝 Creating user profile and institution...');

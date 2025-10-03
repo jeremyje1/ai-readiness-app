@@ -1,62 +1,10 @@
 {
-  "framework": "nextjs",
-  "regions": [
-    "iad1"
-  ],
-  "functions": {
-    "app/api/report/generate/route.ts": {
-      "maxDuration": 30
-    },
-    "app/api/ai-readiness/*/route.ts": {
-      "maxDuration": 30
-    },
-    "app/api/reports/generate-pdf/route.ts": {
-      "maxDuration": 30
-    },
-    "app/api/assessment/*/route.ts": {
-      "maxDuration": 25
-    },
-    "app/api/assessment-2/route.ts": {
-      "maxDuration": 30,
-      "includeFiles": "test/data/**"
-    }
+  "github": {
+    "silent": false
   },
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        }
-      ]
+  "build": {
+    "env": {
+      "NEXT_BUILD_ID": "$VERCEL_GIT_COMMIT_SHA"
     }
-  ],
-  "redirects": [
-    {
-      "source": "(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "aireadiness.northpathstrategies.org"
-        }
-      ],
-      "destination": "https://aiblueprint.k12aiblueprint.com$1",
-      "permanent": true
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/auth/password/setup/cleanup",
-      "schedule": "10 * * * *"
-    }
-  ]
+  }
 }

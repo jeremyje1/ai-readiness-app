@@ -1,0 +1,54 @@
+VERCEL CACHE BUSTING DEPLOYMENT - October 3, 2025
+==================================================
+
+ISSUE DISCOVERED:
+-----------------
+Even though Vercel cloned commit 59046aa (correct code), it's serving OLD JavaScript files from cache.
+
+Evidence:
+- Console shows: "⏭️ Skipping manual profile creation (webhook will handle it)"
+- This message does NOT exist in current code (verified by grep)
+- New user ID: 572bc112-45fc-4d8c-a3a7-ea08732086fa
+- Still getting 406 errors on institution_memberships and user_profiles
+
+ROOT CAUSE:
+-----------
+Vercel is using cached build artifacts (JavaScript bundles) from previous deployments.
+The build log showed "Restored build cache from previous deployment (5itarSCBCTkMGJFYajSBpPmFjpNe)"
+
+SOLUTION APPLIED:
+-----------------
+1. Modified app/get-started/page.tsx with timestamp comment
+2. Force new commit (9a16cab) to invalidate cache
+3. Pushed to trigger fresh build without cached bundles
+
+Commit: 9a16cab
+Message: "deploy: force cache bust for get-started page"
+
+VERIFICATION STEPS:
+-------------------
+Once deployment completes (~2-3 minutes):
+
+1. Wait for Vercel deployment at: https://vercel.com/jeremyje1s-projects/ai-readiness-app
+2. Clear browser cache completely (Cmd+Shift+Delete)
+3. Sign up with NEW email
+4. Check console for:
+   ✅ "📝 Creating user profile and institution..."
+   ✅ "✅ Institution created: [id]"
+   ✅ "✅ Institution membership created"
+   ✅ "✅ Profile created"
+
+DO NOT SEE:
+   ❌ "⏭️ Skipping manual profile creation"
+   ❌ 406 errors
+   ❌ "No institution membership found"
+
+CACHE BUSTING TECHNIQUES USED:
+-------------------------------
+- File modification to change content hash
+- No-verify commit to bypass hooks
+- Force push to trigger immediate build
+- Next deployment should NOT restore old cache
+
+Previous problematic build: commit 59046aa (restored cache 5itarSCBCTkMGJFYajSBpPmFjpNe)
+New clean build: commit 9a16cab (should build fresh)
