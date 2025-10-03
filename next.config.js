@@ -7,6 +7,25 @@ const nextConfig = {
   images: {
     domains: ['images.unsplash.com', 'plus.unsplash.com'],
   },
+  // Generate unique build IDs to prevent cache issues
+  generateBuildId: async () => {
+    // Use git commit SHA or timestamp to ensure unique builds
+    return process.env.VERCEL_GIT_COMMIT_SHA || `build-${Date.now()}`;
+  },
+  // Disable static page optimization for get-started to force fresh rendering
+  async headers() {
+    return [
+      {
+        source: '/get-started',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          },
+        ],
+      },
+    ];
+  },
   // Removed automatic redirect to /ai-readiness - unified domain should handle its own routing
   async redirects() {
     return [];
