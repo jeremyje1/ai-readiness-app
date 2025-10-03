@@ -1,7 +1,7 @@
 'use client'
 
 import { UserInstitution } from '@/lib/hooks/useUserContext'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
 
 export interface InstitutionSetupData {
@@ -19,6 +19,8 @@ export const useInstitutionSetup = () => {
         try {
             setLoading(true)
             setError(null)
+
+            const supabase = createClient()
 
             // Create slug from name
             const slug = data.name.toLowerCase()
