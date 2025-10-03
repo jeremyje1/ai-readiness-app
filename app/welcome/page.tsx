@@ -67,6 +67,50 @@ export default function WelcomePage() {
 
             // If profile still doesn't exist after retries, create one
             console.log('⚠️ Profile not found after retries, creating minimal profile...');
+            
+            // First, check if user has an institution
+            const { data: existingMembership } = await supabase
+                .from('institution_memberships')
+                .select('*, institutions(*)')
+                .eq('user_id', user.id)
+                .eq('active', true)
+                .single();
+
+            let institutionId = existingMembership?.institution_id;
+
+            // If no institution, create a default one for the user
+            if (!institutionId) {
+                const orgName = user.user_metadata?.organization || user.email?.split('@')[1]?.split('.')[0] || 'My Institution';
+                const { data: newInstitution } = await supabase
+                    .from('institutions')
+                    .insert({
+                        name: orgName,
+                        slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                        headcount: '100-500',
+                        budget: 'Under $1M',
+                        org_type: user.user_metadata?.institution_type || 'K12',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    })
+                    .select()
+                    .single();
+
+                if (newInstitution) {
+                    institutionId = newInstitution.id;
+                    
+                    // Create membership
+                    await supabase
+                        .from('institution_memberships')
+                        .insert({
+                            user_id: user.id,
+                            institution_id: institutionId,
+                            role: 'admin',
+                            active: true,
+                            created_at: new Date().toISOString()
+                        });
+                }
+            }
+
             const { data: newProfile, error: createError } = await supabase
                 .from('user_profiles')
                 .insert({
