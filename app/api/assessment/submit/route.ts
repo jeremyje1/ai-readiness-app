@@ -2,9 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
+// Initialize OpenAI client only if API key is available
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
-});
+}) : null;
 
 // Scoring: 0=0 points, 1=1 point, 2=2 points, 3=3 points
 function calculateScores(answers: Record<number, number>) {
@@ -86,6 +87,26 @@ Format:
 [Top 3 priorities based on lowest scoring areas]
 
 Keep it practical, specific, and actionable. Focus on the lowest-scoring categories for quick improvements.`;
+
+        if (!openai) {
+            // Return a fallback roadmap when OpenAI is not configured
+            return `# AI Readiness Roadmap
+
+Based on your assessment scores:
+- GOVERN: ${scores.GOVERN.percentage}%
+- MAP: ${scores.MAP.percentage}% 
+- MEASURE: ${scores.MEASURE.percentage}%
+- MANAGE: ${scores.MANAGE.percentage}%
+
+## Next Steps
+1. Focus on improving your lowest scoring areas first
+2. Develop comprehensive AI governance policies
+3. Map your AI systems and data flows
+4. Establish measurement and monitoring processes
+5. Implement risk management procedures
+
+For detailed recommendations, please ensure OpenAI API is configured.`;
+        }
 
         const completion = await openai.chat.completions.create({
             model: 'gpt-4o',
