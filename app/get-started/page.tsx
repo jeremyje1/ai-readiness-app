@@ -158,7 +158,7 @@ export default function GetStartedPage() {
 
                 // Create profile immediately (webhook may not be configured)
                 console.log('📝 Creating user profile and institution...');
-                
+
                 // Wrap profile creation in timeout to prevent hang
                 const profileCreationPromise = (async () => {
                     // Create institution first
