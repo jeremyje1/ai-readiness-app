@@ -12,13 +12,6 @@ const nextConfig = {
     // Use git commit SHA or timestamp to ensure unique builds
     return process.env.VERCEL_GIT_COMMIT_SHA || `build-${Date.now()}`;
   },
-  // Force webpack to generate new chunk hashes
-  webpack: (config, { buildId }) => {
-    // Add build ID to output filename to force new chunks
-    config.output.filename = config.output.filename.replace('[name]', `[name]-${buildId}`);
-    config.output.chunkFilename = config.output.chunkFilename.replace('[name]', `[name]-${buildId}`);
-    return config;
-  },
   // Disable static page optimization for get-started to force fresh rendering
   async headers() {
     return [
