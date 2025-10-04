@@ -78,7 +78,7 @@ export default function PersonalizedDashboard() {
     try {
       console.log('🔄 Loading dashboard data...');
       console.log('⏰ Timestamp:', new Date().toISOString());
-      
+
       // Add timeout for authentication check (increased to 15 seconds)
       const authTimeout = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Authentication timeout')), 15000)
@@ -87,7 +87,7 @@ export default function PersonalizedDashboard() {
       // Check authentication with timeout
       const authPromise = supabase.auth.getUser();
       let user, authError;
-      
+
       try {
         const result: any = await Promise.race([authPromise, authTimeout]);
         user = result.data?.user;
@@ -105,12 +105,12 @@ export default function PersonalizedDashboard() {
         router.push('/auth/login');
         return;
       }
-      
+
       console.log('✅ User authenticated:', user.id);
       setUserId(user.id);
 
       console.log('📊 Loading gap analysis...');
-      
+
       // Load gap analysis
       const { data: gapData, error: gapError } = await supabase
         .from('gap_analysis_results')
@@ -128,7 +128,7 @@ export default function PersonalizedDashboard() {
         } else {
           console.log('ℹ️ No gap analysis found yet');
         }
-        
+
         // Try to load from assessment as fallback
         console.log('🔄 Checking for completed assessment...');
         const { data: assessmentData, error: assessmentError } = await supabase
@@ -138,7 +138,7 @@ export default function PersonalizedDashboard() {
           .order('completed_at', { ascending: false })
           .limit(1)
           .single();
-        
+
         if (assessmentData && !assessmentError) {
           console.log('✅ Found assessment, converting to gap analysis format');
           // Convert assessment to gap analysis format
@@ -349,11 +349,11 @@ export default function PersonalizedDashboard() {
                     </div>
                   </div>
                 </div>
-                
+
                 <p className="text-gray-600 mb-6">
                   Ready to transform your institution's AI strategy? Let's get started!
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
                     size="lg"
@@ -380,11 +380,11 @@ export default function PersonalizedDashboard() {
                     Refresh Results
                   </Button>
                 </div>
-                
+
                 <p className="text-sm text-gray-500 mt-6">
                   💡 <strong>Tip:</strong> Upload existing policies, strategic plans, or technology documents for a more accurate analysis
                 </p>
-                
+
                 <p className="text-xs text-gray-400 mt-3">
                   Most institutions complete the entire process in under 15 minutes
                 </p>
