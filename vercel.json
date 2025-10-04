@@ -4,7 +4,9 @@
   },
   "build": {
     "env": {
-      "NEXT_BUILD_ID": "$VERCEL_GIT_COMMIT_SHA"
+      "NEXT_BUILD_ID": "$VERCEL_GIT_COMMIT_SHA",
+      "DISABLE_BUILD_CACHE": "1"
     }
-  }
+  },
+  "installCommand": "rm -rf .next && npm ci"
 }
