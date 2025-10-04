@@ -16,7 +16,7 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     // Disable webpack's persistent cache
     config.cache = false;
-    
+
     return config;
   },
   // Disable static page optimization for get-started to force fresh rendering

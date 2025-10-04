@@ -5,12 +5,28 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+// CACHE BUST MARKER - Force chunk regeneration
+// Build: October 4, 2025 12:58 PM - Breaking persistent cache issue
+const AUTH_NAV_VERSION = 'cache-bust-v4-' + Date.now();
+const DEPLOYMENT_ID = 'deployment-1759600750-' + Math.random().toString(36).slice(2);
+
 export default function AuthNav() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const supabase = createClient();
+  
+  // Log version on mount for verification
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('[AuthNav] Cache Bust Active:', { 
+        version: AUTH_NAV_VERSION, 
+        deployment: DEPLOYMENT_ID,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
