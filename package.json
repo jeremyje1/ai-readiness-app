@@ -1,6 +1,6 @@
 {
   "name": "ai-readiness-app",
-  "version": "1.0.0",
+  "version": "1.0.1-cache-bust",
   "private": true,
   "description": "AI Readiness Assessment Platform - Separated from main organizational assessment app",
   "scripts": {
