@@ -14,7 +14,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
 export function createClient() {
   // Force unique instance marker
   const instanceId = `${CACHE_BUST_VERSION}_${Date.now()}`;
-  
+
   const client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -47,9 +47,9 @@ export function createClient() {
       }
     }
   );
-  
+
   // Attach build marker to client instance for verification
   (client as any).__BUILD_MARKER__ = BUILD_MARKER;
-  
+
   return client;
 }

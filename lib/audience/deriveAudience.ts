@@ -89,7 +89,7 @@ function deriveFromHost(host: string): Audience | null {
   const cleanHost = host.toLowerCase();
   
   // Direct domain matches
-  if (cleanHost.includes('higheredaiblueprint.com')) {
+  if (cleanHost.includes('educationaiblueprint.com')) {
     return 'highered';
   }
   if (cleanHost.includes('k12aiblueprint.com')) {
@@ -117,7 +117,7 @@ function deriveFromReferer(referer: string): Audience | null {
   } catch {
     // Fallback to string matching if URL parsing fails
     const cleanReferer = referer.toLowerCase();
-    if (cleanReferer.includes('higheredaiblueprint.com')) {
+    if (cleanReferer.includes('educationaiblueprint.com')) {
       return 'highered';
     }
     if (cleanReferer.includes('k12aiblueprint.com')) {

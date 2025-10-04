@@ -3,25 +3,19 @@
  * Handles deletion of assessment progress by session ID
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-
-interface RouteParams {
-  params: {
-    sessionId: string;
-  };
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Delete assessment progress by session ID
  */
 export async function DELETE(
-  request: NextRequest, 
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { sessionId } = params;
-    
+    const { sessionId } = await params;
+
     if (!sessionId) {
       return NextResponse.json(
         { error: 'Session ID is required' },
@@ -62,14 +56,14 @@ export async function DELETE(
  * Get specific assessment progress by session ID
  */
 export async function GET(
-  request: NextRequest, 
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { sessionId } = params;
+    const { sessionId } = await params;
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    
+
     if (!sessionId) {
       return NextResponse.json(
         { error: 'Session ID is required' },
@@ -82,7 +76,7 @@ export async function GET(
       .from('assessment_progress')
       .select('*')
       .eq('session_id', sessionId);
-    
+
     // Add user filter if provided
     if (userId) {
       query = query.eq('user_id', userId);
@@ -98,7 +92,7 @@ export async function GET(
           { status: 404 }
         );
       }
-      
+
       console.error('Database error loading assessment progress:', error);
       return NextResponse.json(
         { error: 'Failed to load assessment progress' },

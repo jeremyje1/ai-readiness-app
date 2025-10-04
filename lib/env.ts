@@ -38,7 +38,7 @@ function validateEnv(): Env {
     return envSchema.parse({
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.higheredaiblueprint.com',
+      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com',
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
       DATABASE_URL: process.env.DATABASE_URL,
       STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
@@ -75,7 +75,7 @@ function validateEnv(): Env {
       return {
         NEXT_PUBLIC_SUPABASE_URL: '',
         NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
-        NEXT_PUBLIC_SITE_URL: 'https://aiblueprint.higheredaiblueprint.com',
+        NEXT_PUBLIC_SITE_URL: 'https://aiblueprint.educationaiblueprint.com',
         NODE_ENV: 'production',
       } as Env
     }

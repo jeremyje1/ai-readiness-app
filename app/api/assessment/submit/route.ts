@@ -133,7 +133,7 @@ For detailed recommendations, please ensure OpenAI API is configured.`;
 
 export async function POST(req: NextRequest) {
     try {
-        const supabase = createClient();
+        const supabase = await createClient();
 
         // Verify auth
         const { data: { user }, error: authError } = await supabase.auth.getUser();

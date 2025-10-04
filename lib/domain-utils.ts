@@ -10,7 +10,7 @@ export type InstitutionType = 'K12' | 'HigherEd';
 export function detectInstitutionType(): InstitutionType {
   if (typeof window === 'undefined') return 'K12'; // Default for SSR
   const hostname = window.location.hostname;
-  return hostname.includes('higheredaiblueprint.com') ? 'HigherEd' : 'K12';
+  return hostname.includes('educationaiblueprint.com') ? 'HigherEd' : 'K12';
 }
 
 /**
@@ -18,7 +18,7 @@ export function detectInstitutionType(): InstitutionType {
  */
 export function getCanonicalDomain(institutionType: InstitutionType): string {
   return institutionType === 'HigherEd' 
-    ? 'https://aiblueprint.higheredaiblueprint.com'
+    ? 'https://aiblueprint.educationaiblueprint.com'
     : 'https://aiblueprint.k12aiblueprint.com';
 }
 

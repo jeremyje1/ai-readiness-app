@@ -16,12 +16,12 @@ export default function AuthNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const supabase = createClient();
-  
+
   // Log version on mount for verification
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      console.log('[AuthNav] Cache Bust Active:', { 
-        version: AUTH_NAV_VERSION, 
+      console.log('[AuthNav] Cache Bust Active:', {
+        version: AUTH_NAV_VERSION,
         deployment: DEPLOYMENT_ID,
         timestamp: new Date().toISOString()
       });

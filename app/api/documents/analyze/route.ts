@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
     try {
-        const supabase = createClient();
+        const supabase = await createClient();
 
         // Check authentication
         const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 // Helper endpoint to check if real analysis is available
 export async function GET(request: NextRequest) {
     try {
-        const supabase = createClient();
+        const supabase = await createClient();
 
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error || !user) {

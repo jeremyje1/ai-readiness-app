@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { env, isEnvConfigured } from '@/lib/env';
+import { createClient } from '@/lib/supabase/server';
+import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
 interface HealthCheckResult {
@@ -76,14 +76,14 @@ export async function GET(request: Request) {
   // Check database connectivity
   try {
     const dbStart = Date.now();
-    const supabase = createClient();
+    const supabase = await createClient();
     const { error } = await supabase
       .from('ai_readiness_assessments')
       .select('id')
       .limit(1);
-    
+
     if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows, which is fine
-    
+
     result.checks.database = {
       status: 'ok',
       latency: Date.now() - dbStart
@@ -101,14 +101,14 @@ export async function GET(request: Request) {
     if (!process.env.STRIPE_SECRET_KEY) {
       throw new Error('Stripe secret key not configured');
     }
-    
+
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2025-06-30.basil'
     });
-    
+
     // Just verify we can create a client
     const mode = process.env.STRIPE_SECRET_KEY.includes('_test_') ? 'test' : 'live';
-    
+
     result.checks.stripe = {
       status: 'ok',
       mode
@@ -126,7 +126,7 @@ export async function GET(request: Request) {
     if (!process.env.POSTMARK_API_TOKEN && process.env.NODE_ENV === 'production') {
       throw new Error('Email service not configured for production');
     }
-    
+
     result.checks.email = {
       status: 'ok',
       provider: process.env.POSTMARK_API_TOKEN ? 'postmark' : 'disabled'
@@ -145,7 +145,7 @@ export async function GET(request: Request) {
     if (!process.env.OPENAI_API_KEY) {
       throw new Error('OpenAI API key not configured');
     }
-    
+
     result.checks.openai = {
       status: 'ok'
     };

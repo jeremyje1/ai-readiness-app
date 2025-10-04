@@ -27,13 +27,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   // Derive initial audience from server context
-  const headersList = headers();
+  const headersList = await headers();
   const host = headersList.get('host') || undefined;
   const referer = headersList.get('referer') || undefined;
 
