@@ -17,7 +17,7 @@ export function detectInstitutionType(): InstitutionType {
  * Get the canonical domain for an institution type
  */
 export function getCanonicalDomain(institutionType: InstitutionType): string {
-  return institutionType === 'HigherEd' 
+  return institutionType === 'HigherEd'
     ? 'https://aiblueprint.educationaiblueprint.com'
     : 'https://aiblueprint.k12aiblueprint.com';
 }

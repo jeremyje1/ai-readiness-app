@@ -87,7 +87,7 @@ export function deriveAudience(context: AudienceDerivationContext): {
  */
 function deriveFromHost(host: string): Audience | null {
   const cleanHost = host.toLowerCase();
-  
+
   // Direct domain matches
   if (cleanHost.includes('educationaiblueprint.com')) {
     return 'highered';
@@ -95,7 +95,7 @@ function deriveFromHost(host: string): Audience | null {
   if (cleanHost.includes('k12aiblueprint.com')) {
     return 'k12';
   }
-  
+
   // Subdomain patterns
   if (cleanHost.startsWith('highered.') || cleanHost.includes('.highered.')) {
     return 'highered';
@@ -142,15 +142,15 @@ export function getAudienceOverride(
   allowOverride: boolean = process.env.NODE_ENV !== 'production'
 ): Audience | null {
   if (!allowOverride) return null;
-  
-  const audParam = typeof searchParams.get === 'function' 
-    ? searchParams.get('aud') 
+
+  const audParam = typeof searchParams.get === 'function'
+    ? searchParams.get('aud')
     : (searchParams as Record<string, string>)['aud'];
-    
+
   if (audParam && isValidAudience(audParam)) {
     return audParam as Audience;
   }
-  
+
   return null;
 }
 
