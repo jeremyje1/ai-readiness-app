@@ -54,4 +54,6 @@ export default function RootLayout({
     </html>
   )
 }
-// Force rebuild 1759598869
+
+// Cache bust marker - October 4, 2025
+const CACHE_VERSION = '2025-10-04-v3';
