@@ -1,0 +1,25 @@
+NUCLEAR DEPLOYMENT TRIGGER
+Date: October 4, 2025
+Timestamp: ${Date.now()}
+Commit Hash: ${require('crypto').randomBytes(8).toString('hex')}
+
+CHANGES:
+- Added 10-second timeout to signup process to prevent infinite hang
+- Added 5-second timeout to profile creation to prevent blocking
+- If timeout occurs, user is redirected to welcome page anyway
+- Welcome page will create profile if missing
+- Nuclear cache bust markers added to ensure fresh code
+
+CACHE BUST REQUIREMENTS:
+1. Purge Vercel CDN Cache (DELETE method, all content)
+2. Purge Vercel Data Cache  
+3. Clear browser cache (Ctrl+Shift+Delete)
+4. Test in incognito window
+
+TESTING:
+- Signup should complete within 10 seconds max
+- If database is slow, user still gets redirected
+- No more infinite hangs on signup page
+- Welcome page handles any missing data
+
+BUILD: Nuclear option - complete fresh deployment required

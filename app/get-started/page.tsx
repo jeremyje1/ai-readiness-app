@@ -106,9 +106,16 @@ export default function GetStartedPage() {
     const handleSignUp = async () => {
         try {
             console.log('🚀 Starting signup process...');
+            console.log('⏰ Timestamp:', new Date().toISOString());
+            console.log('🔥 NUCLEAR CACHE BUST - October 4, 2025');
+
+            // Create timeout promise to prevent infinite hang
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Signup timeout - redirecting anyway')), 10000);
+            });
 
             // Sign up the user with auto-confirm for trial users
-            const { data: authData, error: signUpError } = await supabase.auth.signUp({
+            const signupPromise = supabase.auth.signUp({
                 email: formData.email.trim(),
                 password: formData.password,
                 options: {
@@ -126,6 +133,18 @@ export default function GetStartedPage() {
                 }
             });
 
+            let authData, signUpError;
+            try {
+                const result: any = await Promise.race([signupPromise, timeoutPromise]);
+                authData = result.data;
+                signUpError = result.error;
+            } catch (timeoutError) {
+                console.warn('⚠️ Signup timed out, but may have succeeded - redirecting...');
+                // Force redirect after timeout
+                window.location.href = '/welcome';
+                return;
+            }
+
             if (signUpError) {
                 console.error('❌ Signup error:', signUpError);
                 throw signUpError;
@@ -139,7 +158,9 @@ export default function GetStartedPage() {
 
                 // Create profile immediately (webhook may not be configured)
                 console.log('📝 Creating user profile and institution...');
-                try {
+                
+                // Wrap profile creation in timeout to prevent hang
+                const profileCreationPromise = (async () => {
                     // Create institution first
                     const orgName = formData.organization || formData.email.split('@')[1]?.split('.')[0] || 'My Institution';
                     // institutions.org_type is just TEXT, no constraint - can use any value
@@ -209,6 +230,18 @@ export default function GetStartedPage() {
                     } else {
                         console.log('✅ Profile created');
                     }
+                })();
+
+                // Race profile creation against timeout
+                const profileTimeout = new Promise((resolve) => {
+                    setTimeout(() => {
+                        console.warn('⚠️ Profile creation timeout - continuing to welcome page');
+                        resolve(null);
+                    }, 5000);
+                });
+
+                try {
+                    await Promise.race([profileCreationPromise, profileTimeout]);
                 } catch (setupError) {
                     console.error('Error during user setup:', setupError);
                     // Continue anyway - welcome page will handle missing data
