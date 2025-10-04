@@ -53,18 +53,31 @@ export default function AssessmentUploadDocumentsPage() {
     const handleContinue = async () => {
         setLoading(true);
         try {
+            console.log('📤 Processing document uploads...');
+            
             // Log the document upload completion
             if (userId) {
                 await supabase.from('user_activity_log').insert({
                     user_id: userId,
                     activity_type: 'documents_uploaded',
-                    activity_data: { fileCount: uploadedFiles.length },
+                    activity_data: { 
+                        fileCount: uploadedFiles.length,
+                        timestamp: new Date().toISOString()
+                    },
                 });
             }
 
+            console.log('✅ Documents logged successfully');
+            console.log('🎯 Redirecting to dashboard...');
+            
+            // Add a small delay to show the loading state
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
             router.push('/dashboard/personalized');
         } catch (error) {
-            console.error('Error:', error);
+            console.error('❌ Error processing documents:', error);
+            // Continue to dashboard anyway
+            router.push('/dashboard/personalized');
         } finally {
             setLoading(false);
         }

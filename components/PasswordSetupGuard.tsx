@@ -35,16 +35,22 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
 
     const checkPasswordSetupRequired = async () => {
         try {
-            // Get current session with timeout
+            // Get current session with increased timeout (15 seconds)
             const sessionPromise = supabase.auth.getSession();
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Session check timeout')), 5000)
+                setTimeout(() => reject(new Error('Session check timeout')), 15000)
             );
 
-            const { data: { session }, error: sessionError } = await Promise.race([
-                sessionPromise,
-                timeoutPromise
-            ]) as any;
+            let session, sessionError;
+            try {
+                const result: any = await Promise.race([sessionPromise, timeoutPromise]);
+                session = result.data?.session;
+                sessionError = result.error;
+            } catch (timeoutError) {
+                console.warn('🔐 Session check timeout, skipping password check');
+                setIsChecking(false);
+                return;
+            }
 
             if (sessionError || !session) {
                 // No session, let normal auth flow handle this

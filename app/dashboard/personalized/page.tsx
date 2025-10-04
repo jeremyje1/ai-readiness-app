@@ -76,23 +76,37 @@ export default function PersonalizedDashboard() {
   const loadDashboardData = async () => {
     const supabase = createClient();
     try {
-      // Add timeout for authentication check
+      console.log('🔄 Loading dashboard data...');
+      console.log('⏰ Timestamp:', new Date().toISOString());
+      
+      // Add timeout for authentication check (increased to 15 seconds)
       const authTimeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Authentication timeout')), 5000)
+        setTimeout(() => reject(new Error('Authentication timeout')), 15000)
       );
 
       // Check authentication with timeout
       const authPromise = supabase.auth.getUser();
-      const { data: { user }, error: authError } = await Promise.race([
-        authPromise,
-        authTimeout
-      ]) as any;
+      let user, authError;
+      
+      try {
+        const result: any = await Promise.race([authPromise, authTimeout]);
+        user = result.data?.user;
+        authError = result.error;
+      } catch (timeoutError) {
+        console.error('⚠️ Auth timeout, retrying without timeout...');
+        // Retry without timeout
+        const { data, error } = await supabase.auth.getUser();
+        user = data?.user;
+        authError = error;
+      }
 
       if (authError || !user) {
-        console.error('Authentication failed:', authError);
+        console.error('❌ Authentication failed:', authError);
         router.push('/auth/login');
         return;
       }
+      
+      console.log('✅ User authenticated:', user.id);
       setUserId(user.id);
 
       // Load gap analysis
@@ -267,28 +281,65 @@ export default function PersonalizedDashboard() {
 
               {/* Call to Action */}
               <div className="text-center">
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+                  <h3 className="font-semibold text-blue-900 mb-2">✨ Your Analysis is Being Generated</h3>
+                  <p className="text-blue-700 mb-4">
+                    We're analyzing your institution's current AI readiness. Complete the assessment and upload documents to unlock your personalized roadmap!
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>Assessment: 5 minutes</span>
+                    </div>
+                    <div className="hidden sm:block text-blue-400">•</div>
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <FileText className="h-4 w-4" />
+                      <span>Upload: 3-5 minutes</span>
+                    </div>
+                    <div className="hidden sm:block text-blue-400">•</div>
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <Zap className="h-4 w-4" />
+                      <span>Results: Instant</span>
+                    </div>
+                  </div>
+                </div>
+                
                 <p className="text-gray-600 mb-6">
                   Ready to transform your institution's AI strategy? Let's get started!
                 </p>
-                <div className="flex gap-4 justify-center">
+                
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
                     size="lg"
-                    onClick={() => window.location.reload()}
+                    onClick={() => router.push('/assessment')}
                     className="bg-indigo-600 hover:bg-indigo-700"
                   >
                     <Target className="h-5 w-5 mr-2" />
-                    Refresh Dashboard
+                    Start Assessment
                   </Button>
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push('/assessment/upload-documents')}
                   >
                     <FileText className="h-5 w-5 mr-2" />
-                    View Main Dashboard
+                    Upload Documents
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    onClick={() => window.location.reload()}
+                  >
+                    <ArrowRight className="h-5 w-5 mr-2" />
+                    Refresh Results
                   </Button>
                 </div>
-                <p className="text-sm text-gray-500 mt-4">
+                
+                <p className="text-sm text-gray-500 mt-6">
+                  💡 <strong>Tip:</strong> Upload existing policies, strategic plans, or technology documents for a more accurate analysis
+                </p>
+                
+                <p className="text-xs text-gray-400 mt-3">
                   Most institutions complete the entire process in under 15 minutes
                 </p>
               </div>
