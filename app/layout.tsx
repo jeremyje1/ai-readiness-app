@@ -55,5 +55,10 @@ export default function RootLayout({
   )
 }
 
-// Cache bust marker - October 4, 2025
-const CACHE_VERSION = '2025-10-04-v3';
+// Cache bust marker - Force fresh build after Vercel cache purge
+// Timestamp: October 4, 2025 - 12:42 PM
+const CACHE_VERSION = '2025-10-04-post-purge-v4';
+const BUILD_TIMESTAMP = Date.now();
+if (typeof window !== 'undefined') {
+  console.log('🔥 FRESH BUILD - Post Cache Purge v4', { version: CACHE_VERSION, timestamp: BUILD_TIMESTAMP });
+}
