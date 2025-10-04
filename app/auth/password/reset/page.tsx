@@ -1,12 +1,12 @@
 'use client';
-import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
+import React, { useState } from 'react';
 
 export default function PasswordResetRequestPage() {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<string|null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -22,9 +22,9 @@ export default function PasswordResetRequestPage() {
       <form onSubmit={submit} className='bg-white shadow rounded-lg p-6 w-full max-w-md space-y-4'>
         <h1 className='text-xl font-semibold'>Reset Password</h1>
         <p className='text-sm text-gray-600'>Enter your account email and we'll send a secure reset link.</p>
-        <Input type='email' value={email} onChange={e=>setEmail(e.target.value)} required placeholder='you@domain.com' />
+        <Input type='email' value={email} onChange={e => setEmail(e.target.value)} required placeholder='you@domain.com' />
         {status && <p className='text-sm text-gray-700'>{status}</p>}
-        <Button type='submit' disabled={loading}>{loading? 'Sending...' : 'Send Reset Link'}</Button>
+        <Button type='submit' disabled={loading}>{loading ? 'Sending...' : 'Send Reset Link'}</Button>
       </form>
     </div>
   );

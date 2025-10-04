@@ -13,69 +13,73 @@ import {
   FileText,
   TrendingUp,
   Shield,
-  Headphones,
   Brain,
-  Zap,
+  GraduationCap,
   Target,
   BarChart3,
-  Clock
+  Calendar
 } from 'lucide-react';
-import { AI_READINESS_PRODUCTS } from '@/lib/ai-readiness-products';
+import { AI_BLUEPRINT_EDU_PRODUCT, formatPrice, getYearlySavings, getYearlySavingsPercent } from '@/lib/ai-blueprint-edu-product';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-export default function AIReadinessPricingPage() {
-  const [isYearly, setIsYearly] = useState(false);
+export default function AIBlueprintPricingPage() {
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const router = useRouter();
 
-  const handleSelectPlan = (product: any) => {
-    // Map product IDs to Stripe checkout tiers
-    const stripeCheckoutMap: { [key: string]: string } = {
-      'higher-ed-ai-pulse-check': 'higher-ed-ai-pulse-check',
-      'ai-readiness-comprehensive': 'ai-readiness-comprehensive', 
-      'ai-transformation-blueprint': 'ai-transformation-blueprint',
-      'ai-enterprise-partnership': 'ai-enterprise-partnership'
-    };
-    
-    const stripeTier = stripeCheckoutMap[product.id];
-    if (stripeTier) {
-  // Use canonical domain (legacy app.northpathstrategies.org removed)
-  window.location.href = `https://aiblueprint.k12aiblueprint.com/api/stripe/create-tier-checkout?tier=${stripeTier}`;
-    } else {
-      // Fallback to contact for enterprise
-      window.location.href = `/contact?service=enterprise-ai`;
+  const handleCheckout = async () => {
+    try {
+      const response = await fetch('/api/stripe/edu-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          billingPeriod: billingPeriod
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
     }
   };
 
   const getFeatureIcon = (feature: string) => {
-    if (feature.includes('team') || feature.includes('members') || feature.includes('Faculty')) return <Users className="h-4 w-4" />;
-    if (feature.includes('support') || feature.includes('advisory') || feature.includes('office hours')) return <Headphones className="h-4 w-4" />;
-    if (feature.includes('report') || feature.includes('Blueprint') || feature.includes('slides')) return <FileText className="h-4 w-4" />;
-    if (feature.includes('analysis') || feature.includes('benchmarking') || feature.includes('dashboard')) return <TrendingUp className="h-4 w-4" />;
-    if (feature.includes('session') || feature.includes('strategy') || feature.includes('workshop')) return <Brain className="h-4 w-4" />;
-    if (feature.includes('policy') || feature.includes('governance')) return <Shield className="h-4 w-4" />;
-    if (feature.includes('sprint') || feature.includes('implementation')) return <Target className="h-4 w-4" />;
-    return <CheckCircle2 className="h-4 w-4" />;
+    if (feature.includes('Faculty') || feature.includes('Colleague')) return <Users className="h-5 w-5" />;
+    if (feature.includes('Course') || feature.includes('Classroom')) return <GraduationCap className="h-5 w-5" />;
+    if (feature.includes('Roadmap') || feature.includes('Workbook')) return <FileText className="h-5 w-5" />;
+    if (feature.includes('Benchmark') || feature.includes('ROI')) return <BarChart3 className="h-5 w-5" />;
+    if (feature.includes('AIRIX') || feature.includes('AIRS')) return <Brain className="h-5 w-5" />;
+    if (feature.includes('Accreditation')) return <Shield className="h-5 w-5" />;
+    if (feature.includes('Progress') || feature.includes('Reviews')) return <Calendar className="h-5 w-5" />;
+    return <CheckCircle2 className="h-5 w-5" />;
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
-      {/* Header Navigation */}
+      {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <Link href="/" className="text-2xl font-bold text-indigo-600">
-              NorthPath Strategies
+              AI Blueprint for Education
             </Link>
             <nav className="hidden md:flex space-x-8">
               <Link href="/" className="text-gray-600 hover:text-gray-900">Home</Link>
-              <Link href="/pricing" className="text-gray-600 hover:text-gray-900">Organizational Assessment</Link>
-              <Link href="/ai-readiness/pricing" className="text-indigo-600 font-medium">AI Readiness</Link>
+              <Link href="/pricing" className="text-indigo-600 font-medium">Pricing</Link>
+              <Link href="/dashboard/personalized" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
             </nav>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-700 text-white py-16">
+      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-700 text-white py-20">
         <div className="absolute inset-0 bg-[url('/images/grid.svg')] opacity-20"></div>
         <div className="relative container mx-auto px-4 text-center">
           <motion.div
@@ -85,301 +89,181 @@ export default function AIReadinessPricingPage() {
           >
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-6">
               <Brain className="h-4 w-4 mr-2" />
-              AI Transformation Blueprint™
+              Trusted by 200+ Higher Ed Institutions
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              From Assessment to Action in 90 Days
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              AI Blueprint for Education
             </h1>
-            <p className="text-xl text-blue-100 mb-8 max-w-4xl mx-auto">
-              Choose your AI transformation path—from quick diagnostics to comprehensive implementation support. 
-              Each tier includes patent-pending analytics and higher education expertise.
+            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+              Transform your institution's AI readiness with our comprehensive assessment, 
+              implementation roadmap, and ongoing support designed specifically for higher education.
             </p>
           </motion.div>
         </div>
       </section>
 
       {/* Billing Toggle */}
-      <section className="container mx-auto px-4 -mt-8 mb-8">
-        <div className="flex justify-center">
-          <div className="bg-white rounded-lg p-1 shadow-lg border border-slate-200">
-            <div className="flex items-center">
-              <button
-                onClick={() => setIsYearly(false)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  !isYearly 
-                    ? 'bg-indigo-600 text-white shadow-sm' 
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setIsYearly(true)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  isYearly 
-                    ? 'bg-indigo-600 text-white shadow-sm' 
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                Yearly
-                <span className="ml-1 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
-                  Save 17%
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Cards - New 4-Tier Structure */}
       <section className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {AI_READINESS_PRODUCTS.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.6 }}
-            >
-              <Card className={`relative h-full ${
-                product.isPopular 
-                  ? 'border-2 border-indigo-500 shadow-xl scale-105' 
-                  : product.name === 'Enterprise AI Partnership'
-                  ? 'bg-gradient-to-br from-gray-900 to-gray-800 text-white border-0'
-                  : 'border border-slate-200 shadow-lg'
-              }`}>
-                {product.isPopular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-indigo-500 text-white px-4 py-1 text-sm font-medium">
-                      <Star className="h-3 w-3 mr-1" />
-                      Most Popular
-                    </Badge>
-                  </div>
+        <div className="flex justify-center items-center space-x-4">
+          <span className={`text-sm ${billingPeriod === 'monthly' ? 'text-gray-900 font-semibold' : 'text-gray-500'}`}>
+            Monthly
+          </span>
+          <button
+            onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
+            className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                billingPeriod === 'yearly' ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className={`text-sm ${billingPeriod === 'yearly' ? 'text-gray-900 font-semibold' : 'text-gray-500'}`}>
+            Yearly
+            {billingPeriod === 'yearly' && (
+              <span className="ml-2 text-green-600 font-semibold">
+                Save {getYearlySavingsPercent()}%
+              </span>
+            )}
+          </span>
+        </div>
+      </section>
+
+      {/* Single Product Card */}
+      <section className="container mx-auto px-4 py-8 pb-20">
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Card className="relative bg-white shadow-xl border-0 overflow-hidden">
+              {/* Popular Badge */}
+              <div className="absolute top-0 right-0">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1 rounded-bl-lg text-sm font-semibold">
+                  Most Popular
+                </div>
+              </div>
+
+              <CardHeader className="text-center pt-8 pb-6">
+                <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                  {AI_BLUEPRINT_EDU_PRODUCT.name}
+                </CardTitle>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  {AI_BLUEPRINT_EDU_PRODUCT.description}
+                </p>
+                
+                <div className="flex items-baseline justify-center mb-2">
+                  <span className="text-5xl font-bold text-indigo-600">
+                    {formatPrice(billingPeriod).split('/')[0]}
+                  </span>
+                  <span className="text-xl text-gray-600 ml-2">
+                    {billingPeriod === 'monthly' ? '/month' : '/year'}
+                  </span>
+                </div>
+                
+                {billingPeriod === 'yearly' && (
+                  <p className="text-sm text-green-600 font-medium">
+                    Save ${getYearlySavings()} compared to monthly billing
+                  </p>
                 )}
-                
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className={`text-xl font-bold mb-2 ${
-                    product.name === 'Enterprise AI Partnership' ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {product.name}
-                  </CardTitle>
-                  <p className={`text-sm mb-4 ${
-                    product.name === 'Enterprise AI Partnership' ? 'text-gray-300' : 'text-gray-600'
-                  }`}>
-                    {product.goal}
-                  </p>
-                  <div className={`text-3xl font-bold mb-2 ${
-                    product.name === 'Enterprise AI Partnership' 
-                      ? 'text-yellow-400' 
-                      : 'text-indigo-600'
-                  }`}>
-                    {product.name === 'Enterprise AI Partnership' ? (
-                      <>Starting at ${isYearly ? product.yearlyPrice?.toLocaleString() : product.monthlyPrice?.toLocaleString()}</>
-                    ) : (
-                      <>
-                        ${isYearly 
-                          ? product.yearlyPrice?.toLocaleString() 
-                          : product.monthlyPrice?.toLocaleString()
-                        }
-                        {!isYearly && product.monthlyPrice && (
-                          <span className="text-sm text-slate-500 ml-1">/mo</span>
-                        )}
-                        {isYearly && product.yearlyPrice && (
-                          <span className="text-sm text-slate-500 ml-1">/year</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <p className={`text-sm ${
-                    product.name === 'Enterprise AI Partnership' ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
-                    {isYearly ? 'Billed annually' : 'Billed monthly'}
-                    {isYearly && product.monthlyPrice && product.yearlyPrice && (
-                      <span className="block text-green-600 font-medium">
-                        Save ${((product.monthlyPrice * 12) - product.yearlyPrice).toLocaleString()}/year
+              </CardHeader>
+              
+              <CardContent className="px-8 pb-8">
+                <ul className="space-y-3 mb-8">
+                  {AI_BLUEPRINT_EDU_PRODUCT.features.map((feature, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="mr-3 mt-0.5 text-indigo-600">
+                        {getFeatureIcon(feature)}
+                      </div>
+                      <span className="text-gray-700">
+                        {feature}
                       </span>
-                    )}
-                  </p>
-                </CardHeader>
+                    </li>
+                  ))}
+                </ul>
                 
-                <CardContent className="px-6 pb-6">
-                  <ul className="space-y-2 mb-6">
-                    {product.features.slice(0, 8).map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start text-sm">
-                        <div className={`mr-2 mt-0.5 ${
-                          product.name === 'Enterprise AI Partnership' 
-                            ? 'text-yellow-400' 
-                            : 'text-green-500'
-                        }`}>
-                          {getFeatureIcon(feature)}
-                        </div>
-                        <span className={
-                          product.name === 'Enterprise AI Partnership' ? 'text-gray-100' : 'text-gray-700'
-                        }>
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                    {product.features.length > 8 && (
-                      <li className={`text-sm italic ${
-                        product.name === 'Enterprise AI Partnership' ? 'text-gray-300' : 'text-gray-500'
-                      }`}>
-                        + {product.features.length - 8} more features...
-                      </li>
-                    )}
-                  </ul>
-                  
-                  <Button
-                    onClick={() => handleSelectPlan(product)}
-                    className={`w-full ${
-                      product.isPopular
-                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                        : product.name === 'Enterprise AI Partnership'
-                        ? 'bg-yellow-400 hover:bg-yellow-300 text-gray-900'
-                        : product.name === 'AI Pulse Check'
-                        ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                        : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700'
-                    }`}
-                  >
-                    {product.name === 'Enterprise AI Partnership' 
-                      ? 'Contact Sales' 
-                      : `Start ${product.name.split(' ')[0]} ${product.name.split(' ')[1] || ''}`
-                    }
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                <Button
+                  onClick={handleCheckout}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 text-lg font-semibold"
+                  size="lg"
+                >
+                  Get Started Today
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                
+                <p className="text-center text-sm text-gray-500 mt-4">
+                  No setup fees · Cancel anytime · Secure checkout
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </section>
 
-      {/* Value Communication Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="bg-indigo-50 rounded-lg p-8 max-w-6xl mx-auto">
-          <h3 className="text-2xl font-bold text-indigo-900 mb-6 text-center">Why the AI Transformation Blueprint™?</h3>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h4 className="font-semibold text-indigo-800 mb-3">Risk Transfer & Implementation Support</h4>
-              <p className="text-indigo-700 text-sm mb-4">
-                Unlike traditional consultants who deliver reports and leave, we own the action plan and guide you through 
-                the first 90 days of execution. You get tangible, board-ready operating plans with ongoing support.
-              </p>
-              <h4 className="font-semibold text-indigo-800 mb-3">Accreditation & Compliance Alignment</h4>
-              <p className="text-indigo-700 text-sm">
-                Every recommendation maps to SACSCOC, HLC, MSCHE, and NIST AI RMF controls. We understand higher education's 
-                unique regulatory landscape and compliance requirements.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-indigo-800 mb-3">Faculty-Centric Change Management</h4>
-              <p className="text-indigo-700 text-sm mb-4">
-                Our dedicated micro-course addresses the biggest hurdle in AI adoption—faculty resistance. 
-                Maps directly to teaching effectiveness competencies and issues verifiable badges.
-              </p>
-              <h4 className="font-semibold text-indigo-800 mb-3">ROI Clarity & Scenario Modeling</h4>
-              <p className="text-indigo-700 text-sm">
-                Interactive workbooks show expected enrollment uplift, cost avoidance, and grant eligibility improvements. 
-                Board members can see the financial impact before making decisions.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Methodology Timeline */}
-      <section className="container mx-auto px-4 py-16 bg-gray-50">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Our 90-Day Transformation Process</h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Diagnostic → Design → Deploy methodology specifically built for higher education's pace and requirements.
-          </p>
-        </div>
-        
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                <BarChart3 className="w-6 h-6 text-indigo-600" />
+      {/* Value Props */}
+      <section className="bg-gray-50 py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            Why Higher Ed Leaders Choose AI Blueprint
+          </h2>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="text-center">
+              <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Target className="h-8 w-8 text-indigo-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Phase 1: Diagnostic</h3>
-              <p className="text-gray-600 text-sm mb-4">Weeks 0-2</p>
-              <ul className="text-sm text-gray-600 space-y-2">
-                <li>• Comprehensive AIRIX/AIRS diagnostic</li>
-                <li>• Strategic document harvest</li>
-                <li>• Stakeholder interviews</li>
-                <li>• Baseline dashboard setup</li>
-              </ul>
+              <h3 className="text-xl font-semibold mb-2">Tailored for Higher Ed</h3>
+              <p className="text-gray-600">
+                Built specifically for colleges and universities, addressing unique challenges in governance, 
+                faculty adoption, and student success.
+              </p>
             </div>
             
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                <Brain className="w-6 h-6 text-indigo-600" />
+            <div className="text-center">
+              <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="h-8 w-8 text-indigo-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Phase 2: Design</h3>
-              <p className="text-gray-600 text-sm mb-4">Weeks 2-6</p>
-              <ul className="text-sm text-gray-600 space-y-2">
-                <li>• Virtual design studio</li>
-                <li>• Scenario modeling (AIPS™)</li>
-                <li>• Policy kit development</li>
-                <li>• 40-page Blueprint creation</li>
-              </ul>
+              <h3 className="text-xl font-semibold mb-2">Data-Driven Insights</h3>
+              <p className="text-gray-600">
+                Compare your institution against peers, track progress over time, and make informed 
+                decisions with comprehensive benchmarking data.
+              </p>
             </div>
             
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                <Zap className="w-6 h-6 text-indigo-600" />
+            <div className="text-center">
+              <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-indigo-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Phase 3: Deploy</h3>
-              <p className="text-gray-600 text-sm mb-4">Weeks 6-12</p>
-              <ul className="text-sm text-gray-600 space-y-2">
-                <li>• 90-day sprint coaching</li>
-                <li>• Weekly office hours</li>
-                <li>• Faculty enablement course</li>
-                <li>• KPI dashboard setup</li>
-              </ul>
+              <h3 className="text-xl font-semibold mb-2">Compliance Ready</h3>
+              <p className="text-gray-600">
+                Stay ahead of regulations with built-in FERPA compliance, accreditation alignment, 
+                and ethical AI frameworks designed for education.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-700 py-16">
+      <section className="bg-indigo-600 py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Transform Your Institution's AI Future?
+            Ready to Transform Your Institution's AI Strategy?
           </h2>
-          <p className="text-xl text-indigo-100 mb-8 max-w-3xl mx-auto">
-            Join forward-thinking institutions using our Blueprint™ methodology to move from assessment to implementation. 
-            Start your transformation today.
+          <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+            Join hundreds of institutions already using AI Blueprint to navigate their AI transformation journey.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href="/ai-readiness/start?tier=blueprint" 
-              className="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-50 transition-colors inline-flex items-center justify-center"
-            >
-              Start Blueprint™ Program
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-            <Link 
-              href="/contact?service=ai-transformation" 
-              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors"
-            >
-              Schedule Consultation
-            </Link>
-          </div>
+          <Button
+            onClick={handleCheckout}
+            size="lg"
+            className="bg-white text-indigo-600 hover:bg-gray-100 font-semibold px-8 py-6 text-lg"
+          >
+            Start Your Assessment Today
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <p className="text-slate-500 text-sm">
-              © 2025 NorthPath Strategies. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -1,23 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createClient } from '@/lib/supabase/client';
 import {
-  CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  FileText,
+  ArrowRight,
   Calendar,
-  Target,
-  Zap,
+  CheckCircle2,
   Download,
-  ArrowRight
+  FileText,
+  Target,
+  TrendingUp,
+  Zap
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface GapAnalysis {
   id: string;
@@ -77,24 +76,40 @@ export default function PersonalizedDashboard() {
   const loadDashboardData = async () => {
     const supabase = createClient();
     try {
-      // Add timeout for authentication check
+      console.log('🔄 Loading dashboard data...');
+      console.log('⏰ Timestamp:', new Date().toISOString());
+
+      // Add timeout for authentication check (increased to 15 seconds)
       const authTimeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Authentication timeout')), 5000)
+        setTimeout(() => reject(new Error('Authentication timeout')), 15000)
       );
 
       // Check authentication with timeout
       const authPromise = supabase.auth.getUser();
-      const { data: { user }, error: authError } = await Promise.race([
-        authPromise,
-        authTimeout
-      ]) as any;
+      let user, authError;
+
+      try {
+        const result: any = await Promise.race([authPromise, authTimeout]);
+        user = result.data?.user;
+        authError = result.error;
+      } catch (timeoutError) {
+        console.error('⚠️ Auth timeout, retrying without timeout...');
+        // Retry without timeout
+        const { data, error } = await supabase.auth.getUser();
+        user = data?.user;
+        authError = error;
+      }
 
       if (authError || !user) {
-        console.error('Authentication failed:', authError);
+        console.error('❌ Authentication failed:', authError);
         router.push('/auth/login');
         return;
       }
+
+      console.log('✅ User authenticated:', user.id);
       setUserId(user.id);
+
+      console.log('📊 Loading gap analysis...');
 
       // Load gap analysis
       const { data: gapData, error: gapError } = await supabase
@@ -104,10 +119,58 @@ export default function PersonalizedDashboard() {
         .single();
 
       if (gapData && !gapError) {
+        console.log('✅ Gap analysis loaded:', gapData);
         setGapAnalysis(gapData);
-      } else if (gapError && gapError.code !== 'PGRST116') {
-        // PGRST116 is "no rows returned" which is expected for new users
-        console.error('Error loading gap analysis:', gapError);
+      } else {
+        if (gapError && gapError.code !== 'PGRST116') {
+          // PGRST116 is "no rows returned" which is expected for new users
+          console.error('❌ Error loading gap analysis:', gapError);
+        } else {
+          console.log('ℹ️ No gap analysis found yet');
+        }
+
+        // Try to load from assessment as fallback
+        console.log('🔄 Checking for completed assessment...');
+        const { data: assessmentData, error: assessmentError } = await supabase
+          .from('streamlined_assessment_responses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (assessmentData && !assessmentError) {
+          console.log('✅ Found assessment, converting to gap analysis format');
+          // Convert assessment to gap analysis format
+          const scores = assessmentData.scores;
+          setGapAnalysis({
+            id: assessmentData.id,
+            user_id: user.id,
+            overall_score: scores?.OVERALL?.percentage || 0,
+            maturity_level: assessmentData.readiness_level || 'Beginning',
+            govern_score: scores?.GOVERN?.percentage || 0,
+            govern_gaps: [],
+            govern_strengths: [],
+            govern_recommendations: ['Focus on AI governance framework'],
+            map_score: scores?.MAP?.percentage || 0,
+            map_gaps: [],
+            map_strengths: [],
+            map_recommendations: ['Map AI systems and processes'],
+            measure_score: scores?.MEASURE?.percentage || 0,
+            measure_gaps: [],
+            measure_strengths: [],
+            measure_recommendations: ['Establish measurement metrics'],
+            manage_score: scores?.MANAGE?.percentage || 0,
+            manage_gaps: [],
+            manage_strengths: [],
+            manage_recommendations: ['Implement risk management'],
+            priority_actions: ['Review policies', 'Train staff', 'Document systems'],
+            quick_wins: ['Create AI policy', 'Awareness training', 'Tool inventory'],
+            analysis_date: assessmentData.completed_at || new Date().toISOString()
+          });
+        } else {
+          console.log('ℹ️ No assessment found either');
+        }
       }
 
       // Load roadmaps
@@ -183,10 +246,10 @@ export default function PersonalizedDashboard() {
           {/* Welcome Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-3">
-              Welcome to Your AI Readiness Journey! 🎯
+              Welcome to Your Dashboard! 🎯
             </h1>
             <p className="text-xl text-gray-600">
-              Let's build your personalized AI implementation roadmap
+              Your AI readiness analysis is being prepared...
             </p>
           </div>
 
@@ -264,13 +327,37 @@ export default function PersonalizedDashboard() {
 
               {/* Call to Action */}
               <div className="text-center">
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+                  <h3 className="font-semibold text-blue-900 mb-2">✨ Your Analysis is Being Generated</h3>
+                  <p className="text-blue-700 mb-4">
+                    We're analyzing your institution's current AI readiness. Complete the assessment and upload documents to unlock your personalized roadmap!
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>Assessment: 5 minutes</span>
+                    </div>
+                    <div className="hidden sm:block text-blue-400">•</div>
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <FileText className="h-4 w-4" />
+                      <span>Upload: 3-5 minutes</span>
+                    </div>
+                    <div className="hidden sm:block text-blue-400">•</div>
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <Zap className="h-4 w-4" />
+                      <span>Results: Instant</span>
+                    </div>
+                  </div>
+                </div>
+
                 <p className="text-gray-600 mb-6">
                   Ready to transform your institution's AI strategy? Let's get started!
                 </p>
-                <div className="flex gap-4 justify-center">
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
                     size="lg"
-                    onClick={() => router.push('/assessment/streamlined')}
+                    onClick={() => router.push('/assessment')}
                     className="bg-indigo-600 hover:bg-indigo-700"
                   >
                     <Target className="h-5 w-5 mr-2" />
@@ -284,8 +371,21 @@ export default function PersonalizedDashboard() {
                     <FileText className="h-5 w-5 mr-2" />
                     Upload Documents
                   </Button>
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    onClick={() => window.location.reload()}
+                  >
+                    <ArrowRight className="h-5 w-5 mr-2" />
+                    Refresh Results
+                  </Button>
                 </div>
-                <p className="text-sm text-gray-500 mt-4">
+
+                <p className="text-sm text-gray-500 mt-6">
+                  💡 <strong>Tip:</strong> Upload existing policies, strategic plans, or technology documents for a more accurate analysis
+                </p>
+
+                <p className="text-xs text-gray-400 mt-3">
                   Most institutions complete the entire process in under 15 minutes
                 </p>
               </div>
@@ -575,9 +675,8 @@ export default function PersonalizedDashboard() {
                         </p>
                       </div>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      doc.processing_status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
+                    <span className={`text-xs px-2 py-1 rounded ${doc.processing_status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
                       {doc.processing_status}
                     </span>
                   </div>

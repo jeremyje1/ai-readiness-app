@@ -1,0 +1,88 @@
+NUCLEAR CACHE BUSTING - October 3, 2025
+========================================
+Commit: c30a819
+
+PROBLEM CONFIRMED:
+------------------
+Vercel's CDN/Edge network is serving OLD JavaScript bundles despite fresh builds:
+
+Evidence:
+- Build log shows: /get-started size changed from 6.47 kB to 6.51 kB (NEW CODE!)
+- Browser loads: page-67ce153a3c115125.js (OLD HASH - hasn't changed in 3 deployments!)
+- Console shows: "⏭️ Skipping manual profile creation" (code that doesn't exist anymore!)
+- Build completed at 13:46:58, deployed commit c0d55f7
+- User tested immediately after, still got old code
+
+Root Cause:
+Vercel's CDN (Content Delivery Network) caches JavaScript bundles aggressively.
+Even though the server built new files, the CDN is serving old cached versions.
+
+NUCLEAR OPTIONS APPLIED:
+-------------------------
+
+1. ✅ next.config.js - generateBuildId()
+   Forces unique build ID using git commit SHA or timestamp
+   Each build gets completely unique identifier
+
+2. ✅ next.config.js - headers() for /get-started
+   Added aggressive cache control headers:
+   - no-store
+   - no-cache  
+   - must-revalidate
+   - proxy-revalidate
+   - max-age=0
+   
+   This tells browsers AND CDNs to NEVER cache the page
+
+3. ✅ vercel.json - Build environment config
+   Already configured in previous deploy
+
+VERIFICATION AFTER DEPLOYMENT:
+-------------------------------
+After deployment completes (~2-3 minutes):
+
+1. **Hard refresh with cache bypass**: Cmd+Shift+R multiple times
+2. **OR Clear all browser data**: Cmd+Shift+Delete
+3. **Sign up with NEW email**
+4. **Check for NEW bundle hash**:
+   - Open DevTools → Network tab
+   - Look for `page-[HASH].js` files
+   - Hash should be DIFFERENT from: page-67ce153a3c115125.js
+   
+5. **Check console for marker**:
+   - MUST see: "🔥 CACHE BUST v2 - October 3, 2025 13:45 CST"
+   - MUST see: "📝 Creating user profile and institution..."
+   - MUST NOT see: "⏭️ Skipping manual profile creation"
+
+IF THIS STILL FAILS:
+--------------------
+If you STILL see page-67ce153a3c115125.js after this deployment, then:
+
+**Option A: Wait for CDN TTL expiry**
+- Vercel's edge cache may have a TTL (Time To Live) of 5-60 minutes
+- The cache control headers will prevent FUTURE caching but won't purge existing cache
+- Try again in 30-60 minutes
+
+**Option B: Use Vercel Dashboard to redeploy**
+1. Go to: https://vercel.com/jeremyje1s-projects/ai-readiness-app
+2. Find the latest deployment (commit c30a819)
+3. Click "..." menu → "Redeploy"
+4. This forces Vercel to purge CDN cache
+
+**Option C: Contact Vercel Support**
+- Request manual CDN cache purge
+- Explain the issue with stale JavaScript bundles
+
+**Option D: Create new project** (LAST RESORT)
+- Deploy to a completely fresh Vercel project
+- No cached files at all
+- Use different domain or subdomain
+
+TIMELINE:
+---------
+- 13:31:15 - Deploy 59046aa (restored cache)
+- 13:42:18 - Deploy 9a16cab (cache bust attempt #1)
+- 13:46:13 - Deploy c0d55f7 (aggressive cache bust)
+- 13:50:xx - Deploy c30a819 (NUCLEAR - cache control headers) ← CURRENT
+
+Current Status: Waiting for deployment c30a819 to complete and CDN to respect no-cache headers

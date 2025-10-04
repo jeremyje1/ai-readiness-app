@@ -1,0 +1,39 @@
+DEPLOYMENT TRIGGERED: October 3, 2025 @ 16:00 CST
+Branch: chore/ai-blueprint-edu-cleanup-20251002-1625
+Deployment URL: https://ai-readiness-cs5mtfux4-jeremys-projects-73929cad.vercel.app
+
+CRITICAL FIXES IN THIS DEPLOYMENT:
+=================================
+
+1. Fixed Multiple GoTrueClient Instances Warning
+   - Updated useUserContext.ts to use createClient() from @/lib/supabase/client
+   - Updated useInstitutionSetup.ts to use createClient() from @/lib/supabase/client
+
+2. Fixed 406 Errors on institution_memberships 
+   - Root cause: wrong Supabase client wasn't sending auth headers
+   - Fixed by updating to browser-specific client
+
+3. Fixed Assessment Redirect Loop
+   - Removed redirect logic in upload-documents page that was sending users back
+   - Now allows access even if assessment query fails
+
+4. Fixed 500 Error on Email Endpoint
+   - Made email sending non-blocking (fire-and-forget)
+   - Added comprehensive error handling to prevent failures from blocking flow
+
+5. Should Fix 406 on streamlined_assessment_responses
+   - Same root cause as institution_memberships (wrong client)
+
+COMMITS INCLUDED:
+- 8e3a665: improve email error handling
+- 05f1495: update client-side hooks to use proper browser Supabase client
+- 76772c4: remove redirect loop from upload-documents page
+
+EXPECTED RESULT:
+- No more "Multiple GoTrueClient instances" warning
+- No more 406 errors
+- Clean signup flow
+- Assessment completion redirects to upload page correctly
+
+DEPLOYMENT METHOD: Vercel CLI with --force flag
+STATUS: Deployed successfully

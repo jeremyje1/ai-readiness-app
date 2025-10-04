@@ -1,4 +1,4 @@
-import { Question } from './algorithm/types';
+import { Question } from './question-types';
 
 export const AI_READINESS_QUESTIONS: Question[] = [
   // === AI STRATEGY & GOVERNANCE (6 questions) ===
@@ -13,7 +13,7 @@ export const AI_READINESS_QUESTIONS: Question[] = [
     contextPrompt: "Describe your current AI strategy documentation and governance structure."
   },
   {
-    id: "AIR_02", 
+    id: "AIR_02",
     section: "AI Strategy & Governance",
     prompt: "We have designated leadership responsible for AI initiatives and decision-making.",
     type: "likert",
@@ -23,7 +23,7 @@ export const AI_READINESS_QUESTIONS: Question[] = [
   },
   {
     id: "AIR_03",
-    section: "AI Strategy & Governance", 
+    section: "AI Strategy & Governance",
     prompt: "Our AI governance framework addresses ethics, privacy, and responsible AI use.",
     type: "likert",
     required: true,
@@ -34,7 +34,7 @@ export const AI_READINESS_QUESTIONS: Question[] = [
     id: "AIR_04",
     section: "AI Strategy & Governance",
     prompt: "We have established metrics and KPIs to measure AI initiative success.",
-    type: "likert", 
+    type: "likert",
     required: true,
     helpText: "Consider whether you track ROI, efficiency gains, and other success indicators for AI projects."
   },
@@ -48,7 +48,7 @@ export const AI_READINESS_QUESTIONS: Question[] = [
   },
   {
     id: "AIR_06",
-    section: "AI Strategy & Governance", 
+    section: "AI Strategy & Governance",
     prompt: "We regularly review and update our AI strategy based on emerging technologies and outcomes.",
     type: "likert",
     required: true,
@@ -70,7 +70,7 @@ export const AI_READINESS_QUESTIONS: Question[] = [
     id: "AIR_08",
     section: "Pedagogical Integration",
     prompt: "We have developed curriculum guidelines for appropriate AI use in coursework and assessments.",
-    type: "likert", 
+    type: "likert",
     required: true,
     helpText: "Consider whether there are clear policies about when and how AI can be used academically."
   },
@@ -85,7 +85,7 @@ export const AI_READINESS_QUESTIONS: Question[] = [
   },
   {
     id: "AIR_10",
-    section: "Pedagogical Integration", 
+    section: "Pedagogical Integration",
     prompt: "Our learning management systems and educational technology integrate effectively with AI tools.",
     type: "likert",
     required: true,
@@ -120,7 +120,7 @@ export const AI_READINESS_QUESTIONS: Question[] = [
     helpText: "Consider data quality, accessibility, and security for AI applications."
   },
   {
-    id: "AIR_14", 
+    id: "AIR_14",
     section: "Technology Infrastructure",
     prompt: "Our cybersecurity measures are adequate for protecting AI systems and data.",
     type: "likert",
@@ -190,7 +190,7 @@ export const AI_READINESS_QUESTIONS: Question[] = [
   },
   {
     id: "AIR_22",
-    section: "Organizational Culture & Change Management", 
+    section: "Organizational Culture & Change Management",
     prompt: "We have processes for addressing concerns and resistance to AI implementation.",
     type: "likert",
     required: true,
@@ -905,7 +905,7 @@ export const AI_DOMAINS: Record<string, Domain> = {
     weight: 0.20
   },
   technology_infrastructure: {
-    name: "Technology Infrastructure", 
+    name: "Technology Infrastructure",
     description: "Technical capacity and systems to support AI implementation",
     questions: ["AIR_16", "AIR_17", "AIR_18", "AIR_19", "AIR_20", "AIR_21", "AIR_22"],
     weight: 0.15
@@ -929,7 +929,7 @@ export const AI_DOMAINS: Record<string, Domain> = {
     weight: 0.08
   },
   benchmarking_standards: {
-    name: "Benchmarking & Standards", 
+    name: "Benchmarking & Standards",
     description: "Peer institution comparison and accreditation alignment",
     questions: ["AIR_39", "AIR_40", "AIR_41", "AIR_42"],
     weight: 0.08
@@ -950,7 +950,7 @@ export const AI_TIERS: Record<string, Tier> = {
     price: 2000
   },
   "ai-readiness-comprehensive": {
-    name: "AI Readiness Comprehensive", 
+    name: "AI Readiness Comprehensive",
     description: "Comprehensive assessment & strategy with 25-page detailed report",
     questionCount: 105,
     price: 4995
@@ -1026,37 +1026,37 @@ export function getQuestionsForTier(tier: string): Question[] {
   if (!tierConfig) {
     return AI_READINESS_QUESTIONS.slice(0, 25); // Default fallback
   }
-  
+
   return AI_READINESS_QUESTIONS.slice(0, tierConfig.questionCount);
 }
 
 export function calculateDomainScores(responses: Record<string, number>): Record<string, { score: number; percentage: number }> {
   const domainScores: Record<string, { score: number; percentage: number }> = {};
-  
+
   Object.entries(AI_DOMAINS).forEach(([domainKey, domain]) => {
     const domainResponses = domain.questions
       .map(qId => responses[qId])
       .filter(response => response !== undefined);
-    
+
     if (domainResponses.length > 0) {
       const totalScore = domainResponses.reduce((sum, score) => sum + score, 0);
       const maxPossibleScore = domainResponses.length * 4; // Assuming 0-4 Likert scale
       const percentage = (totalScore / maxPossibleScore) * 100;
-      
+
       domainScores[domainKey] = {
         score: totalScore,
         percentage: Math.round(percentage)
       };
     }
   });
-  
+
   return domainScores;
 }
 
 export function calculateOverallScore(domainScores: Record<string, { score: number; percentage: number }>): number {
   let weightedScore = 0;
   let totalWeight = 0;
-  
+
   Object.entries(AI_DOMAINS).forEach(([domainKey, domain]) => {
     const domainScore = domainScores[domainKey];
     if (domainScore) {
@@ -1064,6 +1064,6 @@ export function calculateOverallScore(domainScores: Record<string, { score: numb
       totalWeight += domain.weight;
     }
   });
-  
+
   return totalWeight > 0 ? Math.round(weightedScore / totalWeight) : 0;
 }

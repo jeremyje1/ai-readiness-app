@@ -1,6 +1,6 @@
 'use client'
 
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { User } from '@supabase/supabase-js'
 import { createContext, useContext, useEffect, useState } from 'react'
 
@@ -38,6 +38,8 @@ export const useUserContext = () => {
 
 export const fetchUserInstitution = async (userId: string): Promise<UserInstitution | null> => {
     try {
+        const supabase = createClient()
+
         // First, get the user's institution membership
         const { data: membership, error: membershipError } = await supabase
             .from('institution_memberships')
@@ -84,6 +86,8 @@ export const useUser = () => {
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
+        const supabase = createClient()
+
         const loadUserData = async () => {
             try {
                 setLoading(true)
@@ -113,7 +117,7 @@ export const useUser = () => {
         loadUserData()
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
             const currentUser = session?.user || null
             setUser(currentUser)
 

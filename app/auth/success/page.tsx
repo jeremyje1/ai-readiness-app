@@ -24,6 +24,12 @@ export default function AuthSuccessPage() {
         }
         setUser(user);
 
+        if (!user) {
+            console.warn('No authenticated user found on auth success page');
+            setLoading(false);
+            return;
+        }
+
         // Check user metadata first
         if (user?.user_metadata?.payment_verified || user?.user_metadata?.tier) {
             console.log('User has paid subscription (metadata), redirecting to dashboard...');
@@ -63,7 +69,7 @@ export default function AuthSuccessPage() {
     };
 
     const navigateToAssessment = () => {
-        router.push('/assessment/streamlined');
+        router.push('/assessment');
     };
 
     const navigateToPricing = () => {

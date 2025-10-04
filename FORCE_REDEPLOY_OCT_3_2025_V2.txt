@@ -1,0 +1,21 @@
+FORCE REDEPLOY TRIGGER - October 3, 2025 @ 16:15 CST
+
+CACHE BUSTING ATTEMPT #2
+
+The JavaScript bundles are STILL showing old versions:
+- page-58caea26a80c1ad1.js (OLD - should have changed)
+- layout-3548995badf52c15.js (OLD - should have changed)
+
+Despite multiple deployments, Vercel is serving cached bundles.
+
+This file forces a new deployment to bust the cache.
+
+CRITICAL FIXES WAITING TO DEPLOY:
+- Fixed Multiple GoTrueClient instances warning
+- Fixed 406 errors on all Supabase queries
+- Fixed assessment redirect loop
+- Fixed document count display
+- Fixed email error handling
+
+Timestamp: 1728334500
+Random: 0.9234567890123456

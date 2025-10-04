@@ -10,6 +10,12 @@ const cleanEnvVar = (envVar: string | undefined, defaultValue: string): string =
 };
 
 const PRODUCT_PRICE_ENV: Record<string, Record<string, string | undefined>> = {
+  'ai-blueprint-edu': {
+    monthly: cleanEnvVar(process.env.STRIPE_PRICE_EDU_MONTHLY_199, ''),
+    yearly: cleanEnvVar(process.env.STRIPE_PRICE_EDU_YEARLY_1990, ''),
+    annual: cleanEnvVar(process.env.STRIPE_PRICE_EDU_YEARLY_1990, '')
+  },
+  // Legacy mappings kept for backward compatibility
   team: {
     monthly: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3'),
     yearly: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3'),

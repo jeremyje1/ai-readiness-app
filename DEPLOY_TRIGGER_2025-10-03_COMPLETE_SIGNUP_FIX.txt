@@ -1,0 +1,87 @@
+DEPLOYMENT TRIGGER - COMPLETE SIGNUP FLOW FIX
+============================================
+
+Date: 2025-10-03
+Time: 17:45 UTC
+Branch: chore/ai-blueprint-edu-cleanup-20251002-1625
+Author: Jeremy Estrella
+
+CRITICAL FIX SUMMARY:
+--------------------
+Fixed complete signup flow by creating profile and institution immediately 
+instead of relying on non-functioning webhook.
+
+ISSUE DESCRIPTION:
+The signup process was:
+1. Creating auth user successfully ✅
+2. Skipping profile creation (relying on webhook) ❌  
+3. Redirecting to welcome page
+4. Welcome page getting 406 errors because no profile/institution exists
+5. User stuck in infinite retry loop
+
+ERROR LOGS OBSERVED:
+- "Failed to load resource: the server responded with a status of 406 ()"
+- "No institution membership found for user"
+- "Profile not found yet, will retry..."
+- Multiple retries then redirect to dashboard with no data
+
+ROOT CAUSE:
+The signup flow was depending on a Stripe webhook to create profiles, but:
+- Webhook may not be configured or functioning
+- Race condition between signup and profile creation
+- 406 errors indicate RLS policies rejecting queries for non-existent records
+
+SOLUTION IMPLEMENTED:
+Modified signup process to create everything immediately:
+
+1. **Institution Creation**
+   - Creates institution with organization name
+   - Unique slug with timestamp to avoid conflicts
+   - Sets default values for headcount, budget, type
+
+2. **Institution Membership**  
+   - Links user to institution with admin role
+   - Ensures user has institution context
+
+3. **User Profile**
+   - Creates profile with all signup data
+   - Sets 7-day trial period
+   - Includes all metadata
+
+CHANGES MADE:
+- app/get-started/page.tsx - Restored profile creation in signup flow
+
+USER FLOW NOW:
+1. User fills signup form
+2. Supabase auth creates account
+3. System immediately creates:
+   - Institution
+   - Institution membership
+   - User profile
+4. Welcome email sent
+5. Redirect to welcome page (with all data ready)
+6. No 406 errors, smooth flow to dashboard
+
+TESTING CHECKLIST:
+✅ Signup with new email
+✅ Verify institution created in database
+✅ Verify institution_memberships record created
+✅ Verify user_profiles record created  
+✅ Verify no 406 errors
+✅ Verify smooth flow to dashboard
+✅ Verify welcome email sent
+
+ALL FIXES IN THIS DEPLOYMENT:
+1. Welcome page infinite loop fix
+2. Build failures fixed (OpenAI & Stripe APIs)
+3. Assessment flow with document upload  
+4. Institution membership auto-creation
+5. Complete signup flow fix (THIS FIX)
+
+DEPLOYMENT URL: https://aiblueprint.educationaiblueprint.com
+
+NOTES:
+- This is the most critical fix
+- Addresses the core onboarding issue
+- Users should now have a completely smooth signup experience
+- No more 406 errors or retry loops

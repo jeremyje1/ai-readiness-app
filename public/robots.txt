@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Main pages
+Allow: /pricing
+Allow: /start
+Allow: /assessment
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+
+# Restricted areas
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://aiblueprint.k12aiblueprint.com/sitemap.xml

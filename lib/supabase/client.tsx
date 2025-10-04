@@ -1,9 +1,8 @@
 'use client'
 
 import { createBrowserClient } from '@supabase/ssr'
-import { env } from '@/lib/env'
-import { createContext, useContext, useMemo } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { createContext, useContext, useMemo } from 'react'
 
 type SupabaseContext = {
   supabase: SupabaseClient
@@ -11,21 +10,26 @@ type SupabaseContext = {
 
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
-export function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const supabase = useMemo(
-    () =>
-      createBrowserClient(
-        env.NEXT_PUBLIC_SUPABASE_URL || '',
-        env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-      ),
-    []
+// Create a browser client instance with proper cookie handling
+const createSupabaseBrowser = () => {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        flowType: 'pkce',
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    }
   )
+}
 
-  return (
-    <Context.Provider value={{ supabase }}>
-      {children}
-    </Context.Provider>
-  )
+export function SupabaseProvider({ children }: { children: React.ReactNode }) {
+  const supabase = useMemo(() => createSupabaseBrowser(), [])
+
+  return <Context.Provider value={{ supabase }}>{children}</Context.Provider>
 }
 
 export function useSupabase() {
@@ -36,15 +40,6 @@ export function useSupabase() {
   return context.supabase
 }
 
-// Singleton client for use outside of React components
-let browserClient: SupabaseClient | undefined
-
 export function createClient() {
-  if (!browserClient) {
-    browserClient = createBrowserClient(
-      env.NEXT_PUBLIC_SUPABASE_URL || '',
-      env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    )
-  }
-  return browserClient
+  return createSupabaseBrowser()
 }

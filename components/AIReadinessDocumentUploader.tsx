@@ -1,21 +1,21 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { 
-  Upload, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle, 
-  X, 
-  Loader2,
-  BookOpen,
-  FileSpreadsheet,
-  Image
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  AlertCircle,
+  BookOpen,
+  CheckCircle,
+  FileSpreadsheet,
+  FileText,
+  Image,
+  Loader2,
+  Upload,
+  X
+} from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface UploadedDocument {
   id: string;
@@ -49,6 +49,23 @@ export default function AIReadinessDocumentUploader({
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isRealAnalysisAvailable, setIsRealAnalysisAvailable] = useState<boolean | null>(null);
+
+  // Check if real analysis is available on mount
+  useEffect(() => {
+    const checkAnalysisAvailability = async () => {
+      try {
+        const response = await fetch('/api/documents/analyze');
+        const data = await response.json();
+        setIsRealAnalysisAvailable(data.available);
+      } catch (error) {
+        console.error('Failed to check analysis availability:', error);
+        setIsRealAnalysisAvailable(false);
+      }
+    };
+
+    checkAnalysisAvailability();
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -85,53 +102,72 @@ export default function AIReadinessDocumentUploader({
 
       try {
         // Update status to processing
-        setDocuments(prev => prev.map(d => 
+        setDocuments(prev => prev.map(d =>
           d.id === document.id ? { ...d, status: 'processing' } : d
         ));
 
         // Simulate file upload and AI analysis
         const analysisResult = await analyzeDocument(file);
 
-        setDocuments(prev => prev.map(d => 
-          d.id === document.id 
+        setDocuments(prev => prev.map(d =>
+          d.id === document.id
             ? { ...d, status: 'analyzed', analysis: analysisResult }
             : d
         ));
 
       } catch (error) {
-        setDocuments(prev => prev.map(d => 
-          d.id === document.id 
-            ? { 
-                ...d, 
-                status: 'error', 
-                error: error instanceof Error ? error.message : 'Analysis failed'
-              }
+        setDocuments(prev => prev.map(d =>
+          d.id === document.id
+            ? {
+              ...d,
+              status: 'error',
+              error: error instanceof Error ? error.message : 'Analysis failed'
+            }
             : d
         ));
       }
     }
 
     setIsAnalyzing(false);
-    
-    // Notify parent component
+
+    // Notify parent component with ALL documents (both uploaded and analyzed)
     const updatedDocuments = documents.concat(newDocuments);
-    onDocumentsAnalyzed(updatedDocuments.filter(d => d.status === 'analyzed'));
+    setDocuments(updatedDocuments);
+    onDocumentsAnalyzed(updatedDocuments);
   };
 
   const analyzeDocument = async (file: File): Promise<UploadedDocument['analysis']> => {
-    // Simulate document processing time
+    // Use real analysis API if available
+    if (isRealAnalysisAvailable) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/documents/analyze', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error('Analysis API error:', error);
+          throw new Error(error.error || 'Analysis failed');
+        }
+
+        const result = await response.json();
+        return result.analysis;
+      } catch (error) {
+        console.error('Real analysis failed, falling back to mock:', error);
+        // Fall through to mock analysis
+      }
+    }
+
+    // Mock analysis for demo/free users
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
 
-    // In a real implementation, this would:
-    // 1. Upload file to server
-    // 2. Extract text content
-    // 3. Send to OpenAI API for analysis
-    // 4. Return structured analysis
-
-    // Mock analysis based on file name/type
     const fileName = file.name.toLowerCase();
     let documentType = 'general_document';
-    
+
     if (fileName.includes('strategic') || fileName.includes('plan')) {
       documentType = 'strategic_plan';
     } else if (fileName.includes('slo') || fileName.includes('outcome')) {
@@ -235,7 +271,9 @@ export default function AIReadinessDocumentUploader({
   };
 
   const removeDocument = (id: string) => {
-    setDocuments(prev => prev.filter(d => d.id !== id));
+    const updatedDocuments = documents.filter(d => d.id !== id);
+    setDocuments(updatedDocuments);
+    onDocumentsAnalyzed(updatedDocuments);
   };
 
   const getFileIcon = (type: string) => {
@@ -257,7 +295,7 @@ export default function AIReadinessDocumentUploader({
   return (
     <div className={cn("w-full", className)}>
       {/* Upload Area */}
-      <Card 
+      <Card
         className={cn(
           "border-2 border-dashed transition-colors cursor-pointer",
           isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
@@ -312,10 +350,10 @@ export default function AIReadinessDocumentUploader({
             <h4 className="text-lg font-semibold text-gray-900">
               Uploaded Documents
             </h4>
-            
+
             {documents.map((doc) => {
               const FileIcon = getFileIcon(doc.type);
-              
+
               return (
                 <motion.div
                   key={doc.id}
@@ -326,7 +364,7 @@ export default function AIReadinessDocumentUploader({
                   <Card className="p-4">
                     <div className="flex items-start space-x-4">
                       <FileIcon className="w-8 h-8 text-blue-600 flex-shrink-0 mt-1" />
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <div>
@@ -337,7 +375,7 @@ export default function AIReadinessDocumentUploader({
                               {formatFileSize(doc.size)}
                             </p>
                           </div>
-                          
+
                           <div className="flex items-center space-x-2">
                             {doc.status === 'uploading' && (
                               <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
@@ -359,7 +397,7 @@ export default function AIReadinessDocumentUploader({
                             </button>
                           </div>
                         </div>
-                        
+
                         <div className="mt-2">
                           {doc.status === 'uploading' && (
                             <p className="text-xs text-blue-600">Uploading...</p>
@@ -370,7 +408,7 @@ export default function AIReadinessDocumentUploader({
                           {doc.status === 'analyzed' && doc.analysis && (
                             <div className="space-y-2">
                               <p className="text-xs text-green-600 font-medium">
-                                Analysis complete • {doc.analysis.confidenceScore}% confidence
+                                {isRealAnalysisAvailable ? 'AI analysis complete' : 'Demo analysis'} • {doc.analysis.confidenceScore}% {isRealAnalysisAvailable ? 'confidence' : 'match'}
                               </p>
                               <div className="text-xs text-gray-600">
                                 <p><strong>Type:</strong> {doc.analysis.documentType}</p>
@@ -405,8 +443,13 @@ export default function AIReadinessDocumentUploader({
           <Card className="p-6 bg-green-50 border-green-200">
             <h4 className="text-lg font-semibold text-green-900 mb-4">
               Document Analysis Summary
+              {isRealAnalysisAvailable ? (
+                <span className="text-xs font-normal text-green-700 ml-2">(AI-Powered)</span>
+              ) : (
+                <span className="text-xs font-normal text-green-700 ml-2">(Demo)</span>
+              )}
             </h4>
-            
+
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <h5 className="text-sm font-medium text-green-800 mb-2">
@@ -416,7 +459,7 @@ export default function AIReadinessDocumentUploader({
                   {documents.filter(d => d.status === 'analyzed').length}
                 </p>
               </div>
-              
+
               <div>
                 <h5 className="text-sm font-medium text-green-800 mb-2">
                   Average Confidence
@@ -431,11 +474,13 @@ export default function AIReadinessDocumentUploader({
                 </p>
               </div>
             </div>
-            
+
             <div className="mt-4">
               <p className="text-sm text-green-700">
-                Your documents have been analyzed and will enhance your AI readiness assessment 
-                with strategic context and alignment recommendations.
+                {isRealAnalysisAvailable
+                  ? 'AI-powered analysis using GPT-4 to extract document content and identify AI readiness opportunities aligned with NIST framework.'
+                  : 'Demo analysis based on document titles. Full AI-powered analysis extracts content and provides deep insights for subscribers.'
+                }
               </p>
             </div>
           </Card>

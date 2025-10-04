@@ -1,6 +1,6 @@
 'use client'
 
-import { ExecutiveTutorialTrigger } from '@/components/TutorialTrigger'
+// ExecutiveTutorialTrigger removed - using simplified tutorial system
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -228,11 +228,6 @@ export default function ExecutiveDashboard() {
           </p>
         </div>
         <div className="flex gap-2">
-          <ExecutiveTutorialTrigger
-            variant="button"
-            showNewBadge={true}
-            className="mr-2"
-          />
           <Button
             variant="outline"
             onClick={() => generateScreenshot('readiness')}

@@ -12,7 +12,7 @@ import {
 
 interface TutorialTriggerProps {
     variant?: 'button' | 'badge' | 'help-icon' | 'floating'
-    tutorialType?: 'dashboard' | 'assessment' | 'executive' | 'compliance' | 'funding'
+    tutorialType?: 'dashboard' | 'assessment'
     label?: string
     className?: string
     showNewBadge?: boolean
@@ -164,18 +164,6 @@ export function DashboardTutorialTrigger(props: Omit<TutorialTriggerProps, 'tuto
 
 export function AssessmentTutorialTrigger(props: Omit<TutorialTriggerProps, 'tutorialType'>) {
     return <TutorialTrigger {...props} tutorialType="assessment" />
-}
-
-export function ExecutiveTutorialTrigger(props: Omit<TutorialTriggerProps, 'tutorialType'>) {
-    return <TutorialTrigger {...props} tutorialType="executive" />
-}
-
-export function ComplianceTutorialTrigger(props: Omit<TutorialTriggerProps, 'tutorialType'>) {
-    return <TutorialTrigger {...props} tutorialType="compliance" />
-}
-
-export function FundingTutorialTrigger(props: Omit<TutorialTriggerProps, 'tutorialType'>) {
-    return <TutorialTrigger {...props} tutorialType="funding" />
 }
 
 // Floating tutorial help - always available

@@ -2,497 +2,565 @@
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { createClient } from '@/lib/supabase/client';
 import {
     ArrowRight,
     Building,
     CheckCircle,
+    Clock,
     GraduationCap,
-    Lightbulb,
-    School,
+    Plus,
     Target,
     Users,
-    BookOpen,
-    Rocket
+    X
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface OnboardingData {
-    // Step 1: Institution Info
-    institutionName: string;
-    institutionType: 'k12' | 'higher-ed' | 'other';
-    studentCount: string;
-
-    // Step 2: Your Role
+    // Step 1: Educator Profile
     userName: string;
     userRole: string;
     department: string;
+    yearsInEducation: string;
 
-    // Step 3: AI Goals
-    aiExperience: 'none' | 'exploring' | 'piloting' | 'implementing';
-    topPriority: string;
+    // Step 2: Institution Context
+    institutionName: string;
+    institutionSize: string;
+    currentAIAdoption: string;
+
+    // Step 3: Implementation Goals
+    primaryGoals: string[];
+    biggestChallenges: string[];
     timeline: string;
+
+    // Step 4: Team Setup
+    inviteColleagues: boolean;
+    colleagueEmails: string[];
+    createClassroom: boolean;
 }
 
-export default function OnboardingPage() {
+const ROLES = [
+    { value: 'faculty', label: 'Faculty/Professor', icon: GraduationCap },
+    { value: 'admin', label: 'Administrator', icon: Building },
+    { value: 'department_head', label: 'Department Head', icon: Users },
+    { value: 'it_staff', label: 'IT Staff', icon: Target },
+];
+
+const INSTITUTION_SIZES = [
+    { value: 'small', label: 'Small (<2,000 students)' },
+    { value: 'medium', label: 'Medium (2,000-10,000)' },
+    { value: 'large', label: 'Large (10,000-50,000)' },
+    { value: 'very_large', label: 'Very Large (50,000+)' },
+];
+
+const AI_ADOPTION_LEVELS = [
+    { value: 'none', label: 'Not started', description: 'No AI initiatives yet' },
+    { value: 'exploring', label: 'Exploring', description: 'Researching options' },
+    { value: 'piloting', label: 'Piloting', description: 'Testing with small groups' },
+    { value: 'implementing', label: 'Implementing', description: 'Rolling out institution-wide' },
+];
+
+const PRIMARY_GOALS = [
+    'Improve student engagement and outcomes',
+    'Streamline administrative processes',
+    'Enhance faculty productivity',
+    'Develop AI literacy programs',
+    'Create ethical AI guidelines',
+    'Implement AI-powered learning tools',
+];
+
+const BIGGEST_CHALLENGES = [
+    'Faculty resistance to change',
+    'Budget constraints',
+    'Lack of technical expertise',
+    'Data privacy concerns',
+    'Integration with existing systems',
+    'Unclear ROI',
+];
+
+export default function EducatorOnboardingPage() {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
 
     const [data, setData] = useState<OnboardingData>({
-        institutionName: '',
-        institutionType: 'k12',
-        studentCount: '',
         userName: '',
         userRole: '',
         department: '',
-        aiExperience: 'none',
-        topPriority: '',
-        timeline: ''
+        yearsInEducation: '',
+        institutionName: '',
+        institutionSize: '',
+        currentAIAdoption: '',
+        primaryGoals: [],
+        biggestChallenges: [],
+        timeline: '',
+        inviteColleagues: false,
+        colleagueEmails: [],
+        createClassroom: false,
     });
 
-    const totalSteps = 4; // Welcome, Institution, Role, Goals
-    const progress = (currentStep / totalSteps) * 100;
+    const supabase = createClient();
 
     useEffect(() => {
-        checkUser();
-    }, []);
-
-    const checkUser = async () => {
-        const supabase = createClient();
-
-        try {
-            // Add timeout protection
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Auth timeout')), 5000)
-            );
-
-            const authPromise = supabase.auth.getUser();
-            const { data: { user }, error } = await Promise.race([authPromise, timeoutPromise]) as any;
-
-            if (error) {
-                console.error('Auth error:', error);
-                router.push('/auth/login');
-                return;
-            }
-
+        // Check if user is authenticated
+        const checkAuth = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
-                console.error('No user found, redirecting to login');
                 router.push('/auth/login');
-                return;
-            }
-
-            console.log('User authenticated:', user.id);
-            setUserId(user.id);
-
-            // Pre-fill data if available
-            if (user.email) {
-                setData(prev => ({
-                    ...prev,
-                    userName: user.user_metadata?.full_name || user.user_metadata?.name || ''
-                }));
-            }
-        } catch (error) {
-            console.error('Error checking user:', error);
-            // Don't redirect on timeout - user might still be logged in
-            // Just try to get session from cookies as fallback
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user) {
-                    console.log('User found via session:', session.user.id);
-                    setUserId(session.user.id);
-                    setData(prev => ({
-                        ...prev,
-                        userName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || ''
-                    }));
-                } else {
-                    router.push('/auth/login');
+            } else {
+                setUserId(user.id);
+                // Pre-fill user data if available
+                if (user.user_metadata?.name) {
+                    setData(prev => ({ ...prev, userName: user.user_metadata.name }));
                 }
-            } catch (sessionError) {
-                console.error('Session fallback failed:', sessionError);
-                router.push('/auth/login');
             }
-        }
-    };
-
-    const handleNext = () => {
-        if (currentStep < totalSteps) {
-            setCurrentStep(currentStep + 1);
-        } else {
-            handleComplete();
-        }
-    };
-
-    const handleBack = () => {
-        if (currentStep > 1) {
-            setCurrentStep(currentStep - 1);
-        }
-    };
+        };
+        checkAuth();
+    }, [router, supabase]);
 
     const handleComplete = async () => {
-        if (!userId) {
-            console.error('No user ID found');
-            return;
-        }
-
-        console.log('Starting onboarding completion...', { userId, data });
         setLoading(true);
-        const supabase = createClient();
-
         try {
-            // Save user profile
-            console.log('Saving user profile...');
-            const profileData = {
-                user_id: userId,
-                institution_name: data.institutionName,
-                institution_type: data.institutionType,
-                student_count: parseInt(data.studentCount) || null,
-                full_name: data.userName,
-                job_title: data.userRole,
-                department: data.department,
-                ai_experience: data.aiExperience,
-                top_priority: data.topPriority,
-                implementation_timeline: data.timeline,
-                onboarding_completed: true,
-                updated_at: new Date().toISOString()
-            };
+            if (!userId) return;
 
-            console.log('Profile data:', profileData);
+            // Save onboarding data
+            const { error } = await supabase
+                .from('user_onboarding')
+                .upsert({
+                    user_id: userId,
+                    educator_profile: {
+                        name: data.userName,
+                        role: data.userRole,
+                        department: data.department,
+                        years_in_education: data.yearsInEducation,
+                    },
+                    institution_context: {
+                        name: data.institutionName,
+                        size: data.institutionSize,
+                        current_ai_adoption: data.currentAIAdoption,
+                    },
+                    implementation_goals: {
+                        primary_goals: data.primaryGoals,
+                        biggest_challenges: data.biggestChallenges,
+                        timeline: data.timeline,
+                    },
+                    team_setup: {
+                        invite_colleagues: data.inviteColleagues,
+                        colleague_emails: data.colleagueEmails,
+                        create_classroom: data.createClassroom,
+                    },
+                    completed_at: new Date().toISOString(),
+                });
 
-            const { data: savedProfile, error: profileError } = await supabase
-                .from('user_profiles')
-                .upsert(profileData, {
-                    onConflict: 'user_id'
-                })
-                .select();
+            if (error) throw error;
 
-            if (profileError) {
-                console.error('Error saving profile:', profileError);
-                alert('Error saving your profile. Please try again or contact support.');
-                setLoading(false);
-                return;
+            // Update user metadata
+            await supabase.auth.updateUser({
+                data: {
+                    onboarding_completed: true,
+                    institution_name: data.institutionName,
+                    user_role: data.userRole,
+                }
+            });
+
+            // Send colleague invitations if requested
+            if (data.inviteColleagues && data.colleagueEmails.length > 0) {
+                await fetch('/api/invite-colleagues', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        emails: data.colleagueEmails,
+                        inviterName: data.userName,
+                        institutionName: data.institutionName,
+                    }),
+                });
             }
 
-            console.log('Profile saved successfully:', savedProfile);
-
-            // Redirect to streamlined assessment
-            console.log('Redirecting to assessment...');
-            window.location.href = '/assessment/streamlined';
+            // Redirect to dashboard
+            router.push('/dashboard/personalized');
         } catch (error) {
-            console.error('Error completing onboarding:', error);
-            alert('An error occurred. Please try again or contact support.');
+            console.error('Onboarding error:', error);
+        } finally {
             setLoading(false);
         }
     };
 
-    const renderStep = () => {
-        switch (currentStep) {
+    const isStepValid = (step: number): boolean => {
+        switch (step) {
             case 1:
-                return (
-                    <div className="space-y-6 text-center">
-                        <div className="flex justify-center">
-                            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-4 rounded-2xl">
-                                <Rocket className="h-16 w-16 text-white" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <h2 className="text-3xl font-bold mb-4">Welcome to AI Blueprint! 🎉</h2>
-                            <p className="text-gray-600 text-lg mb-6">
-                                Let's get you set up in just 2 minutes. We'll personalize your
-                                AI readiness journey based on your institution's unique needs.
-                            </p>
-                        </div>
-
-                        <Card className="p-6 bg-blue-50 border-blue-200">
-                            <h3 className="font-semibold text-lg mb-3">What you'll get:</h3>
-                            <div className="space-y-3 text-left">
-                                <div className="flex items-start gap-3">
-                                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                                    <span>Personalized AI readiness assessment</span>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                                    <span>Custom implementation roadmap</span>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                                    <span>Policy templates & governance tools</span>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                                    <span>Ongoing support & resources</span>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
-                );
-
+                return !!(data.userName && data.userRole && data.department);
             case 2:
-                return (
-                    <div className="space-y-6">
-                        <div className="text-center">
-                            <Building className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                            <h2 className="text-2xl font-bold mb-2">Tell us about your institution</h2>
-                            <p className="text-gray-600">This helps us customize your experience</p>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Institution Name *
-                                </label>
-                                <Input
-                                    value={data.institutionName}
-                                    onChange={(e) => setData({...data, institutionName: e.target.value})}
-                                    placeholder="e.g., Springfield School District"
-                                    className="w-full"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Institution Type *
-                                </label>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    {[
-                                        { value: 'k12', label: 'K-12', icon: School },
-                                        { value: 'higher-ed', label: 'Higher Ed', icon: GraduationCap },
-                                        { value: 'other', label: 'Other', icon: Building }
-                                    ].map((type) => (
-                                        <button
-                                            key={type.value}
-                                            type="button"
-                                            onClick={() => setData({...data, institutionType: type.value as any})}
-                                            className={`p-4 border-2 rounded-lg transition-all ${
-                                                data.institutionType === type.value
-                                                    ? 'border-blue-600 bg-blue-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <type.icon className="h-8 w-8 mx-auto mb-2" />
-                                            <div className="font-medium">{type.label}</div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Approximate Student Count
-                                </label>
-                                <Input
-                                    type="number"
-                                    value={data.studentCount}
-                                    onChange={(e) => setData({...data, studentCount: e.target.value})}
-                                    placeholder="e.g., 5000"
-                                    className="w-full"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                );
-
+                return !!(data.institutionName && data.institutionSize && data.currentAIAdoption);
             case 3:
-                return (
-                    <div className="space-y-6">
-                        <div className="text-center">
-                            <Users className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                            <h2 className="text-2xl font-bold mb-2">Your role & department</h2>
-                            <p className="text-gray-600">Help us understand your perspective</p>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Your Name *
-                                </label>
-                                <Input
-                                    value={data.userName}
-                                    onChange={(e) => setData({...data, userName: e.target.value})}
-                                    placeholder="John Smith"
-                                    className="w-full"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Your Role *
-                                </label>
-                                <Input
-                                    value={data.userRole}
-                                    onChange={(e) => setData({...data, userRole: e.target.value})}
-                                    placeholder="e.g., Technology Director, Principal, CTO"
-                                    className="w-full"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Department
-                                </label>
-                                <Input
-                                    value={data.department}
-                                    onChange={(e) => setData({...data, department: e.target.value})}
-                                    placeholder="e.g., IT, Curriculum, Administration"
-                                    className="w-full"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                );
-
+                return data.primaryGoals.length > 0 && data.biggestChallenges.length > 0 && !!data.timeline;
             case 4:
-                return (
-                    <div className="space-y-6">
-                        <div className="text-center">
-                            <Target className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                            <h2 className="text-2xl font-bold mb-2">Your AI journey</h2>
-                            <p className="text-gray-600">Almost done! Tell us about your AI goals</p>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Where are you in your AI journey? *
-                                </label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {[
-                                        { value: 'none', label: 'Just Starting' },
-                                        { value: 'exploring', label: 'Exploring Options' },
-                                        { value: 'piloting', label: 'Running Pilots' },
-                                        { value: 'implementing', label: 'Implementing' }
-                                    ].map((stage) => (
-                                        <button
-                                            key={stage.value}
-                                            type="button"
-                                            onClick={() => setData({...data, aiExperience: stage.value as any})}
-                                            className={`p-3 border-2 rounded-lg transition-all ${
-                                                data.aiExperience === stage.value
-                                                    ? 'border-blue-600 bg-blue-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            {stage.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    What's your top priority?
-                                </label>
-                                <Input
-                                    value={data.topPriority}
-                                    onChange={(e) => setData({...data, topPriority: e.target.value})}
-                                    placeholder="e.g., Create AI policy, train teachers, evaluate tools"
-                                    className="w-full"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Implementation timeline
-                                </label>
-                                <select
-                                    value={data.timeline}
-                                    onChange={(e) => setData({...data, timeline: e.target.value})}
-                                    className="w-full p-2 border rounded-lg"
-                                >
-                                    <option value="">Select timeline</option>
-                                    <option value="immediate">Immediate (This month)</option>
-                                    <option value="quarter">This Quarter</option>
-                                    <option value="semester">This Semester</option>
-                                    <option value="year">This School Year</option>
-                                    <option value="planning">Planning for Next Year</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            default:
-                return null;
-        }
-    };
-
-    const canProceed = () => {
-        switch (currentStep) {
-            case 1:
-                return true; // Welcome screen
-            case 2:
-                return data.institutionName && data.institutionType;
-            case 3:
-                return data.userName && data.userRole;
-            case 4:
-                return data.aiExperience;
+                return true; // Optional step
             default:
                 return false;
         }
     };
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-            {/* Progress Bar */}
-            <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b z-10">
-                <div className="max-w-3xl mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-600">
-                            Step {currentStep} of {totalSteps}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                            {Math.round(progress)}% Complete
-                        </span>
-                    </div>
-                    <Progress value={progress} className="h-2" />
-                </div>
-            </div>
+    const handleAddColleague = () => {
+        setData(prev => ({
+            ...prev,
+            colleagueEmails: [...prev.colleagueEmails, '']
+        }));
+    };
 
-            {/* Content */}
-            <div className="max-w-3xl mx-auto px-6 py-12">
+    const handleRemoveColleague = (index: number) => {
+        setData(prev => ({
+            ...prev,
+            colleagueEmails: prev.colleagueEmails.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleColleagueEmailChange = (index: number, value: string) => {
+        setData(prev => ({
+            ...prev,
+            colleagueEmails: prev.colleagueEmails.map((email, i) =>
+                i === index ? value : email
+            )
+        }));
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12">
+            <div className="max-w-2xl mx-auto px-4">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Welcome to AI Blueprint for Education
+                    </h1>
+                    <p className="text-gray-600">
+                        Let's personalize your experience in just a few steps
+                    </p>
+                </div>
+
+                <Progress value={(currentStep / 4) * 100} className="mb-8" />
+
                 <Card className="p-8">
-                    {renderStep()}
+                    {/* Step 1: Educator Profile */}
+                    {currentStep === 1 && (
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-2xl font-semibold mb-2">Tell us about yourself</h2>
+                                <p className="text-gray-600">This helps us tailor recommendations to your role</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <Label htmlFor="name">Your Name</Label>
+                                    <Input
+                                        id="name"
+                                        value={data.userName}
+                                        onChange={(e) => setData({ ...data, userName: e.target.value })}
+                                        placeholder="Dr. Jane Smith"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Your Role</Label>
+                                    <div className="grid grid-cols-2 gap-3 mt-2">
+                                        {ROLES.map((role) => (
+                                            <button
+                                                key={role.value}
+                                                onClick={() => setData({ ...data, userRole: role.value })}
+                                                className={`p-4 rounded-lg border-2 transition-all ${data.userRole === role.value
+                                                        ? 'border-indigo-600 bg-indigo-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                            >
+                                                <role.icon className="h-6 w-6 mx-auto mb-2 text-indigo-600" />
+                                                <p className="text-sm font-medium">{role.label}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="department">Department</Label>
+                                    <Input
+                                        id="department"
+                                        value={data.department}
+                                        onChange={(e) => setData({ ...data, department: e.target.value })}
+                                        placeholder="e.g., Computer Science, Administration"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="years">Years in Education</Label>
+                                    <Input
+                                        id="years"
+                                        type="number"
+                                        value={data.yearsInEducation}
+                                        onChange={(e) => setData({ ...data, yearsInEducation: e.target.value })}
+                                        placeholder="10"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 2: Institution Context */}
+                    {currentStep === 2 && (
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-2xl font-semibold mb-2">About your institution</h2>
+                                <p className="text-gray-600">Help us understand your institutional context</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <Label htmlFor="institution">Institution Name</Label>
+                                    <Input
+                                        id="institution"
+                                        value={data.institutionName}
+                                        onChange={(e) => setData({ ...data, institutionName: e.target.value })}
+                                        placeholder="State University"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Institution Size</Label>
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                        {INSTITUTION_SIZES.map((size) => (
+                                            <button
+                                                key={size.value}
+                                                onClick={() => setData({ ...data, institutionSize: size.value })}
+                                                className={`p-3 rounded-lg border text-left transition-all ${data.institutionSize === size.value
+                                                        ? 'border-indigo-600 bg-indigo-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                            >
+                                                <p className="text-sm font-medium">{size.label}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label>Current AI Adoption Level</Label>
+                                    <div className="space-y-2 mt-2">
+                                        {AI_ADOPTION_LEVELS.map((level) => (
+                                            <button
+                                                key={level.value}
+                                                onClick={() => setData({ ...data, currentAIAdoption: level.value })}
+                                                className={`w-full p-4 rounded-lg border text-left transition-all ${data.currentAIAdoption === level.value
+                                                        ? 'border-indigo-600 bg-indigo-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                            >
+                                                <p className="font-medium">{level.label}</p>
+                                                <p className="text-sm text-gray-600">{level.description}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 3: Implementation Goals */}
+                    {currentStep === 3 && (
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-2xl font-semibold mb-2">Your AI implementation goals</h2>
+                                <p className="text-gray-600">What do you hope to achieve with AI?</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <Label>Primary Goals (select all that apply)</Label>
+                                    <div className="space-y-2 mt-2">
+                                        {PRIMARY_GOALS.map((goal) => (
+                                            <label
+                                                key={goal}
+                                                className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer"
+                                            >
+                                                <Checkbox
+                                                    checked={data.primaryGoals.includes(goal)}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setData({
+                                                                ...data,
+                                                                primaryGoals: [...data.primaryGoals, goal]
+                                                            });
+                                                        } else {
+                                                            setData({
+                                                                ...data,
+                                                                primaryGoals: data.primaryGoals.filter(g => g !== goal)
+                                                            });
+                                                        }
+                                                    }}
+                                                />
+                                                <span className="text-sm">{goal}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label>Biggest Challenges (select all that apply)</Label>
+                                    <div className="space-y-2 mt-2">
+                                        {BIGGEST_CHALLENGES.map((challenge) => (
+                                            <label
+                                                key={challenge}
+                                                className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer"
+                                            >
+                                                <Checkbox
+                                                    checked={data.biggestChallenges.includes(challenge)}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setData({
+                                                                ...data,
+                                                                biggestChallenges: [...data.biggestChallenges, challenge]
+                                                            });
+                                                        } else {
+                                                            setData({
+                                                                ...data,
+                                                                biggestChallenges: data.biggestChallenges.filter(c => c !== challenge)
+                                                            });
+                                                        }
+                                                    }}
+                                                />
+                                                <span className="text-sm">{challenge}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label>Implementation Timeline</Label>
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                        {[
+                                            { value: '1-3months', label: '1-3 months' },
+                                            { value: '3-6months', label: '3-6 months' },
+                                            { value: '6-12months', label: '6-12 months' },
+                                            { value: 'over1year', label: 'Over 1 year' },
+                                        ].map((timeline) => (
+                                            <button
+                                                key={timeline.value}
+                                                onClick={() => setData({ ...data, timeline: timeline.value })}
+                                                className={`p-3 rounded-lg border text-center transition-all ${data.timeline === timeline.value
+                                                        ? 'border-indigo-600 bg-indigo-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                            >
+                                                <Clock className="h-5 w-5 mx-auto mb-1 text-indigo-600" />
+                                                <p className="text-sm font-medium">{timeline.label}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Team Setup (Optional) */}
+                    {currentStep === 4 && (
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-2xl font-semibold mb-2">Build your team (optional)</h2>
+                                <p className="text-gray-600">Collaborate with colleagues on your AI journey</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="flex items-center space-x-3">
+                                    <Checkbox
+                                        checked={data.inviteColleagues}
+                                        onCheckedChange={(checked) =>
+                                            setData({ ...data, inviteColleagues: checked as boolean })
+                                        }
+                                    />
+                                    <span>Invite colleagues to join AI Blueprint</span>
+                                </label>
+
+                                {data.inviteColleagues && (
+                                    <div className="space-y-3">
+                                        <Label>Colleague Email Addresses</Label>
+                                        {data.colleagueEmails.map((email, index) => (
+                                            <div key={index} className="flex gap-2">
+                                                <Input
+                                                    type="email"
+                                                    value={email}
+                                                    onChange={(e) => handleColleagueEmailChange(index, e.target.value)}
+                                                    placeholder="colleague@university.edu"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() => handleRemoveColleague(index)}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={handleAddColleague}
+                                            className="w-full"
+                                        >
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            Add Another Colleague
+                                        </Button>
+                                    </div>
+                                )}
+
+                                <label className="flex items-center space-x-3">
+                                    <Checkbox
+                                        checked={data.createClassroom}
+                                        onCheckedChange={(checked) =>
+                                            setData({ ...data, createClassroom: checked as boolean })
+                                        }
+                                    />
+                                    <span>Create a virtual classroom for AI training</span>
+                                </label>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Navigation */}
-                    <div className="flex justify-between mt-8 pt-6 border-t">
+                    <div className="flex justify-between mt-8">
                         <Button
                             variant="outline"
-                            onClick={handleBack}
+                            onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
                             disabled={currentStep === 1}
-                            className="min-w-[100px]"
                         >
                             Back
                         </Button>
 
-                        <Button
-                            onClick={handleNext}
-                            disabled={!canProceed() || loading}
-                            className="min-w-[140px]"
-                        >
-                            {loading ? (
-                                'Setting up...'
-                            ) : currentStep === totalSteps ? (
-                                <>
-                                    Start Assessment <CheckCircle className="ml-2 h-4 w-4" />
-                                </>
-                            ) : (
-                                <>
-                                    Continue <ArrowRight className="ml-2 h-4 w-4" />
-                                </>
-                            )}
-                        </Button>
+                        {currentStep < 4 ? (
+                            <Button
+                                onClick={() => setCurrentStep(currentStep + 1)}
+                                disabled={!isStepValid(currentStep)}
+                            >
+                                Continue
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleComplete}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>Completing...</>
+                                ) : (
+                                    <>
+                                        Complete Setup
+                                        <CheckCircle className="ml-2 h-4 w-4" />
+                                    </>
+                                )}
+                            </Button>
+                        )}
                     </div>
                 </Card>
-
-                {/* Help text */}
-                <div className="text-center mt-6 text-sm text-gray-500">
-                    Need help? Contact support at support@aiblueprint.org
-                </div>
             </div>
         </div>
     );

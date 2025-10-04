@@ -1,0 +1,25 @@
+FORCE DEPLOYMENT - October 4, 2025 - ${Date.now()}
+
+This file forces Vercel to create a completely new build with:
+- New JavaScript bundle hashes
+- New chunk file names
+- Fresh CDN cache
+- No possibility of serving old code
+
+Previous bundles showing:
+- 938-77fee557f7a878ac.js (OLD)
+- layout-3548995badf52c15.js (OLD)
+- page-512ecc3ee6004fe3.js (OLD)
+
+After this deployment, expect NEW hashes.
+
+Commit that should be deployed: 81339fd
+Changes included:
+- 15-second auth timeouts (not 5)
+- Retry logic for failed auth
+- Gap analysis auto-creation from assessment
+- Dashboard fallback to assessment data
+- Better error handling throughout
+
+If you're still seeing the old hashes after this deploys,
+the problem is network-level caching (ISP, router, etc.)

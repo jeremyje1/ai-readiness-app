@@ -1,5 +1,0 @@
-Deployment triggered to apply fixed Supabase environment variables.
-
-Issue: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY had trailing newline characters (\n)
-Fix: Removed and re-added environment variables without trailing newlines using Vercel CLI
-Timestamp: 2025-09-30

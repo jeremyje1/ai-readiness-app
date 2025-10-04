@@ -1,0 +1,83 @@
+AGGRESSIVE CACHE BUSTING DEPLOYMENT
+====================================
+Date: October 3, 2025 - 13:45 CST
+Commit: c0d55f7
+
+PROBLEM:
+--------
+Vercel keeps serving OLD cached JavaScript bundles even after:
+1. Commit 59046aa - restored cache from previous build
+2. Commit 9a16cab - file modification attempt
+3. STILL showing "⏭️ Skipping manual profile creation" (code that doesn't exist!)
+
+JavaScript bundle names in browser:
+- page-67ce153a3c115125.js (get-started page - OLD CODE!)
+- page-64f6c745fed2da72.js (welcome page)
+- layout-51321fa5bfdb8aa6.js (layout)
+
+AGGRESSIVE SOLUTIONS APPLIED:
+------------------------------
+
+1. ✅ Added Unique Console Log Marker
+   - Added: "🔥 CACHE BUST v2 - October 3, 2025 13:45 CST"
+   - This will ONLY appear if new code is deployed
+   - Easy visual verification in browser console
+
+2. ✅ Created vercel.json Config
+   - Forces Next.js to use commit SHA as build ID
+   - Should prevent build cache reuse
+   - Each deployment gets unique build hash
+
+3. ✅ Deleted Local .next Cache
+   - Ensures clean local state
+
+4. ✅ Committed ALL Files
+   - Including fix-existing-user.js script
+   - Including cache bust documentation
+
+VERIFICATION STEPS:
+-------------------
+1. Wait 2-3 minutes for deployment
+2. Hard refresh browser (Cmd+Shift+R) or clear cache completely
+3. Sign up with NEW email
+4. Look for this EXACT message in console:
+   
+   🔥 CACHE BUST v2 - October 3, 2025 13:45 CST
+   
+5. If you see this message, the new code is running
+6. If you DON'T see it, Vercel cache is still active
+
+EXPECTED CONSOLE OUTPUT (NEW CODE):
+------------------------------------
+✅ Session created automatically
+🔥 CACHE BUST v2 - October 3, 2025 13:45 CST  ← NEW!
+📝 Creating user profile and institution...
+✅ Institution created: [id]
+✅ Institution membership created
+✅ Profile created
+
+BAD CONSOLE OUTPUT (OLD CACHED CODE):
+--------------------------------------
+✅ Session created automatically
+⏭️ Skipping manual profile creation (webhook will handle it)  ← OLD!
+📧 Sending welcome email...
+
+NEXT STEPS IF STILL FAILING:
+-----------------------------
+If you STILL see old code after this:
+1. The issue is Vercel's CDN/edge cache
+2. We may need to:
+   - Contact Vercel support
+   - Delete and redeploy the project
+   - Use a different deployment branch
+   - Manually invalidate Vercel's cache
+
+BUILD HASHES TO VERIFY:
+-----------------------
+Current deployed bundles (OLD):
+- page-67ce153a3c115125.js
+
+After deployment, these should CHANGE to new hashes like:
+- page-[NEW-HASH].js
+
+If the hash is SAME after deployment, cache is still being used.

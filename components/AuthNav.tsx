@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ export default function AuthNav() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const supabase = createClient();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -30,17 +31,13 @@ export default function AuthNav() {
   const linkBase = 'hover:text-gray-900 px-2 py-1 rounded transition-colors';
   const activeClasses = 'text-indigo-600 font-semibold';
   const links = [
-    { href: '/services', label: 'Services' },
     { href: '/contact', label: 'Contact' },
     { href: '/privacy', label: 'Privacy' },
     { href: '/terms', label: 'Terms' }
-  ];
-
-  const dashboardLinks = [
-    { href: '/executive', label: 'Executive Dashboard', description: 'Readiness scorecards & metrics' },
-    { href: '/executive/compliance', label: 'Compliance Watch', description: 'Track policies & vendor renewals' },
-    { href: '/executive/funding', label: 'Funding Justification', description: 'Generate grant narratives' },
-    { href: '/community', label: 'Community Hub', description: 'Monthly briefings, templates & benchmarks' }
+  ]; const dashboardLinks = [
+    { href: '/dashboard/personalized', label: 'Dashboard', description: 'Your personalized AI readiness dashboard' },
+    { href: '/assessment', label: 'Assessment', description: 'Take or review your AI readiness assessment' },
+    { href: '/resources/templates', label: 'Resources', description: 'Access templates and guides' }
   ];
   return (
     <header className='w-full bg-white/70 backdrop-blur border-b border-gray-200 text-sm sticky top-0 z-40'>
@@ -86,7 +83,7 @@ export default function AuthNav() {
           {!loading && !userEmail && (
             <>
               <Link href='/auth/login' className='text-gray-700 hover:text-black'>Login</Link>
-              <Link href='/start?billing=monthly' className='text-blue-600 hover:underline'>Start</Link>
+              <Link href='/get-started' className='text-blue-600 hover:underline'>Get Started</Link>
             </>
           )}
         </div>
@@ -134,7 +131,7 @@ export default function AuthNav() {
             {!loading && !userEmail && (
               <>
                 <Link href='/auth/login' onClick={() => setOpen(false)} className='text-gray-700 hover:text-black'>Login</Link>
-                <Link href='/start?billing=monthly' onClick={() => setOpen(false)} className='text-blue-600 hover:underline'>Start</Link>
+                <Link href='/get-started' onClick={() => setOpen(false)} className='text-blue-600 hover:underline'>Get Started</Link>
               </>
             )}
           </div>

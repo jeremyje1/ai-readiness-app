@@ -1,6 +1,6 @@
 'use client'
 
-import { ComplianceTutorialTrigger } from '@/components/TutorialTrigger'
+// ComplianceTutorialTrigger removed - using simplified tutorial system
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -289,7 +289,6 @@ ${complianceItems.filter(item => item.daysUntilDue >= 0 && item.daysUntilDue <= 
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <ComplianceTutorialTrigger showNewBadge={true} variant="floating" />
           <Button onClick={generateReport} variant="outline" className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Generate Report
