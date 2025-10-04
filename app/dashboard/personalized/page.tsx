@@ -109,6 +109,8 @@ export default function PersonalizedDashboard() {
       console.log('✅ User authenticated:', user.id);
       setUserId(user.id);
 
+      console.log('📊 Loading gap analysis...');
+      
       // Load gap analysis
       const { data: gapData, error: gapError } = await supabase
         .from('gap_analysis_results')
@@ -117,13 +119,57 @@ export default function PersonalizedDashboard() {
         .single();
 
       if (gapData && !gapError) {
+        console.log('✅ Gap analysis loaded:', gapData);
         setGapAnalysis(gapData);
-      } else if (gapError && gapError.code !== 'PGRST116') {
-        // PGRST116 is "no rows returned" which is expected for new users
-        console.error('Error loading gap analysis:', gapError);
-        // Don't let 406 errors prevent dashboard access
-        if (gapError.code === '406') {
-          console.log('⚠️ Gap analysis query failed due to auth issue, continuing anyway');
+      } else {
+        if (gapError && gapError.code !== 'PGRST116') {
+          // PGRST116 is "no rows returned" which is expected for new users
+          console.error('❌ Error loading gap analysis:', gapError);
+        } else {
+          console.log('ℹ️ No gap analysis found yet');
+        }
+        
+        // Try to load from assessment as fallback
+        console.log('🔄 Checking for completed assessment...');
+        const { data: assessmentData, error: assessmentError } = await supabase
+          .from('streamlined_assessment_responses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (assessmentData && !assessmentError) {
+          console.log('✅ Found assessment, converting to gap analysis format');
+          // Convert assessment to gap analysis format
+          const scores = assessmentData.scores;
+          setGapAnalysis({
+            id: assessmentData.id,
+            user_id: user.id,
+            overall_score: scores?.OVERALL?.percentage || 0,
+            maturity_level: assessmentData.readiness_level || 'Beginning',
+            govern_score: scores?.GOVERN?.percentage || 0,
+            govern_gaps: [],
+            govern_strengths: [],
+            govern_recommendations: ['Focus on AI governance framework'],
+            map_score: scores?.MAP?.percentage || 0,
+            map_gaps: [],
+            map_strengths: [],
+            map_recommendations: ['Map AI systems and processes'],
+            measure_score: scores?.MEASURE?.percentage || 0,
+            measure_gaps: [],
+            measure_strengths: [],
+            measure_recommendations: ['Establish measurement metrics'],
+            manage_score: scores?.MANAGE?.percentage || 0,
+            manage_gaps: [],
+            manage_strengths: [],
+            manage_recommendations: ['Implement risk management'],
+            priority_actions: ['Review policies', 'Train staff', 'Document systems'],
+            quick_wins: ['Create AI policy', 'Awareness training', 'Tool inventory'],
+            analysis_date: assessmentData.completed_at || new Date().toISOString()
+          });
+        } else {
+          console.log('ℹ️ No assessment found either');
         }
       }
 
