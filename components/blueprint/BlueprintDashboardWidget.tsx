@@ -12,7 +12,7 @@ import {
     Sparkles
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface BlueprintSummary {
     id: string;
@@ -26,42 +26,21 @@ interface BlueprintSummary {
     };
 }
 
-export default function BlueprintDashboardWidget() {
+interface BlueprintDashboardWidgetProps {
+    blueprints?: BlueprintSummary[];
+    hasAssessment?: boolean;
+    loading?: boolean;
+}
+
+export default function BlueprintDashboardWidget({ 
+    blueprints: initialBlueprints = [], 
+    hasAssessment: initialHasAssessment = false,
+    loading: initialLoading = false 
+}: BlueprintDashboardWidgetProps) {
     const router = useRouter();
-    const [blueprints, setBlueprints] = useState<BlueprintSummary[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [hasAssessment, setHasAssessment] = useState(false);
-
-    useEffect(() => {
-        fetchBlueprints();
-        checkAssessment();
-    }, []);
-
-    const fetchBlueprints = async () => {
-        try {
-            const response = await fetch('/api/blueprint?limit=3');
-            if (!response.ok) throw new Error('Failed to fetch blueprints');
-            const data = await response.json();
-            setBlueprints(data.blueprints || []);
-        } catch (error) {
-            console.error('Error fetching blueprints:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const checkAssessment = async () => {
-        // Check if user has completed an assessment
-        try {
-            const response = await fetch('/api/assessment/check');
-            if (response.ok) {
-                const data = await response.json();
-                setHasAssessment(data.hasCompleted);
-            }
-        } catch (error) {
-            console.error('Error checking assessment:', error);
-        }
-    };
+    const [blueprints] = useState<BlueprintSummary[]>(initialBlueprints);
+    const [loading] = useState(initialLoading);
+    const [hasAssessment] = useState(initialHasAssessment);
 
     const getStatusColor = (status: string) => {
         const colors: Record<string, string> = {

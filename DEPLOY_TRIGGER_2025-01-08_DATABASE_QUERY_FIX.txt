@@ -1,0 +1,28 @@
+DEPLOYMENT TRIGGER - DATABASE QUERY 406 ERRORS FIX
+Date: 2025-01-08
+Purpose: Fix 406 errors from Supabase queries
+
+Issues Fixed:
+1. 406 (Not Acceptable) errors when querying:
+   - gap_analysis_results
+   - streamlined_assessment_responses 
+   - institution_memberships
+   
+2. Added missing /api/assessment/check endpoint
+
+3. Document upload not completing due to database errors
+
+Root Cause:
+- Using .single() on queries that might return 0 rows
+- Supabase returns 406 when expecting exactly 1 row but getting 0 or multiple
+
+Solution:
+- Replaced .single() with .maybeSingle() in:
+  - app/dashboard/personalized/page.tsx
+  - app/assessment/upload-documents/page.tsx
+  - lib/hooks/useUserContext.ts
+  - app/api/assessment/check/route.ts (new)
+
+This allows proper handling when users don't have data yet.
+
+Deployment URL: https://ai-readiness-9t0x4gabs-jeremys-projects-73929cad.vercel.app

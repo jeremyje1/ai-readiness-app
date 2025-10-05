@@ -23,7 +23,7 @@ export class BlueprintService {
 
             // Step 1: Calculate readiness scores
             const responses = assessment.assessment_responses || [];
-            
+
             // Create default organization metrics
             // TODO: These should ideally come from the assessment or institution profile
             const defaultOrgMetrics = {
@@ -45,7 +45,7 @@ export class BlueprintService {
                 resourceUtilization: 0.5,
                 taskAutomationLevel: 0.4
             };
-            
+
             const metrics = await calculateEnterpriseMetrics(responses, defaultOrgMetrics);
 
             // Calculate overall score as average of all metric scores

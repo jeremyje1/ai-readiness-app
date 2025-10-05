@@ -69,6 +69,8 @@ export default function PersonalizedDashboard() {
   const [gapAnalysis, setGapAnalysis] = useState<GapAnalysis | null>(null);
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [blueprints, setBlueprints] = useState<any[]>([]);
+  const [hasAssessment, setHasAssessment] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -198,6 +200,33 @@ export default function PersonalizedDashboard() {
       } else if (docError) {
         console.error('Error loading documents:', docError);
       }
+
+      // Load blueprints (limit to 3 for dashboard widget)
+      const { data: blueprintData, error: blueprintError } = await supabase
+        .from('blueprints')
+        .select(`
+          id,
+          title,
+          status,
+          maturity_level,
+          generated_at,
+          blueprint_progress (
+            overall_progress,
+            is_on_track
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('generated_at', { ascending: false })
+        .limit(3);
+
+      if (blueprintData && !blueprintError) {
+        setBlueprints(blueprintData);
+      } else if (blueprintError) {
+        console.error('Error loading blueprints:', blueprintError);
+      }
+
+      // Set hasAssessment flag based on loaded gap analysis
+      setHasAssessment(!!gapData || !!gapAnalysis);
 
       setLoading(false);
     } catch (error) {
@@ -471,7 +500,11 @@ export default function PersonalizedDashboard() {
         </Card>
 
         {/* AI Implementation Blueprints */}
-        <BlueprintDashboardWidget />
+        <BlueprintDashboardWidget 
+          blueprints={blueprints}
+          hasAssessment={hasAssessment}
+          loading={loading}
+        />
 
         {/* Quick Wins */}
         {gapAnalysis.quick_wins && gapAnalysis.quick_wins.length > 0 && (
