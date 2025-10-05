@@ -178,6 +178,12 @@ export async function POST(req: NextRequest) {
         console.log('✅ Assessment saved, creating gap analysis...');
 
         // Also create gap_analysis_results for dashboard
+        // Extract recommendations from roadmap (database expects ARRAY[] not TEXT)
+        const governRec = (roadmap.split('GOVERN')[1]?.split('MAP')[0] || 'Focus on governance').substring(0, 200);
+        const mapRec = (roadmap.split('MAP')[1]?.split('MEASURE')[0] || 'Focus on mapping').substring(0, 200);
+        const measureRec = (roadmap.split('MEASURE')[1]?.split('MANAGE')[0] || 'Focus on measurement').substring(0, 200);
+        const manageRec = (roadmap.split('MANAGE')[1] || 'Focus on risk management').substring(0, 200);
+
         const gapAnalysisData = {
             user_id: userId,
             overall_score: scores.OVERALL.percentage,
@@ -185,19 +191,19 @@ export async function POST(req: NextRequest) {
             govern_score: scores.GOVERN.percentage,
             govern_gaps: [], // Will be populated from detailed analysis
             govern_strengths: [],
-            govern_recommendations: [roadmap.split('GOVERN')[1]?.split('MAP')[0] || 'Focus on governance'].slice(0, 200),
+            govern_recommendations: [governRec], // ARRAY format
             map_score: scores.MAP.percentage,
             map_gaps: [],
             map_strengths: [],
-            map_recommendations: [roadmap.split('MAP')[1]?.split('MEASURE')[0] || 'Focus on mapping'].slice(0, 200),
+            map_recommendations: [mapRec], // ARRAY format
             measure_score: scores.MEASURE.percentage,
             measure_gaps: [],
             measure_strengths: [],
-            measure_recommendations: [roadmap.split('MEASURE')[1]?.split('MANAGE')[0] || 'Focus on measurement'].slice(0, 200),
+            measure_recommendations: [measureRec], // ARRAY format
             manage_score: scores.MANAGE.percentage,
             manage_gaps: [],
             manage_strengths: [],
-            manage_recommendations: [roadmap.split('MANAGE')[1] || 'Focus on risk management'].slice(0, 200),
+            manage_recommendations: [manageRec], // ARRAY format
             priority_actions: [
                 'Review AI governance policies',
                 'Establish AI oversight committee',
