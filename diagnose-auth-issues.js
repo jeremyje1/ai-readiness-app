@@ -39,11 +39,11 @@ async function makeRequest(path, options = {}) {
         });
 
         req.on('error', reject);
-        
+
         if (options.body) {
             req.write(JSON.stringify(options.body));
         }
-        
+
         req.end();
     });
 }
@@ -56,14 +56,14 @@ async function runDiagnostics() {
         console.log(`   Status: ${assessmentCheck.status}`);
         console.log(`   Expected: 401 (Unauthorized)`);
         console.log(`   Result: ${assessmentCheck.status === 401 ? '✅ PASS' : '❌ FAIL'}`);
-        
+
         // Test 2: Check /api/blueprint without auth
         console.log('\n2️⃣ Testing /api/blueprint?limit=3 (no auth)...');
         const blueprintCheck = await makeRequest('/api/blueprint?limit=3');
         console.log(`   Status: ${blueprintCheck.status}`);
         console.log(`   Expected: 401 (Unauthorized)`);
         console.log(`   Result: ${blueprintCheck.status === 401 ? '✅ PASS' : '❌ FAIL'}`);
-        
+
         console.log('\n📝 Analysis:');
         console.log('The 401 errors are expected because these API routes require authentication.');
         console.log('The issue is that client-side components are calling server-only API routes.');
@@ -71,7 +71,7 @@ async function runDiagnostics() {
         console.log('1. Move authentication checks to be client-side compatible');
         console.log('2. Use server components for data fetching');
         console.log('3. Pass data as props instead of fetching from client components');
-        
+
     } catch (error) {
         console.error('❌ Error:', error.message);
     }

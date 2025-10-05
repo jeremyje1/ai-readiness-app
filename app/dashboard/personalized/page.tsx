@@ -500,7 +500,7 @@ export default function PersonalizedDashboard() {
         </Card>
 
         {/* AI Implementation Blueprints */}
-        <BlueprintDashboardWidget 
+        <BlueprintDashboardWidget
           blueprints={blueprints}
           hasAssessment={hasAssessment}
           loading={loading}

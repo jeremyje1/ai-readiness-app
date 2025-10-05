@@ -32,10 +32,10 @@ interface BlueprintDashboardWidgetProps {
     loading?: boolean;
 }
 
-export default function BlueprintDashboardWidget({ 
-    blueprints: initialBlueprints = [], 
+export default function BlueprintDashboardWidget({
+    blueprints: initialBlueprints = [],
     hasAssessment: initialHasAssessment = false,
-    loading: initialLoading = false 
+    loading: initialLoading = false
 }: BlueprintDashboardWidgetProps) {
     const router = useRouter();
     const [blueprints] = useState<BlueprintSummary[]>(initialBlueprints);

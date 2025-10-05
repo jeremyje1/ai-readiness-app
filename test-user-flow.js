@@ -198,7 +198,7 @@ async function runTest() {
 
         // Step 7: Check if data is accessible
         console.log('\n7️⃣ Verifying data access...');
-        
+
         // Check assessment
         const { data: checkAssessment, error: checkAssessmentError } = await supabase
             .from('streamlined_assessment_responses')
@@ -255,7 +255,7 @@ async function runTest() {
         console.log(`- Email: ${testEmail}`);
         console.log(`- Institution: ${institution.name} (${institution.id})`);
         console.log(`- Assessment: ${assessment.id}`);
-        
+
     } catch (error) {
         console.error('❌ Test failed:', error);
     }

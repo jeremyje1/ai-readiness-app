@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import React, { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface FormErrors {
   name?: string;
@@ -11,7 +12,23 @@ interface FormErrors {
 }
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', organization: '', message: '', company_website: '' });
+  const searchParams = useSearchParams();
+  const subject = searchParams.get('subject');
+  
+  // Set initial message based on subject parameter
+  const getInitialMessage = () => {
+    switch(subject) {
+      case 'consulting': return 'I\'m interested in learning more about your consulting services.';
+      case 'enterprise': return 'I\'m interested in enterprise pricing and features.';
+      case 'support': return 'I need technical support with...';
+      case 'security': return 'I have questions about security and compliance.';
+      case 'compliance': return 'I have questions about compliance features.';
+      case 'webinars': return 'I\'m interested in attending your webinars.';
+      default: return '';
+    }
+  };
+
+  const [form, setForm] = useState({ name: '', email: '', organization: '', message: getInitialMessage(), company_website: '' });
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});

@@ -1,0 +1,44 @@
+DEPLOYMENT - FIX 401 AUTHENTICATION ERRORS
+Date: January 8, 2025  
+Time: ~14:00 CST
+
+## Issues Fixed
+
+### Problem
+Client-side components were calling server-side API routes that require authentication cookies:
+- `/api/blueprint?limit=3` - returning 401
+- `/api/assessment/check` - returning 401
+
+### Root Cause
+`BlueprintDashboardWidget` is a client component (`'use client'`) that was using `fetch()` to call server-side API routes. Client-side fetch calls don't automatically include authentication cookies in the same way server-side calls do.
+
+### Solution Implemented
+1. **Removed API calls from client component** - Deleted `fetchBlueprints()` and `checkAssessment()` functions from `BlueprintDashboardWidget`
+2. **Moved data fetching to parent component** - Dashboard page now fetches blueprint data using Supabase client (which has access to auth cookies)
+3. **Props-based data flow** - Pass fetched data as props to `BlueprintDashboardWidget`
+
+### Files Modified
+- `components/blueprint/BlueprintDashboardWidget.tsx` - Now accepts data via props
+- `app/dashboard/personalized/page.tsx` - Fetches blueprint data and passes to widget
+
+### Testing
+- Created diagnostic scripts (`diagnose-auth-issues.js`, `test-user-flow.js`) to identify the authentication pattern
+- Confirmed 401 errors are expected for unauthenticated requests
+- Verified solution follows Next.js 15 best practices for client/server component data flow
+
+## Deployment Details
+- Commit: 2a68a9e
+- Vercel URL: https://ai-readiness-3vefj6vc7-jeremys-projects-73929cad.vercel.app
+- Production domain: https://aiblueprint.educationaiblueprint.com
+
+## Expected Results
+- No more 401 errors in browser console for `/api/blueprint` and `/api/assessment/check`
+- Dashboard loads blueprint data correctly
+- Assessment completion status displays properly
+- Smoother user experience with no failed API calls
+
+## Notes
+This follows Next.js 15 best practices:
+- Server components for data fetching (or client components with Supabase client)
+- Props for passing data to child components
+- Avoid fetch() calls from client components to own API routes
