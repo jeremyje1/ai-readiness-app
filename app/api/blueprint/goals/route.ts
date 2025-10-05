@@ -1,12 +1,11 @@
 import { BlueprintGoals } from '@/types/blueprint';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 // GET: Fetch user's blueprint goals
 export async function GET(request: Request) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const supabase = await createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
@@ -43,7 +42,7 @@ export async function GET(request: Request) {
 // POST: Create new blueprint goals
 export async function POST(request: Request) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const supabase = await createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
@@ -106,7 +105,7 @@ export async function POST(request: Request) {
 // PUT: Update existing blueprint goals
 export async function PUT(request: Request) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const supabase = await createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
@@ -154,7 +153,7 @@ export async function PUT(request: Request) {
 // DELETE: Delete blueprint goals
 export async function DELETE(request: Request) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const supabase = await createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {

@@ -1,13 +1,12 @@
 import { BlueprintService } from '@/lib/blueprint/blueprint-service';
 import { Blueprint, BlueprintGoals } from '@/types/blueprint';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 // POST: Generate a new blueprint
 export async function POST(request: Request) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const supabase = await createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
