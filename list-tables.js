@@ -50,7 +50,7 @@ async function listTables() {
 
     if (error) {
         console.error('❌ Error querying tables (trying direct query):', error.message);
-        
+
         // Try a simpler approach - query each table directly
         const knownTables = [
             'user_profiles',
@@ -66,13 +66,13 @@ async function listTables() {
         ];
 
         console.log('\n📊 Checking known critical tables:\n');
-        
+
         for (const tableName of knownTables) {
             try {
                 const { data, error, count } = await supabase
                     .from(tableName)
                     .select('*', { count: 'exact', head: true });
-                
+
                 if (error) {
                     console.log(`❌ ${tableName}: Does NOT exist or no access (${error.code})`);
                 } else {
@@ -88,7 +88,7 @@ async function listTables() {
     console.log('✅ Found tables in public schema:\n');
     console.log('Table Name                              | Columns');
     console.log('----------------------------------------|--------');
-    
+
     if (tables && tables.length > 0) {
         tables.forEach(t => {
             console.log(`${t.table_name.padEnd(40)}| ${t.column_count}`);
@@ -119,7 +119,7 @@ async function checkCriticalTables() {
             const { count, error } = await supabase
                 .from(tableName)
                 .select('*', { count: 'exact', head: true });
-            
+
             if (error) {
                 console.log(`❌ ${tableName.padEnd(35)} - MISSING or NO ACCESS`);
                 console.log(`   Purpose: ${description}`);

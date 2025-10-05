@@ -257,6 +257,145 @@ export default function PersonalizedDashboard() {
     return 'text-red-600';
   };
 
+  const handleDownloadReport = async () => {
+    if (!gapAnalysis) return;
+
+    try {
+      console.log('📄 Generating assessment report...');
+
+      // Generate report content as HTML
+      const reportContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>AI Readiness Assessment Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+            h1 { color: #4f46e5; border-bottom: 3px solid #4f46e5; padding-bottom: 10px; }
+            h2 { color: #4f46e5; margin-top: 30px; }
+            h3 { color: #6366f1; }
+            .score { font-size: 48px; font-weight: bold; color: ${gapAnalysis.overall_score >= 60 ? '#059669' : '#dc2626'}; }
+            .maturity { display: inline-block; padding: 10px 20px; border-radius: 8px; font-weight: bold; background: #eff6ff; color: #1e40af; }
+            .section { margin: 20px 0; padding: 15px; border-left: 4px solid #4f46e5; background: #f9fafb; }
+            .category { margin: 15px 0; padding: 10px; background: white; border-radius: 5px; }
+            .recommendation { padding: 8px; margin: 5px 0; background: #eff6ff; border-radius: 4px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+            th { background: #4f46e5; color: white; }
+            .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; }
+          </style>
+        </head>
+        <body>
+          <h1>🎯 AI Readiness Assessment Report</h1>
+          
+          <div class="section">
+            <h2>Executive Summary</h2>
+            <p><strong>Overall Score:</strong> <span class="score">${gapAnalysis.overall_score}/100</span></p>
+            <p><strong>Maturity Level:</strong> <span class="maturity">${gapAnalysis.maturity_level}</span></p>
+            <p><strong>Assessment Date:</strong> ${new Date(gapAnalysis.analysis_date).toLocaleDateString()}</p>
+            <p><strong>Framework:</strong> NIST AI Risk Management Framework</p>
+          </div>
+
+          <div class="section">
+            <h2>NIST AI RMF Framework Scores</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Score</th>
+                  <th>Level</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>🏛️ GOVERN</td>
+                  <td>${gapAnalysis.govern_score}/100</td>
+                  <td>${gapAnalysis.govern_score >= 60 ? 'Good' : 'Needs Improvement'}</td>
+                </tr>
+                <tr>
+                  <td>🗺️ MAP</td>
+                  <td>${gapAnalysis.map_score}/100</td>
+                  <td>${gapAnalysis.map_score >= 60 ? 'Good' : 'Needs Improvement'}</td>
+                </tr>
+                <tr>
+                  <td>📊 MEASURE</td>
+                  <td>${gapAnalysis.measure_score}/100</td>
+                  <td>${gapAnalysis.measure_score >= 60 ? 'Good' : 'Needs Improvement'}</td>
+                </tr>
+                <tr>
+                  <td>⚙️ MANAGE</td>
+                  <td>${gapAnalysis.manage_score}/100</td>
+                  <td>${gapAnalysis.manage_score >= 60 ? 'Good' : 'Needs Improvement'}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section">
+            <h2>Recommendations by Category</h2>
+            
+            <div class="category">
+              <h3>🏛️ GOVERN Recommendations</h3>
+              ${gapAnalysis.govern_recommendations?.map(rec => `<div class="recommendation">${rec}</div>`).join('') || '<p>No recommendations available</p>'}
+            </div>
+
+            <div class="category">
+              <h3>🗺️ MAP Recommendations</h3>
+              ${gapAnalysis.map_recommendations?.map(rec => `<div class="recommendation">${rec}</div>`).join('') || '<p>No recommendations available</p>'}
+            </div>
+
+            <div class="category">
+              <h3>📊 MEASURE Recommendations</h3>
+              ${gapAnalysis.measure_recommendations?.map(rec => `<div class="recommendation">${rec}</div>`).join('') || '<p>No recommendations available</p>'}
+            </div>
+
+            <div class="category">
+              <h3>⚙️ MANAGE Recommendations</h3>
+              ${gapAnalysis.manage_recommendations?.map(rec => `<div class="recommendation">${rec}</div>`).join('') || '<p>No recommendations available</p>'}
+            </div>
+          </div>
+
+          ${gapAnalysis.priority_actions && gapAnalysis.priority_actions.length > 0 ? `
+          <div class="section">
+            <h2>🎯 Priority Actions</h2>
+            ${gapAnalysis.priority_actions.map((action, i) => `<div class="recommendation">${i + 1}. ${action}</div>`).join('')}
+          </div>
+          ` : ''}
+
+          ${gapAnalysis.quick_wins && gapAnalysis.quick_wins.length > 0 ? `
+          <div class="section">
+            <h2>⚡ Quick Wins (30 Days)</h2>
+            ${gapAnalysis.quick_wins.map((win, i) => `<div class="recommendation">${i + 1}. ${win}</div>`).join('')}
+          </div>
+          ` : ''}
+
+          <div class="footer">
+            <p>Generated by AI Blueprint - Education AI Readiness Platform</p>
+            <p>For more information, visit educationaiblueprint.com</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Create blob and download
+      const blob = new Blob([reportContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `AI-Readiness-Report-${new Date(gapAnalysis.analysis_date).toISOString().split('T')[0]}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      console.log('✅ Report downloaded successfully');
+    } catch (error) {
+      console.error('❌ Error generating report:', error);
+      alert('Failed to generate report. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
@@ -462,7 +601,7 @@ export default function PersonalizedDashboard() {
                 <p className="text-lg font-semibold">
                   {new Date(gapAnalysis.analysis_date).toLocaleDateString()}
                 </p>
-                <Button variant="outline" size="sm" className="mt-3">
+                <Button variant="outline" size="sm" className="mt-3" onClick={handleDownloadReport}>
                   <Download className="h-4 w-4 mr-2" />
                   Download Full Report
                 </Button>

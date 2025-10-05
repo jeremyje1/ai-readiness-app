@@ -71,7 +71,7 @@ export default function AIReadinessDocumentUploader({
   // Notify parent when documents change and all are analyzed or errored
   useEffect(() => {
     if (documents.length > 0 && !isAnalyzing && !hasNotifiedParent) {
-      const allProcessed = documents.every(d => 
+      const allProcessed = documents.every(d =>
         d.status === 'analyzed' || d.status === 'error'
       );
       if (allProcessed) {

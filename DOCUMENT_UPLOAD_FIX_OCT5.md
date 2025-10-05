@@ -27,21 +27,28 @@ Problems:
 
 ## Solution Applied
 
-Added a `useEffect` hook that watches for document state changes and notifies the parent only when ALL documents are fully processed:
+Added a `useEffect` hook with a notification tracking flag to prevent infinite loops:
 
 ```typescript
-// AFTER (CORRECT) - New useEffect
+// AFTER (CORRECT) - New useEffect with tracking flag
+const [hasNotifiedParent, setHasNotifiedParent] = useState(false);
+
 useEffect(() => {
-  if (documents.length > 0 && !isAnalyzing) {
+  if (documents.length > 0 && !isAnalyzing && !hasNotifiedParent) {
     const allProcessed = documents.every(d => 
       d.status === 'analyzed' || d.status === 'error'
     );
     if (allProcessed) {
+      const analyzedDocs = documents.filter(d => d.status === 'analyzed');
       console.log('📄 All documents processed, notifying parent');
-      onDocumentsAnalyzed(documents.filter(d => d.status === 'analyzed'));
+      onDocumentsAnalyzed(analyzedDocs);
+      setHasNotifiedParent(true); // Prevent re-notification
     }
   }
-}, [documents, isAnalyzing, onDocumentsAnalyzed]);
+}, [documents, isAnalyzing, hasNotifiedParent, onDocumentsAnalyzed]);
+
+// Reset flag when new files are added
+setHasNotifiedParent(false);
 ```
 
 **Benefits:**
@@ -49,6 +56,8 @@ useEffect(() => {
 - ✅ Only sends successfully analyzed documents (filters out errors)
 - ✅ Uses React's state update cycle properly
 - ✅ Parent receives fresh, complete data
+- ✅ **Prevents infinite loop by tracking notification state**
+- ✅ Resets flag when new files are added
 
 ## Files Changed
 

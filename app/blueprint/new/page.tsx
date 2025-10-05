@@ -32,11 +32,11 @@ export default function NewBlueprintPage() {
             if (!response.ok) throw new Error('No assessment found');
 
             const data = await response.json();
-            if (!data.id) {
+            if (!data.assessment?.id) {
                 throw new Error('Please complete an assessment first');
             }
 
-            setAssessmentId(data.id);
+            setAssessmentId(data.assessment.id);
         } catch (error: any) {
             console.error('Error fetching assessment:', error);
             setError(error.message || 'Failed to load assessment');

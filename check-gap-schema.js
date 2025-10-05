@@ -26,7 +26,7 @@ const supabase = createClient(
 
 async function checkSchema() {
     console.log('🔍 Checking gap_analysis_results schema...\n');
-    
+
     // Try inserting with text recommendations
     const testData1 = {
         user_id: '1dbe2f11-69cc-49dd-b340-75ac0e502dd5',
@@ -37,16 +37,16 @@ async function checkSchema() {
         govern_recommendations: 'This is a text recommendation',
         priority_actions: ['Action 1', 'Action 2']
     };
-    
+
     console.log('Test 1: Inserting with TEXT recommendations...');
     const { error: error1 } = await supabase
         .from('gap_analysis_results')
         .insert(testData1);
-    
+
     if (error1) {
         console.log('❌ TEXT failed:', error1.message);
         console.log('   Trying ARRAY format...\n');
-        
+
         // Try with array
         const testData2 = {
             user_id: '1dbe2f11-69cc-49dd-b340-75ac0e502dd5',
@@ -57,18 +57,18 @@ async function checkSchema() {
             govern_recommendations: ['Recommendation 1', 'Recommendation 2'],
             priority_actions: ['Action 1', 'Action 2']
         };
-        
+
         const { data: data2, error: error2 } = await supabase
             .from('gap_analysis_results')
             .insert(testData2)
             .select();
-        
+
         if (error2) {
             console.log('❌ ARRAY also failed:', error2.message);
         } else {
             console.log('✅ ARRAY format works!');
             console.log('✅ Columns expect ARRAY[], not TEXT');
-            
+
             // Cleanup
             await supabase.from('gap_analysis_results').delete().eq('id', data2[0].id);
         }
