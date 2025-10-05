@@ -50,9 +50,12 @@ export default function AuthNav() {
     { href: '/contact', label: 'Contact' },
     { href: '/privacy', label: 'Privacy' },
     { href: '/terms', label: 'Terms' }
-  ]; const dashboardLinks = [
+  ];
+
+  const dashboardLinks = [
     { href: '/dashboard/personalized', label: 'Dashboard', description: 'Your personalized AI readiness dashboard' },
     { href: '/assessment', label: 'Assessment', description: 'Take or review your AI readiness assessment' },
+    { href: '/blueprint', label: 'Blueprints', description: 'View and manage your AI implementation blueprints' },
     { href: '/resources/templates', label: 'Resources', description: 'Access templates and guides' }
   ];
   return (

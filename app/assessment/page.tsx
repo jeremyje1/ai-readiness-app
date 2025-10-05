@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { ArrowRight, Building2, CheckCircle2, Clock, FileText, Target, Upload } from 'lucide-react';
+import { ArrowRight, Building2, CheckCircle2, Clock, FileText, Sparkles, Target, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -600,10 +600,41 @@ export default function StreamlinedAssessment() {
                   </ul>
                 </div>
 
-                <Button size="lg" onClick={handleSubmit} disabled={loading} className="w-full">
-                  {loading ? 'Saving...' : 'Continue to Document Upload'}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                <div className="space-y-3">
+                  <Button size="lg" onClick={handleSubmit} disabled={loading} className="w-full">
+                    {loading ? 'Saving...' : 'Continue to Document Upload'}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white px-2 text-gray-500">Or</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => {
+                      // Save assessment first, then redirect to blueprint
+                      handleSubmit().then(() => {
+                        router.push('/blueprint/new');
+                      });
+                    }}
+                    disabled={loading}
+                    className="w-full border-indigo-200 hover:bg-indigo-50"
+                  >
+                    <Sparkles className="mr-2 h-5 w-5 text-indigo-600" />
+                    Generate AI Implementation Blueprint
+                  </Button>
+
+                  <p className="text-xs text-center text-gray-500">
+                    Skip document upload and create your personalized AI roadmap now
+                  </p>
+                </div>
               </div>
             )}
 

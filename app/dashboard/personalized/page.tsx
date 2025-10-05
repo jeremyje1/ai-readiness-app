@@ -1,5 +1,6 @@
 'use client';
 
+import BlueprintDashboardWidget from '@/components/blueprint/BlueprintDashboardWidget';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -469,6 +470,9 @@ export default function PersonalizedDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* AI Implementation Blueprints */}
+        <BlueprintDashboardWidget />
 
         {/* Quick Wins */}
         {gapAnalysis.quick_wins && gapAnalysis.quick_wins.length > 0 && (
