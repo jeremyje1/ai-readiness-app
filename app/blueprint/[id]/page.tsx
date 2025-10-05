@@ -8,15 +8,16 @@ import { Card } from '@/components/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 interface BlueprintPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function BlueprintPage({ params }: BlueprintPageProps) {
+    const { id } = use(params);
     const router = useRouter();
     const [showSharing, setShowSharing] = useState(false);
     const [blueprint, setBlueprint] = useState<any>(null);
@@ -34,11 +35,11 @@ export default function BlueprintPage({ params }: BlueprintPageProps) {
         }, 10000); // Check every 10 seconds
 
         return () => clearInterval(interval);
-    }, [params.id, blueprint?.status]);
+    }, [id, blueprint?.status]);
 
     const fetchBlueprint = async () => {
         try {
-            const response = await fetch(`/api/blueprint/${params.id}`);
+            const response = await fetch(`/api/blueprint/${id}`);
             if (!response.ok) throw new Error('Blueprint not found');
 
             const data = await response.json();
@@ -153,7 +154,7 @@ export default function BlueprintPage({ params }: BlueprintPageProps) {
 
                 <TabsContent value="blueprint" className="mt-6">
                     <BlueprintViewer
-                        blueprintId={params.id}
+                        blueprintId={id}
                         onShare={() => setShowSharing(true)}
                         onEdit={() => {
                             // TODO: Implement edit functionality
@@ -163,7 +164,7 @@ export default function BlueprintPage({ params }: BlueprintPageProps) {
                 </TabsContent>
 
                 <TabsContent value="progress" className="mt-6">
-                    <BlueprintProgressTracker blueprintId={params.id} />
+                    <BlueprintProgressTracker blueprintId={id} />
                 </TabsContent>
             </Tabs>
 
