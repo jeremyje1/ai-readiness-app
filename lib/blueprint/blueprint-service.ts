@@ -23,19 +23,51 @@ export class BlueprintService {
 
             // Step 1: Calculate readiness scores
             const responses = assessment.assessment_responses || [];
-            const metrics = calculateEnterpriseMetrics(responses);
+            
+            // Create default organization metrics
+            // TODO: These should ideally come from the assessment or institution profile
+            const defaultOrgMetrics = {
+                digitalMaturity: 0.5,
+                systemIntegration: 0.5,
+                collaborationIndex: 0.6,
+                innovationCapacity: 0.5,
+                strategicAgility: 0.5,
+                leadershipEffectiveness: 0.6,
+                decisionLatency: 0.4, // lower is better
+                communicationEfficiency: 0.6,
+                employeeEngagement: 0.5,
+                changeReadiness: 0.5,
+                futureReadiness: 0.5,
+                processComplexity: 0.4, // lower is better
+                operationalRisk: 0.3, // lower is better
+                technologicalRisk: 0.3, // lower is better
+                cybersecurityLevel: 0.6,
+                resourceUtilization: 0.5,
+                taskAutomationLevel: 0.4
+            };
+            
+            const metrics = await calculateEnterpriseMetrics(responses, defaultOrgMetrics);
+
+            // Calculate overall score as average of all metric scores
+            const overallScore = (
+                metrics.dsch.overallScore +
+                metrics.lei.overallScore +
+                metrics.crf.overallScore +
+                metrics.oci.overallScore +
+                metrics.hoci.overallScore
+            ) / 5;
 
             const readinessScores = {
-                overall: metrics.overall,
-                dsch: metrics.dsch,
-                lei: metrics.lei,
-                crf: metrics.crf,
-                oci: metrics.oci,
-                hoci: metrics.hoci
+                overall: overallScore,
+                dsch: { score: metrics.dsch.overallScore, factors: metrics.dsch.factors },
+                lei: { score: metrics.lei.overallScore, factors: metrics.lei.factors },
+                crf: { score: metrics.crf.overallScore, factors: metrics.crf.factors },
+                oci: { score: metrics.oci.overallScore, factors: metrics.oci.factors },
+                hoci: { score: metrics.hoci.overallScore, factors: metrics.hoci.factors }
             };
 
             // Step 2: Determine maturity level
-            const maturityLevel = this.determineMaturityLevel(metrics.overall);
+            const maturityLevel = this.determineMaturityLevel(overallScore);
 
             // Step 3: Generate vision and executive summary
             const visionStatement = await this.generator.generateVisionStatement(goals, metrics);
@@ -220,7 +252,7 @@ export class BlueprintService {
     }
 
     // Public methods for updating blueprints
-    async updateBlueprintStatus(blueprintId: string, status: string, userId: string): Promise<void> {
+    async updateBlueprintStatus(blueprintId: string, status: 'draft' | 'generating' | 'complete' | 'updated', userId: string): Promise<void> {
         // Verify ownership
         const { data: blueprint } = await this.supabase
             .from('blueprints')
