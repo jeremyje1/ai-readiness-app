@@ -132,7 +132,7 @@ class EmailService {
     };
 
     const domain = getContextualDomain();
-    const clientDashboardUrl = dashboardUrl || `${domain}/ai-readiness/dashboard`;
+    const clientDashboardUrl = dashboardUrl || `${domain}/dashboard/personalized`;
     const adminAssessmentUrl = `${domain}/admin/assessment/${assessmentId}`;
     const adminDashboardUrl = `${domain}/admin`;
 
@@ -342,7 +342,7 @@ class EmailService {
     };
 
     const domain = getContextualDomain();
-    const dashboardUrl = `${domain}/ai-readiness/dashboard`;
+    const dashboardUrl = `${domain}/dashboard/personalized`;
 
     // Get branded titles based on institution type
     const getBrandedTitle = () => {

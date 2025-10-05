@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       tier: tier || 'comprehensive',
       overallScore: overallScore || 0,
       maturityLevel: maturityLevel || 'Unknown',
-      dashboardUrl: dashboardUrl || 'https://ai-readiness-b1wtt4bxa-jeremys-projects-73929cad.vercel.app/ai-readiness/dashboard'
+      dashboardUrl: dashboardUrl || 'https://aiblueprint.educationaiblueprint.com/dashboard/personalized'
     });
 
     return NextResponse.json({

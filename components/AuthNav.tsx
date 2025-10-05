@@ -29,15 +29,30 @@ export default function AuthNav() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUserEmail(data.session?.user?.email || null);
-      setLoading(false);
-    });
+    const loadSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.warn('[AuthNav] Session error (expected if not logged in):', error.message);
+          setUserEmail(null);
+        } else {
+          setUserEmail(data.session?.user?.email || null);
+        }
+      } catch (error) {
+        console.error('[AuthNav] Error loading session:', error);
+        setUserEmail(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSession();
+
     const { data: listener } = supabase.auth.onAuthStateChange((_evt, session) => {
       setUserEmail(session?.user?.email || null);
     });
     return () => listener.subscription.unsubscribe();
-  }, []);
+  }, [supabase.auth]);
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -87,7 +102,7 @@ export default function AuthNav() {
           {!loading && userEmail && (
             <>
               <Link
-                href='/ai-readiness/dashboard'
+                href='/dashboard/personalized'
                 className='flex items-center gap-2 text-gray-700 hover:text-black bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors'
                 title='Go to Dashboard'
               >
@@ -132,7 +147,7 @@ export default function AuthNav() {
             {!loading && userEmail && (
               <>
                 <Link
-                  href='/ai-readiness/dashboard'
+                  href='/dashboard/personalized'
                   onClick={() => setOpen(false)}
                   className='flex items-center gap-2 text-gray-700 hover:text-black bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors'
                 >

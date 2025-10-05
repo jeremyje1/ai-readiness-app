@@ -392,7 +392,7 @@ export default function InteractiveTutorial({
         // Add data-tutorial attributes to key elements for targeting
         const elements = [
             { selector: 'header', attribute: 'main-nav' },
-            { selector: '[href="/ai-readiness/dashboard"]', attribute: 'user-email' },
+            { selector: '[href="/dashboard/personalized"]', attribute: 'user-email' },
             { selector: '[data-testid="executive-dashboard"]', attribute: 'executive-dashboard' },
             { selector: '[value="readiness"]', attribute: 'readiness-tab' },
             { selector: '[value="adoption"]', attribute: 'adoption-tab' },

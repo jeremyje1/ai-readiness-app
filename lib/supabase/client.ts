@@ -12,9 +12,6 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
 }
 
 export function createClient() {
-  // Force unique instance marker
-  const instanceId = `${CACHE_BUST_VERSION}_${Date.now()}`;
-
   const client = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -24,26 +21,8 @@ export function createClient() {
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
-        // Add cache bust to auth storage key
-        storage: {
-          getItem: (key: string) => {
-            if (typeof window !== 'undefined') {
-              return window.localStorage.getItem(key);
-            }
-            return null;
-          },
-          setItem: (key: string, value: string) => {
-            if (typeof window !== 'undefined') {
-              window.localStorage.setItem(key, value);
-            }
-          },
-          removeItem: (key: string) => {
-            if (typeof window !== 'undefined') {
-              window.localStorage.removeItem(key);
-            }
-          },
-        },
-        storageKey: `sb-auth-token-${instanceId}`,
+        // Use static storage key so sessions persist across page loads
+        storageKey: 'sb-aiblueprint-auth-token',
       }
     }
   );
