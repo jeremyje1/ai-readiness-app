@@ -3,20 +3,20 @@
  * Sends email notifications when assessments are completed
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { emailService } from '@/lib/email-service';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { 
-      userEmail, 
-      userName, 
-      institutionName, 
-      assessmentId, 
-      tier, 
-      overallScore, 
+    const {
+      userEmail,
+      userName,
+      institutionName,
+      assessmentId,
+      tier,
+      overallScore,
       maturityLevel,
-      dashboardUrl 
+      dashboardUrl
     } = await request.json();
 
     // Validate required fields

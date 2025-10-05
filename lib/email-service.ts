@@ -25,12 +25,12 @@ class EmailService {
 
   private initializeSync(): void {
     const postmarkToken = process.env.POSTMARK_API_TOKEN || process.env.POSTMARK_SERVER_TOKEN;
-    
+
     console.log('🔧 Email service initialization...');
     console.log('📧 Postmark token exists:', !!postmarkToken);
     console.log('📧 From email:', process.env.FROM_EMAIL || process.env.POSTMARK_FROM_EMAIL);
     console.log('📧 Reply to:', process.env.REPLY_TO_EMAIL || process.env.POSTMARK_REPLY_TO);
-    
+
     if (!postmarkToken) {
       console.error('❌ No Postmark token found in environment variables');
       return;
@@ -57,7 +57,7 @@ class EmailService {
     try {
       const fromEmail = (options.from || process.env.POSTMARK_FROM_EMAIL || process.env.FROM_EMAIL || 'noreply@northpathstrategies.org').trim();
       const replyToEmail = (options.replyTo || process.env.POSTMARK_REPLY_TO || process.env.REPLY_TO_EMAIL || 'info@northpathstrategies.org').trim();
-      
+
       const result = await this.client.sendEmail({
         From: fromEmail,
         To: options.to,
@@ -94,18 +94,18 @@ class EmailService {
     institutionType?: 'K12' | 'HigherEd' | 'default';
     domainContext?: string;
   }): Promise<{ clientSent: boolean; adminSent: boolean }> {
-    const { 
-      userEmail, 
-      userName, 
-      institutionName, 
-      assessmentId, 
-      tier, 
-      overallScore, 
-      maturityLevel, 
-      dashboardUrl, 
-      baseUrl, 
+    const {
+      userEmail,
+      userName,
+      institutionName,
+      assessmentId,
+      tier,
+      overallScore,
+      maturityLevel,
+      dashboardUrl,
+      baseUrl,
       institutionType,
-      domainContext 
+      domainContext
     } = params;
 
     // Determine the appropriate domain based on institution type
@@ -113,7 +113,7 @@ class EmailService {
       if (baseUrl && !baseUrl.includes('vercel.app')) {
         return baseUrl; // Use provided baseUrl if it's not a Vercel URL
       }
-      
+
       // Use context-specific domains
       switch (institutionType) {
         case 'K12':
@@ -323,7 +323,7 @@ class EmailService {
       if (baseUrl && !baseUrl.includes('vercel.app')) {
         return baseUrl; // Use provided baseUrl if it's not a Vercel URL
       }
-      
+
       // Use context-specific domains
       switch (institutionType) {
         case 'K12':
@@ -439,10 +439,10 @@ class EmailService {
     passwordSetupUrl: string;
     magicLinkUrl?: string;
     tier?: string;
-  loginUrl?: string;
-  passwordResetUrl?: string;
+    loginUrl?: string;
+    passwordResetUrl?: string;
   }): Promise<boolean> {
-  const { to, name, dashboardUrl, passwordSetupUrl, magicLinkUrl, tier, loginUrl, passwordResetUrl } = params;
+    const { to, name, dashboardUrl, passwordSetupUrl, magicLinkUrl, tier, loginUrl, passwordResetUrl } = params;
     const subject = `Welcome to AI Blueprint${tier ? ' – ' + tier.replace(/-/g, ' ') : ''}`;
     const htmlBody = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:24px;">
@@ -453,8 +453,8 @@ class EmailService {
           <li><a href="${dashboardUrl}" style="color:#2563eb;">Open your Dashboard</a></li>
           <li><a href="${passwordSetupUrl}" style="color:#2563eb;">Set / Create Your Password</a></li>
           ${magicLinkUrl ? `<li><a href="${magicLinkUrl}" style="color:#2563eb;">One‑Click Magic Login</a> (valid once)</li>` : ''}
-      ${loginUrl ? `<li><a href="${loginUrl}" style="color:#2563eb;">Standard Login Page</a></li>`: ''}
-      ${passwordResetUrl ? `<li><a href="${passwordResetUrl}" style="color:#2563eb;">Forgot / Reset Password</a></li>`: ''}
+      ${loginUrl ? `<li><a href="${loginUrl}" style="color:#2563eb;">Standard Login Page</a></li>` : ''}
+      ${passwordResetUrl ? `<li><a href="${passwordResetUrl}" style="color:#2563eb;">Forgot / Reset Password</a></li>` : ''}
         </ul>
         <p style="color:#444;font-size:14px;">For security, the magic link and password setup links expire. After setting a password you can log in directly anytime.</p>
         <p style="margin-top:32px;color:#555;font-size:12px;">If you did not authorize this, contact support immediately.</p>
@@ -473,7 +473,7 @@ class EmailService {
         <p style="font-size:14px;color:#444;line-height:1.5;"><strong>Name:</strong> ${name}</p>
         <p style="font-size:14px;color:#444;line-height:1.5;"><strong>Email:</strong> ${email}</p>
         <p style="font-size:14px;color:#444;line-height:1.5;"><strong>Organization:</strong> ${organization || '—'}</p>
-        <p style="font-size:14px;color:#444;line-height:1.5;"><strong>Message:</strong><br/>${message.replace(/</g,'&lt;')}</p>
+        <p style="font-size:14px;color:#444;line-height:1.5;"><strong>Message:</strong><br/>${message.replace(/</g, '&lt;')}</p>
         <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb;" />
         <p style="font-size:12px;color:#666;">Reply directly to this email to respond. This notification was generated by the AI Blueprint contact form.</p>
       </div>
@@ -496,11 +496,11 @@ class EmailService {
     const { customerEmail, customerName, tier, organization, stripeSessionId, stripeCustomerId, dashboardUrl } = params;
     const to = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_EMAIL || 'info@northpathstrategies.org';
     const subject = `🎉 New Customer: ${customerName} (${tier})`;
-    
+
     const tierDisplay = tier.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://aiblueprint.k12aiblueprint.com';
     const adminDashboard = dashboardUrl || `${baseUrl}/admin/dashboard`;
-    
+
     const htmlBody = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
         <div style="background:#10b981;color:white;padding:16px;border-radius:6px;text-align:center;margin-bottom:24px;">
@@ -550,7 +550,7 @@ class EmailService {
         <p style="font-size:12px;color:#666;text-align:center;">This is an automated notification from AI Blueprint. Customer has been sent their welcome email with access credentials.</p>
       </div>
     `;
-    
+
     console.log(`📧 Sending new customer notification to admin: ${to}`);
     return this.sendEmail({ to, subject, htmlBody });
   }
