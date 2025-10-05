@@ -1,663 +1,473 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { createClient } from '@/lib/supabase/client';
-import type { User } from '@supabase/supabase-js';
-import { ArrowRight, Building2, CheckCircle2, Clock, FileText, Sparkles, Target, Upload } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-interface AssessmentData {
-  // Step 1: Institution Context
-  institutionType: string;
-  institutionSize: string;
-  institutionState: string;
+// NIST AI Risk Management Framework Questions
+const NIST_QUESTIONS = {
+  GOVERN: [
+    {
+      id: 1,
+      text: 'Our institution has established clear AI governance policies and procedures',
+      category: 'GOVERN',
+      helpText: 'Do you have documented policies for AI use, oversight committees, and decision-making processes?'
+    },
+    {
+      id: 2,
+      text: 'We have designated leadership responsible for AI strategy and implementation',
+      category: 'GOVERN',
+      helpText: 'Is there a person or team with clear authority and accountability for AI initiatives?'
+    },
+    {
+      id: 3,
+      text: 'Our AI governance addresses ethics, bias, and responsible AI use',
+      category: 'GOVERN',
+      helpText: 'Do your policies cover fairness, transparency, and ethical considerations?'
+    },
+    {
+      id: 4,
+      text: 'We have processes for reviewing and approving new AI tools and applications',
+      category: 'GOVERN',
+      helpText: 'Is there a formal vetting process before adopting new AI technologies?'
+    },
+    {
+      id: 5,
+      text: 'Our institution has allocated budget and resources for AI initiatives',
+      category: 'GOVERN',
+      helpText: 'Are AI projects funded and resourced appropriately?'
+    }
+  ],
+  MAP: [
+    {
+      id: 6,
+      text: 'We have documented all AI systems currently in use across our institution',
+      category: 'MAP',
+      helpText: 'Do you maintain an inventory of AI tools, applications, and vendors?'
+    },
+    {
+      id: 7,
+      text: 'We understand the data flows and inputs required for our AI systems',
+      category: 'MAP',
+      helpText: 'Can you map where data comes from and how it flows through AI systems?'
+    },
+    {
+      id: 8,
+      text: 'We have identified the stakeholders affected by our AI implementations',
+      category: 'MAP',
+      helpText: 'Do you know which faculty, staff, and students are impacted by AI systems?'
+    },
+    {
+      id: 9,
+      text: 'We have assessed the risks associated with each AI system we use',
+      category: 'MAP',
+      helpText: 'Have you identified potential harms, biases, or failure modes?'
+    },
+    {
+      id: 10,
+      text: 'We understand the technical capabilities and limitations of our AI systems',
+      category: 'MAP',
+      helpText: 'Do you know what your AI tools can and cannot do reliably?'
+    }
+  ],
+  MEASURE: [
+    {
+      id: 11,
+      text: 'We have established metrics to evaluate AI system performance',
+      category: 'MEASURE',
+      helpText: 'Do you track accuracy, reliability, and effectiveness of AI tools?'
+    },
+    {
+      id: 12,
+      text: 'We monitor AI systems for bias, fairness, and equity issues',
+      category: 'MEASURE',
+      helpText: 'Are you actively checking for discriminatory outcomes?'
+    },
+    {
+      id: 13,
+      text: 'We regularly assess user satisfaction with AI tools and services',
+      category: 'MEASURE',
+      helpText: 'Do you collect feedback from faculty, staff, and students?'
+    },
+    {
+      id: 14,
+      text: 'We measure the impact of AI on educational outcomes and operations',
+      category: 'MEASURE',
+      helpText: 'Can you quantify benefits like efficiency gains or improved learning?'
+    },
+    {
+      id: 15,
+      text: 'We track compliance with AI-related policies and regulations',
+      category: 'MEASURE',
+      helpText: 'Do you monitor adherence to FERPA, ADA, and institutional policies?'
+    }
+  ],
+  MANAGE: [
+    {
+      id: 16,
+      text: 'We have incident response procedures for AI system failures or issues',
+      category: 'MANAGE',
+      helpText: 'Do you have plans for when AI systems malfunction or cause problems?'
+    },
+    {
+      id: 17,
+      text: 'We conduct regular reviews and audits of our AI systems',
+      category: 'MANAGE',
+      helpText: 'Are AI implementations evaluated periodically for effectiveness and safety?'
+    },
+    {
+      id: 18,
+      text: 'We provide training and support for users of AI systems',
+      category: 'MANAGE',
+      helpText: 'Do faculty, staff, and students receive guidance on AI tool usage?'
+    },
+    {
+      id: 19,
+      text: 'We have processes to address complaints or concerns about AI systems',
+      category: 'MANAGE',
+      helpText: 'Can stakeholders report issues and get them resolved?'
+    },
+    {
+      id: 20,
+      text: 'We continuously improve our AI practices based on feedback and outcomes',
+      category: 'MANAGE',
+      helpText: 'Do you iterate and adapt your AI approach over time?'
+    }
+  ]
+};
 
-  // Step 2: Current AI Status
-  aiJourneyStage: string;
-  biggestChallenge: string;
-
-  // Step 3: Strategic Priorities
-  topPriorities: string[];
-  implementationTimeline: string;
-
-  // Step 4: Contact & Preferences
-  contactName: string;
-  contactEmail: string;
-  contactRole: string;
-  preferredConsultationTime: string;
-  specialConsiderations: string;
-}
-
-const INSTITUTION_TYPES = [
-  { value: 'university', label: 'University (4-year)', icon: '🎓' },
-  { value: 'community_college', label: 'Community College (2-year)', icon: '📚' },
-  { value: 'trade_school', label: 'Trade/Technical School', icon: '🔧' },
-  { value: 'k12_district', label: 'K-12 School District', icon: '🏫' },
+const ALL_QUESTIONS = [
+  ...NIST_QUESTIONS.GOVERN,
+  ...NIST_QUESTIONS.MAP,
+  ...NIST_QUESTIONS.MEASURE,
+  ...NIST_QUESTIONS.MANAGE
 ];
 
-const INSTITUTION_SIZES = [
-  { value: 'small', label: 'Small (<2,000 students)' },
-  { value: 'medium', label: 'Medium (2,000-5,000)' },
-  { value: 'large', label: 'Large (5,000-10,000)' },
-  { value: 'very_large', label: 'Very Large (10,000+)' },
+const RATING_OPTIONS = [
+  { value: 0, label: 'Not at all', description: 'No progress or not applicable', color: 'bg-red-100 border-red-300 text-red-700' },
+  { value: 1, label: 'Limited', description: 'Early stages or minimal implementation', color: 'bg-orange-100 border-orange-300 text-orange-700' },
+  { value: 2, label: 'Moderate', description: 'In progress with some gaps', color: 'bg-yellow-100 border-yellow-300 text-yellow-700' },
+  { value: 3, label: 'Excellent', description: 'Well established and effective', color: 'bg-green-100 border-green-300 text-green-700' }
 ];
 
-const AI_JOURNEY_STAGES = [
-  { value: 'just_starting', label: '🌱 Just Starting', desc: "We're exploring AI but haven't begun implementation" },
-  { value: 'piloting', label: '🧪 Piloting', desc: 'Testing AI tools in limited areas' },
-  { value: 'implementing', label: '🚀 Implementing', desc: 'Actively rolling out AI across institution' },
-  { value: 'optimizing', label: '⚡ Optimizing', desc: 'Refining and scaling existing AI initiatives' },
-];
-
-const PRIORITIES = [
-  { value: 'faculty_development', label: 'Faculty Development & Training', icon: '👨‍🏫' },
-  { value: 'student_safety', label: 'Student Safety & Ethics', icon: '🛡️' },
-  { value: 'research_innovation', label: 'Research & Innovation', icon: '🔬' },
-  { value: 'compliance_governance', label: 'Compliance & Governance', icon: '📋' },
-  { value: 'operational_efficiency', label: 'Operational Efficiency', icon: '⚙️' },
-  { value: 'academic_integrity', label: 'Academic Integrity', icon: '✅' },
-];
-
-const TIMELINES = [
-  { value: 'immediate', label: 'Need to act now (0-3 months)', icon: '🔥' },
-  { value: 'planning', label: 'Planning ahead (3-6 months)', icon: '📅' },
-  { value: 'long_term', label: 'Long-term strategy (6-12 months)', icon: '🗓️' },
-];
-
-export default function StreamlinedAssessment() {
+export default function NISTAssessment() {
   const router = useRouter();
   const supabase = createClient();
-  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [currentCategory, setCurrentCategory] = useState(0);
+  const [responses, setResponses] = useState<Record<number, number>>({});
+  const [showHelp, setShowHelp] = useState<Record<number, boolean>>({});
 
-  const [formData, setFormData] = useState<AssessmentData>({
-    institutionType: '',
-    institutionSize: '',
-    institutionState: '',
-    aiJourneyStage: '',
-    biggestChallenge: '',
-    topPriorities: [],
-    implementationTimeline: '',
-    contactName: '',
-    contactEmail: '',
-    contactRole: '',
-    preferredConsultationTime: '',
-    specialConsiderations: '',
-  });
+  const categories = ['GOVERN', 'MAP', 'MEASURE', 'MANAGE'];
+  const currentCategoryName = categories[currentCategory];
+  const currentQuestions = NIST_QUESTIONS[currentCategoryName as keyof typeof NIST_QUESTIONS];
+  const totalQuestions = ALL_QUESTIONS.length;
+  const answeredQuestions = Object.keys(responses).length;
+  const progress = (answeredQuestions / totalQuestions) * 100;
 
   useEffect(() => {
     checkUser();
   }, []);
 
   const checkUser = async () => {
-    const waitForAuthenticatedUser = () =>
-      new Promise<User | null>((resolve) => {
-        let resolved = false;
-        let authSubscription: { unsubscribe: () => void } | null = null;
-
-        const timeoutId = setTimeout(() => {
-          if (!resolved) {
-            resolved = true;
-            authSubscription?.unsubscribe();
-            resolve(null);
-          }
-        }, 5000);
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-          if (session?.user && !resolved) {
-            resolved = true;
-            clearTimeout(timeoutId);
-            subscription.unsubscribe();
-            resolve(session.user);
-          }
-        });
-
-        authSubscription = subscription;
-      });
-
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const { data: { user }, error } = await supabase.auth.getUser();
 
-      if (sessionError) {
-        console.warn('Auth session lookup failed:', sessionError.message);
-      }
-
-      let activeUser: User | null = session?.user ?? null;
-
-      if (!activeUser) {
-        activeUser = await waitForAuthenticatedUser();
-      }
-
-      if (!activeUser) {
-        router.replace('/auth/login?redirect=/assessment');
+      if (error || !user) {
+        router.push('/auth/login');
         return;
       }
 
-      setUserId(activeUser.id);
+      setUserId(user.id);
 
-      // Load existing assessment data if any - use maybeSingle() to avoid error for new users
-      const { data: existingAssessment, error } = await supabase
+      // Check if assessment already completed
+      const { data: existingAssessment } = await supabase
         .from('streamlined_assessment_responses')
-        .select('*')
-        .eq('user_id', activeUser.id)
+        .select('id, completed_at')
+        .eq('user_id', user.id)
         .maybeSingle();
 
-      if (existingAssessment && !error) {
-        setFormData({
-          institutionType: existingAssessment.institution_type || '',
-          institutionSize: existingAssessment.institution_size || '',
-          institutionState: existingAssessment.institution_state || '',
-          aiJourneyStage: existingAssessment.ai_journey_stage || '',
-          biggestChallenge: existingAssessment.biggest_challenge || '',
-          topPriorities: existingAssessment.top_priorities || [],
-          implementationTimeline: existingAssessment.implementation_timeline || '',
-          contactName: existingAssessment.contact_name || '',
-          contactEmail: existingAssessment.contact_email || activeUser?.email || '',
-          contactRole: existingAssessment.contact_role || '',
-          preferredConsultationTime: existingAssessment.preferred_consultation_time || '',
-          specialConsiderations: existingAssessment.special_considerations || '',
-        });
-      } else {
-        // Pre-fill email from user
-        setFormData(prev => ({ ...prev, contactEmail: activeUser?.email || '' }));
+      if (existingAssessment?.completed_at) {
+        // Assessment already completed, go to dashboard
+        router.push('/dashboard/personalized');
+        return;
       }
-    } catch (error) {
-      console.error('Auth check error:', error);
-      // If auth times out or fails, redirect to login
-      router.replace('/auth/login?redirect=/assessment');
-    } finally {
+
       setInitialLoading(false);
+    } catch (error) {
+      console.error('Error checking user:', error);
+      router.push('/auth/login');
     }
   };
 
-  const saveProgress = async () => {
-    if (!userId) return;
-
-    const supabase = createClient();
-    await supabase
-      .from('streamlined_assessment_responses')
-      .upsert({
-        user_id: userId,
-        institution_type: formData.institutionType,
-        institution_size: formData.institutionSize,
-        institution_state: formData.institutionState,
-        ai_journey_stage: formData.aiJourneyStage,
-        biggest_challenge: formData.biggestChallenge,
-        top_priorities: formData.topPriorities,
-        implementation_timeline: formData.implementationTimeline,
-        contact_name: formData.contactName,
-        contact_email: formData.contactEmail,
-        contact_role: formData.contactRole,
-        preferred_consultation_time: formData.preferredConsultationTime,
-        special_considerations: formData.specialConsiderations,
-        updated_at: new Date().toISOString(),
-      });
-
-    // Log activity
-    await supabase.from('user_activity_log').insert({
-      user_id: userId,
-      activity_type: 'assessment_progress_saved',
-      activity_data: { step: currentStep },
+  const handleResponse = (questionId: number, value: number) => {
+    setResponses({
+      ...responses,
+      [questionId - 1]: value
     });
   };
 
-  const handleNext = async () => {
-    await saveProgress();
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1);
+  const toggleHelp = (questionId: number) => {
+    setShowHelp({
+      ...showHelp,
+      [questionId]: !showHelp[questionId]
+    });
+  };
+
+  const isCategoryComplete = () => {
+    return currentQuestions.every(q => responses[q.id - 1] !== undefined);
+  };
+
+  const handleNext = () => {
+    if (currentCategory < categories.length - 1) {
+      setCurrentCategory(currentCategory + 1);
+      window.scrollTo(0, 0);
     }
   };
 
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+  const handlePrevious = () => {
+    if (currentCategory > 0) {
+      setCurrentCategory(currentCategory - 1);
+      window.scrollTo(0, 0);
     }
   };
 
   const handleSubmit = async () => {
+    if (!userId || answeredQuestions < totalQuestions) {
+      alert('Please answer all questions before submitting.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await supabase
-        .from('streamlined_assessment_responses')
-        .upsert({
-          user_id: userId,
-          institution_type: formData.institutionType,
-          institution_size: formData.institutionSize,
-          institution_state: formData.institutionState,
-          ai_journey_stage: formData.aiJourneyStage,
-          biggest_challenge: formData.biggestChallenge,
-          top_priorities: formData.topPriorities,
-          implementation_timeline: formData.implementationTimeline,
-          contact_name: formData.contactName,
-          contact_email: formData.contactEmail,
-          contact_role: formData.contactRole,
-          preferred_consultation_time: formData.preferredConsultationTime,
-          special_considerations: formData.specialConsiderations,
-          completed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+      console.log('Submitting assessment with responses:', responses);
 
-      // Log completion
-      await supabase.from('user_activity_log').insert({
-        user_id: userId,
-        activity_type: 'assessment_completed',
-        activity_data: formData,
+      const response = await fetch('/api/assessment/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          answers: responses,
+          completedAt: new Date().toISOString()
+        })
       });
 
-      // Send assessment completion email (fire and forget - don't block redirect)
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        const userMetadata = user.user_metadata || {};
-        fetch('/api/email/assessment-complete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: user.email,
-            name: userMetadata.name || formData.contactName,
-            organization: userMetadata.organization || 'Your Institution',
-            assessmentData: formData,
-          }),
-        }).catch(emailError => {
-          console.error('⚠️ Failed to send assessment completion email (non-blocking):', emailError);
-        });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit assessment');
       }
 
-      // Redirect to document upload after assessment completion
+      console.log('✅ Assessment submitted successfully:', result);
+
+      // Redirect to document upload
       router.push('/assessment/upload-documents');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting assessment:', error);
-      alert('Failed to save assessment. Please try again.');
+      alert(`Failed to submit assessment: ${error.message}. Please try again.`);
     } finally {
       setLoading(false);
     }
   };
 
-  const togglePriority = (priority: string) => {
-    if (formData.topPriorities.includes(priority)) {
-      setFormData({
-        ...formData,
-        topPriorities: formData.topPriorities.filter(p => p !== priority),
-      });
-    } else if (formData.topPriorities.length < 3) {
-      setFormData({
-        ...formData,
-        topPriorities: [...formData.topPriorities, priority],
-      });
-    }
-  };
-
-  const isStepValid = () => {
-    switch (currentStep) {
-      case 1:
-        return formData.institutionType && formData.institutionSize && formData.institutionState;
-      case 2:
-        return formData.aiJourneyStage && formData.biggestChallenge;
-      case 3:
-        return formData.topPriorities.length > 0 && formData.implementationTimeline;
-      case 4:
-        return formData.contactName && formData.contactEmail && formData.contactRole;
-      default:
-        return false;
-    }
-  };
-
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading assessment...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
+              <p className="text-gray-600">Loading assessment...</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50 py-12">
-      <div className="container max-w-4xl mx-auto px-4">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold">Strategic AI Readiness Assessment</h1>
-            <span className="text-sm text-gray-600">Step {currentStep} of 5</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / 5) * 100}%` }}
-            />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            AI Readiness Assessment
+          </h1>
+          <p className="text-lg text-gray-600 mb-4">
+            Based on the NIST AI Risk Management Framework
+          </p>
+          <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+            <span>{answeredQuestions} of {totalQuestions} questions answered</span>
+            <span>•</span>
+            <span>Section {currentCategory + 1} of {categories.length}</span>
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {currentStep === 1 && <><Building2 className="h-6 w-6" /> Institution Context</>}
-              {currentStep === 2 && <><Target className="h-6 w-6" /> Current AI Status</>}
-              {currentStep === 3 && <><CheckCircle2 className="h-6 w-6" /> Strategic Priorities</>}
-              {currentStep === 4 && <><FileText className="h-6 w-6" /> Contact Information</>}
-              {currentStep === 5 && <><Upload className="h-6 w-6" /> Next Steps</>}
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            {/* Step 1: Institution Context */}
-            {currentStep === 1 && (
-              <div className="space-y-6">
-                <div>
-                  <Label className="text-lg font-semibold mb-4 block">What type of institution are you?</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {INSTITUTION_TYPES.map((type) => (
-                      <button
-                        key={type.value}
-                        onClick={() => setFormData({ ...formData, institutionType: type.value })}
-                        className={`p-4 border-2 rounded-lg text-left transition-all ${formData.institutionType === type.value
-                          ? 'border-indigo-600 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                      >
-                        <div className="text-2xl mb-2">{type.icon}</div>
-                        <div className="font-semibold">{type.label}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Institution Size</Label>
-                  <select
-                    value={formData.institutionSize}
-                    onChange={(e) => setFormData({ ...formData, institutionSize: e.target.value })}
-                    className="w-full mt-2 p-3 border rounded-lg"
-                  >
-                    <option value="">Select size...</option>
-                    {INSTITUTION_SIZES.map((size) => (
-                      <option key={size.value} value={size.value}>
-                        {size.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <Label>State/Region</Label>
-                  <Input
-                    value={formData.institutionState}
-                    onChange={(e) => setFormData({ ...formData, institutionState: e.target.value })}
-                    placeholder="e.g., California, New York"
-                    className="mt-2"
-                  />
-                </div>
+        {/* Progress Bar */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Overall Progress</span>
+                <span>{Math.round(progress)}%</span>
               </div>
-            )}
-
-            {/* Step 2: Current AI Status */}
-            {currentStep === 2 && (
-              <div className="space-y-6">
-                <div>
-                  <Label className="text-lg font-semibold mb-4 block">
-                    Where is your institution in its AI journey?
-                  </Label>
-                  <div className="space-y-3">
-                    {AI_JOURNEY_STAGES.map((stage) => (
-                      <button
-                        key={stage.value}
-                        onClick={() => setFormData({ ...formData, aiJourneyStage: stage.value })}
-                        className={`w-full p-4 border-2 rounded-lg text-left transition-all ${formData.aiJourneyStage === stage.value
-                          ? 'border-indigo-600 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                      >
-                        <div className="font-semibold">{stage.label}</div>
-                        <div className="text-sm text-gray-600 mt-1">{stage.desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label>What's your biggest AI challenge? (100 characters)</Label>
-                  <Textarea
-                    value={formData.biggestChallenge}
-                    onChange={(e) => setFormData({ ...formData, biggestChallenge: e.target.value.slice(0, 100) })}
-                    placeholder="e.g., Faculty resistance, lack of policy, budget constraints..."
-                    className="mt-2"
-                    rows={3}
-                    maxLength={100}
-                  />
-                  <div className="text-sm text-gray-500 mt-1">
-                    {formData.biggestChallenge.length}/100 characters
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Strategic Priorities */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <div>
-                  <Label className="text-lg font-semibold mb-4 block">
-                    Select your top 3 priorities (choose up to 3)
-                  </Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {PRIORITIES.map((priority) => (
-                      <button
-                        key={priority.value}
-                        onClick={() => togglePriority(priority.value)}
-                        disabled={
-                          !formData.topPriorities.includes(priority.value) &&
-                          formData.topPriorities.length >= 3
-                        }
-                        className={`p-4 border-2 rounded-lg text-left transition-all ${formData.topPriorities.includes(priority.value)
-                          ? 'border-indigo-600 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed'
-                          }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <span className="text-2xl">{priority.icon}</span>
-                          <div className="flex-1">
-                            <div className="font-semibold">{priority.label}</div>
-                            {formData.topPriorities.includes(priority.value) && (
-                              <CheckCircle2 className="h-5 w-5 text-indigo-600 mt-1" />
-                            )}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                  <div className="text-sm text-gray-600 mt-2">
-                    Selected: {formData.topPriorities.length}/3
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-lg font-semibold mb-4 block">Implementation Timeline</Label>
-                  <div className="space-y-3">
-                    {TIMELINES.map((timeline) => (
-                      <button
-                        key={timeline.value}
-                        onClick={() => setFormData({ ...formData, implementationTimeline: timeline.value })}
-                        className={`w-full p-4 border-2 rounded-lg text-left transition-all ${formData.implementationTimeline === timeline.value
-                          ? 'border-indigo-600 bg-indigo-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                      >
-                        <span className="mr-3">{timeline.icon}</span>
-                        <span className="font-semibold">{timeline.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Contact Information */}
-            {currentStep === 4 && (
-              <div className="space-y-4">
-                <div>
-                  <Label>Your Name</Label>
-                  <Input
-                    value={formData.contactName}
-                    onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                    placeholder="Full name"
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label>Email</Label>
-                  <Input
-                    type="email"
-                    value={formData.contactEmail}
-                    onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                    placeholder="email@institution.edu"
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label>Your Role</Label>
-                  <Input
-                    value={formData.contactRole}
-                    onChange={(e) => setFormData({ ...formData, contactRole: e.target.value })}
-                    placeholder="e.g., CIO, Dean, Department Chair"
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label>Best time for expert consultation call (optional)</Label>
-                  <Input
-                    value={formData.preferredConsultationTime}
-                    onChange={(e) => setFormData({ ...formData, preferredConsultationTime: e.target.value })}
-                    placeholder="e.g., Weekday mornings, Tuesday afternoons"
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label>Special considerations or requirements (optional)</Label>
-                  <Textarea
-                    value={formData.specialConsiderations}
-                    onChange={(e) => setFormData({ ...formData, specialConsiderations: e.target.value })}
-                    placeholder="Any specific needs, concerns, or context we should know about..."
-                    className="mt-2"
-                    rows={3}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 5: Next Steps */}
-            {currentStep === 5 && (
-              <div className="space-y-6 text-center">
-                <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6">
-                  <CheckCircle2 className="h-16 w-16 text-green-600 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold mb-2">Assessment Complete!</h3>
-                  <p className="text-gray-600">
-                    Great work! Now let's analyze your institution's documents to create your personalized AI
-                    roadmap.
-                  </p>
-                </div>
-
-                <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-6 text-left">
-                  <h4 className="font-bold text-lg mb-3 flex items-center gap-2">
-                    <Upload className="h-5 w-5" />
-                    Next: Upload Your Documents
-                  </h4>
-                  <p className="text-gray-700 mb-4">
-                    Upload 2-5 key documents for AI analysis. This helps us create a truly personalized
-                    roadmap:
-                  </p>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                      <span>Strategic Plan (PDF/DOCX)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                      <span>Current AI Policy (if exists)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                      <span>Faculty Handbook</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                      <span>Technology Plan</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                      <span>Student Handbook/Policy</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="space-y-3">
-                  <Button size="lg" onClick={handleSubmit} disabled={loading} className="w-full">
-                    {loading ? 'Saving...' : 'Continue to Document Upload'}
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-gray-300" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white px-2 text-gray-500">Or</span>
-                    </div>
-                  </div>
-
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => {
-                      // Save assessment first, then redirect to blueprint
-                      handleSubmit().then(() => {
-                        router.push('/blueprint/new');
-                      });
-                    }}
-                    disabled={loading}
-                    className="w-full border-indigo-200 hover:bg-indigo-50"
-                  >
-                    <Sparkles className="mr-2 h-5 w-5 text-indigo-600" />
-                    Generate AI Implementation Blueprint
-                  </Button>
-
-                  <p className="text-xs text-center text-gray-500">
-                    Skip document upload and create your personalized AI roadmap now
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Navigation Buttons */}
-            {currentStep < 5 && (
-              <div className="flex justify-between pt-6 border-t">
-                <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
-                  Back
-                </Button>
-                <Button onClick={handleNext} disabled={!isStepValid()}>
-                  {currentStep === 4 ? 'Review' : 'Next'}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            )}
+              <Progress value={progress} className="h-3" />
+            </div>
           </CardContent>
         </Card>
 
-        {/* Time Estimate */}
-        <div className="mt-6 text-center text-sm text-gray-600 flex items-center justify-center gap-2">
-          <Clock className="h-4 w-4" />
-          Estimated time: 10-15 minutes
+        {/* Category Navigation */}
+        <div className="grid grid-cols-4 gap-2 mb-6">
+          {categories.map((cat, idx) => {
+            const catQuestions = NIST_QUESTIONS[cat as keyof typeof NIST_QUESTIONS];
+            const completed = catQuestions.every(q => responses[q.id - 1] !== undefined);
+            return (
+              <button
+                key={cat}
+                onClick={() => setCurrentCategory(idx)}
+                className={`p-3 rounded-lg font-medium transition-all ${idx === currentCategory
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : completed
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  }`}
+              >
+                {completed && <CheckCircle2 className="h-4 w-4 inline mr-1" />}
+                {cat}
+              </button>
+            );
+          })}
         </div>
+
+        {/* Questions */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl">{currentCategoryName}</CardTitle>
+            <CardDescription>
+              {currentCategoryName === 'GOVERN' && 'AI governance, policies, and leadership'}
+              {currentCategoryName === 'MAP' && 'Understanding AI systems and their impacts'}
+              {currentCategoryName === 'MEASURE' && 'Metrics, monitoring, and evaluation'}
+              {currentCategoryName === 'MANAGE' && 'Risk management and continuous improvement'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {currentQuestions.map((question) => {
+              const response = responses[question.id - 1];
+              const helpVisible = showHelp[question.id];
+
+              return (
+                <div key={question.id} className="border-b pb-6 last:border-b-0 last:pb-0">
+                  <div className="mb-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-medium text-gray-900 flex-1">
+                        {question.id}. {question.text}
+                      </h3>
+                      <button
+                        onClick={() => toggleHelp(question.id)}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium ml-4 whitespace-nowrap"
+                      >
+                        {helpVisible ? 'Hide help' : 'Show help'}
+                      </button>
+                    </div>
+                    {helpVisible && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800 mt-2">
+                        {question.helpText}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {RATING_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => handleResponse(question.id, option.value)}
+                        className={`p-4 rounded-lg border-2 transition-all text-left ${response === option.value
+                            ? `${option.color} border-current shadow-md scale-105`
+                            : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow'
+                          }`}
+                      >
+                        <div className="font-semibold mb-1">{option.label}</div>
+                        <div className="text-xs opacity-75">{option.description}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        {/* Navigation */}
+        <div className="flex justify-between items-center">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentCategory === 0}
+            className="w-32"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Previous
+          </Button>
+
+          <div className="text-sm text-gray-500">
+            {isCategoryComplete() ? (
+              <span className="text-green-600 font-medium">
+                <CheckCircle2 className="h-4 w-4 inline mr-1" />
+                Section complete
+              </span>
+            ) : (
+              <span>Answer all questions to continue</span>
+            )}
+          </div>
+
+          {currentCategory < categories.length - 1 ? (
+            <Button
+              onClick={handleNext}
+              disabled={!isCategoryComplete()}
+              className="w-32"
+            >
+              Next
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              disabled={answeredQuestions < totalQuestions || loading}
+              className="w-48"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  Submit Assessment
+                  <CheckCircle2 className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+
+        {/* Summary at bottom */}
+        <Card className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <h3 className="font-semibold text-lg mb-2">What happens next?</h3>
+              <p className="text-gray-600 text-sm">
+                After completing this assessment, you'll upload relevant documents for AI analysis,
+                then receive your personalized AI readiness score, gap analysis, and implementation blueprint.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
