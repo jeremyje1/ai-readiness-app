@@ -66,82 +66,82 @@ export default function WelcomePage() {
                     attempts++;
                 }
 
-            // If profile still doesn't exist after retries, create one
-            console.log('⚠️ Profile not found after retries, creating minimal profile...');
+                // If profile still doesn't exist after retries, create one
+                console.log('⚠️ Profile not found after retries, creating minimal profile...');
 
-            // First, check if user has an institution
-            const { data: existingMembership } = await supabase
-                .from('institution_memberships')
-                .select('*, institutions(*)')
-                .eq('user_id', user.id)
-                .eq('active', true)
-                .single();
+                // First, check if user has an institution
+                const { data: existingMembership } = await supabase
+                    .from('institution_memberships')
+                    .select('*, institutions(*)')
+                    .eq('user_id', user.id)
+                    .eq('active', true)
+                    .single();
 
-            let institutionId = existingMembership?.institution_id;
+                let institutionId = existingMembership?.institution_id;
 
-            // If no institution, create a default one for the user
-            if (!institutionId) {
-                const orgName = user.user_metadata?.organization || user.email?.split('@')[1]?.split('.')[0] || 'My Institution';
-                const { data: newInstitution } = await supabase
-                    .from('institutions')
-                    .insert({
-                        name: orgName,
-                        slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
-                        headcount: 500,
-                        budget: 1000000,
-                        org_type: user.user_metadata?.institution_type || 'K12'
+                // If no institution, create a default one for the user
+                if (!institutionId) {
+                    const orgName = user.user_metadata?.organization || user.email?.split('@')[1]?.split('.')[0] || 'My Institution';
+                    const { data: newInstitution } = await supabase
+                        .from('institutions')
+                        .insert({
+                            name: orgName,
+                            slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
+                            headcount: 500,
+                            budget: 1000000,
+                            org_type: user.user_metadata?.institution_type || 'K12'
+                        })
+                        .select()
+                        .single();
+
+                    if (newInstitution) {
+                        institutionId = newInstitution.id;
+
+                        // Create membership
+                        await supabase
+                            .from('institution_memberships')
+                            .insert({
+                                user_id: user.id,
+                                institution_id: institutionId,
+                                role: 'admin',
+                                active: true
+                            });
+                    }
+                }
+
+                const { data: newProfile, error: createError } = await supabase
+                    .from('user_profiles')
+                    .upsert({
+                        user_id: user.id,
+                        email: user.email,
+                        full_name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+                        institution_id: institutionId || null,
+                        institution_name: user.user_metadata?.organization || '',
+                        institution_type: user.user_metadata?.institution_type || 'K12',
+                        job_title: user.user_metadata?.title || '',
+                        phone: user.user_metadata?.phone || '',
+                        subscription_tier: 'trial',
+                        subscription_status: 'trial',
+                        trial_ends_at: user.user_metadata?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                        onboarding_completed: false
+                    }, {
+                        onConflict: 'user_id'
                     })
                     .select()
                     .single();
 
-                if (newInstitution) {
-                    institutionId = newInstitution.id;
-
-                    // Create membership
-                    await supabase
-                        .from('institution_memberships')
-                        .insert({
-                            user_id: user.id,
-                            institution_id: institutionId,
-                            role: 'admin',
-                            active: true
-                        });
+                if (newProfile) {
+                    console.log('✅ Profile created:', newProfile);
+                    setProfile(newProfile);
+                } else {
+                    console.error('❌ Failed to create profile:', createError);
+                    // Continue without profile data - allow user to proceed
+                    setProfile({
+                        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+                        organization: user.user_metadata?.organization || '',
+                        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                    });
                 }
-            }
-
-            const { data: newProfile, error: createError } = await supabase
-                .from('user_profiles')
-                .upsert({
-                    user_id: user.id,
-                    email: user.email,
-                    full_name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                    institution_id: institutionId || null,
-                    institution_name: user.user_metadata?.organization || '',
-                    institution_type: user.user_metadata?.institution_type || 'K12',
-                    job_title: user.user_metadata?.title || '',
-                    phone: user.user_metadata?.phone || '',
-                    subscription_tier: 'trial',
-                    subscription_status: 'trial',
-                    trial_ends_at: user.user_metadata?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-                    onboarding_completed: false
-                }, {
-                    onConflict: 'user_id'
-                })
-                .select()
-                .single();
-
-            if (newProfile) {
-                console.log('✅ Profile created:', newProfile);
-                setProfile(newProfile);
-            } else {
-                console.error('❌ Failed to create profile:', createError);
-                // Continue without profile data - allow user to proceed
-                setProfile({
-                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                    organization: user.user_metadata?.organization || '',
-                    trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-                });
-            }
             } catch (error) {
                 console.error('❌ Error in loadUser:', error);
                 // Set minimal profile to allow user to continue
@@ -205,8 +205,8 @@ export default function WelcomePage() {
                     <CardContent className="pt-6">
                         <div className="flex flex-col items-center space-y-4">
                             <div className="animate-pulse">Loading your account...</div>
-                            <Button 
-                                variant="outline" 
+                            <Button
+                                variant="outline"
                                 onClick={() => router.push('/dashboard/personalized')}
                             >
                                 Continue Anyway <ArrowRight className="ml-2 h-4 w-4" />
@@ -238,9 +238,9 @@ export default function WelcomePage() {
                             <Button onClick={() => router.push('/assessment')} className="w-full">
                                 Start Assessment <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
-                            <Button 
-                                variant="outline" 
-                                onClick={() => router.push('/dashboard/personalized')} 
+                            <Button
+                                variant="outline"
+                                onClick={() => router.push('/dashboard/personalized')}
                                 className="w-full"
                             >
                                 Go to Dashboard

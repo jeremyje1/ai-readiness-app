@@ -45,11 +45,11 @@ export async function POST(request: Request) {
         const { data: existingProfile } = await supabase
             .from('user_profiles')
             .select('id')
-            .eq('id', user.id)
-            .single();
+            .eq('user_id', user.id)  // FIXED: Changed from 'id' to 'user_id'
+            .maybeSingle();
 
         if (!existingProfile) {
-            console.log('[Auth Hook] Creating user profile...');
+            console.log('[Auth Hook] Creating user profile for:', user.email);
 
             // Calculate trial end date (7 days from now)
             const trialEndDate = new Date();
@@ -58,18 +58,17 @@ export async function POST(request: Request) {
             const { error: profileError } = await supabase
                 .from('user_profiles')
                 .insert({
-                    id: user.id,
+                    user_id: user.id,  // FIXED: Changed from 'id' to 'user_id'
                     email: user.email,
-                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                    organization: user.user_metadata?.organization || '',
+                    full_name: user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+                    institution_name: user.user_metadata?.organization || '',
                     institution_type: user.user_metadata?.institution_type || 'K12',
-                    title: user.user_metadata?.title || '',
+                    job_title: user.user_metadata?.title || '',
                     phone: user.user_metadata?.phone || '',
                     subscription_tier: 'trial',
                     subscription_status: 'trialing',
                     trial_ends_at: trialEndDate.toISOString(),
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
+                    onboarding_completed: false
                 });
 
             if (profileError) {
