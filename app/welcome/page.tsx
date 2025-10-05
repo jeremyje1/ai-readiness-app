@@ -28,42 +28,43 @@ export default function WelcomePage() {
 
     useEffect(() => {
         const loadUser = async () => {
-            console.log('🔍 Welcome page: Loading user...');
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                console.log('❌ No user found, redirecting to get-started');
-                router.push('/get-started');
-                return;
-            }
-            console.log('✅ User loaded:', user.email);
-            setUser(user);
-
-            // Load user profile with retries (profile might be created asynchronously)
-            let attempts = 0;
-            const maxAttempts = 5;
-
-            while (attempts < maxAttempts) {
-                console.log(`🔄 Attempt ${attempts + 1}/${maxAttempts}: Loading profile...`);
-                const { data: profileData, error } = await supabase
-                    .from('user_profiles')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .single();
-
-                if (profileData) {
-                    console.log('✅ Profile loaded:', profileData);
-                    setProfile(profileData);
+            try {
+                console.log('🔍 Welcome page: Loading user...');
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                if (userError || !user) {
+                    console.log('❌ No user found, redirecting to get-started', userError);
+                    router.push('/get-started');
                     return;
                 }
+                console.log('✅ User loaded:', user.email);
+                setUser(user);
 
-                if (error) {
-                    console.log('⚠️ Profile not found yet, will retry...', error);
+                // Load user profile with retries (profile might be created asynchronously)
+                let attempts = 0;
+                const maxAttempts = 3; // Reduced from 5 to 3
+
+                while (attempts < maxAttempts) {
+                    console.log(`🔄 Attempt ${attempts + 1}/${maxAttempts}: Loading profile...`);
+                    const { data: profileData, error } = await supabase
+                        .from('user_profiles')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .maybeSingle(); // Use maybeSingle instead of single
+
+                    if (profileData) {
+                        console.log('✅ Profile loaded:', profileData);
+                        setProfile(profileData);
+                        return;
+                    }
+
+                    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+                        console.error('❌ Error loading profile:', error);
+                    }
+
+                    // Wait 500ms before retrying (faster retry)
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    attempts++;
                 }
-
-                // Wait 1 second before retrying
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                attempts++;
-            }
 
             // If profile still doesn't exist after retries, create one
             console.log('⚠️ Profile not found after retries, creating minimal profile...');
@@ -134,10 +135,20 @@ export default function WelcomePage() {
                 setProfile(newProfile);
             } else {
                 console.error('❌ Failed to create profile:', createError);
-                // Continue without profile data
+                // Continue without profile data - allow user to proceed
                 setProfile({
                     name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                    organization: user.user_metadata?.organization || ''
+                    organization: user.user_metadata?.organization || '',
+                    trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                });
+            }
+            } catch (error) {
+                console.error('❌ Error in loadUser:', error);
+                // Set minimal profile to allow user to continue
+                setProfile({
+                    name: 'User',
+                    organization: '',
+                    trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
                 });
             }
         };
@@ -190,12 +201,24 @@ export default function WelcomePage() {
     if (!user) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-pulse">Loading your account...</div>
+                <Card className="max-w-md">
+                    <CardContent className="pt-6">
+                        <div className="flex flex-col items-center space-y-4">
+                            <div className="animate-pulse">Loading your account...</div>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => router.push('/dashboard/personalized')}
+                            >
+                                Continue Anyway <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         );
     }
 
-    // If profile doesn't exist yet, show a simpler welcome screen
+    // If profile doesn't exist yet, show a simpler welcome screen with continue option
     if (!profile) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
@@ -212,8 +235,15 @@ export default function WelcomePage() {
                                 <div className="h-4 w-4 bg-indigo-600 rounded-full"></div>
                                 <span>Creating your profile...</span>
                             </div>
-                            <Button onClick={() => router.push('/dashboard/personalized')} className="w-full">
-                                Continue to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                            <Button onClick={() => router.push('/assessment')} className="w-full">
+                                Start Assessment <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => router.push('/dashboard/personalized')} 
+                                className="w-full"
+                            >
+                                Go to Dashboard
                             </Button>
                         </div>
                     </CardContent>
