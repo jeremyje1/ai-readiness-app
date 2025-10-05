@@ -117,14 +117,13 @@ export default function PersonalizedDashboard() {
         .from('gap_analysis_results')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid 406 errors
 
       if (gapData && !gapError) {
         console.log('✅ Gap analysis loaded:', gapData);
         setGapAnalysis(gapData);
       } else {
-        if (gapError && gapError.code !== 'PGRST116') {
-          // PGRST116 is "no rows returned" which is expected for new users
+        if (gapError) {
           console.error('❌ Error loading gap analysis:', gapError);
         } else {
           console.log('ℹ️ No gap analysis found yet');
@@ -138,7 +137,7 @@ export default function PersonalizedDashboard() {
           .eq('user_id', user.id)
           .order('completed_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle(); // Use maybeSingle to avoid 406 errors
 
         if (assessmentData && !assessmentError) {
           console.log('✅ Found assessment, converting to gap analysis format');

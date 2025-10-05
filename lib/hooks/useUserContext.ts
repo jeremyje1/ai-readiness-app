@@ -56,7 +56,7 @@ export const fetchUserInstitution = async (userId: string): Promise<UserInstitut
       `)
             .eq('user_id', userId)
             .eq('active', true)
-            .single()
+            .maybeSingle() // Use maybeSingle to avoid 406 errors
 
         if (membershipError || !membership) {
             console.log('No institution membership found for user:', userId)

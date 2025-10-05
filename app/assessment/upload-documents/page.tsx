@@ -34,7 +34,7 @@ export default function AssessmentUploadDocumentsPage() {
             .from('streamlined_assessment_responses')
             .select('*')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle(); // Use maybeSingle to avoid 406 errors
 
         if (error) {
             console.log('⚠️ Could not verify assessment (this is OK if just completed):', error.message);
