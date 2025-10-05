@@ -67,6 +67,19 @@ export default function AIReadinessDocumentUploader({
     checkAnalysisAvailability();
   }, []);
 
+  // Notify parent when documents change and all are analyzed or errored
+  useEffect(() => {
+    if (documents.length > 0 && !isAnalyzing) {
+      const allProcessed = documents.every(d => 
+        d.status === 'analyzed' || d.status === 'error'
+      );
+      if (allProcessed) {
+        console.log('📄 All documents processed, notifying parent with', documents.length, 'documents');
+        onDocumentsAnalyzed(documents.filter(d => d.status === 'analyzed'));
+      }
+    }
+  }, [documents, isAnalyzing, onDocumentsAnalyzed]);
+
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
@@ -129,11 +142,6 @@ export default function AIReadinessDocumentUploader({
     }
 
     setIsAnalyzing(false);
-
-    // Notify parent component with ALL documents (both uploaded and analyzed)
-    const updatedDocuments = documents.concat(newDocuments);
-    setDocuments(updatedDocuments);
-    onDocumentsAnalyzed(updatedDocuments);
   };
 
   const analyzeDocument = async (file: File): Promise<UploadedDocument['analysis']> => {
