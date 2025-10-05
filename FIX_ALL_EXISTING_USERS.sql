@@ -164,10 +164,6 @@ BEGIN
 END $$;
 
 -- Verification Report
-RAISE NOTICE '';
-RAISE NOTICE '📊 VERIFICATION REPORT';
-RAISE NOTICE '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
-
 SELECT 
     '📊 Summary' as report_type,
     COUNT(DISTINCT au.id) as total_auth_users,
