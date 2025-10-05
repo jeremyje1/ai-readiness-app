@@ -50,6 +50,7 @@ export default function AIReadinessDocumentUploader({
   const [isDragOver, setIsDragOver] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isRealAnalysisAvailable, setIsRealAnalysisAvailable] = useState<boolean | null>(null);
+  const [hasNotifiedParent, setHasNotifiedParent] = useState(false);
 
   // Check if real analysis is available on mount
   useEffect(() => {
@@ -69,16 +70,18 @@ export default function AIReadinessDocumentUploader({
 
   // Notify parent when documents change and all are analyzed or errored
   useEffect(() => {
-    if (documents.length > 0 && !isAnalyzing) {
+    if (documents.length > 0 && !isAnalyzing && !hasNotifiedParent) {
       const allProcessed = documents.every(d => 
         d.status === 'analyzed' || d.status === 'error'
       );
       if (allProcessed) {
-        console.log('📄 All documents processed, notifying parent with', documents.length, 'documents');
-        onDocumentsAnalyzed(documents.filter(d => d.status === 'analyzed'));
+        const analyzedDocs = documents.filter(d => d.status === 'analyzed');
+        console.log('📄 All documents processed, notifying parent with', analyzedDocs.length, 'documents');
+        onDocumentsAnalyzed(analyzedDocs);
+        setHasNotifiedParent(true);
       }
     }
-  }, [documents, isAnalyzing, onDocumentsAnalyzed]);
+  }, [documents, isAnalyzing, hasNotifiedParent, onDocumentsAnalyzed]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -107,6 +110,7 @@ export default function AIReadinessDocumentUploader({
 
     setDocuments(prev => [...prev, ...newDocuments]);
     setIsAnalyzing(true);
+    setHasNotifiedParent(false); // Reset notification flag when new files are added
 
     // Process each file
     for (let i = 0; i < files.length; i++) {
