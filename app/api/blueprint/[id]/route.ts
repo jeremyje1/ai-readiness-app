@@ -5,17 +5,16 @@ import { NextResponse } from 'next/server';
 // GET: Fetch a specific blueprint
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const supabase = createRouteHandlerClient({ cookies });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
-        const { id } = params;
 
         // Fetch the blueprint with all related data
         const { data: blueprint, error } = await supabase
@@ -86,17 +85,16 @@ export async function GET(
 // PUT: Update a blueprint
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const supabase = createRouteHandlerClient({ cookies });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
-        const { id } = params;
         const body = await request.json();
 
         // Verify ownership
@@ -136,17 +134,16 @@ export async function PUT(
 // DELETE: Delete a blueprint
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const supabase = createRouteHandlerClient({ cookies });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
-        const { id } = params;
 
         // Verify ownership
         const { data: existing, error: fetchError } = await supabase

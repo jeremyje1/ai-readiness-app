@@ -5,17 +5,16 @@ import { NextResponse } from 'next/server';
 // POST: Share a blueprint
 export async function POST(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const supabase = createRouteHandlerClient({ cookies });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
-        const { id } = params;
         const body = await request.json();
         const { email, make_public } = body;
 
@@ -93,17 +92,16 @@ export async function POST(
 // DELETE: Remove sharing
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const supabase = createRouteHandlerClient({ cookies });
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
-        const { id } = params;
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('user_id');
 
