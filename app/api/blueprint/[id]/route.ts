@@ -15,23 +15,10 @@ export async function GET(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Fetch the blueprint with all related data
+        // Fetch the blueprint first without joins
         const { data: blueprint, error } = await supabase
             .from('blueprints')
-            .select(`
-        *,
-        blueprint_goals (*),
-        assessments (
-          id,
-          completed_at,
-          assessment_responses (*)
-        ),
-        organizations (
-          id,
-          name,
-          domain
-        )
-      `)
+            .select('*')
             .eq('id', id)
             .single();
 
@@ -47,6 +34,43 @@ export async function GET(
 
         if (!hasAccess) {
             return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+        }
+
+        // Fetch related data separately to avoid join issues
+        // Fetch goals if exists
+        if (blueprint.goals_id) {
+            const { data: goals } = await supabase
+                .from('blueprint_goals')
+                .select('*')
+                .eq('id', blueprint.goals_id)
+                .single();
+            if (goals) {
+                blueprint.blueprint_goals = goals;
+            }
+        }
+
+        // Fetch assessment if exists
+        if (blueprint.assessment_id) {
+            const { data: assessment } = await supabase
+                .from('assessments')
+                .select('id, completed_at')
+                .eq('id', blueprint.assessment_id)
+                .single();
+            if (assessment) {
+                blueprint.assessments = assessment;
+            }
+        }
+
+        // Fetch organization if exists
+        if (blueprint.organization_id) {
+            const { data: organization } = await supabase
+                .from('organizations')
+                .select('id, name, domain')
+                .eq('id', blueprint.organization_id)
+                .single();
+            if (organization) {
+                blueprint.organizations = organization;
+            }
         }
 
         // Fetch phases and tasks

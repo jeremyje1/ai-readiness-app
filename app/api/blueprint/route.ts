@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    // Build query
+    // Build query with simplified select to avoid join issues
     let query = supabase
       .from('blueprints')
       .select(`
@@ -33,23 +33,9 @@ export async function GET(request: Request) {
         is_public,
         share_token,
         user_id,
-        blueprint_goals (
-          primary_goals,
-          timeline_preference,
-          budget_range
-        ),
-        assessments (
-          id,
-          completed_at
-        ),
-        organizations (
-          id,
-          name
-        ),
-        blueprint_progress (
-          overall_progress,
-          is_on_track
-        )
+        assessment_id,
+        organization_id,
+        goals_id
       `, { count: 'exact' })
       .eq('user_id', user.id)
       .order('generated_at', { ascending: false })
@@ -73,9 +59,9 @@ export async function GET(request: Request) {
         limit,
         offset
       });
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'Failed to fetch blueprints',
-        details: error.message 
+        details: error.message
       }, { status: 500 });
     }
 

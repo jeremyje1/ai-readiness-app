@@ -6,40 +6,40 @@
 import { emailService } from './email-service';
 
 interface UserInfo {
-  email: string;
-  name: string;
-  institutionName?: string;
-  institutionType?: 'K12' | 'HigherEd' | 'District' | 'University' | 'Community College' | 'default';
+    email: string;
+    name: string;
+    institutionName?: string;
+    institutionType?: 'K12' | 'HigherEd' | 'District' | 'University' | 'Community College' | 'default';
 }
 
 interface AssessmentInfo {
-  id: string;
-  completedAt: string;
-  overallScore: number;
-  maturityLevel: string;
+    id: string;
+    completedAt: string;
+    overallScore: number;
+    maturityLevel: string;
 }
 
 interface BlueprintInfo {
-  id: string;
-  title: string;
-  generatedAt: string;
-  status: string;
+    id: string;
+    title: string;
+    generatedAt: string;
+    status: string;
 }
 
 export class EmailTouchpoints {
-  private baseUrl: string;
+    private baseUrl: string;
 
-  constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.educationaiblueprint.com';
-  }
+    constructor() {
+        this.baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.educationaiblueprint.com';
+    }
 
-  /**
-   * 1. Welcome Email - Sent immediately after signup
-   */
-  async sendWelcomeEmail(user: UserInfo, hasPassword: boolean = false): Promise<boolean> {
-    const subject = `🎉 Welcome to AI Blueprint™ - Let's Transform ${user.institutionName || 'Your Institution'}!`;
-    
-    const htmlBody = `
+    /**
+     * 1. Welcome Email - Sent immediately after signup
+     */
+    async sendWelcomeEmail(user: UserInfo, hasPassword: boolean = false): Promise<boolean> {
+        const subject = `🎉 Welcome to AI Blueprint™ - Let's Transform ${user.institutionName || 'Your Institution'}!`;
+
+        const htmlBody = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -123,20 +123,20 @@ export class EmailTouchpoints {
 </body>
 </html>`;
 
-    return emailService.sendEmail({
-      to: user.email,
-      subject,
-      htmlBody
-    });
-  }
+        return emailService.sendEmail({
+            to: user.email,
+            subject,
+            htmlBody
+        });
+    }
 
-  /**
-   * 2. Assessment Started Email - Sent when user starts assessment
-   */
-  async sendAssessmentStartedEmail(user: UserInfo): Promise<boolean> {
-    const subject = `📊 Your AI Readiness Assessment Has Started`;
-    
-    const htmlBody = `
+    /**
+     * 2. Assessment Started Email - Sent when user starts assessment
+     */
+    async sendAssessmentStartedEmail(user: UserInfo): Promise<boolean> {
+        const subject = `📊 Your AI Readiness Assessment Has Started`;
+
+        const htmlBody = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -188,23 +188,23 @@ export class EmailTouchpoints {
 </body>
 </html>`;
 
-    return emailService.sendEmail({
-      to: user.email,
-      subject,
-      htmlBody
-    });
-  }
+        return emailService.sendEmail({
+            to: user.email,
+            subject,
+            htmlBody
+        });
+    }
 
-  /**
-   * 3. Assessment Completed Email - Sent when assessment is finished
-   */
-  async sendAssessmentCompletedEmail(
-    user: UserInfo, 
-    assessment: AssessmentInfo
-  ): Promise<boolean> {
-    const subject = `🎉 Assessment Complete! Your AI Readiness Score: ${assessment.overallScore}%`;
-    
-    const htmlBody = `
+    /**
+     * 3. Assessment Completed Email - Sent when assessment is finished
+     */
+    async sendAssessmentCompletedEmail(
+        user: UserInfo,
+        assessment: AssessmentInfo
+    ): Promise<boolean> {
+        const subject = `🎉 Assessment Complete! Your AI Readiness Score: ${assessment.overallScore}%`;
+
+        const htmlBody = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -281,23 +281,23 @@ export class EmailTouchpoints {
 </body>
 </html>`;
 
-    return emailService.sendEmail({
-      to: user.email,
-      subject,
-      htmlBody
-    });
-  }
+        return emailService.sendEmail({
+            to: user.email,
+            subject,
+            htmlBody
+        });
+    }
 
-  /**
-   * 4. Blueprint Generated Email - Sent when blueprint is created
-   */
-  async sendBlueprintGeneratedEmail(
-    user: UserInfo,
-    blueprint: BlueprintInfo
-  ): Promise<boolean> {
-    const subject = `🚀 Your AI Implementation Blueprint is Ready!`;
-    
-    const htmlBody = `
+    /**
+     * 4. Blueprint Generated Email - Sent when blueprint is created
+     */
+    async sendBlueprintGeneratedEmail(
+        user: UserInfo,
+        blueprint: BlueprintInfo
+    ): Promise<boolean> {
+        const subject = `🚀 Your AI Implementation Blueprint is Ready!`;
+
+        const htmlBody = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -381,23 +381,23 @@ export class EmailTouchpoints {
 </body>
 </html>`;
 
-    return emailService.sendEmail({
-      to: user.email,
-      subject,
-      htmlBody
-    });
-  }
+        return emailService.sendEmail({
+            to: user.email,
+            subject,
+            htmlBody
+        });
+    }
 
-  /**
-   * 5. Trial Ending Soon Email - Sent 3 days before trial ends
-   */
-  async sendTrialEndingSoonEmail(
-    user: UserInfo,
-    daysRemaining: number
-  ): Promise<boolean> {
-    const subject = `⏰ Your AI Blueprint Trial Ends in ${daysRemaining} Days`;
-    
-    const htmlBody = `
+    /**
+     * 5. Trial Ending Soon Email - Sent 3 days before trial ends
+     */
+    async sendTrialEndingSoonEmail(
+        user: UserInfo,
+        daysRemaining: number
+    ): Promise<boolean> {
+        const subject = `⏰ Your AI Blueprint Trial Ends in ${daysRemaining} Days`;
+
+        const htmlBody = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -465,28 +465,28 @@ export class EmailTouchpoints {
 </body>
 </html>`;
 
-    return emailService.sendEmail({
-      to: user.email,
-      subject,
-      htmlBody
-    });
-  }
-
-  /**
-   * 6. Progress Update Email - Sent weekly for active users
-   */
-  async sendWeeklyProgressEmail(
-    user: UserInfo,
-    stats: {
-      blueprintsCreated: number;
-      tasksCompleted: number;
-      progressPercentage: number;
-      lastActivity: string;
+        return emailService.sendEmail({
+            to: user.email,
+            subject,
+            htmlBody
+        });
     }
-  ): Promise<boolean> {
-    const subject = `📊 Your Weekly AI Implementation Progress`;
-    
-    const htmlBody = `
+
+    /**
+     * 6. Progress Update Email - Sent weekly for active users
+     */
+    async sendWeeklyProgressEmail(
+        user: UserInfo,
+        stats: {
+            blueprintsCreated: number;
+            tasksCompleted: number;
+            progressPercentage: number;
+            lastActivity: string;
+        }
+    ): Promise<boolean> {
+        const subject = `📊 Your Weekly AI Implementation Progress`;
+
+        const htmlBody = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -534,20 +534,20 @@ export class EmailTouchpoints {
 </body>
 </html>`;
 
-    return emailService.sendEmail({
-      to: user.email,
-      subject,
-      htmlBody
-    });
-  }
+        return emailService.sendEmail({
+            to: user.email,
+            subject,
+            htmlBody
+        });
+    }
 
-  /**
-   * 7. Re-engagement Email - Sent to inactive users after 7 days
-   */
-  async sendReEngagementEmail(user: UserInfo, daysSinceLastLogin: number): Promise<boolean> {
-    const subject = `We Miss You! Your AI Implementation Journey Awaits 🚀`;
-    
-    const htmlBody = `
+    /**
+     * 7. Re-engagement Email - Sent to inactive users after 7 days
+     */
+    async sendReEngagementEmail(user: UserInfo, daysSinceLastLogin: number): Promise<boolean> {
+        const subject = `We Miss You! Your AI Implementation Journey Awaits 🚀`;
+
+        const htmlBody = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -593,12 +593,12 @@ export class EmailTouchpoints {
 </body>
 </html>`;
 
-    return emailService.sendEmail({
-      to: user.email,
-      subject,
-      htmlBody
-    });
-  }
+        return emailService.sendEmail({
+            to: user.email,
+            subject,
+            htmlBody
+        });
+    }
 }
 
 // Export singleton instance
