@@ -10,8 +10,20 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Check if this is a signup request and redirect
+  // Redirect to unified get-started page
+  // The /get-started page has a better UX with tab switching between signin/signup
   useEffect(() => {
+    const message = searchParams.get('message');
+    const email = searchParams.get('email');
+    
+    // Keep this page only for specific flows (password reset, etc)
+    // Otherwise redirect to get-started
+    if (!message && !email) {
+      router.push('/get-started');
+      return;
+    }
+    
+    // Check if this is a signup request and redirect
     if (searchParams.get('signup') === 'true') {
       router.push('/get-started');
     }
@@ -328,23 +340,21 @@ export default function LoginPage() {
         const hasPayment = user?.user_metadata?.payment_verified || user?.user_metadata?.tier;
         const isTrial = user?.user_metadata?.subscription_status === 'trial' || user?.user_metadata?.subscription_status === 'trialing';
         
-        // Use window.location instead of router.push to force full page reload
-        // This ensures Supabase client picks up the new session from cookies
-        setTimeout(() => {
-          if (hasPayment) {
-            // Paid user - check payment status
-            console.log('🔐 Paid user, redirecting to auth/success...');
-            window.location.href = '/auth/success';
-          } else if (isTrial) {
-            // Trial user - go straight to dashboard
-            console.log('🔐 Trial user, redirecting to dashboard...');
-            window.location.href = '/dashboard/personalized';
-          } else {
-            // New/free user - send to welcome
-            console.log('🔐 New user, redirecting to welcome...');
-            window.location.href = '/welcome';
-          }
-        }, 500);
+        // Determine redirect destination
+        let redirectPath = '/dashboard/personalized'; // Default to dashboard for trial users
+        
+        if (hasPayment) {
+          redirectPath = '/auth/success'; // Paid users check payment
+        } else if (!isTrial) {
+          redirectPath = '/welcome'; // Brand new users to onboarding
+        }
+        
+        console.log('🔐 Redirecting to:', redirectPath);
+        
+        // Use router.push instead of window.location to preserve session
+        // Session is already set by signInWithPassword
+        router.push(redirectPath);
+        
         // Don't set loading to false here - let redirect happen
       } else {
         console.log('🔐 No session in successful result');
