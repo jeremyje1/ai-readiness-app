@@ -1,4 +1,3 @@
-import { calculateEnterpriseMetrics } from '@/lib/algorithms';
 import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
 import { Blueprint, BlueprintGoals, ImplementationPhase, SuccessMetric } from '@/types/blueprint';
 import { SupabaseClient } from '@supabase/supabase-js';

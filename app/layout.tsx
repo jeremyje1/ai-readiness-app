@@ -5,14 +5,16 @@ import UserProvider from '@/components/UserProvider'
 import { AudienceProvider } from '@/lib/audience/AudienceContext'
 import { deriveAudience } from '@/lib/audience/deriveAudience'
 import { initializeCacheBust } from '@/lib/cache-bust-force'
+import { initializeAuthValidation } from '@/lib/auth-utils'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { headers } from 'next/headers'
 import './globals.css'
 
-// Initialize cache bust immediately
+// Initialize cache bust and auth validation immediately
 if (typeof window !== 'undefined') {
   initializeCacheBust();
+  initializeAuthValidation();
 }
 
 const inter = Inter({ subsets: ['latin'] })

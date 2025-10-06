@@ -75,6 +75,14 @@ export function middleware(request: NextRequest) {
 
     // Set up response
     const response = NextResponse.next();
+    
+    // Add cache control headers for auth routes to prevent browser caching issues
+    if (pathname.startsWith('/auth/') || pathname.startsWith('/dashboard/')) {
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+      response.headers.set('Surrogate-Control', 'no-store');
+    }
 
     // Update cookie if audience changed or doesn't exist
     if (!existingAudience || existingAudience !== audience) {

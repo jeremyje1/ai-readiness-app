@@ -55,8 +55,33 @@ export default function AuthNav() {
   }, [supabase.auth]);
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
+    try {
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      // Clear all auth-related storage to prevent cache issues
+      if (typeof window !== 'undefined') {
+        // Clear local storage
+        localStorage.clear();
+        
+        // Clear session storage
+        sessionStorage.clear();
+        
+        // Clear cookies (client-side accessible ones)
+        document.cookie.split(";").forEach((c) => {
+          document.cookie = c
+            .replace(/^ +/, "")
+            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        
+        // Force reload to ensure clean state
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force redirect even on error
+      window.location.href = '/';
+    }
   };
 
   const linkBase = 'hover:text-gray-900 px-2 py-1 rounded transition-colors';
