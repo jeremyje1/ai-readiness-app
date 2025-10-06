@@ -1,0 +1,11 @@
+Deploy triggered on 2025-10-06 for BlueprintViewer conversion flow integration
+
+Changes:
+- Integrated BlueprintUpgradeCTA component into BlueprintViewer
+- Added useSubscription hook to track user subscription status
+- Trial users now see upgrade prompts when viewing blueprints
+- Shows trial expiration warning banner when ≤3 days remaining
+- Displays floating upgrade CTA after 30 seconds on page
+- Smart conversion prompts for trial-to-paid conversion
+
+This completes the blueprint generation to paying customer conversion flow.
