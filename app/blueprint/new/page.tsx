@@ -3,10 +3,10 @@
 import GoalSettingWizard from '@/components/blueprint/GoalSettingWizard';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
+import ConversionModal from '@/components/ConversionModal';
 import { AlertCircle, ArrowLeft, Sparkles } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import ConversionModal from '@/components/ConversionModal';
 
 export default function NewBlueprintPage() {
     const router = useRouter();
@@ -62,7 +62,7 @@ export default function NewBlueprintPage() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                
+
                 // Check if it's a subscription-related error
                 if (response.status === 403) {
                     if (errorData.code === 'TRIAL_EXPIRED') {
@@ -73,7 +73,7 @@ export default function NewBlueprintPage() {
                     setShowConversionModal(true);
                     return;
                 }
-                
+
                 throw new Error(errorData.error || 'Failed to generate blueprint');
             }
 

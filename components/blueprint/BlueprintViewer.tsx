@@ -4,6 +4,7 @@ import { Badge } from '@/components/badge';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Blueprint } from '@/types/blueprint';
 import {
     AlertTriangle,
@@ -21,6 +22,7 @@ import {
     Users
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import BlueprintUpgradeCTA from './BlueprintUpgradeCTA';
 
 interface BlueprintViewerProps {
     blueprintId: string;
@@ -32,6 +34,7 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
     const [blueprint, setBlueprint] = useState<Blueprint | null>(null);
     const [loading, setLoading] = useState(true);
     const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set([1]));
+    const subscription = useSubscription();
 
     useEffect(() => {
         fetchBlueprint();
@@ -125,6 +128,15 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
                     </div>
                 </div>
             </Card>
+
+            {/* Trial User Upgrade CTA */}
+            {subscription.isTrialUser && (
+                <BlueprintUpgradeCTA
+                    isTrialUser={true}
+                    daysLeftInTrial={subscription.daysLeftInTrial}
+                    showFloatingCTA={true}
+                />
+            )}
 
             {/* Vision Statement */}
             <Card className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50">

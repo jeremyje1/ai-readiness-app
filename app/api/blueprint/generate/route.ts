@@ -65,15 +65,15 @@ export async function POST(request: Request) {
         // 2. Trial users with unexpired trials (subscription_status = 'trial' and trial_ends_at > now)
         const now = new Date();
         const trialExpired = userProfile?.trial_ends_at ? new Date(userProfile.trial_ends_at) < now : true;
-        
+
         const hasAccess = userProfile && (
             userProfile.subscription_status === 'active' ||
             (userProfile.subscription_status === 'trial' && !trialExpired)
         );
 
-        console.log('🔐 Access check:', { 
-            hasAccess, 
-            status: userProfile?.subscription_status, 
+        console.log('🔐 Access check:', {
+            hasAccess,
+            status: userProfile?.subscription_status,
             trialEndsAt: userProfile?.trial_ends_at,
             trialExpired
         });
@@ -82,8 +82,8 @@ export async function POST(request: Request) {
             // Provide different error messages based on the reason
             if (userProfile?.subscription_status === 'trial' && trialExpired) {
                 return NextResponse.json(
-                    { 
-                        error: 'Trial expired', 
+                    {
+                        error: 'Trial expired',
                         code: 'TRIAL_EXPIRED',
                         message: 'Your trial has expired. Please subscribe to continue generating blueprints.',
                         upgradeUrl: '/pricing'
@@ -91,11 +91,11 @@ export async function POST(request: Request) {
                     { status: 403 }
                 );
             }
-            
+
             return NextResponse.json(
-                { 
+                {
                     error: 'Subscription required',
-                    code: 'SUBSCRIPTION_REQUIRED', 
+                    code: 'SUBSCRIPTION_REQUIRED',
                     message: 'An active subscription is required to generate blueprints.',
                     upgradeUrl: '/pricing'
                 },
