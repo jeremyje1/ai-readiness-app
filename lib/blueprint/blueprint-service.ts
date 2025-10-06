@@ -22,7 +22,8 @@ export class BlueprintService {
             console.log('Starting blueprint generation for:', blueprintId);
 
             // Step 1: Calculate readiness scores
-            const responses = assessment.assessment_responses || [];
+            // Handle both old assessment format and new streamlined format
+            const responses = assessment.assessment_responses || assessment.responses || [];
 
             // Create default organization metrics
             // TODO: These should ideally come from the assessment or institution profile

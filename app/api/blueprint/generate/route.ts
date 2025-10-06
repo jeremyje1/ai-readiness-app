@@ -1,6 +1,6 @@
 import { BlueprintService } from '@/lib/blueprint/blueprint-service';
-import { Blueprint, BlueprintGoals } from '@/types/blueprint';
 import { createClient } from '@/lib/supabase/server';
+import { Blueprint, BlueprintGoals } from '@/types/blueprint';
 import { NextResponse } from 'next/server';
 
 // POST: Generate a new blueprint
@@ -36,17 +36,20 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Goals not found' }, { status: 404 });
         }
 
-        // Fetch the assessment data
+        // Fetch the assessment data from streamlined_assessment_responses
         const { data: assessment, error: assessmentError } = await supabase
-            .from('assessments')
-            .select('*, assessment_responses(*)')
+            .from('streamlined_assessment_responses')
+            .select('*')
             .eq('id', assessment_id)
             .eq('user_id', user.id)
             .single();
 
         if (assessmentError || !assessment) {
+            console.error('Assessment fetch error:', assessmentError);
             return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
         }
+
+        console.log('✅ Found assessment:', assessment.id);
 
         // Check if user has an active subscription or sufficient credits
         const { data: userProfile } = await supabase

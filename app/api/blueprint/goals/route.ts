@@ -1,5 +1,5 @@
-import { BlueprintGoals } from '@/types/blueprint';
 import { createClient } from '@/lib/supabase/server';
+import { BlueprintGoals } from '@/types/blueprint';
 import { NextResponse } from 'next/server';
 
 // GET: Fetch user's blueprint goals

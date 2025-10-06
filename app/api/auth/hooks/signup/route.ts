@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         // 1. Create or find institution
         let institutionId: string | null = null;
         const orgName = user.user_metadata?.organization || user.email.split('@')[1]?.replace(/\./g, ' ') || 'My Institution';
-        
+
         // Check if institution already exists
         const { data: existingInstitution } = await supabase
             .from('institutions')
