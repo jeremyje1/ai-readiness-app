@@ -8,5 +8,15 @@
       "DISABLE_BUILD_CACHE": "1"
     }
   },
-  "installCommand": "rm -rf .next && npm ci"
+  "installCommand": "rm -rf .next && npm ci",
+  "crons": [
+    {
+      "path": "/api/cron/trial-reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/re-engagement",
+      "schedule": "0 10 * * *"
+    }
+  ]
 }
