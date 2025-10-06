@@ -1,0 +1,13 @@
+Deploy triggered on 2025-10-06 for blueprint conversion flow implementation
+
+Changes:
+- Implemented complete conversion flow from blueprint generation to paying customer
+- Added trial expiration handling with specific error codes
+- Created ConversionModal with compelling upgrade prompts
+- Added BlueprintUpgradeCTA for strategic conversion opportunities
+- Implemented useSubscription hook for subscription status tracking
+- Created success page for post-payment onboarding
+- Updated Stripe webhook to properly set subscription_status = 'active'
+- Configured Stripe price ID: price_1SDnhlRMpSG47vNmDQr1WeJ3 ($199/month)
+
+This deployment enables monetization of the blueprint generation feature with a smooth user experience.
