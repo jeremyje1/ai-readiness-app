@@ -1,23 +1,23 @@
 interface WeeklyProgressData {
-  userName: string;
-  institutionName: string;
-  weekNumber: number;
-  tasksCompleted: number;
-  tasksTotal: number;
-  progressPercentage: number;
-  quickWins: string[];
-  upcomingMilestones: string[];
-  teamActivity: {
-    name: string;
-    action: string;
-  }[];
-  roiSaved: number;
-  timeSaved: number;
+    userName: string;
+    institutionName: string;
+    weekNumber: number;
+    tasksCompleted: number;
+    tasksTotal: number;
+    progressPercentage: number;
+    quickWins: string[];
+    upcomingMilestones: string[];
+    teamActivity: {
+        name: string;
+        action: string;
+    }[];
+    roiSaved: number;
+    timeSaved: number;
 }
 
 export const premiumWeeklyProgressTemplate = (data: WeeklyProgressData) => ({
-  subject: `Week ${data.weekNumber} Progress Report - ${data.progressPercentage}% Complete 📊`,
-  htmlBody: `
+    subject: `Week ${data.weekNumber} Progress Report - ${data.progressPercentage}% Complete 📊`,
+    htmlBody: `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
         <h1 style="color: white; margin: 0; font-size: 28px;">Week ${data.weekNumber} Progress Report</h1>
@@ -112,7 +112,7 @@ export const premiumWeeklyProgressTemplate = (data: WeeklyProgressData) => ({
       </div>
     </div>
   `,
-  textBody: `
+    textBody: `
 Week ${data.weekNumber} Progress Report - ${data.institutionName}
 
 Hi ${data.userName},

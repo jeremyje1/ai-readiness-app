@@ -1,28 +1,28 @@
 interface MonthlyTrendsData {
-  userName: string;
-  institutionName: string;
-  month: string;
-  keyInsights: {
-    title: string;
-    impact: 'high' | 'medium' | 'low';
-    description: string;
-  }[];
-  competitivePosition: {
-    metric: string;
-    yourScore: number;
-    peerAverage: number;
-  }[];
-  recommendedActions: {
-    action: string;
-    deadline: string;
-    effort: 'low' | 'medium' | 'high';
-  }[];
-  newPolicies: string[];
+    userName: string;
+    institutionName: string;
+    month: string;
+    keyInsights: {
+        title: string;
+        impact: 'high' | 'medium' | 'low';
+        description: string;
+    }[];
+    competitivePosition: {
+        metric: string;
+        yourScore: number;
+        peerAverage: number;
+    }[];
+    recommendedActions: {
+        action: string;
+        deadline: string;
+        effort: 'low' | 'medium' | 'high';
+    }[];
+    newPolicies: string[];
 }
 
 export const premiumMonthlyTrendsTemplate = (data: MonthlyTrendsData) => ({
-  subject: `🚀 Your ${data.month} AI Trends Report is Ready!`,
-  htmlBody: `
+    subject: `🚀 Your ${data.month} AI Trends Report is Ready!`,
+    htmlBody: `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
         <h1 style="color: white; margin: 0; font-size: 32px;">${data.month} AI Trends Report</h1>
@@ -44,11 +44,10 @@ export const premiumMonthlyTrendsTemplate = (data: MonthlyTrendsData) => ({
             <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #dbeafe;">
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                 <span style="font-weight: bold; color: #1e40af;">${insight.title}</span>
-                <span style="background: ${
-                  insight.impact === 'high' ? '#dc2626' : 
-                  insight.impact === 'medium' ? '#f59e0b' : 
-                  '#10b981'
-                }; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+                <span style="background: ${insight.impact === 'high' ? '#dc2626' :
+            insight.impact === 'medium' ? '#f59e0b' :
+                '#10b981'
+        }; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
                   ${insight.impact.toUpperCase()} IMPACT
                 </span>
               </div>
@@ -76,7 +75,7 @@ export const premiumMonthlyTrendsTemplate = (data: MonthlyTrendsData) => ({
                 </div>
               </div>
             `;
-          }).join('')}
+        }).join('')}
         </div>
 
         <!-- Recommended Actions -->
@@ -128,7 +127,7 @@ export const premiumMonthlyTrendsTemplate = (data: MonthlyTrendsData) => ({
       </div>
     </div>
   `,
-  textBody: `
+    textBody: `
 ${data.month} AI Trends Report - ${data.institutionName}
 
 Hi ${data.userName},
@@ -141,14 +140,14 @@ ${data.keyInsights.map(insight => `• ${insight.title} (${insight.impact} impac
 
 YOUR COMPETITIVE POSITION:
 ${data.competitivePosition.map(metric => {
-  const percentage = Math.round((metric.yourScore / metric.peerAverage) * 100);
-  return `• ${metric.metric}: ${percentage >= 100 ? '+' : ''}${percentage - 100}% vs peer average`;
-}).join('\n')}
+        const percentage = Math.round((metric.yourScore / metric.peerAverage) * 100);
+        return `• ${metric.metric}: ${percentage >= 100 ? '+' : ''}${percentage - 100}% vs peer average`;
+    }).join('\n')}
 
 RECOMMENDED ACTIONS:
-${data.recommendedActions.map(action => 
-  `• ${action.action}\n  By ${action.deadline} (${action.effort} effort)`
-).join('\n')}
+${data.recommendedActions.map(action =>
+        `• ${action.action}\n  By ${action.deadline} (${action.effort} effort)`
+    ).join('\n')}
 
 ${data.newPolicies.length > 0 ? `\nNEW POLICY TEMPLATES ADDED:
 ${data.newPolicies.map(policy => `• ${policy}`).join('\n')}` : ''}

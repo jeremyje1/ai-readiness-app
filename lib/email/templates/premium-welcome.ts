@@ -1,6 +1,6 @@
 export const premiumWelcomeTemplate = (userName: string, institutionName: string) => ({
-  subject: 'Welcome to AI Blueprint Premium! 🎉',
-  htmlBody: `
+    subject: 'Welcome to AI Blueprint Premium! 🎉',
+    htmlBody: `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
         <h1 style="color: white; margin: 0; font-size: 32px;">Welcome to Premium!</h1>
@@ -54,7 +54,7 @@ export const premiumWelcomeTemplate = (userName: string, institutionName: string
       </div>
     </div>
   `,
-  textBody: `
+    textBody: `
 Welcome to AI Blueprint Premium!
 
 Hi ${userName},
