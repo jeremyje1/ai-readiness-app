@@ -98,6 +98,14 @@ export default function AuthNav() {
     { href: '/blueprint', label: 'Blueprints', description: 'View and manage your AI implementation blueprints' },
     { href: '/resources/templates', label: 'Resources', description: 'Access templates and guides' }
   ];
+
+  const premiumLinks = [
+    { href: '/dashboard/premium', label: 'Premium Dashboard', description: 'Advanced metrics and ROI tracking' },
+    { href: '/reports/ai-trends', label: 'AI Trends', description: 'Monthly insights and competitive analysis' },
+    { href: '/resources/policies', label: 'Policy Library', description: '50+ AI policy templates' },
+    { href: '/team', label: 'Team Workspace', description: 'Collaborate with your team' },
+    { href: '/expert-sessions/schedule', label: 'Expert Sessions', description: 'Book 1-on-1 strategy calls' }
+  ];
   return (
     <header className='w-full bg-white/70 backdrop-blur border-b border-gray-200 text-sm sticky top-0 z-40'>
       <div className='max-w-7xl mx-auto px-4 py-2 flex items-center justify-between'>
@@ -120,6 +128,23 @@ export default function AuthNav() {
               {dashboardLinks.map(l => (
                 <Link key={l.href} href={l.href} className={`${linkBase} ${pathname === l.href ? activeClasses : ''}`} title={l.description}>{l.label}</Link>
               ))}
+              <div className="h-4 w-px bg-gray-300 mx-2"></div>
+              <details className="relative group">
+                <summary className={`${linkBase} cursor-pointer flex items-center gap-1`}>
+                  Premium
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div className="absolute top-full right-0 mt-1 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                  {premiumLinks.map(l => (
+                    <Link key={l.href} href={l.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <div className="font-medium">{l.label}</div>
+                      <div className="text-xs text-gray-500">{l.description}</div>
+                    </Link>
+                  ))}
+                </div>
+              </details>
             </>
           )}
         </nav>
@@ -159,6 +184,16 @@ export default function AuthNav() {
                 <div className='border-t border-gray-100 my-2'></div>
                 <div className="text-xs text-gray-500 font-medium mb-1">DASHBOARDS</div>
                 {dashboardLinks.map(l => (
+                  <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className={`${linkBase} ${pathname === l.href ? activeClasses : 'text-gray-600'}`}>
+                    <div>
+                      <div className="font-medium">{l.label}</div>
+                      <div className="text-xs text-gray-500">{l.description}</div>
+                    </div>
+                  </Link>
+                ))}
+                <div className='border-t border-gray-100 my-2'></div>
+                <div className="text-xs text-gray-500 font-medium mb-1">PREMIUM FEATURES ✨</div>
+                {premiumLinks.map(l => (
                   <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className={`${linkBase} ${pathname === l.href ? activeClasses : 'text-gray-600'}`}>
                     <div>
                       <div className="font-medium">{l.label}</div>
