@@ -251,21 +251,70 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
                     )}
 
                     <Card className="p-6">
-                        <h3 className="text-xl font-bold mb-4">Readiness Scores</h3>
+                        <h3 className="text-xl font-bold mb-4">AI Readiness Scores</h3>
+                        
+                        {/* Overall Score */}
+                        {blueprint.readiness_scores.overall && (
+                            <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="text-sm text-indigo-600 font-medium">Overall AI Readiness</p>
+                                        <p className="text-3xl font-bold text-indigo-900">{(blueprint.readiness_scores.overall * 100).toFixed(0)}%</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm text-gray-600">Maturity Level</p>
+                                        <p className="text-lg font-semibold capitalize">{blueprint.maturity_level || 'Assessing'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
                         <div className="space-y-4">
                             {Object.entries(blueprint.readiness_scores).map(([key, value]) => {
                                 if (key === 'overall') return null;
                                 const score = typeof value === 'object' ? value.score : value;
+                                
+                                // Define metric explanations
+                                const metricInfo: Record<string, { name: string; description: string }> = {
+                                    dsch: { 
+                                        name: 'Digital Strategy & Capability', 
+                                        description: 'Strategic planning, technology integration, and leadership alignment for AI initiatives' 
+                                    },
+                                    crf: { 
+                                        name: 'Change Readiness', 
+                                        description: 'Organizational agility, innovation capacity, and ability to adapt to AI-driven changes' 
+                                    },
+                                    lei: { 
+                                        name: 'Leadership Effectiveness', 
+                                        description: 'Leadership understanding, decision-making efficiency, and governance for AI adoption' 
+                                    },
+                                    oci: { 
+                                        name: 'Organizational Culture', 
+                                        description: 'Employee engagement, collaboration, and cultural readiness for AI transformation' 
+                                    },
+                                    hoci: { 
+                                        name: 'Operational Capability', 
+                                        description: 'Process efficiency, automation readiness, and technical infrastructure for AI' 
+                                    }
+                                };
+                                
+                                const info = metricInfo[key] || { name: key.toUpperCase(), description: '' };
+                                
                                 return (
                                     <div key={key}>
                                         <div className="flex justify-between mb-1">
-                                            <span className="font-medium uppercase">{key}</span>
-                                            <span className="font-bold">{score}%</span>
+                                            <div>
+                                                <span className="font-medium">{info.name}</span>
+                                                {info.description && (
+                                                    <p className="text-xs text-gray-500 mt-0.5">{info.description}</p>
+                                                )}
+                                            </div>
+                                            <span className="font-bold ml-4">{(score * 100).toFixed(0)}%</span>
                                         </div>
-                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                                             <div
                                                 className="bg-indigo-600 h-2 rounded-full transition-all"
-                                                style={{ width: `${score}%` }}
+                                                style={{ width: `${score * 100}%` }}
                                             />
                                         </div>
                                     </div>
