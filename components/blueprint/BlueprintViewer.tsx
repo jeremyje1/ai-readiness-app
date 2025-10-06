@@ -252,7 +252,7 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
 
                     <Card className="p-6">
                         <h3 className="text-xl font-bold mb-4">AI Readiness Scores</h3>
-                        
+
                         {/* Check if using legacy metrics */}
                         {blueprint.readiness_scores.dsch && !blueprint.readiness_scores.airs && (
                             <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
@@ -267,7 +267,7 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Overall Score */}
                         {blueprint.readiness_scores.overall && (
                             <div className="mb-6 p-4 bg-indigo-50 rounded-lg">

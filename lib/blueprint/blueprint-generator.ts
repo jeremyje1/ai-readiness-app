@@ -582,7 +582,7 @@ export class BlueprintGenerator {
     private generateDefaultExecutiveSummary(metrics: any, maturityLevel: string): string {
         // Check if we have new AI metrics or legacy metrics
         const hasAIMetrics = metrics.airs && metrics.aics && metrics.aims && metrics.aips && metrics.aibs;
-        
+
         if (hasAIMetrics) {
             return `This AI Implementation Blueprint provides a comprehensive roadmap for transforming your institution's educational delivery and operational efficiency through strategic AI adoption. 
 
@@ -608,7 +608,7 @@ export class BlueprintGenerator {
             if (metrics.aims.overallScore > 60) strengths.push(`Implementation Maturity (${Math.round(metrics.aims.overallScore)}%)`);
             if (metrics.aips.overallScore > 60) strengths.push(`Policy & Ethics (${Math.round(metrics.aips.overallScore)}%)`);
             if (metrics.aibs.overallScore > 60) strengths.push(`Benefits Realization (${Math.round(metrics.aibs.overallScore)}%)`);
-            
+
             return strengths.length > 0 ? strengths.join(', ') : 'Building foundational capabilities across all domains';
         } else {
             // Fallback for legacy metrics

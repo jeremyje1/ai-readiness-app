@@ -6,6 +6,7 @@ import { Card } from '@/components/card';
 import { AlertCircle, ArrowLeft, Sparkles } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import ConversionModal from '@/components/ConversionModal';
 
 export default function NewBlueprintPage() {
     const router = useRouter();
@@ -13,6 +14,8 @@ export default function NewBlueprintPage() {
     const [assessmentId, setAssessmentId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showConversionModal, setShowConversionModal] = useState(false);
+    const [conversionReason, setConversionReason] = useState<'trial_expired' | 'subscription_required'>('subscription_required');
 
     useEffect(() => {
         // Get assessment ID from URL or fetch latest
@@ -58,8 +61,20 @@ export default function NewBlueprintPage() {
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to generate blueprint');
+                const errorData = await response.json();
+                
+                // Check if it's a subscription-related error
+                if (response.status === 403) {
+                    if (errorData.code === 'TRIAL_EXPIRED') {
+                        setConversionReason('trial_expired');
+                    } else if (errorData.code === 'SUBSCRIPTION_REQUIRED') {
+                        setConversionReason('subscription_required');
+                    }
+                    setShowConversionModal(true);
+                    return;
+                }
+                
+                throw new Error(errorData.error || 'Failed to generate blueprint');
             }
 
             const data = await response.json();
@@ -158,6 +173,13 @@ export default function NewBlueprintPage() {
                     onCancel={handleCancel}
                 />
             )}
+
+            {/* Conversion Modal */}
+            <ConversionModal
+                isOpen={showConversionModal}
+                onClose={() => setShowConversionModal(false)}
+                reason={conversionReason}
+            />
         </div>
     );
 }

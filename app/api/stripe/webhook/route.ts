@@ -148,6 +148,27 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
     console.log(`↩️  Payment row already exists for session ${userData.stripeSessionId}`);
   }
 
+  // 3. Update user_profiles with subscription status
+  const { error: profileErr } = await supabaseAdmin
+    .from('user_profiles')
+    .upsert({
+      user_id: userId,
+      email: normalizedEmail,
+      institution_name: userData.organization,
+      subscription_status: 'active',
+      subscription_tier: userData.tier,
+      stripe_customer_id: userData.stripeCustomerId,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id'
+    });
+
+  if (profileErr) {
+    console.error('Failed to update user_profiles:', profileErr);
+  } else {
+    console.log(`✅ User profile updated with active subscription for ${userId}`);
+  }
+
   return userId;
 }
 

@@ -61,19 +61,44 @@ export async function POST(request: Request) {
         console.log('📊 User profile:', userProfile);
 
         // Allow access for:
-        // 1. Trial users (subscription_status = 'trial')
-        // 2. Active paid subscribers (subscription_status = 'active')
-        // Note: All new users get 'trial' status with trial_ends_at set
+        // 1. Active paid subscribers (subscription_status = 'active')
+        // 2. Trial users with unexpired trials (subscription_status = 'trial' and trial_ends_at > now)
+        const now = new Date();
+        const trialExpired = userProfile?.trial_ends_at ? new Date(userProfile.trial_ends_at) < now : true;
+        
         const hasAccess = userProfile && (
-            userProfile.subscription_status === 'trial' ||
-            userProfile.subscription_status === 'active'
+            userProfile.subscription_status === 'active' ||
+            (userProfile.subscription_status === 'trial' && !trialExpired)
         );
 
-        console.log('🔐 Access check:', { hasAccess, status: userProfile?.subscription_status, trialEndsAt: userProfile?.trial_ends_at });
+        console.log('🔐 Access check:', { 
+            hasAccess, 
+            status: userProfile?.subscription_status, 
+            trialEndsAt: userProfile?.trial_ends_at,
+            trialExpired
+        });
 
         if (!hasAccess) {
+            // Provide different error messages based on the reason
+            if (userProfile?.subscription_status === 'trial' && trialExpired) {
+                return NextResponse.json(
+                    { 
+                        error: 'Trial expired', 
+                        code: 'TRIAL_EXPIRED',
+                        message: 'Your trial has expired. Please subscribe to continue generating blueprints.',
+                        upgradeUrl: '/pricing'
+                    },
+                    { status: 403 }
+                );
+            }
+            
             return NextResponse.json(
-                { error: 'Active subscription or credits required to generate blueprints' },
+                { 
+                    error: 'Subscription required',
+                    code: 'SUBSCRIPTION_REQUIRED', 
+                    message: 'An active subscription is required to generate blueprints.',
+                    upgradeUrl: '/pricing'
+                },
                 { status: 403 }
             );
         }
