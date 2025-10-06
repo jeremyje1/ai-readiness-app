@@ -37,11 +37,11 @@ export class BlueprintGenerator {
     async generateExecutiveSummary(goals: BlueprintGoals, metrics: any, maturityLevel: string): Promise<string> {
         const prompt = `Generate an executive summary for an AI implementation blueprint based on:
     Institution Maturity Level: ${maturityLevel}
-    Overall Readiness: ${metrics.overall}%
+    Overall Readiness: ${metrics.airix?.overallScore || metrics.overall || 0}%
     Primary Goals: ${goals.primary_goals.join(', ')}
     Timeline: ${goals.timeline_preference}
     Budget Range: ${goals.budget_range}
-    Key Strengths: DSCH (${metrics.dsch.score}%), LEI (${metrics.lei.score}%), CRF (${metrics.crf.score}%)
+    Key Strengths: ${this.getKeyStrengthsText(metrics)}
     
     The summary should be 3-4 paragraphs covering current state, proposed approach, and expected outcomes.`;
 
@@ -580,11 +580,40 @@ export class BlueprintGenerator {
     }
 
     private generateDefaultExecutiveSummary(metrics: any, maturityLevel: string): string {
-        return `This AI Implementation Blueprint provides a comprehensive roadmap for transforming your institution's educational delivery and operational efficiency through strategic AI adoption. 
+        // Check if we have new AI metrics or legacy metrics
+        const hasAIMetrics = metrics.airs && metrics.aics && metrics.aims && metrics.aips && metrics.aibs;
+        
+        if (hasAIMetrics) {
+            return `This AI Implementation Blueprint provides a comprehensive roadmap for transforming your institution's educational delivery and operational efficiency through strategic AI adoption. 
 
-    With an overall readiness score of ${metrics.overall}% and a ${maturityLevel} maturity level, your institution is positioned to begin a thoughtful AI transformation journey. The assessment reveals key strengths in data systems (${metrics.dsch.score}%) and leadership engagement (${metrics.lei.score}%), while identifying opportunities for growth in change readiness (${metrics.crf.score}%).
+    With an overall AI Readiness Index (AIRIX) score of ${Math.round(metrics.airix?.overallScore || 0)}% and a ${maturityLevel} maturity level, your institution is positioned to begin a thoughtful AI transformation journey. The assessment reveals key strengths in infrastructure and resources (${Math.round(metrics.airs.overallScore)}%), staff capabilities (${Math.round(metrics.aics.overallScore)}%), and implementation readiness (${Math.round(metrics.aims.overallScore)}%), while identifying opportunities for growth in policy frameworks (${Math.round(metrics.aips.overallScore)}%) and benefit realization (${Math.round(metrics.aibs.overallScore)}%).
 
     This blueprint outlines a phased approach to AI implementation that balances innovation with risk management, ensuring sustainable adoption while delivering measurable value. Through careful planning and execution, your institution can expect to see significant improvements in student outcomes, operational efficiency, and competitive positioning in the evolving educational landscape.`;
+        } else {
+            // Fallback for legacy metrics
+            return `This AI Implementation Blueprint provides a comprehensive roadmap for transforming your institution's educational delivery and operational efficiency through strategic AI adoption. 
+
+    With an overall readiness score of ${metrics.overall}% and a ${maturityLevel} maturity level, your institution is positioned to begin a thoughtful AI transformation journey. The assessment reveals key strengths in data systems (${metrics.dsch?.score}%) and leadership engagement (${metrics.lei?.score}%), while identifying opportunities for growth in change readiness (${metrics.crf?.score}%).
+
+    This blueprint outlines a phased approach to AI implementation that balances innovation with risk management, ensuring sustainable adoption while delivering measurable value. Through careful planning and execution, your institution can expect to see significant improvements in student outcomes, operational efficiency, and competitive positioning in the evolving educational landscape.`;
+        }
+    }
+
+    private getKeyStrengthsText(metrics: any): string {
+        // Check if we have new AI metrics
+        if (metrics.airs && metrics.aics && metrics.aims && metrics.aips && metrics.aibs) {
+            const strengths = [];
+            if (metrics.airs.overallScore > 60) strengths.push(`Infrastructure & Resources (${Math.round(metrics.airs.overallScore)}%)`);
+            if (metrics.aics.overallScore > 60) strengths.push(`Capability & Competence (${Math.round(metrics.aics.overallScore)}%)`);
+            if (metrics.aims.overallScore > 60) strengths.push(`Implementation Maturity (${Math.round(metrics.aims.overallScore)}%)`);
+            if (metrics.aips.overallScore > 60) strengths.push(`Policy & Ethics (${Math.round(metrics.aips.overallScore)}%)`);
+            if (metrics.aibs.overallScore > 60) strengths.push(`Benefits Realization (${Math.round(metrics.aibs.overallScore)}%)`);
+            
+            return strengths.length > 0 ? strengths.join(', ') : 'Building foundational capabilities across all domains';
+        } else {
+            // Fallback for legacy metrics
+            return `DSCH (${metrics.dsch?.score || 0}%), LEI (${metrics.lei?.score || 0}%), CRF (${metrics.crf?.score || 0}%)`;
+        }
     }
 
     private getMitigationStrategy(risk: Risk): string {

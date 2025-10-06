@@ -75,7 +75,7 @@ export function middleware(request: NextRequest) {
 
     // Set up response
     const response = NextResponse.next();
-    
+
     // Add cache control headers for auth routes to prevent browser caching issues
     if (pathname.startsWith('/auth/') || pathname.startsWith('/dashboard/')) {
       response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');

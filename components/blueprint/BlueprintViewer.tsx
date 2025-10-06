@@ -252,7 +252,22 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
 
                     <Card className="p-6">
                         <h3 className="text-xl font-bold mb-4">AI Readiness Scores</h3>
-
+                        
+                        {/* Check if using legacy metrics */}
+                        {blueprint.readiness_scores.dsch && !blueprint.readiness_scores.airs && (
+                            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                <div className="flex items-start">
+                                    <svg className="w-5 h-5 text-amber-600 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div className="text-sm">
+                                        <p className="text-amber-800 font-medium">Legacy Metrics</p>
+                                        <p className="text-amber-700 mt-1">This blueprint uses organizational readiness metrics. New blueprints will use AI-specific metrics (AIRS, AICS, AIMS, AIPS, AIBS) for more targeted insights.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
                         {/* Overall Score */}
                         {blueprint.readiness_scores.overall && (
                             <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
@@ -267,9 +282,7 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
                                     </div>
                                 </div>
                             </div>
-                        )}
-
-                        <div className="space-y-4">
+                        )}                        <div className="space-y-4">
                             {Object.entries(blueprint.readiness_scores).map(([key, value]) => {
                                 if (key === 'overall') return null;
                                 const score = typeof value === 'object' ? value.score : value;
