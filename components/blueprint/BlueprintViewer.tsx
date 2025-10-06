@@ -252,7 +252,7 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
 
                     <Card className="p-6">
                         <h3 className="text-xl font-bold mb-4">AI Readiness Scores</h3>
-                        
+
                         {/* Overall Score */}
                         {blueprint.readiness_scores.overall && (
                             <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
@@ -268,38 +268,60 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
                                 </div>
                             </div>
                         )}
-                        
+
                         <div className="space-y-4">
                             {Object.entries(blueprint.readiness_scores).map(([key, value]) => {
                                 if (key === 'overall') return null;
                                 const score = typeof value === 'object' ? value.score : value;
-                                
-                                // Define metric explanations
+
+                                // Define metric explanations for AI readiness metrics (AIRIX framework)
                                 const metricInfo: Record<string, { name: string; description: string }> = {
-                                    dsch: { 
-                                        name: 'Digital Strategy & Capability', 
-                                        description: 'Strategic planning, technology integration, and leadership alignment for AI initiatives' 
+                                    // AI-specific metrics
+                                    airs: {
+                                        name: 'AI Infrastructure & Resources',
+                                        description: 'Data readiness, computing infrastructure, and digital resources for AI deployment'
                                     },
-                                    crf: { 
-                                        name: 'Change Readiness', 
-                                        description: 'Organizational agility, innovation capacity, and ability to adapt to AI-driven changes' 
+                                    aics: {
+                                        name: 'AI Capability & Competence',
+                                        description: 'Staff digital skills, AI/ML knowledge, and analytical competencies'
                                     },
-                                    lei: { 
-                                        name: 'Leadership Effectiveness', 
-                                        description: 'Leadership understanding, decision-making efficiency, and governance for AI adoption' 
+                                    aims: {
+                                        name: 'AI Implementation Maturity',
+                                        description: 'Project governance, change management, and readiness to scale from pilot to production'
                                     },
-                                    oci: { 
-                                        name: 'Organizational Culture', 
-                                        description: 'Employee engagement, collaboration, and cultural readiness for AI transformation' 
+                                    aips: {
+                                        name: 'AI Policy & Ethics',
+                                        description: 'Governance frameworks, bias mitigation, privacy protection, and regulatory compliance'
                                     },
-                                    hoci: { 
-                                        name: 'Operational Capability', 
-                                        description: 'Process efficiency, automation readiness, and technical infrastructure for AI' 
+                                    aibs: {
+                                        name: 'AI Benefits Score',
+                                        description: 'Expected ROI, service improvements, and net benefit realization potential'
+                                    },
+                                    // Legacy metrics (for backward compatibility)
+                                    dsch: {
+                                        name: 'Digital Strategy & Capability',
+                                        description: 'Strategic planning, technology integration, and leadership alignment for AI initiatives'
+                                    },
+                                    crf: {
+                                        name: 'Change Readiness',
+                                        description: 'Organizational agility, innovation capacity, and ability to adapt to AI-driven changes'
+                                    },
+                                    lei: {
+                                        name: 'Leadership Effectiveness',
+                                        description: 'Leadership understanding, decision-making efficiency, and governance for AI adoption'
+                                    },
+                                    oci: {
+                                        name: 'Organizational Culture',
+                                        description: 'Employee engagement, collaboration, and cultural readiness for AI transformation'
+                                    },
+                                    hoci: {
+                                        name: 'Operational Capability',
+                                        description: 'Process efficiency, automation readiness, and technical infrastructure for AI'
                                     }
                                 };
-                                
+
                                 const info = metricInfo[key] || { name: key.toUpperCase(), description: '' };
-                                
+
                                 return (
                                     <div key={key}>
                                         <div className="flex justify-between mb-1">
@@ -525,12 +547,12 @@ export default function BlueprintViewer({ blueprintId, onEdit, onShare }: Bluepr
                         <Card key={index} className="p-6">
                             <div className="flex items-start gap-4">
                                 <div className={`p-3 rounded-lg ${risk.impact === 'high' ? 'bg-red-100' :
-                                        risk.impact === 'medium' ? 'bg-yellow-100' :
-                                            'bg-green-100'
+                                    risk.impact === 'medium' ? 'bg-yellow-100' :
+                                        'bg-green-100'
                                     }`}>
                                     <AlertTriangle className={`h-6 w-6 ${risk.impact === 'high' ? 'text-red-600' :
-                                            risk.impact === 'medium' ? 'text-yellow-600' :
-                                                'text-green-600'
+                                        risk.impact === 'medium' ? 'text-yellow-600' :
+                                            'text-green-600'
                                         }`} />
                                 </div>
 

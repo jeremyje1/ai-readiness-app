@@ -113,11 +113,11 @@ export async function POST(request: Request) {
             },
             readiness_scores: {
                 overall: 0,
-                dsch: { score: 0, factors: {} },
-                lei: { score: 0, factors: {} },
-                crf: { score: 0, factors: {} },
-                oci: { score: 0, factors: {} },
-                hoci: { score: 0, factors: {} }
+                airs: { score: 0, factors: {} }, // AI Infrastructure & Resources Score
+                aics: { score: 0, factors: {} }, // AI Capability & Competence Score
+                aims: { score: 0, factors: {} }, // AI Implementation Maturity Score
+                aips: { score: 0, factors: {} }, // AI Policy & Ethics Score
+                aibs: { score: 0, factors: {} }  // AI Benefits Score
             },
             maturity_level: 'Assessing...',
             implementation_phases: [],

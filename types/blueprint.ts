@@ -110,11 +110,18 @@ export interface ValueProposition {
 
 export interface ReadinessScores {
     overall: number;
-    dsch: { score: number; factors: Record<string, number> };
-    lei: { score: number; factors: Record<string, number> };
-    crf: { score: number; factors: Record<string, number> };
-    oci: { score: number; factors: Record<string, number> };
-    hoci: { score: number; factors: Record<string, number> };
+    // AI-specific readiness metrics (AIRIX framework)
+    airs: { score: number; factors: Record<string, number> }; // AI Infrastructure & Resources Score
+    aics: { score: number; factors: Record<string, number> }; // AI Capability & Competence Score
+    aims: { score: number; factors: Record<string, number> }; // AI Implementation Maturity Score
+    aips: { score: number; factors: Record<string, number> }; // AI Policy & Ethics Score
+    aibs: { score: number; factors: Record<string, number> }; // AI Benefits Score
+    // Legacy metrics (kept for backward compatibility)
+    dsch?: { score: number; factors: Record<string, number> };
+    lei?: { score: number; factors: Record<string, number> };
+    crf?: { score: number; factors: Record<string, number> };
+    oci?: { score: number; factors: Record<string, number> };
+    hoci?: { score: number; factors: Record<string, number> };
 }
 
 export interface ImplementationPhase {

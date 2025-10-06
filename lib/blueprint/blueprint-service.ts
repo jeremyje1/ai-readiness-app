@@ -1,4 +1,5 @@
 import { calculateEnterpriseMetrics } from '@/lib/algorithms';
+import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
 import { Blueprint, BlueprintGoals, ImplementationPhase, SuccessMetric } from '@/types/blueprint';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BlueprintGenerator } from './blueprint-generator';
@@ -47,33 +48,28 @@ export class BlueprintService {
                 taskAutomationLevel: 0.4
             };
 
-            const metrics = await calculateEnterpriseMetrics(responses, defaultOrgMetrics);
+            // Calculate AI readiness metrics using AIRIX framework
+            const aiMetrics = await calculateAIReadinessMetrics(responses);
 
-            // Calculate overall score as average of all metric scores
-            const overallScore = (
-                metrics.dsch.overallScore +
-                metrics.lei.overallScore +
-                metrics.crf.overallScore +
-                metrics.oci.overallScore +
-                metrics.hoci.overallScore
-            ) / 5;
+            // Convert to 0-1 scale for consistency with existing code
+            const overallScore = aiMetrics.airix.overallScore / 100;
 
             const readinessScores = {
                 overall: overallScore,
-                dsch: { score: metrics.dsch.overallScore, factors: metrics.dsch.factors },
-                lei: { score: metrics.lei.overallScore, factors: metrics.lei.factors },
-                crf: { score: metrics.crf.overallScore, factors: metrics.crf.factors },
-                oci: { score: metrics.oci.overallScore, factors: metrics.oci.factors },
-                hoci: { score: metrics.hoci.overallScore, factors: metrics.hoci.factors }
+                airs: { score: aiMetrics.airs.overallScore / 100, factors: aiMetrics.airs.factors },
+                aics: { score: aiMetrics.aics.overallScore / 100, factors: aiMetrics.aics.factors },
+                aims: { score: aiMetrics.aims.overallScore / 100, factors: aiMetrics.aims.factors },
+                aips: { score: aiMetrics.aips.overallScore / 100, factors: aiMetrics.aips.factors },
+                aibs: { score: aiMetrics.aibs.overallScore / 100, factors: aiMetrics.aibs.factors }
             };
 
             // Step 2: Determine maturity level
             const maturityLevel = this.determineMaturityLevel(overallScore);
 
             // Step 3: Generate vision and executive summary
-            const visionStatement = await this.generator.generateVisionStatement(goals, metrics);
-            const executiveSummary = await this.generator.generateExecutiveSummary(goals, metrics, maturityLevel);
-            const valueProposition = await this.generator.generateValueProposition(goals, metrics);
+            const visionStatement = await this.generator.generateVisionStatement(goals, aiMetrics);
+            const executiveSummary = await this.generator.generateExecutiveSummary(goals, aiMetrics, maturityLevel);
+            const valueProposition = await this.generator.generateValueProposition(goals, aiMetrics);
 
             // Step 4: Update blueprint with initial content
             await this.updateBlueprint(blueprintId, {
@@ -87,7 +83,7 @@ export class BlueprintService {
             // Step 5: Generate implementation phases
             const phases = await this.generator.generateImplementationPhases(
                 goals,
-                metrics,
+                aiMetrics,
                 maturityLevel
             );
 
@@ -95,14 +91,14 @@ export class BlueprintService {
             const departmentPlans = await this.generator.generateDepartmentPlans(
                 goals,
                 phases,
-                metrics
+                aiMetrics
             );
 
             // Step 7: Generate success metrics
             const successMetrics = await this.generator.generateSuccessMetrics(goals, departmentPlans);
 
             // Step 8: Generate risk assessment
-            const riskAssessment = await this.generator.generateRiskAssessment(metrics, maturityLevel);
+            const riskAssessment = await this.generator.generateRiskAssessment(aiMetrics, maturityLevel);
             const mitigationStrategies = await this.generator.generateMitigationStrategies(riskAssessment);
 
             // Step 9: Calculate resource allocation and budget
@@ -114,12 +110,12 @@ export class BlueprintService {
             const totalBudget = this.calculateTotalBudget(resourceAllocation);
 
             // Step 10: Generate quick wins
-            const quickWins = await this.generator.generateQuickWins(metrics, goals);
+            const quickWins = await this.generator.generateQuickWins(aiMetrics, goals);
 
             // Step 11: Generate tool recommendations
             const recommendedTools = await this.generator.generateToolRecommendations(
                 goals,
-                metrics,
+                aiMetrics,
                 departmentPlans
             );
 
