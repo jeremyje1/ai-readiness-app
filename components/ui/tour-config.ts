@@ -13,13 +13,13 @@ export const tourConfig = {
     showSkip: true,         // Show skip button on first step
     storageKey: 'onboarding-tour-completed', // Local storage key to track tour completion
   },
-  
+
   // Animation settings
   animations: {
     duration: 0.2,         // Animation duration in seconds
     initialScale: 0.9,     // Initial scale for entrance animation
   },
-  
+
   // Appearance settings
   appearance: {
     overlayColor: 'rgba(0, 0, 0, 0.5)',
@@ -33,7 +33,7 @@ export const tourConfig = {
     tooltipPadding: '1.5rem',
     arrowSize: '8px',
   },
-  
+
   // Mobile settings
   mobile: {
     tooltipPosition: 'bottom',  // Position of tooltip on mobile (bottom, center)
@@ -42,7 +42,7 @@ export const tourConfig = {
     mobileBreakpoint: '640px',  // Mobile breakpoint
     minTouchTargetSize: '44px', // Minimum size for touch targets
   },
-  
+
   // Accessibility settings
   a11y: {
     ariaLabelPrefix: 'Tour step',
@@ -65,13 +65,13 @@ export const tourCopy = {
 // Additional helper functions
 export function getStoredTourState(storageKey = tourConfig.defaults.storageKey) {
   if (typeof window === 'undefined') return null;
-  
+
   return localStorage.getItem(storageKey);
 }
 
 export function setStoredTourState(state: 'completed' | 'skipped' | null, storageKey = tourConfig.defaults.storageKey) {
   if (typeof window === 'undefined') return;
-  
+
   if (state === null) {
     localStorage.removeItem(storageKey);
   } else {

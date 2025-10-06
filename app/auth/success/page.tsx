@@ -31,9 +31,9 @@ export default function AuthSuccessPage() {
         }
 
         // Check if trial user - redirect immediately to dashboard
-        const isTrial = user?.user_metadata?.subscription_status === 'trial' || 
-                       user?.user_metadata?.subscription_status === 'trialing';
-        
+        const isTrial = user?.user_metadata?.subscription_status === 'trial' ||
+            user?.user_metadata?.subscription_status === 'trialing';
+
         if (isTrial) {
             console.log('Trial user detected, redirecting to dashboard...');
             router.push('/dashboard/personalized');

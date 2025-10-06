@@ -100,7 +100,7 @@ export default function BlueprintListPage() {
                         Comprehensive roadmaps for your AI transformation journey
                     </p>
                 </div>
-                <Button 
+                <Button
                     onClick={() => router.push('/blueprint/new')}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
@@ -215,7 +215,7 @@ export default function BlueprintListPage() {
                                 : 'Create your first blueprint to get started with AI implementation planning'}
                         </p>
                         {!searchTerm && (
-                            <Button 
+                            <Button
                                 onClick={() => router.push('/blueprint/new')}
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white"
                             >

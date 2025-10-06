@@ -1,8 +1,8 @@
 /* shadcn/ui-style button with a typed `variant` prop
    (outline | default | ghost) — extend as you like                                */
-import * as React from 'react'
-import { Slot } from "@radix-ui/react-slot"
 import { cn } from '@/lib/utils'
+import { Slot } from "@radix-ui/react-slot"
+import * as React from 'react'
 
 export type ButtonVariant = 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary' | 'link'
 export type ButtonSize = 'default' | 'sm' | 'lg' | 'icon'

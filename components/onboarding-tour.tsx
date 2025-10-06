@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  ChevronLeft,
+  ChevronRight,
+  X as CloseIcon,
+  RefreshCw,
+  SkipForward
+} from 'lucide-react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useBreakpoint, useTouchDevice } from './responsive-utils';
 import { Button } from './button';
 import { Progress } from './progress';
-import { cn } from '@/lib/utils';
-import {
-  X as CloseIcon,
-  ChevronRight,
-  ChevronLeft,
-  SkipForward,
-  RefreshCw
-} from 'lucide-react';
+import { useBreakpoint, useTouchDevice } from './responsive-utils';
 
 // ==========================================================
 // Types and Context
@@ -96,11 +96,11 @@ export function TourProvider({
   const endTour = () => {
     setIsOpen(false);
     setCurrentStep(0);
-    
+
     if (storageKey && typeof window !== 'undefined') {
       localStorage.setItem(storageKey, 'true');
     }
-    
+
     if (onComplete) {
       onComplete();
     }
@@ -109,11 +109,11 @@ export function TourProvider({
   const skipTour = () => {
     setIsOpen(false);
     setCurrentStep(0);
-    
+
     if (storageKey && typeof window !== 'undefined') {
       localStorage.setItem(storageKey, 'skipped');
     }
-    
+
     if (onSkip) {
       onSkip();
     }
@@ -172,8 +172,8 @@ export function TourProvider({
     <TourContext.Provider value={contextValue}>
       {children}
       {typeof window !== 'undefined' && isOpen && tourSteps.length > 0 && createPortal(
-        <TourOverlay 
-          currentStep={currentStep} 
+        <TourOverlay
+          currentStep={currentStep}
           tourSteps={tourSteps}
           nextStep={nextStep}
           prevStep={prevStep}
@@ -219,36 +219,36 @@ function TourOverlay({
   const overlayRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<number | null>(null);
-  
+
   const currentTourStep = tourSteps[currentStep];
   const isLastStep = currentStep === tourSteps.length - 1;
   const isFirstStep = currentStep === 0;
   const isMobile = breakpoint === 'sm';
-  
+
   // Calculate position of the tooltip relative to the target element
   useEffect(() => {
     if (!currentTourStep) return;
-    
+
     const targetElement = document.querySelector(currentTourStep.target) as HTMLElement;
     if (!targetElement || !tooltipRef.current) {
       // If target doesn't exist, position in center
       setTooltipPlacement('center');
       return;
     }
-    
+
     const placement = currentTourStep.placement || 'bottom';
     setTooltipPlacement(placement);
-    
+
     // Get position of target element
     const targetRect = targetElement.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    
+
     // Calculate tooltip position based on placement
     let top = 0;
     let left = 0;
-    
+
     const offset = currentTourStep.offset || { x: 0, y: 0 };
-    
+
     switch (placement) {
       case 'top':
         top = targetRect.top - tooltipRect.height - 10 + (offset.y || 0);
@@ -271,26 +271,26 @@ function TourOverlay({
         left = window.innerWidth / 2 - tooltipRect.width / 2 + (offset.x || 0);
         break;
     }
-    
+
     // Ensure tooltip stays within viewport
     if (left < 10) left = 10;
     if (left + tooltipRect.width > window.innerWidth - 10) {
       left = window.innerWidth - tooltipRect.width - 10;
     }
-    
+
     if (top < 10) top = 10;
     if (top + tooltipRect.height > window.innerHeight - 10) {
       top = window.innerHeight - tooltipRect.height - 10;
     }
-    
+
     setTooltipPosition({ top, left });
     setOverlayReady(true);
-    
+
     // Create highlight effect for the target
     if (!currentTourStep.disableOverlay && targetElement) {
       targetElement.classList.add('tour-target');
     }
-    
+
     return () => {
       if (targetElement) {
         targetElement.classList.remove('tour-target');
@@ -309,7 +309,7 @@ function TourOverlay({
         prevStep();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextStep, prevStep, endTour]);
@@ -321,10 +321,10 @@ function TourOverlay({
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartRef.current === null) return;
-    
+
     const touchEnd = e.changedTouches[0].clientX;
     const diff = touchStartRef.current - touchEnd;
-    
+
     // If swipe distance is significant enough (> 50px)
     if (Math.abs(diff) > 50) {
       if (diff > 0) {
@@ -335,7 +335,7 @@ function TourOverlay({
         !isFirstStep && prevStep();
       }
     }
-    
+
     touchStartRef.current = null;
   };
 
@@ -343,13 +343,13 @@ function TourOverlay({
     <div className="fixed inset-0 z-[9999] pointer-events-none">
       {/* Overlay layer - semi-transparent background */}
       {!currentTourStep?.disableOverlay && (
-        <div 
+        <div
           className="absolute inset-0 bg-black/50 pointer-events-auto"
           onClick={() => skipTour()}
           ref={overlayRef}
         />
       )}
-      
+
       {/* Tooltip */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -369,42 +369,42 @@ function TourOverlay({
           onTouchEnd={handleTouchEnd}
         >
           {/* Close button */}
-          <button 
+          <button
             onClick={endTour}
             className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
             aria-label="Close tour"
           >
             <CloseIcon className="h-4 w-4" />
           </button>
-          
+
           {/* Title */}
           <h3 className="text-lg font-semibold text-indigo-900 mb-1">
             {currentTourStep?.title}
           </h3>
-          
+
           {/* Progress indicator */}
           <div className="mb-3 flex items-center text-xs text-gray-500">
             <span>Step {currentStep + 1} of {tourSteps.length}</span>
             <div className="ml-2 flex-1">
-              <Progress 
-                value={(currentStep + 1) / tourSteps.length * 100} 
-                className="h-1 bg-gray-200" 
+              <Progress
+                value={(currentStep + 1) / tourSteps.length * 100}
+                className="h-1 bg-gray-200"
               />
             </div>
           </div>
-          
+
           {/* Content */}
           <div className="mb-4 text-sm text-gray-700">
             {currentTourStep?.content}
           </div>
-          
+
           {/* Navigation buttons */}
           <div className="flex justify-between items-center">
             <div className="space-x-2">
               {!isFirstStep ? (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={prevStep}
                   className={cn(
                     'min-h-[36px]',
@@ -415,9 +415,9 @@ function TourOverlay({
                   Back
                 </Button>
               ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={skipTour}
                   className={cn(
                     'min-h-[36px]',
@@ -430,7 +430,7 @@ function TourOverlay({
               )}
             </div>
             <div>
-              <Button 
+              <Button
                 onClick={isLastStep ? endTour : nextStep}
                 size="sm"
                 className={cn(
@@ -443,7 +443,7 @@ function TourOverlay({
               </Button>
             </div>
           </div>
-          
+
           {/* Arrow pointing to element (unless center placement) */}
           {tooltipPlacement !== 'center' && !isMobile && (
             <div
@@ -480,10 +480,10 @@ export function TourButton({
   size = 'default'
 }: TourButtonProps) {
   const { startTour } = useTour();
-  
+
   return (
-    <Button 
-      variant={variant} 
+    <Button
+      variant={variant}
       size={size}
       onClick={() => startTour(0)}
       className={cn('flex items-center', className)}
@@ -505,11 +505,11 @@ interface TourProps {
 
 export function Tour({ steps, children }: TourProps) {
   const { registerTour } = useTour();
-  
+
   useEffect(() => {
     registerTour(steps);
   }, [steps, registerTour]);
-  
+
   return <>{children}</>;
 }
 

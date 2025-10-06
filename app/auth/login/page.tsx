@@ -15,14 +15,14 @@ export default function LoginPage() {
   useEffect(() => {
     const message = searchParams.get('message');
     const email = searchParams.get('email');
-    
+
     // Keep this page only for specific flows (password reset, etc)
     // Otherwise redirect to get-started
     if (!message && !email) {
       router.push('/get-started');
       return;
     }
-    
+
     // Check if this is a signup request and redirect
     if (searchParams.get('signup') === 'true') {
       router.push('/get-started');
@@ -339,22 +339,22 @@ export default function LoginPage() {
         const user = result.data.session.user;
         const hasPayment = user?.user_metadata?.payment_verified || user?.user_metadata?.tier;
         const isTrial = user?.user_metadata?.subscription_status === 'trial' || user?.user_metadata?.subscription_status === 'trialing';
-        
+
         // Determine redirect destination
         let redirectPath = '/dashboard/personalized'; // Default to dashboard for trial users
-        
+
         if (hasPayment) {
           redirectPath = '/auth/success'; // Paid users check payment
         } else if (!isTrial) {
           redirectPath = '/welcome'; // Brand new users to onboarding
         }
-        
+
         console.log('🔐 Redirecting to:', redirectPath);
-        
+
         // Use router.push instead of window.location to preserve session
         // Session is already set by signInWithPassword
         router.push(redirectPath);
-        
+
         // Don't set loading to false here - let redirect happen
       } else {
         console.log('🔐 No session in successful result');
