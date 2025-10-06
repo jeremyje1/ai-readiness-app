@@ -1,0 +1,8 @@
+Deploy triggered on 2025-10-06 for legacy metrics indicator
+
+Changes:
+- Added legacy metrics warning banner to BlueprintViewer
+- Shows amber alert when viewing blueprints with old organizational metrics (DSCH, LEI, CRF, etc.)
+- Explains that existing blueprints retain original metrics for consistency
+- New blueprints will use AIRIX AI-specific metrics (AIRS, AICS, AIMS, AIPS, AIBS, AICSS)
+- Comprehensive documentation in AI_METRICS_NOTE_OCT6.md
