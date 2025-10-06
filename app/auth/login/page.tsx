@@ -323,12 +323,27 @@ export default function LoginPage() {
         console.log('✅ Access token exists:', !!result.data.session.access_token);
         setSuccessMessage('Login successful! Redirecting...');
 
+        // Check if user has payment or is on trial
+        const user = result.data.session.user;
+        const hasPayment = user?.user_metadata?.payment_verified || user?.user_metadata?.tier;
+        const isTrial = user?.user_metadata?.subscription_status === 'trial' || user?.user_metadata?.subscription_status === 'trialing';
+        
         // Use window.location instead of router.push to force full page reload
         // This ensures Supabase client picks up the new session from cookies
         setTimeout(() => {
-          console.log('🔐 Redirecting to success page with full page reload...');
-          // Changed to redirect to /auth/success instead of dashboard which requires payment
-          window.location.href = '/auth/success';
+          if (hasPayment) {
+            // Paid user - check payment status
+            console.log('🔐 Paid user, redirecting to auth/success...');
+            window.location.href = '/auth/success';
+          } else if (isTrial) {
+            // Trial user - go straight to dashboard
+            console.log('🔐 Trial user, redirecting to dashboard...');
+            window.location.href = '/dashboard/personalized';
+          } else {
+            // New/free user - send to welcome
+            console.log('🔐 New user, redirecting to welcome...');
+            window.location.href = '/welcome';
+          }
         }, 500);
         // Don't set loading to false here - let redirect happen
       } else {

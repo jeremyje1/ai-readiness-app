@@ -26,7 +26,17 @@ export default function AuthSuccessPage() {
 
         if (!user) {
             console.warn('No authenticated user found on auth success page');
-            setLoading(false);
+            router.push('/auth/login');
+            return;
+        }
+
+        // Check if trial user - redirect immediately to dashboard
+        const isTrial = user?.user_metadata?.subscription_status === 'trial' || 
+                       user?.user_metadata?.subscription_status === 'trialing';
+        
+        if (isTrial) {
+            console.log('Trial user detected, redirecting to dashboard...');
+            router.push('/dashboard/personalized');
             return;
         }
 
@@ -57,8 +67,11 @@ export default function AuthSuccessPage() {
             });
 
             router.push('/dashboard/personalized');
+            return;
         }
 
+        // No payment found - free user, redirect to welcome or assessment
+        console.log('No payment found, showing free user options...');
         setLoading(false);
     };
 
