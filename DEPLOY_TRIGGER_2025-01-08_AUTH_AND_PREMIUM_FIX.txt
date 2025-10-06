@@ -1,0 +1,38 @@
+# DEPLOYMENT TRIGGER - January 8, 2025
+
+## Authentication and Premium Subscription Fixes
+
+### Changes Deployed:
+1. **Fixed Payment Status API (401 Errors)**
+   - Rewrote `/api/payments/status/route.ts` with new createClient pattern
+   - Removed complex timeout logic that was causing issues
+   - Simplified to direct database check for active subscription
+
+2. **Added Clear Upgrade CTAs**
+   - Desktop: Prominent gradient "Upgrade to Premium" button before user email
+   - Mobile: Full-width upgrade button in dropdown menu
+   - Only shows for non-premium users
+   - Links to pricing page
+
+3. **Made Premium Menu Conditional**
+   - Premium dropdown only appears for active subscribers
+   - Non-subscribers see upgrade CTA instead
+   - Better user journey clarity
+
+### Technical Details:
+- Uses `useSubscription` hook in AuthNav
+- Simplified auth flow prevents timeout issues
+- Clear visual hierarchy for conversion path
+
+### Testing Notes:
+- Test signup → assessment → blueprint → upgrade flow
+- Verify no 401 errors on payment status check
+- Confirm upgrade buttons appear for non-premium users
+- Check premium menu shows only for subscribers
+
+### Files Changed:
+- `/app/api/payments/status/route.ts`
+- `/components/AuthNav.tsx`
+- Created documentation files
+
+Deploy Time: 2:27 PM EST

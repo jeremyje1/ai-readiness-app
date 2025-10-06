@@ -4,10 +4,10 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     // Get the authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -36,7 +36,7 @@ export async function GET() {
       customerId: payment?.stripe_customer_id,
       priceId: payment?.stripe_price_id
     });
-    
+
   } catch (error) {
     console.error('Payment status route error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 // Placeholder test scaffold for /api/payments/status endpoint.
 // Integration tests would need a test Supabase project or a mocked client.

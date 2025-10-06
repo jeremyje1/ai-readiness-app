@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/lib/supabase/client';
 import { useSubscription } from '@/hooks/useSubscription';
+import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -218,9 +218,9 @@ export default function AuthNav() {
                     ))}
                   </>
                 ) : (
-                  <Link 
-                    href='/pricing' 
-                    onClick={() => setOpen(false)} 
+                  <Link
+                    href='/pricing'
+                    onClick={() => setOpen(false)}
                     className='flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold shadow-lg hover:shadow-xl mx-2 my-2'
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

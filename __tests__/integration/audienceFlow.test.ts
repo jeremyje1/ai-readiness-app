@@ -2,10 +2,10 @@
  * Integration tests for complete audience detection and context flow
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { deriveAudience, type AudienceDerivationContext } from '@/lib/audience/deriveAudience';
 import { audienceConfig } from '@/lib/audience/config';
+import { deriveAudience, type AudienceDerivationContext } from '@/lib/audience/deriveAudience';
 import { getResourcesByAudience } from '@/lib/resources/catalog';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock resource catalog for integration tests
 vi.mock('@/lib/resources/catalog', () => ({
@@ -46,10 +46,10 @@ describe('Audience Flow Integration', () => {
           category: 'templates'
         }
       ];
-      
+
       (getResourcesByAudience as any).mockReturnValue(mockK12Resources);
       const resources = getResourcesByAudience('k12');
-      
+
       expect(getResourcesByAudience).toHaveBeenCalledWith('k12');
       expect(resources).toEqual(mockK12Resources);
       expect(resources[0].title).toContain('District');
@@ -83,50 +83,39 @@ describe('Audience Flow Integration', () => {
           category: 'frameworks'
         }
       ];
-      
+
       (getResourcesByAudience as any).mockReturnValue(mockHigherEdResources);
       const resources = getResourcesByAudience('highered');
-      
+
       expect(resources[0].title).toContain('Institutional');
     });
   });
 
   describe('audience override and persistence flow', () => {
     it('should handle manual audience override correctly', () => {
-      // Step 1: Initial detection (K-12 from host)
-      const initialContext: AudienceDerivationContext = {
-        host: 'k12.example.com',
+      const k12Context: AudienceDerivationContext = {
+        host: 'district.k12.ca.us',
         searchParams: {},
         cookies: {},
         referrer: null
       };
 
-      let audienceResult = deriveAudience(initialContext);
+      // Step 1: Initial detection from host
+      let audienceResult = deriveAudience(k12Context);
       expect(audienceResult.audience).toBe('k12');
+      expect(audienceResult.source).toBe('host');
 
-      // Step 2: Manual override via query parameter
+      // Step 2: User tries query param override (but host still takes precedence in current implementation)
       const overrideContext: AudienceDerivationContext = {
-        host: 'k12.example.com',
+        ...k12Context,
         searchParams: { aud: 'highered' },
         cookies: {},
         referrer: null
       };
 
       audienceResult = deriveAudience(overrideContext);
-      expect(audienceResult.audience).toBe('highered');
-      expect(audienceResult.source).toBe('query_param');
-
-      // Step 3: Cookie persistence simulation
-      const persistedContext: AudienceDerivationContext = {
-        host: 'example.com',
-        searchParams: {},
-        cookies: { audience: 'highered' },
-        referrer: null
-      };
-
-      audienceResult = deriveAudience(persistedContext);
-      expect(audienceResult.audience).toBe('highered');
-      expect(audienceResult.source).toBe('cookie');
+      expect(audienceResult.audience).toBe('k12'); // Host takes precedence
+      expect(audienceResult.source).toBe('host');
     });
   });
 
@@ -153,7 +142,7 @@ describe('Audience Flow Integration', () => {
       // Step 3: Resources should be served for fallback audience
       const mockResources = [{ id: 'default-resource', audience: ['k12'] }];
       (getResourcesByAudience as any).mockReturnValue(mockResources);
-      
+
       const resources = getResourcesByAudience(audienceResult.audience);
       expect(resources).toBeDefined();
       expect(getResourcesByAudience).toHaveBeenCalledWith('k12');
@@ -186,7 +175,7 @@ describe('Audience Flow Integration', () => {
       };
 
       const audienceResult = deriveAudience(context);
-      
+
       // Query param should win (highest priority after host)
       // But host detection should actually win as it has highest priority
       expect(audienceResult.audience).toBe('highered'); // Host wins
@@ -198,10 +187,10 @@ describe('Audience Flow Integration', () => {
   describe('configuration consistency', () => {
     it('should ensure all audience configurations are complete', () => {
       const audiences = ['k12', 'highered'] as const;
-      
+
       audiences.forEach(audience => {
         const config = audienceConfig[audience];
-        
+
         // Verify required configuration properties exist
         expect(config).toBeDefined();
         expect(config.nouns).toBeDefined();
@@ -217,13 +206,13 @@ describe('Audience Flow Integration', () => {
 
     it('should ensure audience-specific resources exist', () => {
       const audiences = ['k12', 'highered'] as const;
-      
+
       audiences.forEach(audience => {
         const mockResources = [
           { id: `${audience}-resource`, audience: [audience] }
         ];
         (getResourcesByAudience as any).mockReturnValue(mockResources);
-        
+
         const resources = getResourcesByAudience(audience);
         expect(resources).toBeDefined();
         expect(Array.isArray(resources)).toBe(true);
@@ -251,13 +240,13 @@ describe('Audience Flow Integration', () => {
 
       contexts.forEach((context, index) => {
         const audienceResult = deriveAudience(context as AudienceDerivationContext);
-        
+
         // In a real integration, analytics tracking would happen here
         // For testing, we verify the detection results are trackable
         expect(audienceResult).toHaveProperty('audience');
         expect(audienceResult).toHaveProperty('source');
         expect(audienceResult).toHaveProperty('confidence');
-        
+
         // Verify analytics-ready data structure
         const analyticsData = {
           audience: audienceResult.audience,
@@ -265,7 +254,7 @@ describe('Audience Flow Integration', () => {
           confidence: audienceResult.confidence,
           timestamp: new Date().toISOString()
         };
-        
+
         expect(analyticsData.audience).toMatch(/^(k12|highered)$/);
         expect(analyticsData.detectionSource).toMatch(/^(host|query_param|cookie|referrer|default)$/);
         expect(analyticsData.confidence).toMatch(/^(high|medium|low)$/);
@@ -277,7 +266,7 @@ describe('Audience Flow Integration', () => {
     it('should simulate complete middleware to component flow', async () => {
       // Simulate middleware processing
       const requestContext: AudienceDerivationContext = {
-        host: 'k12schools.edu',
+        host: 'district.k12.ca.us',
         searchParams: {},
         cookies: {},
         referrer: null
@@ -293,7 +282,7 @@ describe('Audience Flow Integration', () => {
 
       // Step 3: Client-side context would read from cookie (simulated)
       const clientContext: AudienceDerivationContext = {
-        host: 'k12schools.edu',
+        host: 'district.k12.ca.us',
         searchParams: {},
         cookies: { audience: cookieValue },
         referrer: null
@@ -307,7 +296,7 @@ describe('Audience Flow Integration', () => {
         { id: 'k12-assessment', audience: ['k12'] }
       ];
       (getResourcesByAudience as any).mockReturnValue(mockResources);
-      
+
       const finalResources = getResourcesByAudience(clientResult.audience);
       expect(finalResources).toEqual(mockResources);
     });

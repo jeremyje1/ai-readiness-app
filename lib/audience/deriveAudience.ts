@@ -29,19 +29,10 @@ export interface AudienceDerivationContext {
  */
 export function deriveAudience(context: AudienceDerivationContext): {
   audience: Audience;
-  source: 'cookie' | 'host' | 'referer' | 'profile' | 'default';
+  source: 'cookie' | 'host' | 'referer' | 'profile' | 'default' | 'query_param' | 'referrer';
   confidence: 'high' | 'medium' | 'low';
 } {
-  // 1. Check cookie first (highest confidence)
-  if (context.cookie && isValidAudience(context.cookie)) {
-    return {
-      audience: context.cookie as Audience,
-      source: 'cookie',
-      confidence: 'high'
-    };
-  }
-
-  // 2. Check host patterns
+  // 1. Check host patterns first (highest priority)
   if (context.host) {
     const hostAudience = deriveFromHost(context.host);
     if (hostAudience) {
@@ -53,19 +44,56 @@ export function deriveAudience(context: AudienceDerivationContext): {
     }
   }
 
-  // 3. Check referer patterns  
-  if (context.referer) {
-    const refererAudience = deriveFromReferer(context.referer);
-    if (refererAudience) {
+  // 2. Check search params (aud or audience parameter)
+  if (context.searchParams) {
+    const params = context.searchParams;
+    let audParam: string | null = null;
+
+    if (typeof params.get === 'function') {
+      audParam = params.get('aud') || params.get('audience');
+    } else if (params) {
+      audParam = params['aud'] || params['audience'];
+    }
+
+    if (audParam && isValidAudience(audParam)) {
       return {
-        audience: refererAudience,
-        source: 'referer',
+        audience: audParam as Audience,
+        source: 'query_param',
+        confidence: 'high'
+      };
+    }
+  }
+
+  // 3. Check cookie
+  if (context.cookies?.audience && isValidAudience(context.cookies.audience)) {
+    return {
+      audience: context.cookies.audience as Audience,
+      source: 'cookie',
+      confidence: 'medium'
+    };
+  }
+  if (context.cookie && isValidAudience(context.cookie)) {
+    return {
+      audience: context.cookie as Audience,
+      source: 'cookie',
+      confidence: 'medium'
+    };
+  }
+
+  // 4. Check referrer patterns (both 'referrer' and 'referer')
+  const referrerUrl = context.referrer || context.referer;
+  if (referrerUrl) {
+    const referrerAudience = deriveFromReferer(referrerUrl);
+    if (referrerAudience) {
+      return {
+        audience: referrerAudience,
+        source: 'referrer',
         confidence: 'medium'
       };
     }
   }
 
-  // 4. Check user profile
+  // 5. Check user profile
   if (context.userProfile?.audience && isValidAudience(context.userProfile.audience)) {
     return {
       audience: context.userProfile.audience,
@@ -74,7 +102,7 @@ export function deriveAudience(context: AudienceDerivationContext): {
     };
   }
 
-  // 5. Default fallback
+  // 6. Default fallback
   return {
     audience: 'k12',
     source: 'default',
@@ -101,6 +129,18 @@ function deriveFromHost(host: string): Audience | null {
     return 'highered';
   }
   if (cleanHost.startsWith('k12.') || cleanHost.includes('.k12.')) {
+    return 'k12';
+  }
+
+  // University/college patterns
+  if (cleanHost.includes('university') || cleanHost.includes('college') ||
+    cleanHost.includes('.edu') || cleanHost.includes('highered')) {
+    return 'highered';
+  }
+
+  // K-12 patterns
+  if (cleanHost.includes('k12') || cleanHost.includes('school') ||
+    cleanHost.includes('district')) {
     return 'k12';
   }
 
