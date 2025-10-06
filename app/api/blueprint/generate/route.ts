@@ -51,17 +51,25 @@ export async function POST(request: Request) {
 
         console.log('✅ Found assessment:', assessment.id);
 
-        // Check if user has an active subscription or sufficient credits
+        // Check if user has an active subscription or is on trial
         const { data: userProfile } = await supabase
-            .from('users')
-            .select('tier_expiry, is_paid_subscriber, credits_remaining')
-            .eq('id', user.id)
+            .from('user_profiles')
+            .select('subscription_tier, subscription_status, trial_ends_at')
+            .eq('user_id', user.id)
             .single();
 
+        console.log('📊 User profile:', userProfile);
+
+        // Allow access for:
+        // 1. Trial users (subscription_status = 'trial')
+        // 2. Active paid subscribers (subscription_status = 'active')
+        // Note: All new users get 'trial' status with trial_ends_at set
         const hasAccess = userProfile && (
-            (userProfile.is_paid_subscriber && userProfile.tier_expiry && new Date(userProfile.tier_expiry) > new Date()) ||
-            (userProfile.credits_remaining && userProfile.credits_remaining > 0)
+            userProfile.subscription_status === 'trial' ||
+            userProfile.subscription_status === 'active'
         );
+
+        console.log('🔐 Access check:', { hasAccess, status: userProfile?.subscription_status, trialEndsAt: userProfile?.trial_ends_at });
 
         if (!hasAccess) {
             return NextResponse.json(
@@ -145,13 +153,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Failed to create blueprint' }, { status: 500 });
         }
 
-        // Deduct credit if not subscriber
-        if (userProfile && !userProfile.is_paid_subscriber && userProfile.credits_remaining) {
-            await supabase
-                .from('users')
-                .update({ credits_remaining: userProfile.credits_remaining - 1 })
-                .eq('id', user.id);
-        }
+        // No credit deduction needed - users have trial or active subscription
+        console.log('✅ Blueprint generation started for user with subscription status:', userProfile?.subscription_status);
 
         // Initialize the blueprint service and start generation
         const blueprintService = new BlueprintService(supabase);

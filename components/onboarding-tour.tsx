@@ -361,7 +361,7 @@ function TourOverlay({
           transition={{ duration: 0.2 }}
           className={cn(
             'absolute bg-white rounded-lg shadow-lg p-4 sm:p-6 max-w-[90vw] sm:max-w-[400px] pointer-events-auto',
-            'border-2 border-np-primary-blue',
+            'border-2 border-indigo-500',
             isMobile ? 'bottom-20 left-1/2 transform -translate-x-1/2 w-[90vw] !fixed' : ''
           )}
           style={!isMobile ? { top: tooltipPosition.top, left: tooltipPosition.left } : undefined}
@@ -378,7 +378,7 @@ function TourOverlay({
           </button>
           
           {/* Title */}
-          <h3 className="text-lg font-semibold text-np-deep-blue mb-1">
+          <h3 className="text-lg font-semibold text-indigo-900 mb-1">
             {currentTourStep?.title}
           </h3>
           
@@ -448,7 +448,7 @@ function TourOverlay({
           {tooltipPlacement !== 'center' && !isMobile && (
             <div
               className={cn(
-                'absolute w-4 h-4 rotate-45 bg-white border-np-primary-blue',
+                'absolute w-4 h-4 rotate-45 bg-white border-indigo-500',
                 tooltipPlacement === 'top' && 'border-b border-r bottom-[-8px] left-1/2 ml-[-8px]',
                 tooltipPlacement === 'right' && 'border-b border-l left-[-8px] top-1/2 mt-[-8px]',
                 tooltipPlacement === 'bottom' && 'border-t border-l top-[-8px] left-1/2 ml-[-8px]',

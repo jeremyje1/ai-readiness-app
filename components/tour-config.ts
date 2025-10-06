@@ -23,9 +23,9 @@ export const tourConfig = {
   // Appearance settings
   appearance: {
     overlayColor: 'rgba(0, 0, 0, 0.5)',
-    highlightColor: 'rgba(59, 130, 246, 0.5)',
+    highlightColor: 'rgba(99, 102, 241, 0.5)',
     tooltipBackgroundColor: 'white',
-    tooltipBorderColor: 'var(--np-primary-blue, #3b82f6)',
+    tooltipBorderColor: '#6366f1',
     tooltipBorderWidth: '2px',
     tooltipBorderRadius: '0.5rem',
     tooltipShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
