@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create Stripe checkout session
+        const baseUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com';
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
@@ -40,8 +41,8 @@ export async function POST(request: NextRequest) {
                 quantity: 1,
             }],
             mode: 'subscription',
-            success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing?status=cancelled`,
+            success_url: `${baseUrl}/auth/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${baseUrl}/pricing?status=cancelled`,
             allow_promotion_codes: true,
             billing_address_collection: 'required',
             customer_email: body.email || undefined,
@@ -94,6 +95,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        const baseUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com';
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
@@ -101,8 +103,8 @@ export async function GET(request: NextRequest) {
                 quantity: 1,
             }],
             mode: 'subscription',
-            success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing?status=cancelled`,
+            success_url: `${baseUrl}/auth/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${baseUrl}/pricing?status=cancelled`,
             allow_promotion_codes: true,
             billing_address_collection: 'required',
             metadata: {

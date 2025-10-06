@@ -2,1182 +2,946 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Blueprint™ | AI Readiness & Implementation for Education</title>
     <meta name="description"
-        content="AI Blueprint - Transform your educational institution with AI-powered readiness assessments, personalized implementation blueprints, and strategic planning tools. Get started today!">
+        content="Assess AI readiness, generate an implementation blueprint, and track progress—purpose-built for K-12 and Higher Education. Start a 7-day free trial." />
     <meta name="keywords"
-        content="AI education, AI readiness, educational technology, AI implementation, higher education AI, K-12 AI">
-    <title>AI Blueprint™ | AI Implementation Planning for Educational Institutions</title>
+        content="AI education, AI readiness, AI implementation, NIST AI RMF, higher education AI, K-12 AI, AI governance" />
+
+    <!-- Canonical + Social -->
+    <link rel="canonical" href="https://educationaiblueprint.com/" />
+    <meta property="og:title" content="AI Blueprint™ for Education" />
+    <meta property="og:description"
+        content="Assess AI readiness, generate an AI implementation plan, and track progress. 7-day free trial." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://educationaiblueprint.com/" />
+    <meta property="og:image"
+        content="https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Blueprint™ for Education" />
+    <meta name="twitter:description"
+        content="AI readiness assessment + implementation blueprint for schools, colleges, and universities." />
+    <meta name="twitter:image"
+        content="https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png" />
+
+    <!-- Favicon (can be replaced by your own) -->
+    <link rel="icon"
+        href="https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png" />
+
     <style>
+        :root {
+            --brand: #1e3a8a;
+            /* NorthPath deep blue */
+            --brand-2: #2563eb;
+            /* Primary CTA blue */
+            --brand-3: #fbbf24;
+            /* Gold accent */
+            --ink: #0f172a;
+            /* Headings */
+            --muted: #475569;
+            /* Body */
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --ring: #93c5fd;
+            --radius: 14px;
+            --shadow: 0 10px 30px rgba(2, 6, 23, .08);
+        }
+
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+            color: var(--muted);
+            background: var(--bg);
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
+        /* Layout */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px
+        }
+
+        .section {
+            padding: 72px 0
+        }
+
+        .section--alt {
+            background: #fff
         }
 
         /* Header */
-        .header {
+        .skip-link {
+            position: absolute;
+            left: -999px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden
+        }
+
+        .skip-link:focus {
+            left: 16px;
+            top: 16px;
+            width: auto;
+            height: auto;
             background: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 9999
+        }
+
+        .header {
+            position: sticky;
             top: 0;
             z-index: 1000;
+            background: #fff;
+            border-bottom: 1px solid rgba(2, 6, 23, .06);
+            backdrop-filter: saturate(180%) blur(8px);
         }
 
         .nav {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
+            justify-content: space-between;
+            padding: 14px 0;
+            gap: 16px
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2563eb;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none
+        }
+
+        .brand img {
+            height: 34px;
+            width: auto;
+            border-radius: 6px;
+            display: block
+        }
+
+        .brand span {
+            font-weight: 800;
+            color: var(--brand);
+            letter-spacing: .2px
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
             align-items: center;
+            gap: 22px
         }
 
         .nav-links a {
+            color: var(--muted);
             text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: color 0.3s;
+            font-weight: 600;
+            font-size: .98rem;
+            padding: 8px 6px;
+            border-radius: 8px;
+            outline-offset: 2px;
         }
 
         .nav-links a:hover {
-            color: #2563eb;
+            color: var(--brand-2)
+        }
+
+        .nav-cta {
+            display: flex;
+            align-items: center;
+            gap: 10px
         }
 
         .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-weight: 800;
             text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-align: center;
+            border: 1.5px solid transparent;
+            transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
+            will-change: transform;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--ring);
+            outline-offset: 3px
         }
 
         .btn-primary {
-            background: #2563eb;
-            color: white;
+            background: var(--brand-2);
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, .25)
         }
 
         .btn-primary:hover {
-            background: #1d4ed8;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px)
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: #2563eb;
-            border: 2px solid #2563eb;
+        .btn-outline {
+            background: #fff;
+            color: var(--brand-2);
+            border-color: var(--brand-2)
         }
 
-        .btn-secondary:hover {
-            background: #2563eb;
-            color: white;
+        .btn-outline:hover {
+            background: var(--brand-2);
+            color: #fff
         }
 
-        /* Hero Section */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            line-height: 1;
+            color: var(--ink);
+            cursor: pointer
+        }
+
+        /* Hero */
         .hero {
-            padding: 8rem 0 4rem;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
+            padding: 110px 0 72px;
+            overflow: hidden;
+            background:
+                radial-gradient(1200px 500px at 80% -10%, rgba(37, 99, 235, .20), transparent 70%),
+                radial-gradient(1000px 400px at -10% 0%, rgba(251, 191, 36, .15), transparent 70%),
+                linear-gradient(180deg, #fff 0%, #f7f9ff 100%);
         }
 
-        .hero-content {
+        .hero-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 48px;
+            align-items: center
         }
 
-        .hero-text h1 {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            color: #1a1a1a;
-            line-height: 1.2;
+        .eyebrow {
+            color: var(--brand-2);
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            font-size: .8rem
         }
 
-        .hero-text p {
-            font-size: 1.25rem;
-            color: #666;
-            margin-bottom: 2rem;
+        .hero h1 {
+            color: var(--ink);
+            font-size: clamp(1.9rem, 3.6vw, 3.2rem);
+            line-height: 1.15;
+            margin: .5rem 0 12px
         }
 
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
+        .hero p.lead {
+            font-size: clamp(1rem, 1.6vw, 1.2rem);
+            color: #334155;
+            margin: 10px 0 22px
         }
 
-        .hero-image {
-            text-align: center;
+        .meta {
+            font-size: .92rem;
+            color: #64748b
         }
 
-        .hero-image img {
-            max-width: 100%;
-            height: auto;
+        .hero-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 18px;
+        }
+
+        .hero-visual {
+            height: 420px;
             border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Features Section */
-        .features {
-            padding: 5rem 0;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-header h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #1a1a1a;
-        }
-
-        .section-header p {
-            font-size: 1.25rem;
-            color: #666;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-
-        .feature-card {
-            padding: 2rem;
-            border-radius: 12px;
-            background: #f8f9fa;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            background: #2563eb;
-            border-radius: 50%;
-            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #1e3a8a, #2563eb 45%, #7c3aed);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: #1a1a1a;
-        }
-
-        .feature-card p {
-            color: #666;
-        }
-
-        /* Pricing Section */
-        .pricing {
-            padding: 5rem 0;
-            background: #f8f9fa;
-        }
-
-        .pricing-card {
-            background: white;
-            border-radius: 16px;
-            padding: 3rem;
-            max-width: 400px;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            color: #fff;
             text-align: center;
+            padding: 28px;
         }
 
-        .pricing-header h3 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #1a1a1a;
+        .hero-visual strong {
+            font-size: 1.1rem
+        }
+
+        .hero-visual .emoji {
+            font-size: 44px;
+            display: block;
+            margin-bottom: 10px;
+            opacity: .95
+        }
+
+        /* Grids / cards */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px
+        }
+
+        .grid-auto {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 22px
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px
+        }
+
+        .card h3 {
+            color: var(--ink);
+            font-size: 1.15rem;
+            margin: 6px 0 6px
+        }
+
+        .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: inline-grid;
+            place-items: center;
+            background: rgba(37, 99, 235, .10);
+            color: var(--brand-2);
+            font-size: 22px;
+            font-weight: 800
+        }
+
+        .muted {
+            color: #64748b
+        }
+
+        /* Pricing */
+        .pricing-wrap {
+            display: grid;
+            place-items: center
+        }
+
+        .price-card {
+            max-width: 440px
         }
 
         .price {
             font-size: 3rem;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 0.5rem;
+            color: var(--brand-2);
+            font-weight: 900;
+            letter-spacing: -.02em;
+            margin: .25rem 0
         }
 
-        .price-period {
-            color: #666;
-            margin-bottom: 2rem;
+        .period {
+            color: #64748b;
+            margin-top: -4px
         }
 
-        .pricing-features {
-            list-style: none;
-            margin-bottom: 2rem;
-        }
-
-        .pricing-features li {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #eee;
-            color: #666;
-        }
-
-        .pricing-features li:last-child {
-            border-bottom: none;
-        }
-
-        .pricing-features li:before {
-            content: "✓ ";
-            color: #22c55e;
-            font-weight: bold;
-            margin-right: 0.5rem;
-        }
-
-        /* CTA Section */
-        .cta {
-            padding: 5rem 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        /* CTA band */
+        .band {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #7c3aed 100%);
+            color: #fff;
             text-align: center;
+            padding: 64px 0
         }
 
-        .cta h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        .band h2 {
+            font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+            margin: 0 0 8px
         }
 
-        .cta p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .cta .btn {
-            background: white;
-            color: #667eea;
-            font-size: 1.1rem;
-            padding: 1rem 2rem;
-        }
-
-        .cta .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        .band p {
+            opacity: .95;
+            margin: 0 0 18px
         }
 
         /* Footer */
-        .footer {
-            padding: 3rem 0;
-            background: #1a1a1a;
-            color: white;
-            text-align: center;
+        footer {
+            background: #0b1020;
+            color: #e5e7eb
         }
 
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 28px
         }
 
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.3s;
+        footer a {
+            color: rgba(255, 255, 255, .78);
+            text-decoration: none
         }
 
-        .footer-links a:hover {
-            opacity: 1;
-        }
-
-        .footer-copy {
-            opacity: 0.6;
-            font-size: 0.9rem;
-        }
-
-        /* Mobile Navigation */
-        .nav-links.mobile-active {
-            display: flex !important;
-            flex-direction: column;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            z-index: 999;
+        footer a:hover {
+            color: #fff
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .hero {
-                padding: 6rem 0 3rem;
-            }
-
-            .hero-content {
+        @media (max-width: 900px) {
+            .hero-grid {
                 grid-template-columns: 1fr;
-                gap: 2rem;
+                gap: 26px
             }
+        }
 
-            .hero-text h1 {
-                font-size: 1.75rem;
-                line-height: 1.3;
-            }
-
-            .hero-text p {
-                font-size: 1rem;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
+        @media (max-width: 760px) {
             .nav-links {
-                display: none;
-                gap: 1rem;
+                display: none
             }
 
-            .hero-buttons {
+            .menu-toggle {
+                display: inline-block
+            }
+
+            .nav.open .nav-links {
+                display: flex;
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 60px;
+                background: #fff;
+                padding: 12px 16px 16px;
+                border-bottom: 1px solid rgba(2, 6, 23, .06);
                 flex-direction: column;
+                gap: 10px
             }
 
             .btn {
-                width: 100%;
-                text-align: center;
+                width: 100%
             }
 
-            .section-header h2 {
-                font-size: 1.75rem;
-            }
-
-            .section-header p {
-                font-size: 1rem;
-            }
-
-            .pricing-card {
-                padding: 2rem 1.5rem;
-            }
-
-            .price {
-                font-size: 2.5rem;
-            }
-
-            /* Mobile footer */
-            .footer-links {
-                flex-direction: column;
-                gap: 1rem;
+            .grid-3 {
+                grid-template-columns: 1fr
             }
         }
 
-        /* Smooth transitions */
-        * {
-            scroll-behavior: smooth;
+        /* Respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto
+            }
+
+            .btn,
+            .btn-primary {
+                transition: none
+            }
         }
 
-        /* Accessibility improvements */
-        a:focus,
-        button:focus {
-            outline: 2px solid #2563eb;
-            outline-offset: 2px;
-        }
-
-        /* Print styles */
+        /* Print */
         @media print {
 
             .header,
-            .footer,
-            .cta,
+            .band,
             .btn {
-                display: none;
+                display: none !important
+            }
+
+            .section {
+                padding: 24px 0
+            }
+
+            .card,
+            .hero-card {
+                box-shadow: none;
+                border: 1px solid #e5e7eb
             }
         }
     </style>
+
+    <!-- JSON-LD: Organization + SoftwareApplication -->
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "AI Blueprint for Education",
+    "url": "https://educationaiblueprint.com/",
+    "logo": "https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png",
+    "sameAs": [
+      "https://aiblueprint.educationaiblueprint.com/privacy",
+      "https://aiblueprint.educationaiblueprint.com/terms"
+    ]
+  }
+  </script>
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AI Blueprint™",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "url": "https://educationaiblueprint.com/",
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "USD",
+      "price": "199.00"
+    }
+  }
+  </script>
 </head>
 
 <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
     <!-- Header -->
-    <header class="header">
-        <nav class="nav container">
-            <div class="logo">AI Blueprint™</div>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#blueprint">AI Blueprint</a>
-                <a href="#services">Services</a>
-                <a href="#pricing">Pricing</a>
-                <a href="#about">About</a>
-                <a href="https://aiblueprint.educationaiblueprint.com/get-started" class="btn btn-secondary">Sign In</a>
-                <a href="https://aiblueprint.educationaiblueprint.com/get-started" class="btn btn-primary">Get
-                    Started</a>
-            </div>
-        </nav>
+    <header class="header" role="banner" aria-label="Primary">
+        <div class="container">
+            <nav class="nav" aria-label="Main navigation">
+                <a class="brand" href="#top" aria-label="AI Blueprint home">
+                    <img src="https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png"
+                        alt="NorthPath Strategies logo" />
+                    <span>AI Blueprint™</span>
+                </a>
+
+                <button class="menu-toggle" aria-expanded="false" aria-controls="primary-menu"
+                    aria-label="Toggle menu">☰</button>
+
+                <div id="primary-menu" class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#blueprint">AI Blueprint</a>
+                    <a href="#services">Services</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#about">About</a>
+                </div>
+
+                <div class="nav-cta">
+                    <a class="btn btn-outline" href="https://aiblueprint.educationaiblueprint.com/get-started">Sign
+                        In</a>
+                    <a class="btn btn-primary" href="https://aiblueprint.educationaiblueprint.com/get-started">Get
+                        Started</a>
+                </div>
+            </nav>
+        </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1>Transform Your Institution with AI Implementation Blueprints</h1>
-                    <p>The complete platform for educational institutions to assess AI readiness, generate personalized
-                        implementation blueprints, and track progress with AI-powered guidance.</p>
-                    <div class="hero-buttons">
-                        <a href="https://aiblueprint.educationaiblueprint.com/get-started" class="btn btn-primary">Start
-                            Your AI Journey - Free</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/demo" class="btn btn-secondary">Watch
-                            Demo</a>
-                    </div>
-                    <p style="font-size: 0.9rem; color: #666;">✨ Trusted by 100+ educational institutions | 🎯
-                        AI-powered strategic planning | 📊 Complete in 15 minutes</p>
+    <!-- Hero -->
+    <section id="top" class="hero" aria-labelledby="h1">
+        <div class="container hero-grid">
+            <div>
+                <div class="eyebrow">Purpose-Built for K-12 & Higher Ed</div>
+                <h1 id="h1">AI Readiness Assessment & Implementation Blueprint</h1>
+                <p class="lead">Assess your AI maturity, generate a step-by-step implementation plan aligned to NIST AI
+                    RMF, and track progress with clear milestones.</p>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 8px">
+                    <a class="btn btn-primary" href="https://aiblueprint.educationaiblueprint.com/get-started">Start
+                        7-Day Free Trial</a>
+                    <a class="btn btn-outline" href="https://aiblueprint.educationaiblueprint.com/demo">Watch Demo</a>
                 </div>
-                <div class="hero-image">
-                    <!-- Replace with actual dashboard screenshot -->
-                    <div
-                        style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); width: 100%; height: 400px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; text-align: center; padding: 2rem;">
+                <div class="meta">No credit card required • Setup in minutes</div>
+            </div>
+
+            <aside class="hero-card" aria-label="Preview">
+                <div class="hero-visual" role="img"
+                    aria-label="AI Blueprint dashboard preview with phases, tasks, and progress">
+                    <div>
+                        <span class="emoji">📊</span>
+                        <strong>AI Blueprint Dashboard</strong>
+                        <div style="opacity:.9;margin-top:6px">Phased Plan • Tasks • Progress • Risks</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <!-- AI Blueprint: How it works -->
+    <main id="main">
+        <section id="blueprint" class="section section--alt" aria-labelledby="how-title">
+            <div class="container">
+                <header style="text-align:center;margin-bottom:26px">
+                    <h2 id="how-title" style="color:var(--ink);margin:0 0 6px">AI Implementation Blueprint</h2>
+                    <p class="muted">Turn your assessment into an actionable roadmap</p>
+                </header>
+
+                <div class="card" aria-label="How it works">
+                    <h3 class="visually-hidden"
+                        style="position:absolute;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px)">How it
+                        works</h3>
+                    <div class="grid-auto">
                         <div>
-                            <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
-                            <div>AI Blueprint Dashboard</div>
-                            <div style="font-size: 1rem; opacity: 0.8; margin-top: 0.5rem;">Personalized Implementation
-                                Plans</div>
+                            <div class="icon" aria-hidden="true">1</div>
+                            <h3>Complete Assessment</h3>
+                            <p class="muted">5–10 minute AI readiness evaluation.</p>
+                        </div>
+                        <div>
+                            <div class="icon" aria-hidden="true">2</div>
+                            <h3>Set Goals</h3>
+                            <p class="muted">Priorities, departments, timelines, and budget.</p>
+                        </div>
+                        <div>
+                            <div class="icon" aria-hidden="true">3</div>
+                            <h3>Generate Plan</h3>
+                            <p class="muted">AI builds a phased, NIST-aligned blueprint.</p>
+                        </div>
+                        <div>
+                            <div class="icon" aria-hidden="true">4</div>
+                            <h3>Track Progress</h3>
+                            <p class="muted">Milestones, blockers, and status in one view.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section" style="padding-top:28px">
+                    <div class="grid-3">
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">🎯</div>
+                            <h3>Goal-Driven Planning</h3>
+                            <p class="muted">Capture goals, departments, timelines, and budgets to tailor your plan.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">🤖</div>
+                            <h3>AI-Powered Generation</h3>
+                            <p class="muted">GPT-powered plans with concrete tasks and recommendations.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">📋</div>
+                            <h3>Phased Approach</h3>
+                            <p class="muted">3–5 phases with timelines, tools, and budget guidance.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">👥</div>
+                            <h3>Department Strategies</h3>
+                            <p class="muted">Academic Affairs, IT, Administration, and Student Services views.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">⚡</div>
+                            <h3>Quick Wins</h3>
+                            <p class="muted">Immediate actions to build momentum and stakeholder confidence.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">🛡️</div>
+                            <h3>Risk Mitigation</h3>
+                            <p class="muted">Identify risks early and attach mitigation strategies.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">📊</div>
+                            <h3>Progress Tracking</h3>
+                            <p class="muted">Completion, budget, schedule, and blockers—updated in real time.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">🔗</div>
+                            <h3>Collaboration</h3>
+                            <p class="muted">Share securely, invite teammates, and align across units.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon" aria-hidden="true">🔁</div>
+                            <h3>Auto-Refresh</h3>
+                            <p class="muted">Live data refresh to keep your team on the same page.</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- AI Blueprint Section -->
-    <section class="features" id="blueprint" style="background: #f8f9fa;">
-        <div class="container">
-            <div class="section-header">
-                <h2>🚀 AI Implementation Blueprint</h2>
-                <p>The revolutionary AI-powered planning tool that transforms your assessment into action</p>
+        <!-- Core Features -->
+        <section id="features" class="section" aria-labelledby="features-title">
+            <div class="container">
+                <header style="text-align:center;margin-bottom:26px">
+                    <h2 id="features-title" style="color:var(--ink);margin:0 0 6px">Complete AI Readiness Platform</h2>
+                    <p class="muted">Assess • Plan • Implement • Govern</p>
+                </header>
+
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">📊</div>
+                        <h3>NIST AI RMF Assessment</h3>
+                        <p class="muted">Govern, Map, Measure, Manage—evaluate strengths and gaps.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">🎯</div>
+                        <h3>Personalized Dashboard</h3>
+                        <p class="muted">Scores, maturity level, priorities, and quick wins in one place.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">🧭</div>
+                        <h3>Gap Analysis</h3>
+                        <p class="muted">Targeted recommendations for each framework function.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">🔒</div>
+                        <h3>Enterprise Security</h3>
+                        <p class="muted">Supabase auth, row-level security, encrypted storage, FERPA-aligned.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">📄</div>
+                        <h3>Document Analysis</h3>
+                        <p class="muted">Upload and analyze institutional docs to enrich your plan.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">📑</div>
+                        <h3>Policy Templates</h3>
+                        <p class="muted">50+ customizable AI policies and governance templates.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">💰</div>
+                        <h3>Funding Support</h3>
+                        <p class="muted">ROI calculators and proposal scaffolds to secure resources.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">📚</div>
+                        <h3>Resource Library</h3>
+                        <p class="muted">Guides, case studies, and best practices (login required).</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon" aria-hidden="true">🤝</div>
+                        <h3>Expert Support</h3>
+                        <p class="muted">Email support and monthly webinars—plus consulting on request.</p>
+                    </div>
+                </div>
             </div>
-            <div
-                style="max-width: 900px; margin: 0 auto 3rem; background: white; padding: 3rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <h3 style="font-size: 1.75rem; margin-bottom: 1.5rem; text-align: center;">How It Works</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
-                    <div style="text-align: center;">
-                        <div
-                            style="background: #e0f2fe; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
-                            1️⃣</div>
-                        <h4>Complete Assessment</h4>
-                        <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">5-minute AI readiness evaluation
+        </section>
+
+        <!-- Services -->
+        <section id="services" class="section section--alt" aria-labelledby="services-title"
+            style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 60%,#7c3aed 100%);color:#fff">
+            <div class="container">
+                <header style="text-align:center;margin-bottom:26px">
+                    <h2 id="services-title" style="margin:0 0 6px;color:#fff">Services</h2>
+                    <p style="opacity:.9">End-to-end support for your AI transformation</p>
+                </header>
+
+                <div class="grid-auto" style="max-width:1000px;margin:0 auto">
+                    <div class="card"
+                        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff">
+                        <h3>Assessment & Planning</h3>
+                        <ul style="margin:10px 0 0; padding-left:18px; line-height:1.9">
+                            <li>NIST AI RMF readiness</li>
+                            <li>AI Implementation Blueprint</li>
+                            <li>Gap analysis & maturity scoring</li>
+                            <li>Strategic roadmap</li>
+                        </ul>
+                        <p style="margin:10px 0 0">
+                            <a href="https://aiblueprint.educationaiblueprint.com/assessment"
+                                style="color:#fff;text-decoration:underline">Start Assessment →</a>
                         </p>
                     </div>
-                    <div style="text-align: center;">
-                        <div
-                            style="background: #ddd6fe; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
-                            2️⃣</div>
-                        <h4>Set Your Goals</h4>
-                        <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Define priorities & departments
+                    <div class="card"
+                        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff">
+                        <h3>Implementation Support</h3>
+                        <ul style="margin:10px 0 0; padding-left:18px; line-height:1.9">
+                            <li>Progress dashboard & milestones</li>
+                            <li>Budget and blocker tracking</li>
+                            <li>Team collaboration</li>
+                        </ul>
+                        <p style="margin:10px 0 0">
+                            <a href="https://aiblueprint.educationaiblueprint.com/blueprint"
+                                style="color:#fff;text-decoration:underline">View Blueprints →</a>
                         </p>
                     </div>
-                    <div style="text-align: center;">
-                        <div
-                            style="background: #fce7f3; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
-                            3️⃣</div>
-                        <h4>AI Generates Plan</h4>
-                        <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Comprehensive blueprint in
-                            seconds</p>
-                    </div>
-                    <div style="text-align: center;">
-                        <div
-                            style="background: #d1fae5; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
-                            4️⃣</div>
-                        <h4>Track Progress</h4>
-                        <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Real-time implementation tracking
+                    <div class="card"
+                        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff">
+                        <h3>Resources & Training</h3>
+                        <ul style="margin:10px 0 0; padding-left:18px; line-height:1.9">
+                            <li>Policy templates</li>
+                            <li>Guides & case libraries</li>
+                            <li>Webinars & community</li>
+                        </ul>
+                        <p style="margin:10px 0 0">
+                            <a href="https://aiblueprint.educationaiblueprint.com/resources/templates"
+                                style="color:#fff;text-decoration:underline">Browse Resources →</a>
                         </p>
                     </div>
                 </div>
-            </div>
 
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>Goal-Driven Planning</h3>
-                    <p>4-step wizard captures your specific goals, department needs, timeline, and budget to create a
-                        truly personalized implementation plan.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🤖</div>
-                    <h3>AI-Powered Generation</h3>
-                    <p>GPT-4 analyzes your assessment results and goals to generate comprehensive, phased implementation
-                        plans with specific tasks and tools.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📋</div>
-                    <h3>Phased Approach</h3>
-                    <p>Get 3-5 implementation phases with detailed tasks, timelines, tool recommendations, and budget
-                        allocation for each phase.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">�</div>
-                    <h3>Department Strategies</h3>
-                    <p>Department-specific recommendations and tools tailored to your Academic Affairs, IT,
-                        Administration, and Student Services teams.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Quick Wins</h3>
-                    <p>Identify immediate actions you can take today to build momentum and show early success to
-                        stakeholders.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <h3>Risk Mitigation</h3>
-                    <p>Comprehensive risk analysis with mitigation strategies to anticipate and prevent common
-                        implementation challenges.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Progress Tracking</h3>
-                    <p>Real-time dashboard tracks task completion, budget spent, timeline adherence, and identifies
-                        blockers automatically.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">👥</div>
-                    <h3>Team Collaboration</h3>
-                    <p>Share blueprints publicly or privately, invite team members via email, and collaborate on
-                        implementation together.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">�</div>
-                    <h3>Auto-Refresh</h3>
-                    <p>Progress data refreshes every 30 seconds to give you real-time visibility into implementation
-                        status.</p>
+                <div class="card"
+                    style="max-width:860px;margin:34px auto 0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;text-align:center">
+                    <h3 style="margin-top:0">Consulting Services</h3>
+                    <p style="opacity:.95;margin:8px 0 14px">Need hands-on help? Strategy sessions, custom policy
+                        development, executive briefings, and implementation coaching.</p>
+                    <a class="btn" href="https://aiblueprint.educationaiblueprint.com/contact?subject=consulting"
+                        style="background:#fff;color:#1e3a8a">Contact Us →</a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Core Features Section -->
-    <section class="features" id="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Complete AI Readiness Platform</h2>
-                <p>Everything you need to assess, plan, and implement AI across your institution</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>NIST Framework Assessment</h3>
-                    <p>Comprehensive 5-step assessment based on the NIST AI Risk Management Framework (Govern, Map,
-                        Measure, Manage).</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>Personalized Dashboard</h3>
-                    <p>AI readiness score, maturity level, framework breakdown, priority actions, and quick wins - all
-                        on one dashboard.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">�</div>
-                    <h3>Gap Analysis</h3>
-                    <p>Detailed analysis of gaps, strengths, and recommendations for each NIST framework function.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Enterprise Security</h3>
-                    <p>Row-level security, encrypted data, Supabase authentication, and full compliance with educational
-                        data protection.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📄</div>
-                    <h3>Document Analysis</h3>
-                    <p>Upload institutional documents for AI-powered analysis to enhance your assessment accuracy.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📑</div>
-                    <h3>Policy Templates</h3>
-                    <p>Access 50+ AI policy templates covering governance, ethics, data privacy, faculty guidelines, and
-                        student use.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <h3>Funding Justification</h3>
-                    <p>AI-generated funding proposals and ROI calculators to secure budget approval from leadership.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">�</div>
-                    <h3>Resource Library</h3>
-                    <p>Curated guides, case studies, best practices, and templates from leading educational
-                        institutions.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🤝</div>
-                    <h3>Expert Support</h3>
-                    <p>Access to AI education consultants, community forums, and monthly webinars with industry experts.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+        <!-- Pricing -->
+        <section id="pricing" class="section" aria-labelledby="pricing-title">
+            <div class="container pricing-wrap">
+                <header style="text-align:center;margin-bottom:18px">
+                    <h2 id="pricing-title" style="color:var(--ink);margin:0 0 6px">Simple, Transparent Pricing</h2>
+                    <p class="muted">Everything included. No per-seat fees.</p>
+                </header>
 
-    <!-- Services Section -->
-    <section class="features" id="services"
-        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-        <div class="container">
-            <div class="section-header" style="color: white;">
-                <h2 style="color: white;">Our Services</h2>
-                <p style="color: rgba(255,255,255,0.9);">Comprehensive support for your AI transformation journey</p>
-            </div>
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto;">
-                <div
-                    style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">🎯 Assessment & Planning</h3>
-                    <ul style="list-style: none; padding: 0; line-height: 2;">
-                        <li>✓ NIST AI RMF Framework Assessment</li>
-                        <li>✓ AI Implementation Blueprint Generation</li>
-                        <li>✓ Gap Analysis & Recommendations</li>
-                        <li>✓ Maturity Level Scoring</li>
-                        <li>✓ Strategic Roadmap Development</li>
-                    </ul>
-                    <a href="https://aiblueprint.educationaiblueprint.com/assessment"
-                        style="display: inline-block; margin-top: 1rem; color: white; text-decoration: underline;">Start
-                        Assessment →</a>
-                </div>
-                <div
-                    style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">🚀 Implementation Support</h3>
-                    <ul style="list-style: none; padding: 0; line-height: 2;">
-                        <li>✓ Progress Tracking Dashboard</li>
-                        <li>✓ Task Management & Milestones</li>
-                        <li>✓ Budget Monitoring Tools</li>
-                        <li>✓ Blocker Identification</li>
-                        <li>✓ Team Collaboration Features</li>
-                    </ul>
-                    <a href="https://aiblueprint.educationaiblueprint.com/blueprint"
-                        style="display: inline-block; margin-top: 1rem; color: white; text-decoration: underline;">View
-                        Blueprints →</a>
-                </div>
-                <div
-                    style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">📚 Resources & Training</h3>
-                    <ul style="list-style: none; padding: 0; line-height: 2;">
-                        <li>✓ 50+ Policy Templates</li>
-                        <li>✓ Best Practice Guides</li>
-                        <li>✓ Case Studies Library</li>
-                        <li>✓ Monthly Expert Webinars</li>
-                        <li>✓ Community Forum Access</li>
-                    </ul>
-                    <a href="https://aiblueprint.educationaiblueprint.com/resources/templates"
-                        style="display: inline-block; margin-top: 1rem; color: white; text-decoration: underline;">Browse
-                        Resources →</a>
-                </div>
-            </div>
-
-            <div
-                style="max-width: 800px; margin: 4rem auto 0; text-align: center; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
-                <h3 style="font-size: 1.75rem; margin-bottom: 1rem;">🎓 Consulting Services Available</h3>
-                <p style="font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.9;">Need hands-on support? Our team of AI
-                    education experts can provide:</p>
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; text-align: left;">
-                    <div>• One-on-one strategy sessions</div>
-                    <div>• Custom policy development</div>
-                    <div>• Faculty training workshops</div>
-                    <div>• Executive presentations</div>
-                    <div>• Implementation coaching</div>
-                    <div>• Change management support</div>
-                </div>
-                <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=consulting" class="btn"
-                    style="margin-top: 1.5rem; background: white; color: #667eea; border: none;">Contact Us About
-                    Consulting
-                    →</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section class="pricing" id="pricing">
-        <div class="container">
-            <div class="section-header">
-                <h2>Simple, Transparent Pricing</h2>
-                <p>Everything included - No hidden fees, no per-user charges</p>
-            </div>
-            <div class="pricing-card">
-                <div class="pricing-header">
+                <div class="card price-card" role="region" aria-label="AI Blueprint pricing">
                     <div
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                        <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.25rem;">COMPLETE PLATFORM</div>
-                        <h3 style="color: white; margin-bottom: 0;">AI Blueprint™ for Education</h3>
+                        style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:14px;border-radius:10px">
+                        <div style="font-size:.85rem;opacity:.9">Complete Platform</div>
+                        <h3 style="margin:2px 0 0">AI Blueprint™ for Education</h3>
                     </div>
                     <div class="price">$199</div>
-                    <div class="price-period">per institution / month</div>
-                    <div style="font-size: 0.9rem; color: #22c55e; font-weight: 600; margin-bottom: 1rem;">
-                        💰 Save $400/year with annual plan
+                    <div class="period">per institution / month</div>
+                    <ul style="margin:12px 0 16px; padding:0 0 0 18px; line-height:1.9">
+                        <li>AI Implementation Blueprint (personalized)</li>
+                        <li>NIST AI RMF Assessment</li>
+                        <li>Progress Tracking Dashboard</li>
+                        <li>Unlimited team invites</li>
+                        <li>50+ policy templates</li>
+                        <li>Resource library (with login)</li>
+                        <li>Document analysis</li>
+                        <li>Funding & ROI tools</li>
+                        <li>Priority actions & quick wins</li>
+                        <li>Email support & monthly webinars</li>
+                        <li>Unlimited assessments</li>
+                    </ul>
+                    <a class="btn btn-primary" href="https://aiblueprint.educationaiblueprint.com/get-started"
+                        style="width:100%">Start 7-Day Free Trial</a>
+                    <p class="muted" style="font-size:.85rem;margin:10px 0 0">No credit card required • Cancel anytime
+                    </p>
+
+                    <div style="border-top:1px solid #e5e7eb;margin:16px 0 0;padding-top:14px">
+                        <p class="muted" style="margin:0 0 6px"><strong>Need more?</strong> Dedicated support,
+                            integrations, and custom services.</p>
+                        <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=enterprise"
+                            style="color:var(--brand-2);font-weight:800;text-decoration:none">Contact Sales →</a>
                     </div>
                 </div>
-                <ul class="pricing-features">
-                    <li><strong>AI Implementation Blueprint</strong> - Personalized roadmap generation</li>
-                    <li><strong>NIST Framework Assessment</strong> - Complete readiness evaluation</li>
-                    <li><strong>Progress Tracking</strong> - Real-time implementation dashboard</li>
-                    <li><strong>Team Collaboration</strong> - Share & invite unlimited users</li>
-                    <li><strong>50+ Policy Templates</strong> - Ready-to-use AI policies</li>
-                    <li><strong>Resource Library</strong> - Guides, case studies, best practices</li>
-                    <li><strong>Document Analysis</strong> - AI-powered document insights</li>
-                    <li><strong>Funding Tools</strong> - ROI calculator & proposal generator</li>
-                    <li><strong>Gap Analysis</strong> - Detailed recommendations by function</li>
-                    <li><strong>Priority Actions</strong> - Quick wins & strategic next steps</li>
-                    <li><strong>Expert Support</strong> - Email support & monthly webinars</li>
-                    <li><strong>Unlimited Assessments</strong> - Track progress over time</li>
-                </ul>
-                <a href="https://aiblueprint.educationaiblueprint.com/get-started" class="btn btn-primary"
-                    style="width: 100%;">Start Free 14-Day Trial</a>
-                <p style="margin-top: 1rem; font-size: 0.85rem; color: #999;">
-                    No credit card required • Cancel anytime • Full access
-                </p>
-                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #eee;">
-                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;"><strong>Need more?</strong></p>
-                    <p style="font-size: 0.85rem; color: #666;">Enterprise plans with dedicated support, custom
-                        integrations, and consulting services available.</p>
-                    <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=enterprise"
-                        style="color: #2563eb; text-decoration: none; font-size: 0.9rem; font-weight: 600;">Contact
-                        Sales →</a>
+            </div>
+        </section>
+
+        <!-- About -->
+        <section id="about" class="section section--alt" aria-labelledby="about-title">
+            <div class="container">
+                <header style="text-align:center;margin-bottom:26px">
+                    <h2 id="about-title" style="color:var(--ink);margin:0 0 6px">About AI Blueprint™</h2>
+                    <p class="muted">Empowering responsible, effective AI adoption in education</p>
+                </header>
+
+                <div class="grid-auto" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+                    <div class="card">
+                        <h3>Our Mission</h3>
+                        <p class="muted">Provide every school, college, and university with world-class tools to assess
+                            AI readiness, plan responsibly, and implement confidently.</p>
+                    </div>
+                    <div class="card">
+                        <h3>NIST-Aligned</h3>
+                        <p class="muted">Grounded in the NIST AI Risk Management Framework with guardrails for
+                            governance, privacy, and safety.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Built for EDU</h3>
+                        <p class="muted">K-12 and Higher Ed–specific patterns, templates, and workflows—not generic
+                            enterprise tooling.</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Social Proof Section -->
-    <section class="features" style="background: #f8f9fa;">
+        <!-- FAQ -->
+        <section class="section" aria-labelledby="faq-title">
+            <div class="container">
+                <header style="text-align:center;margin-bottom:26px">
+                    <h2 id="faq-title" style="color:var(--ink);margin:0 0 6px">Frequently Asked Questions</h2>
+                    <p class="muted">Key details about the platform</p>
+                </header>
+
+                <div class="grid-auto" style="max-width:900px;margin:0 auto">
+                    <div class="card">
+                        <h3>How long does it take to get a blueprint?</h3>
+                        <p class="muted">The readiness assessment is ~5–10 minutes. The goal-setting wizard takes ~3–5
+                            minutes. Your personalized blueprint generates in seconds.</p>
+                    </div>
+                    <div class="card">
+                        <h3>What makes this different from generic planning tools?</h3>
+                        <p class="muted">It’s trained on education best practices and aligns to NIST AI RMF, generating
+                            phased plans with concrete tasks, tools, and governance guidance.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Can teams collaborate?</h3>
+                        <p class="muted">Yes—invite unlimited users, share securely, and track progress together in real
+                            time.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Is our data secure?</h3>
+                        <p class="muted">Supabase authentication, row-level security, encrypted storage, and
+                            FERPA-aligned practices protect your data.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Do you offer hands-on support?</h3>
+                        <p class="muted">Yes—contact us for consulting services including strategy, policy development,
+                            workshops, and executive presentations. <a
+                                href="https://aiblueprint.educationaiblueprint.com/contact?subject=consulting">Get in
+                                touch →</a></p>
+                    </div>
+                    <div class="card">
+                        <h3>Can we try it first?</h3>
+                        <p class="muted">Yes—start a 7-day free trial with full access. No credit card required.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CTA Band -->
+    <section class="band" aria-label="Primary call to action">
         <div class="container">
-            <div class="section-header">
-                <h2>Trusted by Leading Educational Institutions</h2>
-                <p>See how institutions are transforming their AI strategy with AI Blueprint™</p>
+            <h2>Ready to plan and implement AI the right way?</h2>
+            <p>Start your 7-day free trial and generate your first blueprint today.</p>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px">
+                <a class="btn btn-primary" href="https://aiblueprint.educationaiblueprint.com/get-started">Start Free
+                    Trial</a>
+                <a class="btn btn-outline" href="https://aiblueprint.educationaiblueprint.com/demo"
+                    style="border-color:#fff;color:#fff">Watch Demo</a>
             </div>
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                    <div style="color: #fbbf24; font-size: 1.5rem; margin-bottom: 1rem;">★★★★★</div>
-                    <p style="font-style: italic; color: #666; margin-bottom: 1.5rem; line-height: 1.7;">
-                        "The AI Blueprint feature is a game-changer. In less than 20 minutes, we had a comprehensive
-                        implementation plan that would have taken our team weeks to develop. The phased approach and
-                        department-specific recommendations were exactly what we needed."
-                    </p>
-                    <div>
-                        <strong>Dr. Sarah Mitchell</strong>
-                        <div style="font-size: 0.9rem; color: #999;">Chief Technology Officer</div>
-                        <div style="font-size: 0.85rem; color: #bbb;">Major State University</div>
-                    </div>
-                </div>
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                    <div style="color: #fbbf24; font-size: 1.5rem; margin-bottom: 1rem;">★★★★★</div>
-                    <p style="font-style: italic; color: #666; margin-bottom: 1.5rem; line-height: 1.7;">
-                        "The NIST framework assessment gave us credibility with our board. The detailed gap analysis and
-                        progress tracking dashboard keeps our AI initiative on track and accountable. Best investment
-                        we've made this year."
-                    </p>
-                    <div>
-                        <strong>James Rodriguez</strong>
-                        <div style="font-size: 0.9rem; color: #999;">Director of Innovation</div>
-                        <div style="font-size: 0.85rem; color: #bbb;">Urban School District</div>
-                    </div>
-                </div>
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                    <div style="color: #fbbf24; font-size: 1.5rem; margin-bottom: 1rem;">★★★★★</div>
-                    <p style="font-style: italic; color: #666; margin-bottom: 1.5rem; line-height: 1.7;">
-                        "The policy templates alone are worth the subscription. Being able to collaborate with our team
-                        on the blueprint and track progress in real-time has transformed how we approach AI
-                        implementation. Highly recommend."
-                    </p>
-                    <div>
-                        <strong>Lisa Chen</strong>
-                        <div style="font-size: 0.9rem; color: #999;">VP of Academic Affairs</div>
-                        <div style="font-size: 0.85rem; color: #bbb;">Private Liberal Arts College</div>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                style="max-width: 800px; margin: 3rem auto 0; text-align: center; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Join Institutions Nationwide</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem;">
-                    <div>
-                        <div style="font-size: 0.85rem; color: #999; margin-bottom: 0.25rem;">Universities</div>
-                        <div style="font-size: 1.75rem; font-weight: bold; color: #2563eb;">45+</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.85rem; color: #999; margin-bottom: 0.25rem;">Community Colleges</div>
-                        <div style="font-size: 1.75rem; font-weight: bold; color: #2563eb;">30+</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.85rem; color: #999; margin-bottom: 0.25rem;">K-12 Districts</div>
-                        <div style="font-size: 1.75rem; font-weight: bold; color: #2563eb;">25+</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.85rem; color: #999; margin-bottom: 0.25rem;">Avg. Time Saved</div>
-                        <div style="font-size: 1.75rem; font-weight: bold; color: #2563eb;">40hrs</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section class="features" id="about">
-        <div class="container">
-            <div class="section-header">
-                <h2>About AI Blueprint™</h2>
-                <p>Empowering educational institutions to harness AI responsibly and effectively</p>
-            </div>
-            <div style="max-width: 900px; margin: 0 auto;">
-                <div
-                    style="background: white; padding: 3rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-                    <h3 style="font-size: 1.75rem; margin-bottom: 1.5rem; text-align: center;">Our Mission</h3>
-                    <p style="font-size: 1.1rem; line-height: 1.8; color: #666; margin-bottom: 1.5rem;">
-                        AI Blueprint™ is the first comprehensive platform designed specifically for educational
-                        institutions navigating the complex landscape of AI implementation. We believe that every
-                        school, college, and university deserves access to world-class AI planning tools and expertise.
-                    </p>
-                    <p style="font-size: 1.1rem; line-height: 1.8; color: #666;">
-                        Built on the NIST AI Risk Management Framework and powered by advanced AI technology, our
-                        platform transforms complex AI readiness assessments into actionable, personalized
-                        implementation blueprints that institutions can follow step-by-step.
-                    </p>
-                </div>
-
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
-                    <div style="background: #f8f9fa; padding: 2rem; border-radius: 12px; text-align: center;">
-                        <div style="font-size: 2.5rem; font-weight: bold; color: #2563eb; margin-bottom: 0.5rem;">100+
-                        </div>
-                        <div style="color: #666;">Educational Institutions</div>
-                    </div>
-                    <div style="background: #f8f9fa; padding: 2rem; border-radius: 12px; text-align: center;">
-                        <div style="font-size: 2.5rem; font-weight: bold; color: #2563eb; margin-bottom: 0.5rem;">500+
-                        </div>
-                        <div style="color: #666;">Blueprints Generated</div>
-                    </div>
-                    <div style="background: #f8f9fa; padding: 2rem; border-radius: 12px; text-align: center;">
-                        <div style="font-size: 2.5rem; font-weight: bold; color: #2563eb; margin-bottom: 0.5rem;">50+
-                        </div>
-                        <div style="color: #666;">Policy Templates</div>
-                    </div>
-                </div>
-
-                <div
-                    style="background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%); padding: 2rem; border-radius: 12px; text-align: center;">
-                    <h4 style="font-size: 1.25rem; margin-bottom: 1rem;">Why Educational Institutions Choose Us</h4>
-                    <div
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; text-align: left; margin-top: 1.5rem;">
-                        <div>
-                            <strong style="color: #2563eb;">✓ Education-Focused</strong>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">Built specifically for K-12
-                                and higher education</p>
-                        </div>
-                        <div>
-                            <strong style="color: #2563eb;">✓ NIST Aligned</strong>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">Based on industry-standard
-                                AI RMF framework</p>
-                        </div>
-                        <div>
-                            <strong style="color: #2563eb;">✓ AI-Powered</strong>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">GPT-4 generates personalized
-                                plans</p>
-                        </div>
-                        <div>
-                            <strong style="color: #2563eb;">✓ Proven Results</strong>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">Trusted by leading
-                                institutions nationwide</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="features" style="background: #f8f9fa;">
-        <div class="container">
-            <div class="section-header">
-                <h2>Frequently Asked Questions</h2>
-                <p>Everything you need to know about AI Blueprint™</p>
-            </div>
-            <div style="max-width: 800px; margin: 0 auto;">
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #1a1a1a;">How long does it take to
-                        complete the assessment and get a blueprint?</h3>
-                    <p style="color: #666; line-height: 1.7;">The AI readiness assessment takes about 5-10 minutes to
-                        complete. Once finished, you can immediately start the 4-step goal-setting wizard (3-5 minutes),
-                        and your personalized AI implementation blueprint will be generated in 10-30 seconds. Total
-                        time: 15 minutes from start to complete blueprint.</p>
-                </div>
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #1a1a1a;">What makes the AI Blueprint
-                        different from generic strategic planning?</h3>
-                    <p style="color: #666; line-height: 1.7;">Our AI Blueprint is powered by GPT-4 and specifically
-                        trained on educational AI implementation best practices. It analyzes your NIST framework
-                        assessment scores, your specific goals, department needs, timeline, and budget to generate a
-                        truly personalized, phased implementation plan with specific tools, tasks, and recommendations
-                        tailored to your institution.</p>
-                </div>
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #1a1a1a;">Can multiple team members access
-                        and collaborate on our blueprint?</h3>
-                    <p style="color: #666; line-height: 1.7;">Yes! Your subscription includes unlimited users per
-                        institution. You can share blueprints publicly via link or privately invite specific team
-                        members via email. All progress tracking updates in real-time so everyone stays aligned on
-                        implementation status.</p>
-                </div>
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #1a1a1a;">Is our institutional data secure
-                        and private?</h3>
-                    <p style="color: #666; line-height: 1.7;">Absolutely. We use enterprise-grade Supabase
-                        infrastructure with row-level security, encrypted data storage, and compliance with all major
-                        educational data protection regulations including FERPA. Your assessment data and blueprints are
-                        only accessible to your institution's authorized users.</p>
-                </div>
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #1a1a1a;">What's included in the policy
-                        template library?</h3>
-                    <p style="color: #666; line-height: 1.7;">You get access to 50+ ready-to-use AI policy templates
-                        covering: AI governance frameworks, ethical AI use policies, faculty AI guidelines, student AI
-                        use policies, data privacy & security, acceptable use policies, AI literacy frameworks, and
-                        more. All templates are customizable and regularly updated.</p>
-                </div>
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #1a1a1a;">Do you offer implementation
-                        support beyond the platform?</h3>
-                    <p style="color: #666; line-height: 1.7;">Yes! All subscriptions include email support and monthly
-                        expert webinars. We also offer consulting services for institutions that need hands-on support
-                        including strategy sessions, custom policy development, faculty training workshops, executive
-                        presentations, and implementation coaching. <a
-                            href="https://aiblueprint.educationaiblueprint.com/consulting"
-                            style="color: #2563eb;">Contact us to learn more</a>.</p>
-                </div>
-                <div
-                    style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #1a1a1a;">Can I try it before committing?
-                    </h3>
-                    <p style="color: #666; line-height: 1.7;">Yes! We offer a 14-day free trial with full access to all
-                        platform features including assessment, blueprint generation, progress tracking, policy
-                        templates, and resources. No credit card required. You can explore everything and decide if it's
-                        right for your institution.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to Transform Your Institution with AI?</h2>
-            <p>Join 100+ educational institutions using AI Blueprint™ to plan and implement AI successfully</p>
-            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap;">
-                <a href="https://aiblueprint.educationaiblueprint.com/get-started" class="btn"
-                    style="background: white; color: #667eea; font-size: 1.1rem; padding: 1rem 2.5rem;">Start Free
-                    14-Day Trial</a>
-                <a href="https://aiblueprint.educationaiblueprint.com/demo" class="btn"
-                    style="background: transparent; color: white; border: 2px solid white; font-size: 1.1rem; padding: 1rem 2.5rem;">Watch
-                    Demo</a>
-            </div>
-            <p style="margin-top: 1.5rem; opacity: 0.9; font-size: 0.95rem;">No credit card required • Full platform
-                access • Cancel anytime</p>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer role="contentinfo" class="section">
         <div class="container">
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; margin-bottom: 3rem; text-align: left;">
+            <div class="footer-grid">
                 <div>
-                    <h4 style="font-size: 1.1rem; margin-bottom: 1rem; color: white;">Product</h4>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <a href="https://aiblueprint.educationaiblueprint.com/features"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Features</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/blueprint"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">AI Blueprint</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/assessment"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Assessment</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/dashboard/personalized"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Dashboard</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/pricing"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Pricing</a>
+                    <h4 style="margin:0 0 10px;color:#fff;font-weight:800">Product</h4>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <a href="https://aiblueprint.educationaiblueprint.com/features">Features</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/blueprint">AI Blueprint</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/assessment">Assessment</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/dashboard/personalized">Dashboard</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/pricing">Pricing</a>
                     </div>
                 </div>
                 <div>
-                    <h4 style="font-size: 1.1rem; margin-bottom: 1rem; color: white;">Resources</h4>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <a href="https://aiblueprint.educationaiblueprint.com/resources/templates"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Policy Templates</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/resources/guides"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Guides & Best Practices</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/resources/case-studies"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Case Studies</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=webinars"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Webinars</a>
+                    <h4 style="margin:0 0 10px;color:#fff;font-weight:800">Resources</h4>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <a href="https://aiblueprint.educationaiblueprint.com/resources/templates">Policy Templates</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/resources/guides">Guides & Best
+                            Practices</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/resources/case-studies">Case Studies</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=webinars">Webinars</a>
                     </div>
                 </div>
                 <div>
-                    <h4 style="font-size: 1.1rem; margin-bottom: 1rem; color: white;">Company</h4>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <a href="https://aiblueprint.educationaiblueprint.com/about"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">About Us</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=consulting"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Consulting Services</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=enterprise"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Enterprise</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/contact"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Contact Us</a>
+                    <h4 style="margin:0 0 10px;color:#fff;font-weight:800">Company</h4>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <a href="https://aiblueprint.educationaiblueprint.com/about">About Us</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=consulting">Consulting
+                            Services</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=enterprise">Enterprise</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/contact">Contact Us</a>
                     </div>
                 </div>
                 <div>
-                    <h4 style="font-size: 1.1rem; margin-bottom: 1rem; color: white;">Support</h4>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <a href="https://aiblueprint.educationaiblueprint.com/help"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Help Center</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/contact"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Contact Us</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/demo"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Request Demo</a>
-                        <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=support"
-                            style="color: rgba(255,255,255,0.7); text-decoration: none;">Technical Support</a>
-                    </div>
-                </div>
-            </div>
-
-            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem; margin-top: 2rem;">
-                <div class="footer-links" style="margin-bottom: 1.5rem;">
-                    <a href="https://aiblueprint.educationaiblueprint.com/privacy">Privacy Policy</a>
-                    <a href="https://aiblueprint.educationaiblueprint.com/terms">Terms of Service</a>
-                    <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=security">Security</a>
-                    <a href="https://aiblueprint.educationaiblueprint.com/contact?subject=compliance">Compliance</a>
-                </div>
-                <div class="footer-copy">
-                    © 2025 AI Blueprint™ for Education. All rights reserved.
-                </div>
-                <div style="margin-top: 1rem; opacity: 0.6; font-size: 0.85rem;">
-                    Powered by NIST AI Risk Management Framework | Built for Educational Excellence
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script>
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                const href = this.getAttribute('href');
-                if (href !== '#' && document.querySelector(href)) {
-                    e.preventDefault();
-                    const target = document.querySelector(href);
-                    const headerOffset = 80;
-                    const elementPosition = target.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // Mobile menu toggle
-        const createMobileMenu = () => {
-            const nav = document.querySelector('.nav');
-            const navLinks = document.querySelector('.nav-links');
-
-            // Create hamburger button for mobile
-            const hamburger = document.createElement('button');
-            hamburger.innerHTML = '☰';
-            hamburger.style.cssText = 'display: none; font-size: 1.5rem; background: none; border: none; color: #333; cursor: pointer; padding: 0.5rem;';
-            hamburger.className = 'mobile-menu-toggle';
-
-            // Add hamburger before nav-links
-            nav.insertBefore(hamburger, navLinks);
-
-            // Toggle menu on mobile
-            hamburger.addEventListener('click', () => {
-                navLinks.classList.toggle('mobile-active');
-            });
-
-            // Show hamburger on mobile
-            const mediaQuery = window.matchMedia('(max-width: 768px)');
-            const handleMobile = (e) => {
-                if (e.matches) {
-                    hamburger.style.display = 'block';
-                } else {
-                    hamburger.style.display = 'none';
-                    navLinks.classList.remove('mobile-active');
-                }
-            };
-            mediaQuery.addListener(handleMobile);
-            handleMobile(mediaQuery);
-        };
-
-        // Initialize mobile menu
-        createMobileMenu();
-
-        // Track clicks to the platform (Optional Analytics)
-        document.querySelectorAll('a[href^="https://aiblueprint.educationaiblueprint.com"]').forEach(link => {
-            link.addEventListener('click', function () {
-                // Add your analytics tracking here
-                console.log('User clicked:', this.href);
-
-                // Example: Google Analytics tracking
-                // if (typeof gtag !== 'undefined') {
-                //     gtag('event', 'click', {
-                //         'event_category': 'CTA',
-                //         'event_label': this.href
-                //     });
-                // }
-            });
-        });
-
-        // Scroll-based header shadow
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('.header');
-            if (window.scrollY > 10) {
-                header.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-            } else {
-                header.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-            }
-        });
-    </script>
-</body>
-
-</html>
+                    <h4 style="margin:0 0 10px;color:#fff;font-weight:800">Support</h4>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <a href="https://aiblueprint.educationaiblueprint.com/help">Help Center</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/demo">Request Demo</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/privacy">Privacy Policy</a>
+                        <a href="https://aiblueprint.educationaiblueprint.com/terms">Terms of Service</a>
+                    </div

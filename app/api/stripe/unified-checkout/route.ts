@@ -81,7 +81,7 @@ function resolvePriceId(product: string, billing: string): string | null {
 
 function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
   // Simple single-domain approach
-  const canonical = 'https://aiblueprint.k12aiblueprint.com';
+  const canonical = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com';
 
   // Map return_to shorthand values to paths
   const destination = (() => {
