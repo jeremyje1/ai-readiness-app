@@ -1,0 +1,22 @@
+DEPLOYMENT TRIGGER FILE
+=======================
+DATE: 2025-01-08
+PURPOSE: FIX RLS POLICIES WITH PROPER SCHEMA REFERENCE
+
+CHANGES MADE:
+1. Added public schema prefix to all user_payments references in RLS policies
+2. Added validation check to ensure user_payments table exists before running migration
+3. Added validation check to ensure organization column exists in user_payments
+
+FIXED ISSUES:
+- ERROR: column "organization" does not exist
+- All RLS policies now reference public.user_payments explicitly
+- Migration will fail early with helpful message if user_payments table is missing
+
+FILES CHANGED:
+- APPLY_PREMIUM_FEATURES_MIGRATION.sql
+
+DEPLOYMENT NOTES:
+- Make sure to run the user_payments migration (database-migrations/001_user_payments.sql) FIRST
+- Then run this updated premium features migration
+- The schema prefix ensures PostgreSQL finds the correct table

@@ -1,6 +1,24 @@
 -- IMPORTANT: Run this SQL in your Supabase Dashboard SQL Editor
 -- This creates all tables needed for premium features
 
+-- First, ensure the user_payments table exists with the organization column
+-- If you get an error here, run the user_payments migration first
+DO $$
+BEGIN
+    -- Check if user_payments table exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'user_payments' AND table_schema = 'public') THEN
+        RAISE EXCEPTION 'Table user_payments does not exist. Please run the user_payments migration first.';
+    END IF;
+    
+    -- Check if organization column exists in user_payments
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'user_payments' 
+                   AND column_name = 'organization' 
+                   AND table_schema = 'public') THEN
+        RAISE EXCEPTION 'Column organization does not exist in user_payments table. Please run the user_payments migration first.';
+    END IF;
+END $$;
+
 -- 1. Team Management System
 -- ========================
 
@@ -175,7 +193,7 @@ ALTER TABLE event_rsvps ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their organization's team members" ON team_members
     FOR SELECT USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -184,7 +202,7 @@ CREATE POLICY "Users can view their organization's team members" ON team_members
 CREATE POLICY "Users can view their organization's data" ON implementation_phases
     FOR SELECT USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -193,7 +211,7 @@ CREATE POLICY "Users can view their organization's data" ON implementation_phase
 CREATE POLICY "Users can view their organization's tasks" ON implementation_tasks
     FOR SELECT USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -202,7 +220,7 @@ CREATE POLICY "Users can view their organization's tasks" ON implementation_task
 CREATE POLICY "Users can view their organization's ROI metrics" ON roi_metrics
     FOR SELECT USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -211,7 +229,7 @@ CREATE POLICY "Users can view their organization's ROI metrics" ON roi_metrics
 CREATE POLICY "Users can view their organization's events" ON calendar_events
     FOR SELECT USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -221,7 +239,7 @@ CREATE POLICY "Users can view their organization's events" ON calendar_events
 CREATE POLICY "Users can insert team members for their organization" ON team_members
     FOR INSERT WITH CHECK (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -231,7 +249,7 @@ CREATE POLICY "Users can insert team members for their organization" ON team_mem
 CREATE POLICY "Users can update their organization's team members" ON team_members
     FOR UPDATE USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -241,7 +259,7 @@ CREATE POLICY "Users can update their organization's team members" ON team_membe
 CREATE POLICY "Users can insert phases for their organization" ON implementation_phases
     FOR INSERT WITH CHECK (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -251,7 +269,7 @@ CREATE POLICY "Users can insert phases for their organization" ON implementation
 CREATE POLICY "Users can insert tasks for their organization" ON implementation_tasks
     FOR INSERT WITH CHECK (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -261,7 +279,7 @@ CREATE POLICY "Users can insert tasks for their organization" ON implementation_
 CREATE POLICY "Users can update their organization's tasks" ON implementation_tasks
     FOR UPDATE USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -271,7 +289,7 @@ CREATE POLICY "Users can update their organization's tasks" ON implementation_ta
 CREATE POLICY "Users can insert ROI metrics for their organization" ON roi_metrics
     FOR INSERT WITH CHECK (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -281,7 +299,7 @@ CREATE POLICY "Users can insert ROI metrics for their organization" ON roi_metri
 CREATE POLICY "Users can update their organization's ROI metrics" ON roi_metrics
     FOR UPDATE USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -291,7 +309,7 @@ CREATE POLICY "Users can update their organization's ROI metrics" ON roi_metrics
 CREATE POLICY "Users can insert events for their organization" ON calendar_events
     FOR INSERT WITH CHECK (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -301,7 +319,7 @@ CREATE POLICY "Users can insert events for their organization" ON calendar_event
 CREATE POLICY "Users can update their organization's events" ON calendar_events
     FOR UPDATE USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
@@ -311,7 +329,7 @@ CREATE POLICY "Users can update their organization's events" ON calendar_events
 CREATE POLICY "Users can delete their organization's events" ON calendar_events
     FOR DELETE USING (
         organization IN (
-            SELECT organization FROM user_payments 
+            SELECT organization FROM public.user_payments 
             WHERE user_id = auth.uid() 
             AND access_granted = true
         )
