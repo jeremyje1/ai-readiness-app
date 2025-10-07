@@ -2,10 +2,23 @@ import { AI_BLUEPRINT_EDU_PRODUCT } from '@/lib/ai-blueprint-edu-product';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Initialize Stripe only if API key is available
-const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-06-30.basil'
-}) : null;
+// Initialize Stripe with error handling for API version
+let stripe: Stripe | null = null;
+
+if (process.env.STRIPE_SECRET_KEY) {
+    try {
+        stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+            apiVersion: '2025-06-30.basil'
+        });
+    } catch (error) {
+        console.error('Failed to initialize Stripe with API version, trying without version');
+        try {
+            stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {} as any);
+        } catch (fallbackError) {
+            console.error('Failed to initialize Stripe:', fallbackError);
+        }
+    }
+}
 
 export async function POST(request: NextRequest) {
     try {
