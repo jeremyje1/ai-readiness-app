@@ -10,7 +10,7 @@ export async function GET() {
 
     if (authError || !user) {
       console.error('Payment status auth error:', authError);
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'Unauthorized',
         details: authError?.message || 'No user found',
         hint: 'Check if cookies are being sent correctly'

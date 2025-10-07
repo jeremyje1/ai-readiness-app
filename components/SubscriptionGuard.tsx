@@ -5,12 +5,12 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Lock, CreditCard, CheckCircle } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { useUserProfile } from '@/lib/hooks/useUserProfile';
+import { CheckCircle, CreditCard, Loader2, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
@@ -32,7 +32,7 @@ export function SubscriptionGuard({
     const checkSubscription = async () => {
       try {
         // First sync payment status with profile
-        await fetch('/api/user/sync-payment', { 
+        await fetch('/api/user/sync-payment', {
           method: 'POST',
           credentials: 'include'
         });
@@ -120,9 +120,8 @@ export function SubscriptionGuard({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-600">Subscription Status:</span>
-              <span className={`font-medium ${
-                isSubscribed ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span className={`font-medium ${isSubscribed ? 'text-green-600' : 'text-red-600'
+                }`}>
                 {profile?.subscription_status || 'Inactive'}
               </span>
             </div>

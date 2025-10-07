@@ -1,27 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  CheckCircle2, 
-  ArrowRight,
-  Star,
-  Users,
-  FileText,
-  TrendingUp,
-  Shield,
-  Brain,
-  GraduationCap,
-  Target,
-  BarChart3,
-  Calendar
-} from 'lucide-react';
 import { AI_BLUEPRINT_EDU_PRODUCT, formatPrice, getYearlySavings, getYearlySavingsPercent } from '@/lib/ai-blueprint-edu-product';
+import { motion } from 'framer-motion';
+import {
+  ArrowRight,
+  BarChart3,
+  Brain,
+  Calendar,
+  CheckCircle2,
+  FileText,
+  GraduationCap,
+  Shield,
+  Target,
+  Users
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function AIBlueprintPricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
@@ -39,13 +36,13 @@ export default function AIBlueprintPricingPage() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         console.error('Checkout error:', data);
         alert(`Error: ${data.error || 'Failed to create checkout session'}`);
         return;
       }
-      
+
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -103,7 +100,7 @@ export default function AIBlueprintPricingPage() {
               AI Blueprint for Education
             </h1>
             <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Transform your institution's AI readiness with our comprehensive assessment, 
+              Transform your institution's AI readiness with our comprehensive assessment,
               implementation roadmap, and ongoing support designed specifically for higher education.
             </p>
           </motion.div>
@@ -121,9 +118,8 @@ export default function AIBlueprintPricingPage() {
             className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                billingPeriod === 'yearly' ? 'translate-x-6' : 'translate-x-1'
-              }`}
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${billingPeriod === 'yearly' ? 'translate-x-6' : 'translate-x-1'
+                }`}
             />
           </button>
           <span className={`text-sm ${billingPeriod === 'yearly' ? 'text-gray-900 font-semibold' : 'text-gray-500'}`}>
@@ -160,7 +156,7 @@ export default function AIBlueprintPricingPage() {
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
                   {AI_BLUEPRINT_EDU_PRODUCT.description}
                 </p>
-                
+
                 <div className="flex items-baseline justify-center mb-2">
                   <span className="text-5xl font-bold text-indigo-600">
                     {formatPrice(billingPeriod).split('/')[0]}
@@ -169,14 +165,14 @@ export default function AIBlueprintPricingPage() {
                     {billingPeriod === 'monthly' ? '/month' : '/year'}
                   </span>
                 </div>
-                
+
                 {billingPeriod === 'yearly' && (
                   <p className="text-sm text-green-600 font-medium">
                     Save ${getYearlySavings()} compared to monthly billing
                   </p>
                 )}
               </CardHeader>
-              
+
               <CardContent className="px-8 pb-8">
                 <ul className="space-y-3 mb-8">
                   {AI_BLUEPRINT_EDU_PRODUCT.features.map((feature, index) => (
@@ -190,7 +186,7 @@ export default function AIBlueprintPricingPage() {
                     </li>
                   ))}
                 </ul>
-                
+
                 <Button
                   onClick={handleCheckout}
                   className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 text-lg font-semibold"
@@ -199,7 +195,7 @@ export default function AIBlueprintPricingPage() {
                   Get Started Today
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                
+
                 <p className="text-center text-sm text-gray-500 mt-4">
                   No setup fees · Cancel anytime · Secure checkout
                 </p>
@@ -215,7 +211,7 @@ export default function AIBlueprintPricingPage() {
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             Why Higher Ed Leaders Choose AI Blueprint
           </h2>
-          
+
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center">
               <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -223,29 +219,29 @@ export default function AIBlueprintPricingPage() {
               </div>
               <h3 className="text-xl font-semibold mb-2">Tailored for Higher Ed</h3>
               <p className="text-gray-600">
-                Built specifically for colleges and universities, addressing unique challenges in governance, 
+                Built specifically for colleges and universities, addressing unique challenges in governance,
                 faculty adoption, and student success.
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BarChart3 className="h-8 w-8 text-indigo-600" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Data-Driven Insights</h3>
               <p className="text-gray-600">
-                Compare your institution against peers, track progress over time, and make informed 
+                Compare your institution against peers, track progress over time, and make informed
                 decisions with comprehensive benchmarking data.
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-8 w-8 text-indigo-600" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Compliance Ready</h3>
               <p className="text-gray-600">
-                Stay ahead of regulations with built-in FERPA compliance, accreditation alignment, 
+                Stay ahead of regulations with built-in FERPA compliance, accreditation alignment,
                 and ethical AI frameworks designed for education.
               </p>
             </div>
