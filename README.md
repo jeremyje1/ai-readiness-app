@@ -70,6 +70,17 @@ pnpm dev
 
 Visit http://localhost:3000 to see the application.
 
+### One-command demo database (optional)
+
+If you want to experience the full premium workflow locally—including blueprint phases, tasks, ROI metrics, and calendar events—spin up the Docker snapshot and seed data with:
+
+```bash
+chmod +x scripts/bootstrap-full-experience.sh
+./scripts/bootstrap-full-experience.sh
+```
+
+This launches a Postgres 15 container on port `54329`, loads the Supabase schema (auth + public), ensures the auth helper functions (`auth.jwt()`, `auth.role()`, etc.) exist, and seeds the premium demo data plus the 50+ policy templates library (`insert-test-data.sql` and `supabase/seeds/seed-policy-templates.sql`). After it finishes, point your `DATABASE_URL` to `postgresql://postgres:postgres@localhost:54329/postgres` before running `pnpm dev`.
+
 ## Project Structure
 
 ```
@@ -134,6 +145,16 @@ components/
 - [ ] Configure custom domain
 - [ ] Enable email verification
 - [ ] Set up monitoring/analytics
+
+### Policy Template Library Sync
+
+Production deployments now trigger the `Seed Production Policy Templates` workflow, which re-runs `supabase/seeds/seed-policy-templates.sql` against the live Supabase project. To enable it:
+
+1. Create a Supabase connection string with your database password (Settings → Database → Connection string).
+2. Add it as the `SUPABASE_DB_URL` environment variable in the repository (GitHub → Settings → Environments → `production`).
+3. On the next push to `main` or manual workflow dispatch, the pipeline will automatically seed any missing policy templates and log the resulting count.
+
+> The seed is idempotent—running it multiple times will not create duplicate templates.
 
 ## Scripts
 

@@ -1,6 +1,11 @@
 -- AI Blueprint System Database Schema
 -- Run this migration in Supabase SQL editor
 
+-- Ensure assessment dependency table exists for foreign keys when running fresh installs
+CREATE TABLE IF NOT EXISTS public.streamlined_assessment_responses (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4()
+);
+
 -- Organizations table (if not already present)
 CREATE TABLE IF NOT EXISTS public.organizations (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -328,45 +333,159 @@ ALTER TABLE public.blueprint_comments ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 -- Blueprint Goals
-CREATE POLICY "Users can view own blueprint goals" ON public.blueprint_goals
-  FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can create own blueprint goals" ON public.blueprint_goals
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own blueprint goals" ON public.blueprint_goals
-  FOR UPDATE USING (auth.uid() = user_id);
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprint_goals'
+      AND policyname = 'Users can view own blueprint goals'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Users can view own blueprint goals" ON public.blueprint_goals
+      FOR SELECT USING (auth.uid() = user_id);$$;
+  END IF;
+END
+$policy$;
+
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprint_goals'
+      AND policyname = 'Users can create own blueprint goals'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Users can create own blueprint goals" ON public.blueprint_goals
+      FOR INSERT WITH CHECK (auth.uid() = user_id);$$;
+  END IF;
+END
+$policy$;
+
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprint_goals'
+      AND policyname = 'Users can update own blueprint goals'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Users can update own blueprint goals" ON public.blueprint_goals
+      FOR UPDATE USING (auth.uid() = user_id);$$;
+  END IF;
+END
+$policy$;
 
 -- Blueprints
-CREATE POLICY "Users can view own blueprints" ON public.blueprints
-  FOR SELECT USING (auth.uid() = user_id OR auth.uid() = ANY(shared_with) OR is_public = true);
-CREATE POLICY "Users can create own blueprints" ON public.blueprints
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own blueprints" ON public.blueprints
-  FOR UPDATE USING (auth.uid() = user_id);
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprints'
+      AND policyname = 'Users can view own blueprints'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Users can view own blueprints" ON public.blueprints
+      FOR SELECT USING (auth.uid() = user_id OR auth.uid() = ANY(shared_with) OR is_public = true);$$;
+  END IF;
+END
+$policy$;
+
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprints'
+      AND policyname = 'Users can create own blueprints'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Users can create own blueprints" ON public.blueprints
+      FOR INSERT WITH CHECK (auth.uid() = user_id);$$;
+  END IF;
+END
+$policy$;
+
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprints'
+      AND policyname = 'Users can update own blueprints'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Users can update own blueprints" ON public.blueprints
+      FOR UPDATE USING (auth.uid() = user_id);$$;
+  END IF;
+END
+$policy$;
 
 -- Blueprint Phases
-CREATE POLICY "Users can view blueprint phases" ON public.blueprint_phases
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.blueprints 
-      WHERE blueprints.id = blueprint_phases.blueprint_id 
-      AND (blueprints.user_id = auth.uid() OR auth.uid() = ANY(blueprints.shared_with) OR blueprints.is_public = true)
-    )
-  );
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprint_phases'
+      AND policyname = 'Users can view blueprint phases'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Users can view blueprint phases" ON public.blueprint_phases
+      FOR SELECT USING (
+        EXISTS (
+          SELECT 1 FROM public.blueprints 
+          WHERE blueprints.id = blueprint_phases.blueprint_id 
+          AND (blueprints.user_id = auth.uid() OR auth.uid() = ANY(blueprints.shared_with) OR blueprints.is_public = true)
+        )
+      );$$;
+  END IF;
+END
+$policy$;
 
 -- Blueprint Tasks (similar pattern for other tables)
-CREATE POLICY "Users can view blueprint tasks" ON public.blueprint_tasks
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.blueprints 
-      WHERE blueprints.id = blueprint_tasks.blueprint_id 
-      AND (blueprints.user_id = auth.uid() OR auth.uid() = ANY(blueprints.shared_with) OR blueprints.is_public = true)
-    )
-  );
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprint_tasks'
+      AND policyname = 'Users can view blueprint tasks'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Users can view blueprint tasks" ON public.blueprint_tasks
+      FOR SELECT USING (
+        EXISTS (
+          SELECT 1 FROM public.blueprints 
+          WHERE blueprints.id = blueprint_tasks.blueprint_id 
+          AND (blueprints.user_id = auth.uid() OR auth.uid() = ANY(blueprints.shared_with) OR blueprints.is_public = true)
+        )
+      );$$;
+  END IF;
+END
+$policy$;
 
 -- Templates are viewable by all authenticated users
-CREATE POLICY "Authenticated users can view templates" ON public.blueprint_templates
-  FOR SELECT USING (auth.role() = 'authenticated');
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'blueprint_templates'
+      AND policyname = 'Authenticated users can view templates'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Authenticated users can view templates" ON public.blueprint_templates
+      FOR SELECT USING (auth.role() = 'authenticated');$$;
+  END IF;
+END
+$policy$;
 
 -- Recommendations are viewable by all authenticated users  
-CREATE POLICY "Authenticated users can view recommendations" ON public.recommendations_catalog
-  FOR SELECT USING (auth.role() = 'authenticated');
+DO $policy$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'recommendations_catalog'
+      AND policyname = 'Authenticated users can view recommendations'
+  ) THEN
+    EXECUTE $$CREATE POLICY "Authenticated users can view recommendations" ON public.recommendations_catalog
+      FOR SELECT USING (auth.role() = 'authenticated');$$;
+  END IF;
+END
+$policy$;

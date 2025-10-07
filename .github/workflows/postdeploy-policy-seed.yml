@@ -1,0 +1,69 @@
+name: Seed Production Policy Templates
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      skip_seed:
+        description: "Set to true to skip seeding"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  seed-policies:
+    if: ${{ (github.event.inputs.skip_seed || 'false') != 'true' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --omit=dev
+
+      - name: Seed AI policy templates
+        run: |
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "Supabase connection string (SUPABASE_DB_URL) is not configured. Add it as an environment variable." >&2
+            exit 1
+          fi
+          npm run seed:policies
+
+      - name: Verify policy template count
+        run: |
+          node - <<'NODE'
+          const { Client } = require('pg');
+
+          const connectionString = process.env.SUPABASE_DB_URL
+            || process.env.DATABASE_URL;
+
+          if (!connectionString) {
+            throw new Error('Missing Supabase connection string secret.');
+          }
+
+          const client = new Client({
+            connectionString: connectionString.trim(),
+            ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }
+          });
+
+          (async () => {
+            await client.connect();
+            const { rows } = await client.query('SELECT COUNT(*)::int AS count FROM public.ai_policy_templates;');
+            console.log(`Current policy template count: ${rows[0].count}`);
+            await client.end();
+          })().catch(async (error) => {
+            console.error(error);
+            await client.end();
+            process.exit(1);
+          });
+          NODE

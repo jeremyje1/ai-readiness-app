@@ -1,0 +1,54 @@
+name: verify-demo-database
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/bootstrap-full-experience.sh'
+      - 'supabase/migrations/**'
+      - 'supabase/seeds/**'
+      - 'insert-test-data.sql'
+      - '.github/workflows/bootstrap-demo.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure bootstrap script is executable
+        run: chmod +x scripts/bootstrap-full-experience.sh
+
+      - name: Run bootstrap script
+        run: ./scripts/bootstrap-full-experience.sh
+
+      - name: Validate seeded data volume
+        run: |
+          set -euo pipefail
+          POLICY_COUNT=$(docker exec blueprint-experience-db psql -At -U postgres -d postgres -c "SELECT COUNT(*) FROM public.ai_policy_templates;")
+          TEAM_COUNT=$(docker exec blueprint-experience-db psql -At -U postgres -d postgres -c "SELECT COUNT(*) FROM public.team_members;")
+          EVENT_COUNT=$(docker exec blueprint-experience-db psql -At -U postgres -d postgres -c "SELECT COUNT(*) FROM public.calendar_events;")
+          echo "Policy templates: $POLICY_COUNT"
+          echo "Team members: $TEAM_COUNT"
+          echo "Calendar events: $EVENT_COUNT"
+          if [ "${POLICY_COUNT:-0}" -lt 50 ]; then
+            echo "Expected at least 50 policy templates, found $POLICY_COUNT" >&2
+            exit 1
+          fi
+          if [ "${TEAM_COUNT:-0}" -lt 4 ]; then
+            echo "Expected premium team members to seed, found $TEAM_COUNT" >&2
+            exit 1
+          fi
+          if [ "${EVENT_COUNT:-0}" -lt 4 ]; then
+            echo "Expected calendar events to seed, found $EVENT_COUNT" >&2
+            exit 1
+          fi
+
+      - name: Tear down demo database
+        if: always()
+        run: docker rm -f blueprint-experience-db

@@ -24,7 +24,8 @@
     "setup:database": "node scripts/setup-database.js",
     "setup:storage": "node scripts/setup-storage.js",
     "setup:all": "npm run setup:database && npm run setup:storage",
-    "verify:setup": "node scripts/verify-setup.js"
+    "verify:setup": "node scripts/verify-setup.js",
+    "seed:policies": "node scripts/seed-policy-templates.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -72,6 +73,7 @@
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.1.6",
     "pdfkit": "^0.17.1",
+    "pg": "^8.16.3",
     "postcss": "8.4.32",
     "postmark": "^4.0.5",
     "react": "18.2.0",
