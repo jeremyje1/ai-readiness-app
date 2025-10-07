@@ -15,16 +15,27 @@ export async function GET(request: Request) {
         const endDate = url.searchParams.get('end') || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
         const eventType = url.searchParams.get('type');
 
+        // Get user's organization from user_payments
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('organization')
+            .eq('user_id', user.id)
+            .eq('access_granted', true)
+            .single();
+
+        if (!payment || !payment.organization) {
+            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
+        }
+
+        const organization = payment.organization;
+
         // Get user's team membership
         const { data: membership } = await supabase
             .from('team_members')
-            .select('id, institution_id')
+            .select('id')
             .eq('user_id', user.id)
+            .eq('organization', organization)
             .single();
-
-        if (!membership) {
-            return NextResponse.json({ error: 'No team membership found' }, { status: 404 });
-        }
 
         // Build query for calendar events
         let eventsQuery = supabase
@@ -37,7 +48,7 @@ export async function GET(request: Request) {
                     team_member:team_members(id, full_name, email, avatar_url)
                 )
             `)
-            .eq('institution_id', membership.institution_id)
+            .eq('organization', organization)
             .gte('start_time', startDate)
             .lte('start_time', endDate)
             .order('start_time', { ascending: true });
@@ -55,7 +66,7 @@ export async function GET(request: Request) {
 
         // Get user's RSVPs
         const userRsvps = events?.map(event => {
-            const userRsvp = event.rsvps?.find((r: any) => r.team_member_id === membership.id);
+            const userRsvp = membership ? event.rsvps?.find((r: any) => r.team_member_id === membership.id) : null;
             return {
                 ...event,
                 user_rsvp_status: userRsvp?.response || 'not_invited'
@@ -108,11 +119,26 @@ export async function POST(request: Request) {
             recurrence_rule
         } = body;
 
+        // Get user's organization from user_payments
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('organization')
+            .eq('user_id', user.id)
+            .eq('access_granted', true)
+            .single();
+
+        if (!payment || !payment.organization) {
+            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
+        }
+
+        const organization = payment.organization;
+
         // Get user's team membership
         const { data: membership } = await supabase
             .from('team_members')
-            .select('id, institution_id')
+            .select('id')
             .eq('user_id', user.id)
+            .eq('organization', organization)
             .single();
 
         if (!membership) {
@@ -123,7 +149,7 @@ export async function POST(request: Request) {
         const { data: event, error: eventError } = await supabase
             .from('calendar_events')
             .insert({
-                institution_id: membership.institution_id,
+                organization,
                 title,
                 description,
                 event_type,

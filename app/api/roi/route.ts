@@ -11,108 +11,102 @@ export async function GET(request: Request) {
         }
 
         const url = new URL(request.url);
-        const period = url.searchParams.get('period') || 'current_month';
+        const period = url.searchParams.get('period') || '30d';
         
-        // Get user's institution
-        const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('institution_id')
+        // Get user's organization from user_payments
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('organization')
             .eq('user_id', user.id)
+            .eq('access_granted', true)
             .single();
 
-        const institutionId = profile?.institution_id || user.id;
+        if (!payment || !payment.organization) {
+            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
+        }
+
+        const organization = payment.organization;
 
         // Calculate date ranges
         const now = new Date();
         let startDate: Date;
-        let endDate = now;
 
         switch (period) {
-            case 'current_month':
-                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            case '30d':
+                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
                 break;
-            case 'last_month':
-                startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+            case '90d':
+                startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
                 break;
-            case 'quarter':
-                startDate = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
-                break;
-            case 'year':
-                startDate = new Date(now.getFullYear(), 0, 1);
+            case '1y':
+                startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
                 break;
             default:
-                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         }
 
         // Get ROI metrics
         const { data: metrics, error: metricsError } = await supabase
             .from('roi_metrics')
             .select('*')
-            .eq('institution_id', institutionId)
+            .eq('organization', organization)
             .gte('metric_date', startDate.toISOString())
-            .lte('metric_date', endDate.toISOString())
-            .order('metric_date', { ascending: true });
+            .order('metric_date', { ascending: false });
 
         if (metricsError) {
             console.error('Error fetching ROI metrics:', metricsError);
+            return NextResponse.json({ error: 'Failed to fetch ROI metrics' }, { status: 500 });
         }
 
-        // Calculate aggregates
-        const aggregates = metrics?.reduce((acc, metric) => {
-            acc.totalHoursSaved += parseFloat(metric.hours_saved_total || 0);
-            acc.totalCostReduction += parseFloat(metric.cost_reduction_total || 0);
-            acc.tasksAutomated += metric.tasks_automated || 0;
-            acc.processesOptimized += metric.processes_optimized || 0;
-            return acc;
-        }, {
-            totalHoursSaved: 0,
-            totalCostReduction: 0,
-            tasksAutomated: 0,
-            processesOptimized: 0
-        }) || {
-            totalHoursSaved: 0,
-            totalCostReduction: 0,
-            tasksAutomated: 0,
-            processesOptimized: 0
-        };
+        // Calculate aggregated values
+        const totalSavings = metrics?.reduce((sum, m) => {
+            if (m.metric_type === 'cost_savings' || m.metric_type === 'revenue_increase') {
+                return sum + Number(m.metric_value);
+            }
+            return sum;
+        }, 0) || 0;
+
+        const totalProductivityHours = metrics?.reduce((sum, m) => {
+            if (m.metric_type === 'productivity_hours') {
+                return sum + Number(m.metric_value);
+            }
+            return sum;
+        }, 0) || 0;
 
         // Calculate ROI
         const monthlySubscriptionCost = 199;
-        const monthsInPeriod = Math.max(1, metrics?.length || 1);
-        const totalCost = monthlySubscriptionCost * monthsInPeriod;
-        const roiPercentage = totalCost > 0 ? ((aggregates.totalCostReduction - totalCost) / totalCost) * 100 : 0;
-        const paybackPeriodMonths = aggregates.totalCostReduction > 0 ? totalCost / (aggregates.totalCostReduction / monthsInPeriod) : 0;
+        const periodInMonths = period === '30d' ? 1 : period === '90d' ? 3 : 12;
+        const totalCost = monthlySubscriptionCost * periodInMonths;
+        const roiPercentage = totalCost > 0 ? ((totalSavings - totalCost) / totalCost) * 100 : 0;
+        
+        // Annual projection
+        const monthsOfData = (now.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000);
+        const monthlySavings = monthsOfData > 0 ? totalSavings / monthsOfData : 0;
+        const annualProjection = monthlySavings * 12;
+        const paybackPeriod = monthlySavings > monthlySubscriptionCost ? 1 : 
+                             monthlySavings > 0 ? Math.ceil(monthlySubscriptionCost / monthlySavings) : null;
 
-        // Get latest calculation
-        const { data: latestCalculation } = await supabase
-            .from('roi_calculations')
-            .select('*')
-            .eq('institution_id', institutionId)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
+        // Group metrics by category
+        const metricsByCategory: Record<string, number> = {};
+        metrics?.forEach(m => {
+            if (m.category) {
+                metricsByCategory[m.category] = (metricsByCategory[m.category] || 0) + Number(m.metric_value);
+            }
+        });
 
         return NextResponse.json({
-            period: {
-                start: startDate.toISOString(),
-                end: endDate.toISOString(),
-                label: period
+            metrics: metrics || [],
+            summary: {
+                totalSavings,
+                totalProductivityHours,
+                roiPercentage,
+                monthlySavings,
+                annualProjection,
+                paybackPeriod,
+                periodInMonths
             },
-            current: {
-                hoursSaved: aggregates.totalHoursSaved,
-                costReduction: aggregates.totalCostReduction,
-                tasksAutomated: aggregates.tasksAutomated,
-                processesOptimized: aggregates.processesOptimized,
-                roiPercentage: Math.round(roiPercentage),
-                paybackPeriodMonths: Math.round(paybackPeriodMonths)
-            },
-            projections: {
-                annualSavings: (aggregates.totalCostReduction / monthsInPeriod) * 12,
-                annualROI: ((aggregates.totalCostReduction / monthsInPeriod) * 12 - monthlySubscriptionCost * 12) / (monthlySubscriptionCost * 12) * 100
-            },
-            trends: metrics || [],
-            lastCalculation: latestCalculation
+            byCategory: metricsByCategory,
+            period
         });
 
     } catch (error) {
@@ -131,81 +125,97 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const {
-            metric_date = new Date().toISOString().split('T')[0],
-            hours_saved_automation = 0,
-            hours_saved_efficiency = 0,
-            cost_reduction_staff = 0,
-            cost_reduction_tools = 0,
-            cost_reduction_errors = 0,
-            tasks_automated = 0,
-            processes_optimized = 0,
-            satisfaction_score = 0
-        } = body;
+        const { metric_type, metric_value, category, description } = body;
 
-        // Get user's institution
-        const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('institution_id')
+        // Get user's organization from user_payments
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('organization')
             .eq('user_id', user.id)
+            .eq('access_granted', true)
             .single();
 
-        const institutionId = profile?.institution_id || user.id;
+        if (!payment || !payment.organization) {
+            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
+        }
 
-        // Insert or update ROI metrics
-        const { data: metric, error: metricError } = await supabase
+        const organization = payment.organization;
+
+        // Check if user has permission to add metrics
+        const { data: membership } = await supabase
+            .from('team_members')
+            .select('id, role')
+            .eq('user_id', user.id)
+            .eq('organization', organization)
+            .single();
+
+        if (!membership || !['owner', 'admin'].includes(membership.role)) {
+            return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+        }
+
+        // Add ROI metric
+        const { data: metric, error: insertError } = await supabase
             .from('roi_metrics')
-            .upsert({
-                institution_id: institutionId,
-                metric_date,
-                hours_saved_automation,
-                hours_saved_efficiency,
-                cost_reduction_staff,
-                cost_reduction_tools,
-                cost_reduction_errors,
-                tasks_automated,
-                processes_optimized,
-                satisfaction_score,
-                updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'institution_id,metric_date'
+            .insert({
+                organization,
+                metric_type,
+                metric_value,
+                category,
+                description,
+                metric_date: new Date().toISOString()
             })
             .select()
             .single();
 
-        if (metricError) {
-            console.error('Error saving ROI metric:', metricError);
-            return NextResponse.json({ error: 'Failed to save ROI metric' }, { status: 500 });
+        if (insertError) {
+            console.error('Error adding ROI metric:', insertError);
+            return NextResponse.json({ error: 'Failed to add ROI metric' }, { status: 500 });
         }
 
-        // Calculate and store ROI calculation
-        const totalSavings = parseFloat(metric.cost_reduction_total || '0');
-        const monthlyROI = totalSavings - 199; // Monthly subscription cost
-        const roiPercentage = monthlyROI > 0 ? (monthlyROI / 199) * 100 : 0;
+        // Log activity
+        await supabase
+            .from('team_activity')
+            .insert({
+                team_member_id: membership.id,
+                action_type: 'metric_added',
+                action_details: { metric_type, value: metric_value, category },
+                entity_type: 'roi_metric',
+                entity_id: metric.id
+            });
 
+        // Calculate updated ROI if needed
+        const { data: monthMetrics } = await supabase
+            .from('roi_metrics')
+            .select('metric_type, metric_value')
+            .eq('organization', organization)
+            .gte('metric_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+
+        const monthlyTotal = monthMetrics?.reduce((sum, m) => {
+            if (m.metric_type === 'cost_savings' || m.metric_type === 'revenue_increase') {
+                return sum + Number(m.metric_value);
+            }
+            return sum;
+        }, 0) || 0;
+
+        const roiPercentage = ((monthlyTotal - 199) / 199) * 100;
+
+        // Save calculation
         await supabase
             .from('roi_calculations')
             .insert({
-                institution_id: institutionId,
-                calculation_date: metric_date,
-                monthly_savings: totalSavings,
-                annual_projection: totalSavings * 12,
-                payback_period_months: totalSavings > 0 ? Math.ceil(199 / totalSavings) : null,
+                organization,
+                calculation_date: new Date().toISOString(),
+                monthly_savings: monthlyTotal,
+                annual_projection: monthlyTotal * 12,
+                payback_period_months: monthlyTotal > 199 ? 1 : Math.ceil(199 / monthlyTotal),
                 roi_percentage: roiPercentage,
-                calculation_details: {
-                    hours_saved: metric.hours_saved_total,
-                    cost_breakdown: {
-                        staff: metric.cost_reduction_staff,
-                        tools: metric.cost_reduction_tools,
-                        errors: metric.cost_reduction_errors
-                    }
-                }
+                calculation_details: { metrics_count: monthMetrics?.length || 0 }
             });
 
         return NextResponse.json(metric);
 
     } catch (error) {
-        console.error('Error saving ROI metric:', error);
+        console.error('Error adding ROI metric:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

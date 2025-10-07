@@ -10,23 +10,45 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get user's institution from their team membership
-        const { data: membership } = await supabase
+        // Get user's organization from user_payments
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('organization')
+            .eq('user_id', user.id)
+            .eq('access_granted', true)
+            .single();
+
+        if (!payment || !payment.organization) {
+            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
+        }
+
+        const organization = payment.organization;
+
+        // Check if user is already a team member
+        const { data: currentMember } = await supabase
             .from('team_members')
-            .select('institution_id')
+            .select('id')
             .eq('user_id', user.id)
             .single();
 
-        if (!membership) {
-            return NextResponse.json({ error: 'No team membership found' }, { status: 404 });
+        // If not a team member, create them as owner
+        if (!currentMember) {
+            const { data: userData } = await supabase.auth.getUser();
+            await supabase.from('team_members').insert({
+                user_id: user.id,
+                organization,
+                email: userData.user?.email || '',
+                full_name: userData.user?.user_metadata?.full_name || userData.user?.email || '',
+                role: 'owner',
+                permissions: { manage_team: true, manage_billing: true, manage_projects: true }
+            });
         }
 
-        // Get all team members for the institution
+        // Get all team members for the organization
         const { data: teamMembers, error: teamError } = await supabase
             .from('team_members')
             .select('*')
-            .eq('institution_id', membership.institution_id)
-            .eq('status', 'active')
+            .eq('organization', organization)
             .order('joined_at', { ascending: true });
 
         if (teamError) {

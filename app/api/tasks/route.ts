@@ -14,16 +14,19 @@ export async function GET(request: Request) {
         const blueprintId = url.searchParams.get('blueprintId');
         const phaseId = url.searchParams.get('phaseId');
 
-        // Get user's team membership
-        const { data: membership } = await supabase
-            .from('team_members')
-            .select('id, institution_id')
+        // Get user's organization from user_payments
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('organization')
             .eq('user_id', user.id)
+            .eq('access_granted', true)
             .single();
 
-        if (!membership) {
-            return NextResponse.json({ error: 'No team membership found' }, { status: 404 });
+        if (!payment || !payment.organization) {
+            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
         }
+
+        const organization = payment.organization;
 
         // Get implementation phases
         let phasesQuery = supabase
@@ -36,7 +39,8 @@ export async function GET(request: Request) {
                     comments:task_comments(count)
                 )
             `)
-            .order('order_index', { ascending: true });
+            .eq('organization', organization)
+            .order('phase_order', { ascending: true });
 
         if (blueprintId) {
             phasesQuery = phasesQuery.eq('blueprint_id', blueprintId);
@@ -93,7 +97,21 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { phase_id, title, description, assigned_to, priority, due_date } = body;
+        const { phase_id, task_title, description, assigned_to, priority, due_date } = body;
+
+        // Get user's organization from user_payments
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('organization')
+            .eq('user_id', user.id)
+            .eq('access_granted', true)
+            .single();
+
+        if (!payment || !payment.organization) {
+            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
+        }
+
+        const organization = payment.organization;
 
         // Get user's team membership
         const { data: membership } = await supabase
@@ -102,21 +120,18 @@ export async function POST(request: Request) {
             .eq('user_id', user.id)
             .single();
 
-        if (!membership) {
-            return NextResponse.json({ error: 'No team membership found' }, { status: 404 });
-        }
-
         // Create task
         const { data: task, error: taskError } = await supabase
             .from('implementation_tasks')
             .insert({
                 phase_id,
-                title,
+                organization,
+                task_title,
                 description,
                 assigned_to,
                 priority,
                 due_date,
-                status: 'pending'
+                status: 'todo'
             })
             .select()
             .single();
@@ -127,15 +142,17 @@ export async function POST(request: Request) {
         }
 
         // Log activity
-        await supabase
-            .from('team_activity')
-            .insert({
-                team_member_id: membership.id,
-                action_type: 'task_created',
-                action_details: { task_title: title },
-                entity_type: 'task',
-                entity_id: task.id
-            });
+        if (membership) {
+            await supabase
+                .from('team_activity')
+                .insert({
+                    team_member_id: membership.id,
+                    action_type: 'task_created',
+                    action_details: { task_title },
+                    entity_type: 'task',
+                    entity_id: task.id
+                });
+        }
 
         return NextResponse.json(task);
 

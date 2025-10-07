@@ -26,8 +26,8 @@ export async function GET(request: Request) {
             .single();
 
         // Check if premium user (check both tables for compatibility)
-        const hasPremiumAccess = 
-            profile?.subscription_status === 'active' || 
+        const hasPremiumAccess =
+            profile?.subscription_status === 'active' ||
             payment?.access_granted === true;
 
         if (!hasPremiumAccess) {

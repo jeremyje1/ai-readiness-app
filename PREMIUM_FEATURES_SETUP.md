@@ -12,13 +12,15 @@ Navigate to the Supabase Dashboard SQL editor and run the contents of:
 - `database/migrations/premium_features.sql`
 
 This creates the following tables:
-- `team_members` - Team member profiles and permissions
+- `team_members` - Team member profiles and permissions (linked by organization)
 - `team_activity` - Activity log for team actions
-- `implementation_phases` - Project implementation phases
-- `implementation_tasks` - Tasks within each phase
-- `roi_metrics` - ROI tracking data
-- `calendar_events` - Calendar events and meetings
+- `implementation_phases` - Project implementation phases (linked by organization)
+- `implementation_tasks` - Tasks within each phase (linked by organization)
+- `roi_metrics` - ROI tracking data (linked by organization)
+- `calendar_events` - Calendar events and meetings (linked by organization)
 - `event_rsvps` - Event attendance tracking
+
+Note: All tables use the `organization` field from `user_payments` table to group data by customer organization instead of institution_id.
 
 ### 2. Seed Test Data (Optional)
 
