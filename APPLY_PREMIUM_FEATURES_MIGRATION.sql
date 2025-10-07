@@ -23,7 +23,7 @@ END $$;
 -- ========================
 
 -- Team members table
-CREATE TABLE IF NOT EXISTS team_members (
+CREATE TABLE IF NOT EXISTS public.team_members (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     organization TEXT NOT NULL,
@@ -41,9 +41,9 @@ CREATE TABLE IF NOT EXISTS team_members (
 );
 
 -- Team activity log
-CREATE TABLE IF NOT EXISTS team_activity (
+CREATE TABLE IF NOT EXISTS public.team_activity (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    team_member_id UUID REFERENCES team_members(id) ON DELETE CASCADE,
+    team_member_id UUID REFERENCES public.team_members(id) ON DELETE CASCADE,
     action_type TEXT NOT NULL,
     action_details JSONB,
     entity_type TEXT,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS team_activity (
 -- ======================
 
 -- Implementation phases
-CREATE TABLE IF NOT EXISTS implementation_phases (
+CREATE TABLE IF NOT EXISTS public.implementation_phases (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     organization TEXT NOT NULL,
     phase_name TEXT NOT NULL,
@@ -70,13 +70,13 @@ CREATE TABLE IF NOT EXISTS implementation_phases (
 );
 
 -- Implementation tasks
-CREATE TABLE IF NOT EXISTS implementation_tasks (
+CREATE TABLE IF NOT EXISTS public.implementation_tasks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    phase_id UUID REFERENCES implementation_phases(id) ON DELETE CASCADE,
+    phase_id UUID REFERENCES public.implementation_phases(id) ON DELETE CASCADE,
     organization TEXT NOT NULL,
     task_title TEXT NOT NULL,
     description TEXT,
-    assigned_to UUID REFERENCES team_members(id),
+    assigned_to UUID REFERENCES public.team_members(id),
     priority TEXT DEFAULT 'medium', -- 'low', 'medium', 'high', 'critical'
     status TEXT DEFAULT 'todo', -- 'todo', 'in_progress', 'completed', 'blocked'
     estimated_hours INTEGER DEFAULT 0,
@@ -90,10 +90,10 @@ CREATE TABLE IF NOT EXISTS implementation_tasks (
 );
 
 -- Task comments
-CREATE TABLE IF NOT EXISTS task_comments (
+CREATE TABLE IF NOT EXISTS public.task_comments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    task_id UUID REFERENCES implementation_tasks(id) ON DELETE CASCADE,
-    team_member_id UUID REFERENCES team_members(id) ON DELETE CASCADE,
+    task_id UUID REFERENCES public.implementation_tasks(id) ON DELETE CASCADE,
+    team_member_id UUID REFERENCES public.team_members(id) ON DELETE CASCADE,
     comment TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS task_comments (
 -- ====================
 
 -- ROI metrics tracking
-CREATE TABLE IF NOT EXISTS roi_metrics (
+CREATE TABLE IF NOT EXISTS public.roi_metrics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     organization TEXT NOT NULL,
     metric_type TEXT NOT NULL, -- 'cost_savings', 'revenue_increase', 'productivity_hours', etc.
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS roi_metrics (
 );
 
 -- ROI calculations
-CREATE TABLE IF NOT EXISTS roi_calculations (
+CREATE TABLE IF NOT EXISTS public.roi_calculations (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     organization TEXT NOT NULL,
     calculation_date DATE NOT NULL,
@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS roi_calculations (
 -- =================
 
 -- Calendar events
-CREATE TABLE IF NOT EXISTS calendar_events (
+CREATE TABLE IF NOT EXISTS public.calendar_events (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     organization TEXT NOT NULL,
     title TEXT NOT NULL,
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS calendar_events (
     end_time TIMESTAMP WITH TIME ZONE NOT NULL,
     location TEXT,
     meeting_url TEXT,
-    host_id UUID REFERENCES team_members(id),
+    host_id UUID REFERENCES public.team_members(id),
     attendee_ids UUID[],
     max_attendees INTEGER,
     is_recurring BOOLEAN DEFAULT FALSE,
@@ -152,10 +152,10 @@ CREATE TABLE IF NOT EXISTS calendar_events (
 );
 
 -- Event RSVPs
-CREATE TABLE IF NOT EXISTS event_rsvps (
+CREATE TABLE IF NOT EXISTS public.event_rsvps (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    event_id UUID REFERENCES calendar_events(id) ON DELETE CASCADE,
-    team_member_id UUID REFERENCES team_members(id) ON DELETE CASCADE,
+    event_id UUID REFERENCES public.calendar_events(id) ON DELETE CASCADE,
+    team_member_id UUID REFERENCES public.team_members(id) ON DELETE CASCADE,
     response TEXT DEFAULT 'pending', -- 'accepted', 'declined', 'maybe', 'pending'
     responded_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -163,34 +163,34 @@ CREATE TABLE IF NOT EXISTS event_rsvps (
 );
 
 -- Create indexes for performance
-CREATE INDEX IF NOT EXISTS idx_team_members_org ON team_members(organization);
-CREATE INDEX IF NOT EXISTS idx_team_members_email ON team_members(email);
-CREATE INDEX IF NOT EXISTS idx_team_activity_member ON team_activity(team_member_id);
-CREATE INDEX IF NOT EXISTS idx_team_activity_created ON team_activity(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_phases_org ON implementation_phases(organization);
-CREATE INDEX IF NOT EXISTS idx_tasks_phase ON implementation_tasks(phase_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON implementation_tasks(assigned_to);
-CREATE INDEX IF NOT EXISTS idx_tasks_status ON implementation_tasks(status);
-CREATE INDEX IF NOT EXISTS idx_tasks_org ON implementation_tasks(organization);
-CREATE INDEX IF NOT EXISTS idx_roi_metrics_org ON roi_metrics(organization, metric_date DESC);
-CREATE INDEX IF NOT EXISTS idx_calendar_events_org ON calendar_events(organization);
-CREATE INDEX IF NOT EXISTS idx_calendar_events_time ON calendar_events(start_time, end_time);
-CREATE INDEX IF NOT EXISTS idx_calendar_events_type ON calendar_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_team_members_org ON public.team_members(organization);
+CREATE INDEX IF NOT EXISTS idx_team_members_email ON public.team_members(email);
+CREATE INDEX IF NOT EXISTS idx_team_activity_member ON public.team_activity(team_member_id);
+CREATE INDEX IF NOT EXISTS idx_team_activity_created ON public.team_activity(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_phases_org ON public.implementation_phases(organization);
+CREATE INDEX IF NOT EXISTS idx_tasks_phase ON public.implementation_tasks(phase_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON public.implementation_tasks(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON public.implementation_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_org ON public.implementation_tasks(organization);
+CREATE INDEX IF NOT EXISTS idx_roi_metrics_org ON public.roi_metrics(organization, metric_date DESC);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_org ON public.calendar_events(organization);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_time ON public.calendar_events(start_time, end_time);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_type ON public.calendar_events(event_type);
 
 -- Enable RLS
-ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE team_activity ENABLE ROW LEVEL SECURITY;
-ALTER TABLE implementation_phases ENABLE ROW LEVEL SECURITY;
-ALTER TABLE implementation_tasks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE task_comments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE roi_metrics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE roi_calculations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE calendar_events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE event_rsvps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.team_activity ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.implementation_phases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.implementation_tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.task_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.roi_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.roi_calculations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.calendar_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.event_rsvps ENABLE ROW LEVEL SECURITY;
 
 -- Basic RLS policies (adjust as needed)
 -- First, let's create policies that use user_payments table to check organization access
-CREATE POLICY "Users can view their organization's team members" ON team_members
+CREATE POLICY "Users can view their organization's team members" ON public.team_members
     FOR SELECT USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -199,7 +199,7 @@ CREATE POLICY "Users can view their organization's team members" ON team_members
         )
     );
 
-CREATE POLICY "Users can view their organization's data" ON implementation_phases
+CREATE POLICY "Users can view their organization's data" ON public.implementation_phases
     FOR SELECT USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -208,7 +208,7 @@ CREATE POLICY "Users can view their organization's data" ON implementation_phase
         )
     );
 
-CREATE POLICY "Users can view their organization's tasks" ON implementation_tasks
+CREATE POLICY "Users can view their organization's tasks" ON public.implementation_tasks
     FOR SELECT USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -217,7 +217,7 @@ CREATE POLICY "Users can view their organization's tasks" ON implementation_task
         )
     );
 
-CREATE POLICY "Users can view their organization's ROI metrics" ON roi_metrics
+CREATE POLICY "Users can view their organization's ROI metrics" ON public.roi_metrics
     FOR SELECT USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -226,7 +226,7 @@ CREATE POLICY "Users can view their organization's ROI metrics" ON roi_metrics
         )
     );
 
-CREATE POLICY "Users can view their organization's events" ON calendar_events
+CREATE POLICY "Users can view their organization's events" ON public.calendar_events
     FOR SELECT USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -236,7 +236,7 @@ CREATE POLICY "Users can view their organization's events" ON calendar_events
     );
 
 -- INSERT policies for team_members
-CREATE POLICY "Users can insert team members for their organization" ON team_members
+CREATE POLICY "Users can insert team members for their organization" ON public.team_members
     FOR INSERT WITH CHECK (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -246,7 +246,7 @@ CREATE POLICY "Users can insert team members for their organization" ON team_mem
     );
 
 -- UPDATE policies for team_members
-CREATE POLICY "Users can update their organization's team members" ON team_members
+CREATE POLICY "Users can update their organization's team members" ON public.team_members
     FOR UPDATE USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -256,7 +256,7 @@ CREATE POLICY "Users can update their organization's team members" ON team_membe
     );
 
 -- INSERT policies for implementation_phases
-CREATE POLICY "Users can insert phases for their organization" ON implementation_phases
+CREATE POLICY "Users can insert phases for their organization" ON public.implementation_phases
     FOR INSERT WITH CHECK (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -266,7 +266,7 @@ CREATE POLICY "Users can insert phases for their organization" ON implementation
     );
 
 -- INSERT policies for implementation_tasks
-CREATE POLICY "Users can insert tasks for their organization" ON implementation_tasks
+CREATE POLICY "Users can insert tasks for their organization" ON public.implementation_tasks
     FOR INSERT WITH CHECK (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -276,7 +276,7 @@ CREATE POLICY "Users can insert tasks for their organization" ON implementation_
     );
 
 -- UPDATE policies for implementation_tasks
-CREATE POLICY "Users can update their organization's tasks" ON implementation_tasks
+CREATE POLICY "Users can update their organization's tasks" ON public.implementation_tasks
     FOR UPDATE USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -286,7 +286,7 @@ CREATE POLICY "Users can update their organization's tasks" ON implementation_ta
     );
 
 -- INSERT policies for roi_metrics
-CREATE POLICY "Users can insert ROI metrics for their organization" ON roi_metrics
+CREATE POLICY "Users can insert ROI metrics for their organization" ON public.roi_metrics
     FOR INSERT WITH CHECK (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -296,7 +296,7 @@ CREATE POLICY "Users can insert ROI metrics for their organization" ON roi_metri
     );
 
 -- UPDATE policies for roi_metrics
-CREATE POLICY "Users can update their organization's ROI metrics" ON roi_metrics
+CREATE POLICY "Users can update their organization's ROI metrics" ON public.roi_metrics
     FOR UPDATE USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -306,7 +306,7 @@ CREATE POLICY "Users can update their organization's ROI metrics" ON roi_metrics
     );
 
 -- INSERT policies for calendar_events
-CREATE POLICY "Users can insert events for their organization" ON calendar_events
+CREATE POLICY "Users can insert events for their organization" ON public.calendar_events
     FOR INSERT WITH CHECK (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -316,7 +316,7 @@ CREATE POLICY "Users can insert events for their organization" ON calendar_event
     );
 
 -- UPDATE policies for calendar_events
-CREATE POLICY "Users can update their organization's events" ON calendar_events
+CREATE POLICY "Users can update their organization's events" ON public.calendar_events
     FOR UPDATE USING (
         organization IN (
             SELECT organization FROM public.user_payments 
@@ -326,7 +326,7 @@ CREATE POLICY "Users can update their organization's events" ON calendar_events
     );
 
 -- DELETE policies for calendar_events
-CREATE POLICY "Users can delete their organization's events" ON calendar_events
+CREATE POLICY "Users can delete their organization's events" ON public.calendar_events
     FOR DELETE USING (
         organization IN (
             SELECT organization FROM public.user_payments 
