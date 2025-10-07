@@ -26,22 +26,16 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { billingPeriod = 'monthly' } = body;
-
-        // Get the appropriate price ID based on billing period
-        // Trim any whitespace or newlines from environment variables
-        const priceId = billingPeriod === 'yearly'
-            ? process.env.STRIPE_PRICE_YEARLY?.trim()
-            : process.env.STRIPE_PRICE_MONTHLY?.trim();
+        
+        // Only monthly pricing is available
+        const priceId = process.env.STRIPE_PRICE_MONTHLY?.trim();
 
         if (!priceId) {
             return NextResponse.json(
                 { 
-                    error: `Stripe price ID not configured for ${billingPeriod} billing`,
+                    error: 'Stripe price ID not configured',
                     debug: {
-                        billingPeriod,
-                        monthlyPriceExists: !!process.env.STRIPE_PRICE_MONTHLY,
-                        yearlyPriceExists: !!process.env.STRIPE_PRICE_YEARLY
+                        monthlyPriceExists: !!process.env.STRIPE_PRICE_MONTHLY
                     }
                 },
                 { status: 500 }
@@ -49,7 +43,6 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('Creating Stripe session with:', {
-            billingPeriod,
             priceId,
             priceIdLength: priceId?.length,
             priceIdRaw: JSON.stringify(priceId),
@@ -72,14 +65,14 @@ export async function POST(request: NextRequest) {
             customer_email: body.email || undefined,
             metadata: {
                 product_id: AI_BLUEPRINT_EDU_PRODUCT.id,
-                billing_period: billingPeriod,
+                billing_period: 'monthly',
                 tier: 'ai-blueprint-edu' // For webhook processing
             },
             subscription_data: {
                 trial_period_days: 7, // 7-day trial
                 metadata: {
                     product_id: AI_BLUEPRINT_EDU_PRODUCT.id,
-                    billing_period: billingPeriod,
+                    billing_period: 'monthly',
                     tier: 'ai-blueprint-edu'
                 }
             }
@@ -113,9 +106,6 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     // Support GET method for backward compatibility if needed
-    const { searchParams } = new URL(request.url);
-    const billingPeriod = searchParams.get('billing') || 'monthly';
-
     try {
         // Check if Stripe is configured
         if (!stripe) {
@@ -124,13 +114,12 @@ export async function GET(request: NextRequest) {
                 { status: 503 }
             );
         }
-        const priceId = billingPeriod === 'yearly'
-            ? process.env.STRIPE_PRICE_YEARLY
-            : process.env.STRIPE_PRICE_MONTHLY;
+        // Only monthly pricing is available
+        const priceId = process.env.STRIPE_PRICE_MONTHLY?.trim();
 
         if (!priceId) {
             return NextResponse.json(
-                { error: `Stripe price ID not configured for ${billingPeriod} billing` },
+                { error: 'Stripe price ID not configured' },
                 { status: 500 }
             );
         }
@@ -149,14 +138,14 @@ export async function GET(request: NextRequest) {
             billing_address_collection: 'required',
             metadata: {
                 product_id: AI_BLUEPRINT_EDU_PRODUCT.id,
-                billing_period: billingPeriod,
+                billing_period: 'monthly',
                 tier: 'ai-blueprint-edu'
             },
             subscription_data: {
                 trial_period_days: 7,
                 metadata: {
                     product_id: AI_BLUEPRINT_EDU_PRODUCT.id,
-                    billing_period: billingPeriod,
+                    billing_period: 'monthly',
                     tier: 'ai-blueprint-edu'
                 }
             }
