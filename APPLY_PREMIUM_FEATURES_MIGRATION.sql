@@ -171,30 +171,153 @@ ALTER TABLE calendar_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_rsvps ENABLE ROW LEVEL SECURITY;
 
 -- Basic RLS policies (adjust as needed)
+-- First, let's create policies that use user_payments table to check organization access
 CREATE POLICY "Users can view their organization's team members" ON team_members
     FOR SELECT USING (
-        auth.uid() IN (SELECT user_id FROM team_members WHERE organization = team_members.organization)
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
     );
 
 CREATE POLICY "Users can view their organization's data" ON implementation_phases
     FOR SELECT USING (
-        organization IN (SELECT organization FROM team_members WHERE user_id = auth.uid())
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
     );
 
 CREATE POLICY "Users can view their organization's tasks" ON implementation_tasks
     FOR SELECT USING (
-        organization IN (SELECT organization FROM team_members WHERE user_id = auth.uid())
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
     );
 
 CREATE POLICY "Users can view their organization's ROI metrics" ON roi_metrics
     FOR SELECT USING (
-        organization IN (SELECT organization FROM team_members WHERE user_id = auth.uid())
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
     );
 
 CREATE POLICY "Users can view their organization's events" ON calendar_events
     FOR SELECT USING (
-        organization IN (SELECT organization FROM team_members WHERE user_id = auth.uid())
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
     );
+
+-- INSERT policies for team_members
+CREATE POLICY "Users can insert team members for their organization" ON team_members
+    FOR INSERT WITH CHECK (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- UPDATE policies for team_members
+CREATE POLICY "Users can update their organization's team members" ON team_members
+    FOR UPDATE USING (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- INSERT policies for implementation_phases
+CREATE POLICY "Users can insert phases for their organization" ON implementation_phases
+    FOR INSERT WITH CHECK (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- INSERT policies for implementation_tasks
+CREATE POLICY "Users can insert tasks for their organization" ON implementation_tasks
+    FOR INSERT WITH CHECK (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- UPDATE policies for implementation_tasks
+CREATE POLICY "Users can update their organization's tasks" ON implementation_tasks
+    FOR UPDATE USING (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- INSERT policies for roi_metrics
+CREATE POLICY "Users can insert ROI metrics for their organization" ON roi_metrics
+    FOR INSERT WITH CHECK (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- UPDATE policies for roi_metrics
+CREATE POLICY "Users can update their organization's ROI metrics" ON roi_metrics
+    FOR UPDATE USING (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- INSERT policies for calendar_events
+CREATE POLICY "Users can insert events for their organization" ON calendar_events
+    FOR INSERT WITH CHECK (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- UPDATE policies for calendar_events
+CREATE POLICY "Users can update their organization's events" ON calendar_events
+    FOR UPDATE USING (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- DELETE policies for calendar_events
+CREATE POLICY "Users can delete their organization's events" ON calendar_events
+    FOR DELETE USING (
+        organization IN (
+            SELECT organization FROM user_payments 
+            WHERE user_id = auth.uid() 
+            AND access_granted = true
+        )
+    );
+
+-- Insert seed data for testing
 
 -- Grant permissions
 GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;

@@ -1,0 +1,21 @@
+DEPLOYMENT TRIGGER FILE
+=======================
+DATE: 2025-01-08
+PURPOSE: FIX RLS POLICIES TO USE USER_PAYMENTS TABLE
+
+CHANGES MADE:
+1. Fixed RLS policies to get organization from user_payments table
+2. Added INSERT, UPDATE, and DELETE policies for all tables
+3. All policies now check access_granted = true in user_payments
+
+FIXED ISSUES:
+- ERROR: column "organization" does not exist in RLS policies
+- RLS policies now properly reference user_payments table for organization access
+
+FILES CHANGED:
+- APPLY_PREMIUM_FEATURES_MIGRATION.sql
+
+DEPLOYMENT NOTES:
+- Run the updated migration in Supabase SQL editor
+- This fixes the RLS policies to use the correct table relationships
+- All policies now check premium access through user_payments table

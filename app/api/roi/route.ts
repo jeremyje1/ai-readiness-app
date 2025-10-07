@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
         const url = new URL(request.url);
         const period = url.searchParams.get('period') || '30d';
-        
+
         // Get user's organization from user_payments
         const { data: payment } = await supabase
             .from('user_payments')
@@ -78,13 +78,13 @@ export async function GET(request: Request) {
         const periodInMonths = period === '30d' ? 1 : period === '90d' ? 3 : 12;
         const totalCost = monthlySubscriptionCost * periodInMonths;
         const roiPercentage = totalCost > 0 ? ((totalSavings - totalCost) / totalCost) * 100 : 0;
-        
+
         // Annual projection
         const monthsOfData = (now.getTime() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000);
         const monthlySavings = monthsOfData > 0 ? totalSavings / monthsOfData : 0;
         const annualProjection = monthlySavings * 12;
-        const paybackPeriod = monthlySavings > monthlySubscriptionCost ? 1 : 
-                             monthlySavings > 0 ? Math.ceil(monthlySubscriptionCost / monthlySavings) : null;
+        const paybackPeriod = monthlySavings > monthlySubscriptionCost ? 1 :
+            monthlySavings > 0 ? Math.ceil(monthlySubscriptionCost / monthlySavings) : null;
 
         // Group metrics by category
         const metricsByCategory: Record<string, number> = {};
