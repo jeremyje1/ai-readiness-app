@@ -17,8 +17,20 @@ export async function GET(request: Request) {
             .eq('user_id', user.id)
             .single();
 
-        // Check if premium user
-        if (profile?.subscription_status !== 'active') {
+        // Check payment status in user_payments table
+        const { data: payment } = await supabase
+            .from('user_payments')
+            .select('payment_status, access_granted')
+            .eq('user_id', user.id)
+            .eq('payment_status', 'active')
+            .single();
+
+        // Check if premium user (check both tables for compatibility)
+        const hasPremiumAccess = 
+            profile?.subscription_status === 'active' || 
+            payment?.access_granted === true;
+
+        if (!hasPremiumAccess) {
             return NextResponse.json({ error: 'Premium subscription required' }, { status: 403 });
         }
 
