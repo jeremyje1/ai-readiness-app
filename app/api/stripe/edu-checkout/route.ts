@@ -27,10 +27,23 @@ export async function POST(request: NextRequest) {
 
         if (!priceId) {
             return NextResponse.json(
-                { error: `Stripe price ID not configured for ${billingPeriod} billing` },
+                { 
+                    error: `Stripe price ID not configured for ${billingPeriod} billing`,
+                    debug: {
+                        billingPeriod,
+                        monthlyPriceExists: !!process.env.STRIPE_PRICE_EDU_MONTHLY_199,
+                        yearlyPriceExists: !!process.env.STRIPE_PRICE_EDU_YEARLY_1990
+                    }
+                },
                 { status: 500 }
             );
         }
+
+        console.log('Creating Stripe session with:', {
+            priceId,
+            billingPeriod,
+            email: body.email
+        });
 
         // Create Stripe checkout session
         const baseUrl = (process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com').trim();
