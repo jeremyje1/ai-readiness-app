@@ -26,11 +26,9 @@ export async function GET() {
       expand: ['data.product']
     });
 
-    // Get configured price IDs
-    const configuredMonthly = process.env.STRIPE_PRICE_EDU_MONTHLY_199;
-    const configuredYearly = process.env.STRIPE_PRICE_EDU_YEARLY_1990;
-
-    // Check if configured prices exist
+    // Get the configured price IDs from environment
+    const configuredMonthly = process.env.STRIPE_PRICE_MONTHLY;
+    const configuredYearly = process.env.STRIPE_PRICE_YEARLY;    // Check if configured prices exist
     const monthlyExists = prices.data.some(p => p.id === configuredMonthly);
     const yearlyExists = prices.data.some(p => p.id === configuredYearly);
 

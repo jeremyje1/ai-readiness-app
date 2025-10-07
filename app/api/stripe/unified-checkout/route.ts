@@ -11,9 +11,9 @@ const cleanEnvVar = (envVar: string | undefined, defaultValue: string): string =
 
 const PRODUCT_PRICE_ENV: Record<string, Record<string, string | undefined>> = {
   'ai-blueprint-edu': {
-    monthly: cleanEnvVar(process.env.STRIPE_PRICE_EDU_MONTHLY_199, ''),
-    yearly: cleanEnvVar(process.env.STRIPE_PRICE_EDU_YEARLY_1990, ''),
-    annual: cleanEnvVar(process.env.STRIPE_PRICE_EDU_YEARLY_1990, '')
+    monthly: cleanEnvVar(process.env.STRIPE_PRICE_MONTHLY, ''),
+    yearly: cleanEnvVar(process.env.STRIPE_PRICE_YEARLY, ''),
+    annual: cleanEnvVar(process.env.STRIPE_PRICE_YEARLY, '')
   },
   // Legacy mappings kept for backward compatibility
   team: {

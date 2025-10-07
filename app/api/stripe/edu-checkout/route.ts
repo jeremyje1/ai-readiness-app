@@ -29,9 +29,10 @@ export async function POST(request: NextRequest) {
         const { billingPeriod = 'monthly' } = body;
 
         // Get the appropriate price ID based on billing period
+        // Trim any whitespace or newlines from environment variables
         const priceId = billingPeriod === 'yearly'
-            ? process.env.STRIPE_PRICE_EDU_YEARLY_1990
-            : process.env.STRIPE_PRICE_EDU_MONTHLY_199;
+            ? process.env.STRIPE_PRICE_YEARLY?.trim()
+            : process.env.STRIPE_PRICE_MONTHLY?.trim();
 
         if (!priceId) {
             return NextResponse.json(
@@ -39,8 +40,8 @@ export async function POST(request: NextRequest) {
                     error: `Stripe price ID not configured for ${billingPeriod} billing`,
                     debug: {
                         billingPeriod,
-                        monthlyPriceExists: !!process.env.STRIPE_PRICE_EDU_MONTHLY_199,
-                        yearlyPriceExists: !!process.env.STRIPE_PRICE_EDU_YEARLY_1990
+                        monthlyPriceExists: !!process.env.STRIPE_PRICE_MONTHLY,
+                        yearlyPriceExists: !!process.env.STRIPE_PRICE_YEARLY
                     }
                 },
                 { status: 500 }
@@ -48,9 +49,11 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('Creating Stripe session with:', {
-            priceId,
             billingPeriod,
-            email: body.email
+            priceId,
+            priceIdLength: priceId?.length,
+            priceIdRaw: JSON.stringify(priceId),
+            stripeInitialized: !!stripe
         });
 
         // Create Stripe checkout session
@@ -122,8 +125,8 @@ export async function GET(request: NextRequest) {
             );
         }
         const priceId = billingPeriod === 'yearly'
-            ? process.env.STRIPE_PRICE_EDU_YEARLY_1990
-            : process.env.STRIPE_PRICE_EDU_MONTHLY_199;
+            ? process.env.STRIPE_PRICE_YEARLY
+            : process.env.STRIPE_PRICE_MONTHLY;
 
         if (!priceId) {
             return NextResponse.json(
