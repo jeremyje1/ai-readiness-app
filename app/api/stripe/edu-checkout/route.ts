@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create Stripe checkout session
-        const baseUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com';
+        const baseUrl = (process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com').trim();
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const baseUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com';
+        const baseUrl = (process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com').trim();
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{

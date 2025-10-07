@@ -1,0 +1,17 @@
+DEPLOY TRIGGER: Payment System Fix
+Date: October 6, 2025
+Time: 18:38 PST
+
+Changes:
+- Fixed Stripe checkout endpoints to use proper URL resolution
+- Added SITE_URL environment variable for server-side URL access
+- Created debug endpoint at /api/stripe/debug
+- Fixed both edu-checkout and unified-checkout endpoints
+
+Environment Variables Added:
+- SITE_URL=https://aiblueprint.educationaiblueprint.com
+
+Test after deployment:
+1. Visit https://aiblueprint.educationaiblueprint.com/api/stripe/debug
+2. Try payment flow on /pricing page
+3. Check if auth errors persist
