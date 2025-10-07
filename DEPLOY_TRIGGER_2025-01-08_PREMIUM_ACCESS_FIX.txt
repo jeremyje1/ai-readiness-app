@@ -1,0 +1,20 @@
+Deploy Trigger: Premium Access Fix
+Time: 2025-01-08 11:43 UTC
+Reason: Fix premium dashboard showing mock data and 403 errors
+
+Changes:
+- Updated app/api/dashboard/premium-metrics/route.ts
+- Now checks both user_profiles and user_payments tables
+- Fixes 403 error for users with active payments
+- Premium features should work for paid users
+
+Issue Fixed:
+- Premium dashboard was returning 403 errors
+- Was only checking subscription_status in user_profiles
+- Now also checks payment_status in user_payments table
+- Users who paid via Stripe can access premium features
+
+Testing:
+- Visit https://aiblueprint.educationaiblueprint.com/dashboard/premium
+- Should load without 403 errors
+- Should show real data instead of mock data
