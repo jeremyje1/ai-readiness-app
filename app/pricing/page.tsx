@@ -32,6 +32,7 @@ export default function AIBlueprintPricingPage() {
       const response = await fetch('/api/stripe/edu-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           billingPeriod: billingPeriod
         })
@@ -39,10 +40,17 @@ export default function AIBlueprintPricingPage() {
 
       const data = await response.json();
       
+      if (!response.ok) {
+        console.error('Checkout error:', data);
+        alert(`Error: ${data.error || 'Failed to create checkout session'}`);
+        return;
+      }
+      
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error('No checkout URL returned');
+        console.error('No checkout URL returned', data);
+        alert('Failed to create checkout session. Please try again.');
       }
     } catch (error) {
       console.error('Checkout error:', error);

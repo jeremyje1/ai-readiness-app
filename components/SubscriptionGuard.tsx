@@ -32,10 +32,18 @@ export function SubscriptionGuard({
     const checkSubscription = async () => {
       try {
         // First sync payment status with profile
-        await fetch('/api/user/sync-payment', { method: 'POST' });
+        await fetch('/api/user/sync-payment', { 
+          method: 'POST',
+          credentials: 'include'
+        });
 
         // Then check payment API
-        const response = await fetch('/api/payments/status');
+        const response = await fetch('/api/payments/status', {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         const data = await response.json();
 
         setPaymentStatus(data);

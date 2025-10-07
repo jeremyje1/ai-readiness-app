@@ -9,7 +9,12 @@ export async function GET() {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.error('Payment status auth error:', authError);
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        details: authError?.message || 'No user found',
+        hint: 'Check if cookies are being sent correctly'
+      }, { status: 401 });
     }
 
     // Check user_payments table for subscription status

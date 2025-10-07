@@ -64,10 +64,26 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ url: session.url });
     } catch (error: any) {
         console.error('Stripe checkout error:', error);
-        return NextResponse.json(
-            { error: error.message || 'Failed to create checkout session' },
-            { status: 500 }
-        );
+        
+        // Provide more detailed error information
+        const errorResponse: any = {
+            error: error.message || 'Failed to create checkout session',
+            type: error.type || 'unknown_error',
+            code: error.code || null
+        };
+        
+        // In development, include more details
+        if (process.env.NODE_ENV === 'development') {
+            errorResponse.stack = error.stack;
+            errorResponse.details = error;
+        }
+        
+        // Check for specific Stripe errors
+        if (error.type === 'StripeInvalidRequestError') {
+            errorResponse.hint = 'Check Stripe configuration and price IDs';
+        }
+        
+        return NextResponse.json(errorResponse, { status: 500 });
     }
 }
 
