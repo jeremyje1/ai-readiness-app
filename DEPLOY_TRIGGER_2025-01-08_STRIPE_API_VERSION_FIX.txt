@@ -1,0 +1,16 @@
+Deployment Trigger
+==================
+Date: 2025-01-08
+Purpose: Fix Stripe connection error by removing API version
+
+Changes:
+- Removed API version '2025-06-30.basil' from Stripe initialization
+- Simplified Stripe SDK usage for compatibility
+- Created minimal test endpoint to diagnose connectivity
+
+Test endpoints:
+1. /api/stripe/minimal-test - Basic Stripe connection test
+2. /api/stripe/test-connection - Lists prices without API version
+3. /api/stripe/edu-checkout - Main payment endpoint (simplified)
+
+Expected outcome: Stripe should connect without throwing StripeConnectionError
