@@ -2,21 +2,16 @@ import { AI_BLUEPRINT_EDU_PRODUCT } from '@/lib/ai-blueprint-edu-product';
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Initialize Stripe with error handling for API version
+// Initialize Stripe without API version to avoid compatibility issues
 let stripe: Stripe | null = null;
 
 if (process.env.STRIPE_SECRET_KEY) {
     try {
-        stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-            apiVersion: '2025-06-30.basil'
-        });
+        // Initialize without API version for maximum compatibility
+        stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        console.log('Stripe initialized successfully');
     } catch (error) {
-        console.error('Failed to initialize Stripe with API version, trying without version');
-        try {
-            stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {} as any);
-        } catch (fallbackError) {
-            console.error('Failed to initialize Stripe:', fallbackError);
-        }
+        console.error('Failed to initialize Stripe:', error);
     }
 }
 

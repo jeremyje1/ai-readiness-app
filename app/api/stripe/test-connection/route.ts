@@ -13,17 +13,21 @@ export async function GET() {
       }, { status: 500 });
     }
 
-    // Try initializing Stripe with the current API version
+    // Try initializing Stripe - first without API version
     let stripe;
-    let apiVersion = '2025-06-30.basil';
+    let apiVersion = 'default';
     
     try {
-      stripe = new Stripe(stripeKey, { apiVersion: '2025-06-30.basil' as any });
-    } catch (versionError) {
-      // If that fails, try without specifying version
-      console.log('Failed with API version, trying without version');
-      stripe = new Stripe(stripeKey, {});
-      apiVersion = 'default';
+      // First try without API version
+      stripe = new Stripe(stripeKey);
+      console.log('Stripe initialized without API version');
+    } catch (initError: any) {
+      console.error('Failed to initialize Stripe:', initError);
+      return NextResponse.json({
+        error: 'Failed to initialize Stripe SDK',
+        details: initError.message,
+        keyPrefix: stripeKey.substring(0, 7)
+      }, { status: 500 });
     }
 
     // Try a simple API call to test the connection
