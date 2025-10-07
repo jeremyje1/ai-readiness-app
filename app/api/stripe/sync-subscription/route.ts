@@ -4,29 +4,36 @@ import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
     const supabase = await createClient();
+    
+    // Also allow email to be passed in the request body for manual sync
+    const body = await req.json().catch(() => ({}));
+    const requestEmail = body.email;
     
     // Get the authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Determine which email to use
+    const emailToSync = requestEmail || user?.email;
+    
+    if (!emailToSync) {
+      return NextResponse.json({ error: 'No email provided' }, { status: 400 });
     }
 
-    console.log('Syncing subscription for user:', user.id, user.email);
+    console.log('Syncing subscription for email:', emailToSync);
 
     // Search for customer in Stripe by email
     const customers = await stripe.customers.list({
-      email: user.email,
+      email: emailToSync,
       limit: 10
     });
 
     if (!customers.data.length) {
       return NextResponse.json({ 
         error: 'No Stripe customer found',
-        email: user.email 
+        email: emailToSync 
       }, { status: 404 });
     }
 
@@ -52,12 +59,33 @@ export async function POST() {
     
     console.log('Found active subscription:', subscription.id, 'with price:', priceId);
 
+    // Get the user ID from the email if not authenticated
+    let userId = user?.id;
+    
+    if (!userId && emailToSync) {
+      // Look up user by email
+      const { data: userData } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', emailToSync)
+        .single();
+        
+      userId = userData?.id;
+    }
+    
+    if (!userId) {
+      return NextResponse.json({ 
+        error: 'User not found in database',
+        email: emailToSync 
+      }, { status: 404 });
+    }
+
     // Update user_payments table
     const { data: payment, error: upsertError } = await supabase
       .from('user_payments')
       .upsert({
-        user_id: user.id,
-        email: user.email,
+        user_id: userId,
+        email: emailToSync,
         stripe_customer_id: customer.id,
         stripe_subscription_id: subscription.id,
         stripe_price_id: priceId,

@@ -1,0 +1,19 @@
+Deploy Trigger: Subscription Sync Endpoint
+Time: 2025-01-08 10:45 UTC
+Reason: Add manual subscription sync endpoint for existing users
+
+Changes:
+- Created app/api/stripe/sync-subscription/route.ts
+- Endpoint searches Stripe for customer by email
+- Updates user_payments table with correct subscription status
+- Handles case where webhook didn't update existing users
+
+Issue Fixed:
+- User paid for premium but app didn't recognize subscription
+- Webhook likely only handled new users, not existing ones
+- Manual sync endpoint allows fixing subscription status
+
+Next Steps:
+1. Deploy this change
+2. Call sync endpoint to fix user's subscription
+3. Verify premium features are accessible
