@@ -24,8 +24,8 @@ interface ScenarioPatchPayload {
 
 const UNIQUE_VIOLATION_CODE = '23505';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-    const scenarioId = params.id;
+export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
+    const { id: scenarioId } = await context.params;
     const authContext = await getAuthContext();
 
     if (!authContext.ok) {
@@ -111,8 +111,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ scenario });
 }
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-    const scenarioId = params.id;
+export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+    const { id: scenarioId } = await context.params;
     const authContext = await getAuthContext();
 
     if (!authContext.ok) {
@@ -207,8 +207,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ scenario });
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-    const scenarioId = params.id;
+export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
+    const { id: scenarioId } = await context.params;
     const authContext = await getAuthContext();
 
     if (!authContext.ok) {

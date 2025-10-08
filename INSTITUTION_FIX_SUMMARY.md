@@ -146,7 +146,7 @@ await supabase.from('institution_memberships').insert({
 
 ### Migration Details
 
-- Migrated from `@supabase/auth-helpers-nextjs` to `@/lib/supabase/server`
+- Migrated legacy auth helper usage to the shared `@/lib/supabase/server` helper backed by `@supabase/ssr`
 - Consistent with rest of codebase
 - Better error handling and logging
 

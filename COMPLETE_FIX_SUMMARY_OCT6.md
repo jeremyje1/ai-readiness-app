@@ -46,17 +46,9 @@ Fixed critical bugs preventing users from completing the assessment → blueprin
 - `app/api/blueprint/route.ts`
 - `app/api/blueprint/[id]/route.ts`
 
-**Problem**: Using deprecated `createRouteHandlerClient` from `@supabase/auth-helpers-nextjs` which has auth bugs in Next.js 15
+**Problem**: Routes still used the deprecated `createRouteHandlerClient`, which broke auth in Next.js 15.
 
-**Fix**: Replaced with modern `createClient` from `@/lib/supabase/server`:
-```diff
-- import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-- import { cookies } from 'next/headers';
-- const supabase = createRouteHandlerClient({ cookies });
-
-+ import { createClient } from '@/lib/supabase/server';
-+ const supabase = await createClient();
-```
+**Fix**: Replace that helper with the shared `createClient` from `@/lib/supabase/server` so every handler now calls `await createClient()` before interacting with Supabase.
 
 **Doc**: `BLUEPRINT_API_AUTH_FIX_OCT6.md`
 
