@@ -25,7 +25,8 @@
     "setup:storage": "node scripts/setup-storage.js",
     "setup:all": "npm run setup:database && npm run setup:storage",
     "verify:setup": "node scripts/verify-setup.js",
-    "seed:policies": "node scripts/seed-policy-templates.js"
+    "seed:policies": "node scripts/seed-policy-templates.js",
+    "stripe:create-consultation": "node scripts/stripe/create-jeremy-consultation.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

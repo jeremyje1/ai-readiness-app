@@ -5,7 +5,7 @@ const nextConfig = {
     // optimizeCss: true,
   },
   images: {
-    domains: ['images.unsplash.com', 'plus.unsplash.com'],
+    domains: ['images.unsplash.com', 'plus.unsplash.com', 'northpathstrategies.org'],
   },
   // Generate unique build IDs to prevent cache issues
   generateBuildId: async () => {

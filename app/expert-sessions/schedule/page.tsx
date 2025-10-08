@@ -1,355 +1,245 @@
 'use client';
 
+import Image from 'next/image';
+import { useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { useState } from 'react';
-// import { Calendar } from '@/components/ui/calendar';
-import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
-    Calendar as CalendarIcon,
+    ArrowRight,
+    CalendarCheck,
     CheckCircle2,
-    Clock,
-    FileText,
-    MessageCircle,
-    Phone,
+    ShieldCheck,
     Sparkles,
-    Star,
-    Target,
-    TrendingUp,
-    User,
-    Video
+    Timer,
+    TrendingUp
 } from 'lucide-react';
 
-interface Expert {
-    id: string;
-    name: string;
-    title: string;
-    specialties: string[];
-    rating: number;
-    sessions: number;
-    availability: string[];
-    imageUrl?: string;
-}
+const CONSULTATION_PRICE = 349;
+const HEADSHOT_URL = process.env.NEXT_PUBLIC_JEREMY_HEADSHOT_URL ||
+    'https://northpathstrategies.org/wp-content/uploads/2023/08/Jeremy-Estrella-Profile.jpg';
 
-interface TimeSlot {
-    time: string;
-    available: boolean;
-}
+const calendlyUrl = 'https://calendly.com/jeremyestrella/30min?hide_gdpr_banner=1&primary_color=4f46e5';
 
 export default function ExpertSessionsSchedule() {
-    const [selectedExpert, setSelectedExpert] = useState<string>('1');
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-    const [selectedTime, setSelectedTime] = useState<string | null>(null);
-    const [sessionType, setSessionType] = useState<'strategy' | 'implementation' | 'troubleshooting'>('strategy');
+    const params = useSearchParams();
+    const cancelled = params?.get('checkout') === 'cancelled';
 
-    const experts: Expert[] = [
-        {
-            id: '1',
-            name: 'Dr. Emily Rodriguez',
-            title: 'Senior AI Strategy Consultant',
-            specialties: ['Higher Ed AI Strategy', 'Change Management', 'Policy Development'],
-            rating: 4.9,
-            sessions: 234,
-            availability: ['2025-10-15', '2025-10-17', '2025-10-22']
-        },
-        {
-            id: '2',
-            name: 'James Chen',
-            title: 'AI Implementation Specialist',
-            specialties: ['Technical Integration', 'EdTech', 'Data Analytics'],
-            rating: 4.8,
-            sessions: 189,
-            availability: ['2025-10-16', '2025-10-18', '2025-10-23']
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const priceDisplay = useMemo(() => `$${CONSULTATION_PRICE}`, []);
+
+    const handleCheckout = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await fetch('/api/stripe/consultation-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email || undefined })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data?.url) {
+                throw new Error(data?.details || 'Unable to start checkout.');
+            }
+
+            window.location.href = data.url as string;
+        } catch (err) {
+            console.error('Consultation checkout failure:', err);
+            setError(err instanceof Error ? err.message : 'Something went wrong');
+        } finally {
+            setLoading(false);
         }
-    ];
-
-    const timeSlots: TimeSlot[] = [
-        { time: '9:00 AM', available: true },
-        { time: '10:00 AM', available: false },
-        { time: '11:00 AM', available: true },
-        { time: '2:00 PM', available: true },
-        { time: '3:00 PM', available: true },
-        { time: '4:00 PM', available: false }
-    ];
-
-    const sessionTypes = [
-        {
-            type: 'strategy',
-            title: 'Strategic Planning',
-            description: 'Blueprint review, roadmap planning, goal setting',
-            icon: Target,
-            duration: '30 min'
-        },
-        {
-            type: 'implementation',
-            title: 'Implementation Support',
-            description: 'Technical guidance, integration help, best practices',
-            icon: TrendingUp,
-            duration: '45 min'
-        },
-        {
-            type: 'troubleshooting',
-            title: 'Problem Solving',
-            description: 'Address challenges, overcome barriers, quick solutions',
-            icon: MessageCircle,
-            duration: '30 min'
-        }
-    ];
-
-    const handleBookSession = () => {
-        if (!selectedDate || !selectedTime) return;
-
-        // In production, this would call an API to book the session
-        alert(`Session booked with ${experts.find(e => e.id === selectedExpert)?.name} on ${selectedDate.toDateString()} at ${selectedTime}`);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30">
-            <div className="container mx-auto px-6 py-8">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Phone className="h-8 w-8 text-indigo-600" />
-                        <h1 className="text-3xl font-bold">Schedule Expert Session</h1>
-                        <Badge className="bg-amber-100 text-amber-800">Premium</Badge>
-                    </div>
-                    <p className="text-gray-600">Book your monthly 1-on-1 strategy session with our AI experts</p>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 py-16">
+            <div className="container mx-auto px-6 lg:px-10">
+                <div className="grid xl:grid-cols-[minmax(0,1fr)_380px] gap-12 items-start">
+                    <div>
+                        <Badge className="bg-indigo-600/10 text-indigo-700 mb-4 uppercase tracking-wide" variant="secondary">
+                            Founder Consultation
+                        </Badge>
+                        <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+                            Work 1:1 with Jeremy Estrella on your AI Blueprint
+                        </h1>
+                        <p className="mt-4 text-lg text-slate-600 leading-relaxed max-w-2xl">
+                            Jeremy Estrella, founder of AI Blueprint and NorthPath Strategies, helps district and
+                            campus leaders operationalize responsible AI so student outcomes improve faster. Drawing on
+                            years of leading instructional innovation, Jeremy now coaches teams on trustworthy AI adoption,
+                            data governance, and measurable impact for learners.
+                        </p>
+                        <p className="mt-3 text-lg text-slate-600 leading-relaxed max-w-2xl">
+                            This 45-minute strategy intensive is designed for education executives who want a clear, actionable
+                            roadmap that blends policy, change management, and AI-enabled teaching and learning.
+                        </p>
 
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Expert Selection */}
-                    <div className="lg:col-span-1">
-                        <Card className="p-6">
-                            <h2 className="text-xl font-bold mb-4">Select Your Expert</h2>
+                        <div className="mt-8 flex items-center gap-6">
+                            <div>
+                                <div className="text-sm uppercase tracking-wide text-slate-500">Investment</div>
+                                <div className="text-4xl font-bold text-slate-900">{priceDisplay}</div>
+                                <div className="text-sm text-slate-500">One-time consultation • 45 minutes</div>
+                            </div>
+                            <div className="hidden sm:block h-16 w-px bg-slate-200" aria-hidden="true" />
+                            <div className="space-y-2 text-sm text-slate-600">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                                    Bespoke AI roadmap for your team
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                                    Governance, privacy & implementation guidance
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <TrendingUp className="h-5 w-5 text-emerald-500" />
+                                    Action items focused on student outcomes
+                                </div>
+                            </div>
+                        </div>
 
-                            <div className="space-y-4">
-                                {experts.map((expert) => (
-                                    <motion.div
-                                        key={expert.id}
-                                        whileHover={{ scale: 1.02 }}
-                                        className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedExpert === expert.id
-                                                ? 'border-indigo-600 bg-indigo-50'
-                                                : 'hover:border-gray-300'
-                                            }`}
-                                        onClick={() => setSelectedExpert(expert.id)}
+                        <Card className="mt-10 shadow-sm border-indigo-100/60 bg-white/80 backdrop-blur">
+                            <CardHeader>
+                                <CardTitle className="flex items-center justify-between gap-4">
+                                    <span>Reserve your consultation</span>
+                                    <Timer className="h-5 w-5 text-indigo-500" />
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <p className="text-sm text-slate-600">
+                                    Complete checkout to secure the session. You&rsquo;ll be redirected back here with instant access to Jeremy&rsquo;s Calendly to lock in your time.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <Input
+                                        type="email"
+                                        inputMode="email"
+                                        placeholder="Work email (optional)"
+                                        value={email}
+                                        onChange={(event) => setEmail(event.target.value)}
+                                        className="sm:max-w-xs"
+                                        aria-label="Contact email"
+                                    />
+                                    <Button
+                                        onClick={handleCheckout}
+                                        disabled={loading}
+                                        className="bg-indigo-600 hover:bg-indigo-700"
                                     >
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div>
-                                                <h3 className="font-semibold">{expert.name}</h3>
-                                                <p className="text-sm text-gray-600">{expert.title}</p>
-                                            </div>
-                                            {selectedExpert === expert.id && (
-                                                <CheckCircle2 className="h-5 w-5 text-indigo-600" />
-                                            )}
-                                        </div>
+                                        {loading ? 'Redirecting…' : `Reserve for ${priceDisplay}`}
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                    <Button variant="outline" asChild>
+                                        <a href={calendlyUrl} target="_blank" rel="noopener noreferrer">
+                                            Preview availability
+                                        </a>
+                                    </Button>
+                                </div>
 
-                                        <div className="space-y-2">
-                                            <div className="flex flex-wrap gap-1">
-                                                {expert.specialties.map((specialty, idx) => (
-                                                    <Badge key={idx} variant="secondary" className="text-xs">
-                                                        {specialty}
-                                                    </Badge>
-                                                ))}
-                                            </div>
+                                {error && (
+                                    <Alert variant="destructive">
+                                        <AlertTitle>Checkout error</AlertTitle>
+                                        <AlertDescription>{error}</AlertDescription>
+                                    </Alert>
+                                )}
 
-                                            <div className="flex items-center justify-between text-sm">
-                                                <div className="flex items-center gap-1">
-                                                    <Star className="h-4 w-4 text-amber-500 fill-current" />
-                                                    <span className="font-medium">{expert.rating}</span>
-                                                </div>
-                                                <span className="text-gray-500">{expert.sessions} sessions</span>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-
-                            {/* Session Type Selection */}
-                            <h3 className="text-lg font-semibold mt-6 mb-3">Session Focus</h3>
-                            <div className="space-y-3">
-                                {sessionTypes.map((type) => (
-                                    <div
-                                        key={type.type}
-                                        className={`border rounded-lg p-3 cursor-pointer transition-all ${sessionType === type.type
-                                                ? 'border-indigo-600 bg-indigo-50'
-                                                : 'hover:border-gray-300'
-                                            }`}
-                                        onClick={() => setSessionType(type.type as any)}
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            <type.icon className="h-5 w-5 text-indigo-600 mt-0.5" />
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <h4 className="font-medium">{type.title}</h4>
-                                                    <Badge variant="secondary">{type.duration}</Badge>
-                                                </div>
-                                                <p className="text-sm text-gray-600 mt-1">{type.description}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                {cancelled && !error && (
+                                    <Alert className="border-amber-200 bg-amber-50">
+                                        <AlertTitle>Checkout cancelled</AlertTitle>
+                                        <AlertDescription>
+                                            Your session isn&rsquo;t reserved yet. You can restart the checkout anytime.
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
+                            </CardContent>
                         </Card>
+
+                        <section className="mt-12 grid gap-6 md:grid-cols-3">
+                            {[{
+                                title: 'Step 1 — Reserve',
+                                description: 'Complete the secure Stripe checkout to confirm your consultation slot and receive a receipt instantly.',
+                                icon: CheckCircle2
+                            }, {
+                                title: 'Step 2 — Schedule',
+                                description: 'After payment you will land on our scheduling page with Jeremy’s live Calendly to pick a time that works.',
+                                icon: CalendarCheck
+                            }, {
+                                title: 'Step 3 — Accelerate',
+                                description: 'Bring your AI goals, current blockers, and any data you want to review. You will leave with next steps and templates.',
+                                icon: Sparkles
+                            }].map(({ title, description, icon: Icon }) => (
+                                <Card key={title} className="bg-white/80 border-slate-200">
+                                    <CardContent className="pt-6 space-y-3">
+                                        <Icon className="h-6 w-6 text-indigo-500" />
+                                        <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
+                                        <p className="text-sm text-slate-600 leading-relaxed">{description}</p>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </section>
+
+                        <section className="mt-12">
+                            <Card className="bg-slate-900 text-slate-100 border-slate-800 overflow-hidden">
+                                <CardContent className="p-8 grid gap-8 md:grid-cols-[minmax(0,1fr)_260px] items-center">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold mb-4">What leaders gain from this session</h2>
+                                        <ul className="space-y-3 text-sm leading-relaxed">
+                                            <li>• Rapid assessment of your current AI readiness gaps</li>
+                                            <li>• Prioritized roadmap that aligns AI projects to student outcome metrics</li>
+                                            <li>• Policy, privacy, and change management guidance tailored to your context</li>
+                                            <li>• Follow-up resources from the AI Blueprint implementation library</li>
+                                        </ul>
+                                    </div>
+                                    <div className="relative h-60 w-full rounded-2xl overflow-hidden border border-slate-700">
+                                        <Image
+                                            src={HEADSHOT_URL}
+                                            alt="Jeremy Estrella, founder of AI Blueprint"
+                                            fill
+                                            priority
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 100vw, 260px"
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </section>
                     </div>
 
-                    {/* Calendar and Time Selection */}
-                    <div className="lg:col-span-2">
-                        <Card className="p-6">
-                            <h2 className="text-xl font-bold mb-4">Select Date & Time</h2>
-
-                            <div className="grid md:grid-cols-2 gap-6">
-                                {/* Calendar */}
-                                <div>
-                                    <h3 className="font-medium mb-3 flex items-center gap-2">
-                                        <CalendarIcon className="h-4 w-4" />
-                                        Available Dates
-                                    </h3>
-                                    <div className="border rounded-lg p-4">
-                                        <div className="grid grid-cols-7 gap-1 mb-2">
-                                            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-                                                <div key={day} className="text-center text-xs font-medium text-gray-600 p-2">
-                                                    {day}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="grid grid-cols-7 gap-1">
-                                            {/* Simple date grid for October 2025 */}
-                                            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
-                                                const isAvailable = [15, 16, 17, 18, 22, 23].includes(day);
-                                                const isSelected = selectedDate?.getDate() === day;
-                                                return (
-                                                    <button
-                                                        key={day}
-                                                        onClick={() => {
-                                                            const newDate = new Date(2025, 9, day); // October 2025
-                                                            setSelectedDate(newDate);
-                                                        }}
-                                                        disabled={!isAvailable}
-                                                        className={`
-                              p-2 text-sm rounded-md transition-colors
-                              ${isSelected
-                                                                ? 'bg-indigo-600 text-white'
-                                                                : isAvailable
-                                                                    ? 'hover:bg-gray-100 cursor-pointer'
-                                                                    : 'text-gray-300 cursor-not-allowed'
-                                                            }
-                            `}
-                                                    >
-                                                        {day}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
+                    <aside>
+                        <Card className="sticky top-24 bg-white/90 border-slate-200 shadow-sm">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-xl font-semibold text-slate-900">
+                                    About Jeremy Estrella
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 text-sm text-slate-600">
+                                <p>
+                                    Jeremy leads AI Blueprint and NorthPath Strategies, partnering with superintendents,
+                                    provosts, and innovation teams to build AI governance that is ethical, transparent, and centered on learners.
+                                </p>
+                                <p>
+                                    He has guided districts through responsible AI pilots, helped higher education systems modernize policy, and
+                                    trains faculty on AI-enabled instructional design that keeps humans firmly in the loop.
+                                </p>
+                                <p>
+                                    Every session distills the latest AI research, procurement requirements, and change leadership insights into a
+                                    concrete action plan for your organization.
+                                </p>
+                                <div className="pt-2">
+                                    <Button variant="outline" asChild className="w-full">
+                                        <a href="https://northpathstrategies.org/" target="_blank" rel="noopener noreferrer">
+                                            Learn more at NorthPath Strategies
+                                        </a>
+                                    </Button>
                                 </div>
-
-                                {/* Time Slots */}
-                                <div>
-                                    <h3 className="font-medium mb-3 flex items-center gap-2">
-                                        <Clock className="h-4 w-4" />
-                                        Available Times
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {timeSlots.map((slot) => (
-                                            <Button
-                                                key={slot.time}
-                                                variant={selectedTime === slot.time ? 'default' : 'outline'}
-                                                disabled={!slot.available}
-                                                onClick={() => slot.available && setSelectedTime(slot.time)}
-                                                className="w-full"
-                                            >
-                                                {slot.time}
-                                                {!slot.available && <span className="ml-2 text-xs">(Booked)</span>}
-                                            </Button>
-                                        ))}
-                                    </div>
-
-                                    {/* Session Details */}
-                                    {selectedDate && selectedTime && (
-                                        <div className="mt-6 p-4 bg-indigo-50 rounded-lg">
-                                            <h4 className="font-semibold mb-2">Session Details</h4>
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex items-center gap-2">
-                                                    <User className="h-4 w-4 text-indigo-600" />
-                                                    <span>{experts.find(e => e.id === selectedExpert)?.name}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <CalendarIcon className="h-4 w-4 text-indigo-600" />
-                                                    <span>{selectedDate.toDateString()}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-4 w-4 text-indigo-600" />
-                                                    <span>{selectedTime}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Video className="h-4 w-4 text-indigo-600" />
-                                                    <span>Video Conference (Zoom link will be sent)</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Preparation Tips */}
-                            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                    <Sparkles className="h-5 w-5 text-amber-600" />
-                                    Maximize Your Session
-                                </h4>
-                                <ul className="space-y-1 text-sm text-gray-700">
-                                    <li>• Review your latest AI trends report before the call</li>
-                                    <li>• Prepare specific questions or challenges to discuss</li>
-                                    <li>• Have your blueprint and progress metrics ready</li>
-                                    <li>• Consider inviting key stakeholders to join</li>
-                                </ul>
-                            </div>
-
-                            {/* Book Button */}
-                            <div className="mt-6 flex justify-end gap-3">
-                                <Button variant="outline">
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    View Past Sessions
-                                </Button>
-                                <Button
-                                    onClick={handleBookSession}
-                                    disabled={!selectedDate || !selectedTime}
-                                    className="bg-indigo-600 hover:bg-indigo-700"
-                                >
-                                    Book Session
-                                    <CheckCircle2 className="ml-2 h-4 w-4" />
-                                </Button>
-                            </div>
+                            </CardContent>
                         </Card>
-
-                        {/* Recent Sessions */}
-                        <Card className="p-6 mt-6">
-                            <h3 className="text-lg font-bold mb-4">Your Recent Sessions</h3>
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <p className="font-medium">Strategic Planning Session</p>
-                                        <p className="text-sm text-gray-600">with Dr. Emily Rodriguez • Sept 15, 2025</p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button size="sm" variant="outline">Notes</Button>
-                                        <Button size="sm" variant="outline">Recording</Button>
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <p className="font-medium">Implementation Review</p>
-                                        <p className="text-sm text-gray-600">with James Chen • Aug 18, 2025</p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button size="sm" variant="outline">Notes</Button>
-                                        <Button size="sm" variant="outline">Recording</Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
+                    </aside>
                 </div>
             </div>
         </div>

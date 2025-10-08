@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { buildSiteUrl, getStripeServerClient } from '@/lib/stripe/server';
+import type Stripe from 'stripe';
 
 // Supported product definitions. Add additional products and billing cycles here.
 // Each entry maps billing interval -> Stripe Price ID (from environment variables)
@@ -27,17 +28,6 @@ const PRODUCT_PRICE_ENV: Record<string, Record<string, string | undefined>> = {
     annual: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3')
   }
 };
-
-let stripe: Stripe | null = null;
-function getStripeClient(): Stripe {
-  if (!stripe) {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('Stripe secret key not configured');
-    }
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-06-30.basil' });
-  }
-  return stripe;
-}
 
 interface CheckoutParams {
   product: string;
@@ -79,10 +69,7 @@ function resolvePriceId(product: string, billing: string): string | null {
   return productConfig[normalizedBilling] || null;
 }
 
-function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
-  // Simple single-domain approach
-  const canonical = (process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com').trim();
-
+function buildCheckoutUrls(returnTo?: string) {
   // Map return_to shorthand values to paths
   const destination = (() => {
     switch (returnTo) {
@@ -101,9 +88,8 @@ function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
   })();
 
   return {
-    // Include session_id placeholder for post-checkout bootstrap
-    success: `${canonical}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`,
-    cancel: `${canonical}/ai-readiness?checkout=cancelled`
+    success: buildSiteUrl(`${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`),
+    cancel: buildSiteUrl('/ai-readiness?checkout=cancelled')
   };
 }
 
@@ -127,7 +113,7 @@ async function createCheckoutSession(params: CheckoutParams, request?: NextReque
   }
 
   const isSubscription = true; // unified checkout uses subscriptions (supports trial days)
-  const redirect = buildCheckoutUrls(params.returnTo, request);
+  const redirect = buildCheckoutUrls(params.returnTo);
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: isSubscription ? 'subscription' : 'payment',
@@ -166,7 +152,7 @@ async function createCheckoutSession(params: CheckoutParams, request?: NextReque
     }
   }
 
-  return getStripeClient().checkout.sessions.create(sessionParams);
+  return getStripeServerClient().checkout.sessions.create(sessionParams);
 }
 
 function capitalize(s: string) {
