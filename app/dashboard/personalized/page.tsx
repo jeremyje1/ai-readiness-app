@@ -9,7 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { buildNistAlignment, buildRiskHotspots, type NistAlignmentInsight, type RiskHotspot } from '@/lib/analysis/gap-insights';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/browser-client';
 import {
   ArrowRight,
   Calendar,

@@ -27,18 +27,31 @@ export async function getLatestGrantedPayment(
         .from('user_payments')
         .select('*')
         .eq('user_id', userId)
-        .eq('access_granted', true)
         .order('updated_at', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false, nullsFirst: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(5);
 
     if (error) {
         console.error('Failed to load latest payment for user', { userId, error });
         return null;
     }
 
-    return data ?? null;
+    if (!data || data.length === 0) {
+        return null;
+    }
+
+    const granted = data.find((record) => record.access_granted === true);
+    if (granted) {
+        return granted;
+    }
+
+    const activeStatuses = new Set(['active', 'completed', 'paid', 'premium', 'trialing']);
+    const active = data.find((record) => {
+        const status = record.payment_status?.toLowerCase();
+        return status ? activeStatuses.has(status) : false;
+    });
+
+    return active ?? data[0];
 }
 
 export function resolvePaymentTier(payment: UserPayment | null | undefined): string | null {
@@ -48,9 +61,19 @@ export function resolvePaymentTier(payment: UserPayment | null | undefined): str
 
 export function hasActivePayment(payment: UserPayment | null | undefined): boolean {
     if (!payment) return false;
-    if (payment.access_granted !== true) return false;
+
     const normalizedStatus = payment.payment_status?.toLowerCase();
-    return normalizedStatus === 'active' || normalizedStatus === 'completed' || normalizedStatus === 'premium';
+    const activeStatuses = new Set(['active', 'completed', 'paid', 'premium', 'trialing']);
+
+    if (payment.access_granted === true) {
+        return normalizedStatus ? activeStatuses.has(normalizedStatus) : true;
+    }
+
+    if (payment.access_granted === false) {
+        return normalizedStatus ? activeStatuses.has(normalizedStatus) : false;
+    }
+
+    return normalizedStatus ? activeStatuses.has(normalizedStatus) : false;
 }
 
 export async function getOrganizationForUser(

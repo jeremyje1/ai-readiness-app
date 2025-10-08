@@ -1,21 +1,14 @@
+import { AppBootstrap } from '@/components/AppBootstrap'
 import AuthNav from '@/components/AuthNav'
 import { PasswordSetupGuard } from '@/components/PasswordSetupGuard'
 import TutorialProvider from '@/components/TutorialProvider'
 import UserProvider from '@/components/UserProvider'
 import { AudienceProvider } from '@/lib/audience/AudienceContext'
 import { deriveAudience } from '@/lib/audience/deriveAudience'
-import { initializeAuthValidation } from '@/lib/auth-utils'
-import { initializeCacheBust } from '@/lib/cache-bust-force'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { headers } from 'next/headers'
 import './globals.css'
-
-// Initialize cache bust and auth validation immediately
-if (typeof window !== 'undefined') {
-  initializeCacheBust();
-  initializeAuthValidation();
-}
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -53,6 +46,7 @@ export default async function RootLayout({
             <TutorialProvider>
               <AuthNav />
               <PasswordSetupGuard>
+                <AppBootstrap />
                 {children}
               </PasswordSetupGuard>
             </TutorialProvider>

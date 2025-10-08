@@ -1,5 +1,5 @@
 import type { RoiAssumptions, RoiResults } from '@/lib/roi/calculations';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAuthContext, getTeamMembership, SCENARIO_EDITOR_ROLES } from './utils';
 
 interface ScenarioPayload {
@@ -12,8 +12,8 @@ interface ScenarioPayload {
     lastUsedAt?: string;
 }
 
-export async function GET() {
-    const authContext = await getAuthContext();
+export async function GET(request: NextRequest) {
+    const authContext = await getAuthContext(request);
 
     if (!authContext.ok) {
         return authContext.response;
@@ -38,8 +38,8 @@ export async function GET() {
     return NextResponse.json({ scenarios: data ?? [] });
 }
 
-export async function POST(request: Request) {
-    const authContext = await getAuthContext();
+export async function POST(request: NextRequest) {
+    const authContext = await getAuthContext(request);
 
     if (!authContext.ok) {
         return authContext.response;

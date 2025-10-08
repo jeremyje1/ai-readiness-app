@@ -1,5 +1,5 @@
 import type { RoiAssumptions, RoiResults } from '@/lib/roi/calculations';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAuthContext, getTeamMembership, SCENARIO_EDITOR_ROLES } from '../utils';
 
 interface ScenarioUpdatePayload {
@@ -24,9 +24,9 @@ interface ScenarioPatchPayload {
 
 const UNIQUE_VIOLATION_CODE = '23505';
 
-export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
     const { id: scenarioId } = await context.params;
-    const authContext = await getAuthContext();
+    const authContext = await getAuthContext(request);
 
     if (!authContext.ok) {
         return authContext.response;
@@ -111,9 +111,9 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     return NextResponse.json({ scenario });
 }
 
-export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
     const { id: scenarioId } = await context.params;
-    const authContext = await getAuthContext();
+    const authContext = await getAuthContext(request);
 
     if (!authContext.ok) {
         return authContext.response;
@@ -207,9 +207,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ scenario });
 }
 
-export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
     const { id: scenarioId } = await context.params;
-    const authContext = await getAuthContext();
+    const authContext = await getAuthContext(request);
 
     if (!authContext.ok) {
         return authContext.response;

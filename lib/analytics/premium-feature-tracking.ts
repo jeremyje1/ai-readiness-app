@@ -1,4 +1,6 @@
-import { createClient } from '@/lib/supabase/client';
+"use client";
+
+import { createClient } from '@/lib/supabase/browser-client';
 
 export type PremiumFeature =
     | 'premium_dashboard'
@@ -31,7 +33,7 @@ export class PremiumFeatureTracker {
     private static instance: PremiumFeatureTracker;
     private supabase = createClient();
     private eventQueue: TrackingEvent[] = [];
-    private flushInterval: NodeJS.Timeout | null = null;
+    private flushInterval: ReturnType<typeof setInterval> | null = null;
 
     private constructor() {
         // Flush events every 30 seconds
@@ -172,7 +174,7 @@ export async function getFeatureEngagementMetrics() {
     };
 
     if (featureCounts) {
-        featureCounts.forEach(record => {
+        featureCounts.forEach((record: { feature: string }) => {
             if (record.feature in engagement) {
                 engagement[record.feature as PremiumFeature]++;
             }
@@ -196,7 +198,7 @@ export async function getMostEngagedUsers() {
 
     // Count engagements per user
     const userCounts: Record<string, number> = {};
-    data.forEach(record => {
+    data.forEach((record: { user_id: string }) => {
         userCounts[record.user_id] = (userCounts[record.user_id] || 0) + 1;
     });
 

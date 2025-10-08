@@ -8,8 +8,8 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/browser-client';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface UserProfile {
   id?: string;

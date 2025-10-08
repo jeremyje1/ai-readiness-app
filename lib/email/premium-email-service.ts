@@ -1,12 +1,12 @@
 import emailService from '@/lib/email-service';
-import { createClient } from '@/lib/supabase/client';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 import { premiumMonthlyTrendsTemplate } from './templates/premium-monthly-trends';
 import { premiumWeeklyProgressTemplate } from './templates/premium-weekly-progress';
 import { premiumWelcomeTemplate } from './templates/premium-welcome';
 
 export class PremiumEmailService {
     async sendPremiumWelcomeEmail(userId: string) {
-        const supabase = createClient();
+        const supabase = await createServerClient();
 
         // Get user and institution data
         const { data: profile } = await supabase
@@ -34,7 +34,7 @@ export class PremiumEmailService {
     }
 
     async sendWeeklyProgressEmail(userId: string) {
-        const supabase = createClient();
+        const supabase = await createServerClient();
 
         // Get user profile
         const { data: profile } = await supabase
@@ -74,7 +74,7 @@ export class PremiumEmailService {
     }
 
     async sendMonthlyTrendsEmail(userId: string) {
-        const supabase = createClient();
+        const supabase = await createServerClient();
 
         // Get user profile
         const { data: profile } = await supabase
@@ -196,7 +196,7 @@ export class PremiumEmailService {
 
 // Cron job functions to be called by your scheduling service
 export async function sendWeeklyProgressEmails() {
-    const supabase = createClient();
+    const supabase = await createServerClient();
 
     // Get all premium subscribers
     const { data: premiumUsers } = await supabase
@@ -220,7 +220,7 @@ export async function sendWeeklyProgressEmails() {
 }
 
 export async function sendMonthlyTrendsEmails() {
-    const supabase = createClient();
+    const supabase = await createServerClient();
 
     // Get all premium subscribers
     const { data: premiumUsers } = await supabase

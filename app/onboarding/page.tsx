@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/browser-client';
 import {
     ArrowRight,
     Building,

@@ -1,13 +1,14 @@
 import { getLatestGrantedPayment, hasActivePayment } from '@/lib/payments/access';
+import { resolveServerUser } from '@/lib/supabase/resolve-user';
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
         const supabase = await createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const { user, error: authError } = await resolveServerUser(supabase, request);
 
-        if (authError || !user) {
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

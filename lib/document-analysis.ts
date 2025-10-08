@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/client';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 import OpenAI from 'openai';
 
 // Document analysis types
@@ -51,7 +51,7 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
 // Check if user has active subscription
 export async function checkUserSubscription(userId: string): Promise<boolean> {
     try {
-        const supabase = createClient();
+        const supabase = await createServerClient();
 
         // Check for active subscription
         const { data: subscription } = await supabase
@@ -258,7 +258,7 @@ export async function analyzeDocument(
         }
 
         // Get user's institution type for context
-        const supabase = createClient();
+        const supabase = await createServerClient();
         const { data: profile } = await supabase
             .from('user_profiles')
             .select('institution_type')
@@ -304,7 +304,7 @@ async function storeAnalysisResults(
     analysis: DocumentAnalysisResult
 ): Promise<void> {
     try {
-        const supabase = createClient();
+        const supabase = await createServerClient();
 
         await supabase.from('document_analyses').insert({
             user_id: userId,

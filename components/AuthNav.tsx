@@ -1,7 +1,8 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { useSubscription } from '@/hooks/useSubscription';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/browser-client';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -50,7 +51,7 @@ export default function AuthNav() {
 
     loadSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_evt, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_evt: AuthChangeEvent, session: Session | null) => {
       setUserEmail(session?.user?.email || null);
     });
     return () => listener.subscription.unsubscribe();

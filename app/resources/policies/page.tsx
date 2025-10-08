@@ -1,7 +1,7 @@
 'use client';
 
 import { useSubscription } from '@/hooks/useSubscription';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/browser-client';
 import { motion } from 'framer-motion';
 import {
     AlertTriangle,
@@ -281,8 +281,8 @@ export default function PolicyLibraryPage() {
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => setSelectedCategory(isActive ? null : category.id)}
                                 className={`p-4 rounded-lg border-2 transition-all ${isActive
-                                        ? `border-${category.color}-500 bg-${category.color}-50`
-                                        : 'border-gray-200 bg-white hover:border-gray-300'
+                                    ? `border-${category.color}-500 bg-${category.color}-50`
+                                    : 'border-gray-200 bg-white hover:border-gray-300'
                                     }`}
                             >
                                 <Icon className={`w-8 h-8 mb-2 mx-auto text-${category.color}-600`} />
@@ -355,8 +355,8 @@ export default function PolicyLibraryPage() {
                                     <button
                                         onClick={() => handleDownload(policy.id, policy.premium)}
                                         className={`flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center ${policy.premium && !hasActiveSubscription
-                                                ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                            ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+                                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
                                             }`}
                                     >
                                         <Download className="w-4 h-4 mr-2" />

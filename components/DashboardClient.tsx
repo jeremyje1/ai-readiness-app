@@ -1,6 +1,6 @@
 'use client';
 
-import { createClient as createSupabaseClient } from '@/lib/supabase/client';
+import { createClient as createSupabaseClient } from '@/lib/supabase/browser-client';
 import type { Session } from '@supabase/supabase-js';
 import {
   ArrowRight,
@@ -154,10 +154,12 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then((response: Awaited<ReturnType<typeof supabase.auth.getSession>>) => {
+        setSession(response.data.session ?? null);
+        setLoading(false);
+      });
   }, [supabase]);
 
   if (loading) {

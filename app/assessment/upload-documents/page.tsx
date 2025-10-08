@@ -3,7 +3,7 @@
 import AIReadinessDocumentUploader from '@/components/AIReadinessDocumentUploader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/browser-client';
 import { ArrowLeft, CheckCircle2, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';

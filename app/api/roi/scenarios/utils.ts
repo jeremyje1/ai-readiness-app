@@ -1,7 +1,8 @@
 import { getOrganizationForUser, hasActivePayment } from '@/lib/payments/access';
+import { resolveServerUser } from '@/lib/supabase/resolve-user';
 import { createClient } from '@/lib/supabase/server';
 import type { User } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export const SCENARIO_EDITOR_ROLES = new Set(['owner', 'admin', 'editor', 'member']);
 
@@ -24,14 +25,11 @@ export type TeamMembership = {
     role: string | null;
 };
 
-export async function getAuthContext(): Promise<AuthContextResult> {
+export async function getAuthContext(request?: NextRequest): Promise<AuthContextResult> {
     const supabase = await createClient();
-    const {
-        data: { user },
-        error,
-    } = await supabase.auth.getUser();
+    const { user, error } = await resolveServerUser(supabase, request);
 
-    if (error || !user) {
+    if (!user) {
         return {
             ok: false,
             response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),

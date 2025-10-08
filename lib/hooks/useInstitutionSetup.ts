@@ -1,7 +1,7 @@
 'use client'
 
 import { UserInstitution } from '@/lib/hooks/useUserContext'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/browser-client'
 import { useState } from 'react'
 
 export interface InstitutionSetupData {

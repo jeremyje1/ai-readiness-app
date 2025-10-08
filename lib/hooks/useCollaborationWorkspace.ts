@@ -1,7 +1,7 @@
 "use client";
 
 import { getOrganizationForUser, hasActivePayment } from "@/lib/payments/access";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/browser-client";
 import type {
     CollaborationRoom,
     ImplementationPhase,
@@ -10,6 +10,7 @@ import type {
     TeamDocument,
     TeamMember,
 } from "@/types/collaboration";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface UseCollaborationWorkspaceOptions {
@@ -321,7 +322,7 @@ export function useCollaborationWorkspace(
                     table: "collaboration_rooms",
                     filter: `id=eq.${room.id}`,
                 },
-                (payload) => {
+                (payload: RealtimePostgresChangesPayload<CollaborationRoom>) => {
                     const updated = payload.new as CollaborationRoom;
                     setRoom((prev) => (prev ? { ...prev, content: updated.content, updated_at: updated.updated_at, last_editor: updated.last_editor } : updated));
                 }
