@@ -1,3 +1,4 @@
+import { getLatestGrantedPayment, hasActivePayment } from '@/lib/payments/access';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
@@ -17,19 +18,11 @@ export async function GET(request: Request) {
             .eq('user_id', user.id)
             .single();
 
-        // Check payment status in user_payments table
-        const { data: payment } = await supabase
-            .from('user_payments')
-            .select('payment_status, access_granted')
-            .eq('user_id', user.id)
-            .in('payment_status', ['active', 'completed', 'premium'])
-            .eq('access_granted', true)
-            .single();
+        const payment = await getLatestGrantedPayment(supabase, user.id);
 
-        // Check if premium user (check both tables for compatibility)
         const hasPremiumAccess =
             profile?.subscription_status === 'active' ||
-            payment?.access_granted === true;
+            hasActivePayment(payment);
 
         if (!hasPremiumAccess) {
             return NextResponse.json({ error: 'Premium subscription required' }, { status: 403 });

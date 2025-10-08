@@ -1,3 +1,4 @@
+import { getLatestGrantedPayment, hasActivePayment, resolvePaymentTier } from '@/lib/payments/access';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
@@ -18,26 +19,15 @@ export async function GET() {
     }
 
     // Check user_payments table for subscription status
-    const { data: payment, error: paymentError } = await supabase
-      .from('user_payments')
-      .select('*')
-      .eq('user_id', user.id)
-      .in('payment_status', ['active', 'completed', 'premium'])
-      .eq('access_granted', true)
-      .single();
+    const payment = await getLatestGrantedPayment(supabase, user.id);
 
-    if (paymentError && paymentError.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Payment status error:', paymentError);
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
-    }
-
-    // Return payment status
-    const isVerified = payment?.access_granted === true;
+    const isVerified = hasActivePayment(payment);
+    const tier = resolvePaymentTier(payment) || 'free';
 
     return NextResponse.json({
       isVerified,
       hasActiveSubscription: isVerified,
-      tier: payment?.plan_type || 'free',
+      tier,
       email: user.email,
       userId: user.id,
       subscriptionId: payment?.stripe_subscription_id,

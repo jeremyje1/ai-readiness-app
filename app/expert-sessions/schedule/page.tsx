@@ -1,8 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-import { useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,6 +14,9 @@ import {
     Timer,
     TrendingUp
 } from 'lucide-react';
+import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
 
 const CONSULTATION_PRICE = 349;
 const HEADSHOT_URL = process.env.NEXT_PUBLIC_JEREMY_HEADSHOT_URL ||

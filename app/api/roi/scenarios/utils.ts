@@ -1,3 +1,4 @@
+import { getOrganizationForUser, hasActivePayment } from '@/lib/payments/access';
 import { createClient } from '@/lib/supabase/server';
 import type { User } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
@@ -37,21 +38,22 @@ export async function getAuthContext(): Promise<AuthContextResult> {
         };
     }
 
-    const { data: payment, error: paymentError } = await supabase
-        .from('user_payments')
-        .select('organization')
-        .eq('user_id', user.id)
-        .eq('access_granted', true)
-        .single();
+    const { organization: organizationFromPayment, payment } = await getOrganizationForUser(supabase, user.id);
 
-    if (paymentError || !payment?.organization) {
+    if (!payment || !hasActivePayment(payment)) {
         return {
             ok: false,
-            response: NextResponse.json({ error: 'No premium access found' }, { status: 404 }),
+            response: NextResponse.json({ error: 'Active subscription required' }, { status: 403 }),
         };
     }
 
-    return { ok: true, supabase, user, organization: payment.organization };
+    const organization =
+        organizationFromPayment ||
+        user.user_metadata?.organization ||
+        (user.email ? user.email.split('@')[1] : null) ||
+        `premium-${user.id.slice(0, 8)}`;
+
+    return { ok: true, supabase, user, organization };
 }
 
 export async function getTeamMembership(
