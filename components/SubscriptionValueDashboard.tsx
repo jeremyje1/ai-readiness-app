@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Calendar, 
-  TrendingUp, 
-  Users, 
-  CheckCircle2, 
-  Clock, 
-  Target,
-  BarChart3,
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Award,
   BookOpen,
+  Calendar,
+  CheckCircle2,
+  Clock,
   MessageSquare,
-  Award
+  Target,
+  TrendingUp,
+  Users
 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface SubscriptionValueProps {
   userId: string;
@@ -37,11 +36,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProgressData();
-  }, [userId]);
-
-  const loadProgressData = async () => {
+  const loadProgressData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/subscription/progress/${encodeURIComponent(userId)}`);
@@ -69,7 +64,11 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    loadProgressData();
+  }, [loadProgressData]);
 
   const scheduleExpertSession = () => {
     window.open('https://calendly.com/aiblueprint-expert/monthly-strategy', '_blank');
@@ -109,8 +108,8 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
     // Contextualize milestone text based on institution type
     if (!milestone) return milestone;
     return milestone.replace(/district/gi, terms.institution)
-                  .replace(/school/gi, institutionType === 'HigherEd' ? 'university' : 'school')
-                  .replace(/teachers/gi, institutionType === 'HigherEd' ? 'faculty' : 'teachers');
+      .replace(/school/gi, institutionType === 'HigherEd' ? 'university' : 'school')
+      .replace(/teachers/gi, institutionType === 'HigherEd' ? 'faculty' : 'teachers');
   };
 
   if (loading) {
@@ -142,7 +141,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -157,7 +156,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -169,7 +168,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -192,11 +191,11 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
               Quarterly Reassessment Due
             </CardTitle>
             <CardDescription className="text-orange-700">
-              It's time to measure your AI readiness progress! Take your quarterly reassessment to see improvements.
+              It’s time to measure your AI readiness progress! Take your quarterly reassessment to see improvements.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
+            <Button
               className="bg-orange-600 hover:bg-orange-700"
               onClick={() => window.location.href = '/ai-readiness/reassessment'}
             >
@@ -224,13 +223,13 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
               <span>{progress.implementationProgress}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-600 h-2 rounded-full transition-all" 
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all"
                 style={{ width: `${progress.implementationProgress}%` }}
               ></div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
             <span>Next milestone: {getNextMilestoneContext(progress.nextMilestone)}</span>
@@ -238,7 +237,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
         </CardContent>
       </Card>
 
-      {/* This Month's Value */}
+      {/* This Month’s Value */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Expert Support */}
         <Card>
@@ -258,9 +257,9 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
                 {progress.expertSessionsUsed}/{progress.expertSessionsTotal}
               </Badge>
             </div>
-            
+
             <div className="space-y-2">
-              <Button 
+              <Button
                 onClick={scheduleExpertSession}
                 className="w-full"
                 disabled={progress.expertSessionsUsed >= progress.expertSessionsTotal}
@@ -296,14 +295,14 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
                 <span>{progress.templatesDownloaded} total</span>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Button onClick={joinCommunity} variant="outline" className="w-full">
                 Join Community Discussion
               </Button>
-              <Button 
+              <Button
                 onClick={() => window.location.href = '/resources/templates'}
-                variant="outline" 
+                variant="outline"
                 className="w-full"
               >
                 Browse New Templates
@@ -318,7 +317,7 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="h-5 w-5" />
-            This Month's Features
+            This Month’s Features
           </CardTitle>
           <CardDescription>
             New content and tools added to your subscription
@@ -333,18 +332,18 @@ export default function SubscriptionValueDashboard({ userId, assessmentId, tier,
                 Download
               </Button>
             </div>
-            
+
             <div className="p-4 border rounded-lg">
               <h4 className="font-semibold text-sm">Webinar Replay</h4>
-              <p className="text-xs text-gray-600 mt-1">"AI Ethics in Education" - January session</p>
+              <p className="text-xs text-gray-600 mt-1">“AI Ethics in Education” - January session</p>
               <Button size="sm" variant="outline" className="mt-2">
                 Watch
               </Button>
             </div>
-            
+
             <div className="p-4 border rounded-lg">
               <h4 className="font-semibold text-sm">Peer Case Study</h4>
-              <p className="text-xs text-gray-600 mt-1">Springfield District's AI implementation success</p>
+              <p className="text-xs text-gray-600 mt-1">Springfield District’s AI implementation success</p>
               <Button size="sm" variant="outline" className="mt-2">
                 Read
               </Button>

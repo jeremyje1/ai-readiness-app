@@ -5,34 +5,36 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useAudience } from '@/lib/audience/AudienceContext';
-import { useAudienceAnalytics } from '@/lib/analytics/audienceAnalytics';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { useAudienceAnalytics } from '@/lib/analytics/audienceAnalytics';
+import { useAudience } from '@/lib/audience/AudienceContext';
 import {
-  Brain,
-  Users,
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  Target,
-  BookOpen,
-  Shield,
-  GraduationCap,
-  Building,
   AlertTriangle,
-  CheckCircle,
   ArrowRight,
-  RefreshCw,
-  Calendar,
   Award,
-  MessageSquare
+  BarChart3,
+  BookOpen,
+  Brain,
+  Building,
+  CheckCircle,
+  Clock,
+  GraduationCap,
+  RefreshCw,
+  Scale,
+  Shield,
+  ShieldAlert,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Zap
 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface DashboardMetrics {
   assessmentScore: {
@@ -80,6 +82,36 @@ interface DashboardMetrics {
     peerComparison: 'above' | 'below' | 'average';
     sampleSize: number;
   };
+  quickWins: Array<{
+    id: string;
+    title: string;
+    pillar: string;
+    rationale: string;
+    timeframe: string;
+    score: number;
+  }>;
+  riskHotspots: Array<{
+    id: string;
+    pillar: string;
+    severity: 'critical' | 'high' | 'medium' | 'low';
+    severityLabel: string;
+    riskStatement: string;
+    likelihood: string;
+    impact: string;
+    recommendedMitigation: string;
+    nistReference: string;
+    score: number;
+  }>;
+  nistAlignment: Array<{
+    id: string;
+    function: string;
+    score: number;
+    status: 'optimized' | 'progressing' | 'attention' | 'critical';
+    statusLabel: string;
+    requirement: string;
+    guidance: string;
+    priority: string;
+  }>;
 }
 
 interface AudienceAwareDashboardProps {
@@ -94,12 +126,14 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  // Fetch audience-aware metrics
-  useEffect(() => {
-    fetchDashboardMetrics();
-  }, [audience, userId]);
+  const analyticsRef = useRef(analytics);
 
-  const fetchDashboardMetrics = async () => {
+  useEffect(() => {
+    analyticsRef.current = analytics;
+  }, [analytics]);
+
+  // Fetch audience-aware metrics
+  const fetchDashboardMetrics = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -110,17 +144,22 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
       });
 
       const response = await fetch(`/api/dashboard/metrics?${params}`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch metrics: ${response.statusText}`);
       }
 
       const data = await response.json();
-      setMetrics(data.metrics);
+      setMetrics({
+        ...data.metrics,
+        quickWins: data.metrics.quickWins ?? [],
+        riskHotspots: data.metrics.riskHotspots ?? [],
+        nistAlignment: data.metrics.nistAlignment ?? []
+      });
       setLastUpdated(new Date(data.lastUpdated));
 
       // Track dashboard view with audience analytics
-      analytics.trackDashboardView({
+      analyticsRef.current?.trackDashboardView?.({
         score: data.metrics.assessmentScore.current,
         level: data.metrics.assessmentScore.level,
         completion_rate: data.metrics.completionRate.percentage
@@ -132,7 +171,11 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [audience, userId]);
+
+  useEffect(() => {
+    fetchDashboardMetrics();
+  }, [fetchDashboardMetrics]);
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return 'text-green-600';
@@ -189,9 +232,9 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
             {error}
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={fetchDashboardMetrics}
               className="ml-4"
             >
@@ -227,6 +270,45 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
   }
 
   const audienceMetrics = metrics.audienceSpecificMetrics;
+  const quickWins = metrics.quickWins ?? [];
+  const riskHotspotsRaw = metrics.riskHotspots ?? [];
+  const nistAlignment = metrics.nistAlignment ?? [];
+
+  const severityRank: Record<'critical' | 'high' | 'medium' | 'low', number> = {
+    critical: 0,
+    high: 1,
+    medium: 2,
+    low: 3
+  };
+
+  const severityBadgeClasses: Record<'critical' | 'high' | 'medium' | 'low', string> = {
+    critical: 'bg-red-100 text-red-800 border border-red-200',
+    high: 'bg-orange-100 text-orange-800 border border-orange-200',
+    medium: 'bg-amber-100 text-amber-800 border border-amber-200',
+    low: 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+  };
+
+  const alignmentBadgeClasses: Record<'optimized' | 'progressing' | 'attention' | 'critical', string> = {
+    optimized: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+    progressing: 'bg-amber-100 text-amber-800 border border-amber-200',
+    attention: 'bg-orange-100 text-orange-800 border border-orange-200',
+    critical: 'bg-red-100 text-red-800 border border-red-200'
+  };
+
+  const riskHotspots = [...riskHotspotsRaw].sort((a, b) => severityRank[a.severity] - severityRank[b.severity]);
+
+  const handleQuickWinNavigation = (win: DashboardMetrics['quickWins'][number]) => {
+    analytics.trackFeature('quick_win', 'accessed', {
+      pillar: win.pillar,
+      timeframe: win.timeframe,
+      score: win.score,
+      source: 'quick_win_card'
+    });
+    analytics.trackNavigation('dashboard', 'quick-win');
+
+    const pillarToken = win.pillar.toLowerCase().split(' ')[0];
+    window.location.href = `/blueprint/new?from=quick-win&pillar=${encodeURIComponent(pillarToken)}`;
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -244,7 +326,7 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
             </h1>
           </div>
           <p className="text-gray-600">
-            Monitor your {config.nouns.org.toLowerCase()}'s AI integration progress and insights
+            Monitor your {config.nouns.org.toLowerCase()}’s AI integration progress and insights
           </p>
           <p className="text-sm text-gray-500 mt-1">
             Last updated: {lastUpdated.toLocaleString()}
@@ -302,8 +384,8 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
                 <p className="text-sm text-gray-500 mt-1">
                   {metrics.completionRate.completed} of {metrics.completionRate.total} sections
                 </p>
-                <Progress 
-                  value={metrics.completionRate.percentage} 
+                <Progress
+                  value={metrics.completionRate.percentage}
                   className="mt-2 h-2"
                 />
               </div>
@@ -385,7 +467,7 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
               <span>Personalized Recommendations</span>
             </CardTitle>
             <CardDescription>
-              AI-powered suggestions based on your {config.nouns.org.toLowerCase()}'s profile
+              AI-powered suggestions based on your {config.nouns.org.toLowerCase()}’s profile
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -436,7 +518,7 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
                     <p className="text-sm text-gray-500">
                       {new Date(activity.timestamp).toLocaleDateString()}
                     </p>
-                    <Badge 
+                    <Badge
                       variant={activity.status === 'completed' ? 'default' : 'secondary'}
                       className="text-xs"
                     >
@@ -450,91 +532,164 @@ export function AudienceAwareDashboard({ userId }: AudienceAwareDashboardProps) 
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Win Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <Zap className="w-5 h-5 text-yellow-600" />
+            <span>Quick Win Plays</span>
+          </CardTitle>
           <CardDescription>
-            Common tasks for {config.nouns.org.toLowerCase()} leaders
+            Immediate actions pulled straight from your latest readiness assessment
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-            <Button 
-              variant="outline" 
-              className="h-24 flex-col space-y-2"
-              onClick={() => {
-                analytics.trackNavigation('dashboard', 'assessment');
-                analytics.trackFeature('assessment', 'accessed');
-                window.location.href = '/assessment';
-              }}
-            >
-              <BarChart3 className="w-6 h-6" />
-              <span className="text-sm">New Assessment</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-24 flex-col space-y-2"
-              onClick={() => {
-                analytics.trackNavigation('dashboard', 'resources');
-                analytics.trackFeature('resources', 'accessed');
-                window.location.href = '/resources';
-              }}
-            >
-              <BookOpen className="w-6 h-6" />
-              <span className="text-sm">Browse Resources</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-24 flex-col space-y-2"
-              onClick={() => {
-                analytics.trackNavigation('dashboard', 'expert-sessions');
-                analytics.trackFeature('expert_sessions', 'accessed');
-                window.location.href = '/expert-sessions';
-              }}
-            >
-              <Users className="w-6 h-6" />
-              <span className="text-sm">Expert Sessions</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-24 flex-col space-y-2"
-              onClick={() => {
-                analytics.trackNavigation('dashboard', 'community');
-                analytics.trackFeature('community', 'accessed');
-                window.location.href = '/community';
-              }}
-            >
-              <MessageSquare className="w-6 h-6" />
-              <span className="text-sm">Join Community</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-24 flex-col space-y-2"
-              onClick={() => {
-                analytics.trackNavigation('dashboard', 'policy');
-                analytics.trackFeature('policy', 'accessed');
-                window.location.href = '/policy';
-              }}
-            >
-              <Shield className="w-6 h-6" />
-              <span className="text-sm">Policy Templates</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-24 flex-col space-y-2"
-              onClick={() => {
-                analytics.trackNavigation('dashboard', 'training');
-                analytics.trackFeature('training', 'accessed');
-                window.location.href = '/training';
-              }}
-            >
-              <GraduationCap className="w-6 h-6" />
-              <span className="text-sm">Training Hub</span>
-            </Button>
-          </div>
+          {quickWins.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {quickWins.map((win) => (
+                <div
+                  key={win.id}
+                  className="rounded-xl border border-yellow-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        {win.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-gray-500">
+                        {win.pillar} • Score {Math.max(0, Math.round(win.score))}/100
+                      </p>
+                    </div>
+                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                      {win.timeframe}
+                    </Badge>
+                  </div>
+                  <p className="mt-3 text-sm text-gray-700">
+                    {win.rationale}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-xs text-gray-500">
+                      <CheckCircle className="h-4 w-4 text-yellow-600" />
+                      <span>Momentum-ready task</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs"
+                      onClick={() => handleQuickWinNavigation(win)}
+                    >
+                      Plan this win
+                      <ArrowRight className="ml-1 h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-yellow-200 bg-yellow-50/70 p-8 text-center">
+              <Sparkles className="h-6 w-6 text-yellow-600" />
+              <p className="mt-4 text-sm text-yellow-800">
+                Complete your AI readiness assessment to unlock personalized quick wins tailored to your {config.nouns.org.toLowerCase()}.
+              </p>
+              <Button
+                className="mt-4"
+                onClick={() => {
+                  analytics.trackNavigation('dashboard', 'assessment');
+                  analytics.trackFeature('assessment', 'accessed');
+                  window.location.href = '/assessment';
+                }}
+              >
+                Start Assessment
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Risk Mitigation Highlights */}
+      {riskHotspots.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-red-900">
+              <ShieldAlert className="w-5 h-5" />
+              <span>Risk Mitigation Highlights</span>
+            </CardTitle>
+            <CardDescription>
+              Priority risk areas surfaced from your assessment with recommended mitigation steps
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {riskHotspots.map((risk) => (
+              <div key={risk.id} className="rounded-xl border border-red-100 bg-white p-4 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="max-w-2xl">
+                    <p className="text-sm font-semibold text-gray-900">{risk.pillar} • {risk.riskStatement}</p>
+                    <p className="mt-2 text-sm text-gray-700">{risk.recommendedMitigation}</p>
+                  </div>
+                  <span className={`${severityBadgeClasses[risk.severity]} rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide`}>
+                    {risk.severityLabel}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-gray-400" />
+                    Likelihood: <strong className="font-medium text-gray-800">{risk.likelihood}</strong>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-gray-400" />
+                    Impact: <strong className="font-medium text-gray-800">{risk.impact}</strong>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Scale className="h-3.5 w-3.5 text-indigo-500" />
+                    {risk.nistReference}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* NIST Gap Analysis */}
+      {nistAlignment.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Scale className="w-5 h-5 text-indigo-600" />
+              <span>NIST Alignment Tracker</span>
+            </CardTitle>
+            <CardDescription>
+              Snapshot of your alignment with the NIST AI RMF functions and recommended next moves
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {nistAlignment.map((item) => (
+              <div key={item.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="max-w-2xl">
+                    <p className="text-sm font-semibold text-gray-900">{item.function}</p>
+                    <p className="mt-1 text-sm text-gray-600">{item.requirement}</p>
+                  </div>
+                  <span className={`${alignmentBadgeClasses[item.status]} rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide`}>
+                    {item.statusLabel}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center">
+                  <Progress value={item.score} className="h-2 flex-1" />
+                  <span className="text-sm font-medium text-gray-800">{item.score}/100</span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-600">
+                  <p className="flex-1 min-w-[200px]">{item.guidance}</p>
+                  <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+                    {item.priority}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

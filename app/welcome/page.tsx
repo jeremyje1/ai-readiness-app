@@ -17,11 +17,11 @@ import {
     Users
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function WelcomePage() {
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState(0);
@@ -153,7 +153,7 @@ export default function WelcomePage() {
             }
         };
         loadUser();
-    }, [router]);
+    }, [router, supabase]);
 
     const onboardingSteps = [
         {

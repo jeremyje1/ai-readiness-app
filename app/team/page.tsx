@@ -109,7 +109,14 @@ export default function TeamWorkspacePage() {
     const [tasks, setTasks] = useState(mockTasks);
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [selectedView, setSelectedView] = useState<'overview' | 'tasks' | 'activity'>('overview');
-    const { hasActiveSubscription, isLoading } = useSubscription();
+    const {
+        hasActiveSubscription,
+        canAccessPremiumFeatures,
+        isLoading,
+        subscriptionTier,
+        daysLeftInTrial,
+        isTrialUser
+    } = useSubscription();
     const [inviteForm, setInviteForm] = useState({
         email: '',
         role: '',
@@ -171,14 +178,14 @@ export default function TeamWorkspacePage() {
         }
     };
 
-    if (!hasActiveSubscription && !isLoading) {
+    if (!canAccessPremiumFeatures && !isLoading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="bg-white rounded-lg shadow-sm p-8 max-w-md text-center">
                     <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Premium Feature</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Unlock Unlimited Team Invites</h2>
                     <p className="text-gray-600 mb-6">
-                        Team collaboration features are available for premium subscribers. Upgrade to invite team members and collaborate on AI implementation.
+                        Unlimited team invitations and shared collaboration tools are included with the AI Blueprint subscription. Upgrade or start your institution trial to invite your entire leadership team without limits.
                     </p>
                     <Link
                         href="/dashboard#upgrade"
@@ -187,6 +194,15 @@ export default function TeamWorkspacePage() {
                         Upgrade to Premium
                         <ChevronRight className="ml-2 w-5 h-5" />
                     </Link>
+                    <p className="text-xs text-gray-500 mt-4">
+                        {isTrialUser
+                            ? daysLeftInTrial > 0
+                                ? `Finish activating your institution trial to keep inviting teammates for the remaining ${daysLeftInTrial} day${daysLeftInTrial === 1 ? '' : 's'}.`
+                                : 'Your trial has ended. Upgrade to continue inviting unlimited teammates.'
+                            : subscriptionTier
+                                ? `Your current plan (${subscriptionTier}) does not include team collaboration. Contact support if this seems incorrect.`
+                                : 'No active AI Blueprint subscription detected for this account.'}
+                    </p>
                 </div>
             </div>
         );
@@ -294,8 +310,8 @@ export default function TeamWorkspacePage() {
                                         key={tab.id}
                                         onClick={() => setSelectedView(tab.id as any)}
                                         className={`flex-1 px-6 py-4 flex items-center justify-center border-b-2 transition-colors ${selectedView === tab.id
-                                                ? 'border-indigo-600 text-indigo-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                                            ? 'border-indigo-600 text-indigo-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700'
                                             }`}
                                     >
                                         <Icon className="w-5 h-5 mr-2" />
@@ -415,7 +431,7 @@ export default function TeamWorkspacePage() {
                                     <div className="ml-4 flex-1">
                                         <p className="text-sm text-gray-900">
                                             <span className="font-semibold">Michael Chen</span> completed task{' '}
-                                            <span className="font-medium">"Update Student Guidelines"</span>
+                                            <span className="font-medium">“Update Student Guidelines”</span>
                                         </p>
                                         <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
                                     </div>
@@ -428,7 +444,7 @@ export default function TeamWorkspacePage() {
                                     <div className="ml-4 flex-1">
                                         <p className="text-sm text-gray-900">
                                             <span className="font-semibold">Sarah Johnson</span> commented on{' '}
-                                            <span className="font-medium">"Review AI Ethics Policy Draft"</span>
+                                            <span className="font-medium">“Review AI Ethics Policy Draft”</span>
                                         </p>
                                         <p className="text-xs text-gray-500 mt-1">3 hours ago</p>
                                     </div>

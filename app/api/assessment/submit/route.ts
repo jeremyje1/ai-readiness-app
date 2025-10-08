@@ -1,3 +1,4 @@
+import { buildNistAlignment, buildRiskHotspots } from '@/lib/analysis/gap-insights';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
@@ -22,7 +23,7 @@ function calculateScores(answers: Record<number, number>) {
 
     for (const [category, questionIds] of Object.entries(categories)) {
         let categoryScore = 0;
-        let categoryMax = questionIds.length * 3; // Max 3 points per question
+        const categoryMax = questionIds.length * 3; // Max 3 points per question
 
         questionIds.forEach(qId => {
             const answer = answers[qId - 1]; // Questions are 1-indexed
@@ -184,6 +185,48 @@ export async function POST(req: NextRequest) {
         const measureRec = (roadmap.split('MEASURE')[1]?.split('MANAGE')[0] || 'Focus on measurement').substring(0, 200);
         const manageRec = (roadmap.split('MANAGE')[1] || 'Focus on risk management').substring(0, 200);
 
+        const quickWins = [
+            'Create AI acceptable use policy',
+            'Conduct AI awareness training',
+            'Inventory existing AI tools'
+        ];
+
+        const domainInsights = [
+            { key: 'govern', label: 'Govern', score: scores.GOVERN.percentage, recommendation: governRec },
+            { key: 'map', label: 'Map', score: scores.MAP.percentage, recommendation: mapRec },
+            { key: 'measure', label: 'Measure', score: scores.MEASURE.percentage, recommendation: measureRec },
+            { key: 'manage', label: 'Manage', score: scores.MANAGE.percentage, recommendation: manageRec }
+        ] as const;
+
+        const recommendations = [
+            { title: governRec, category: 'Govern' },
+            { title: mapRec, category: 'Map' },
+            { title: measureRec, category: 'Measure' },
+            { title: manageRec, category: 'Manage' }
+        ];
+
+        const riskHotspots = buildRiskHotspots({
+            overallScore: scores.OVERALL.percentage,
+            domains: domainInsights.map((item) => ({
+                key: item.key,
+                label: item.label,
+                score: item.score,
+                recommendation: item.recommendation
+            })),
+            recommendations,
+            quickWins
+        });
+
+        const nistAlignment = buildNistAlignment({
+            overallScore: scores.OVERALL.percentage,
+            domains: domainInsights.map((item) => ({
+                key: item.key,
+                label: item.label,
+                score: item.score,
+                recommendation: item.recommendation
+            }))
+        });
+
         const gapAnalysisData = {
             user_id: userId,
             overall_score: scores.OVERALL.percentage,
@@ -209,11 +252,9 @@ export async function POST(req: NextRequest) {
                 'Establish AI oversight committee',
                 'Document current AI systems'
             ],
-            quick_wins: [
-                'Create AI acceptable use policy',
-                'Conduct AI awareness training',
-                'Inventory existing AI tools'
-            ],
+            quick_wins: quickWins,
+            risk_hotspots: riskHotspots,
+            nist_alignment: nistAlignment,
             analysis_date: new Date().toISOString()
         };
 

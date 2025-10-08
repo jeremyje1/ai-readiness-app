@@ -39,6 +39,63 @@ interface GoalSettingWizardProps {
     onCancel?: () => void;
 }
 
+const timelineOptions = [
+    { value: '3months', label: '3 Months (Fast Track)' },
+    { value: '6months', label: '6 Months (Recommended)' },
+    { value: '1year', label: '1 Year (Comprehensive)' },
+    { value: '18months', label: '18 Months (Gradual)' }
+];
+
+const recommendedDepartmentTemplates: Department[] = [
+    {
+        department: 'Academic Affairs',
+        challenges: [
+            'Align curriculum with AI competencies and accreditation standards',
+            'Build faculty confidence in AI-enhanced pedagogy'
+        ],
+        outcomes: [
+            'AI-ready curricula with measurable learning outcomes',
+            'Faculty development pathways for AI integration'
+        ],
+        budget: 60000,
+        timeline: '6months'
+    },
+    {
+        department: 'Information Technology',
+        challenges: [
+            'Integrate AI tools with legacy systems securely',
+            'Ensure data pipelines and governance support AI usage'
+        ],
+        outcomes: [
+            'Scalable AI infrastructure and integration playbooks',
+            'Automated monitoring and security for AI workloads'
+        ],
+        budget: 90000,
+        timeline: '6months'
+    },
+    {
+        department: 'Student Services',
+        challenges: [
+            'Provide 24/7 support without overextending teams',
+            'Identify and assist at-risk students earlier'
+        ],
+        outcomes: [
+            'AI-powered advising workflows and chatbot support',
+            'Predictive analytics to trigger timely student interventions'
+        ],
+        budget: 45000,
+        timeline: '6months'
+    }
+];
+
+const cloneDepartment = (template: Department): Department => ({
+    department: template.department,
+    challenges: [...template.challenges],
+    outcomes: [...template.outcomes],
+    budget: template.budget,
+    timeline: template.timeline
+});
+
 export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }: GoalSettingWizardProps) {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,13 +103,54 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
     // Form state
     const [primaryGoals, setPrimaryGoals] = useState<string[]>([]);
     const [customGoal, setCustomGoal] = useState('');
-    const [departments, setDepartments] = useState<Department[]>([]);
+    const [departments, setDepartments] = useState<Department[]>(() =>
+        recommendedDepartmentTemplates.map((template) => cloneDepartment(template))
+    );
     const [learningObjectives, setLearningObjectives] = useState<LearningObjective[]>([]);
     const [implementationStyle, setImplementationStyle] = useState<'aggressive' | 'moderate' | 'cautious'>('moderate');
     const [pilotPreference, setPilotPreference] = useState(true);
     const [trainingCapacity, setTrainingCapacity] = useState(5);
     const [timeline, setTimeline] = useState('6months');
     const [budgetRange, setBudgetRange] = useState('50k-100k');
+
+    const budgetRangeLabels: Record<string, string> = {
+        under10k: 'Under $10,000',
+        '10k-50k': '$10,000 - $50,000',
+        '50k-100k': '$50,000 - $100,000',
+        '100k-250k': '$100,000 - $250,000',
+        over250k: 'Over $250,000'
+    };
+
+    const isTemplateActive = (template: Department) =>
+        departments.some(
+            (dept) => dept.department.toLowerCase() === template.department.toLowerCase()
+        );
+
+    const handleTemplateToggle = (template: Department) => {
+        setDepartments((current) => {
+            const exists = current.some(
+                (dept) => dept.department.toLowerCase() === template.department.toLowerCase()
+            );
+
+            if (exists) {
+                return current.filter(
+                    (dept) => dept.department.toLowerCase() !== template.department.toLowerCase()
+                );
+            }
+
+            return [...current, cloneDepartment(template)];
+        });
+    };
+
+    const formatCurrency = (value: number) =>
+        new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 0
+        }).format(Math.max(0, value || 0));
+
+    const getTimelineLabel = (value: string) =>
+        timelineOptions.find((option) => option.value === value)?.label || value;
 
     const predefinedGoals = [
         'Improve student learning outcomes',
@@ -81,23 +179,51 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
     };
 
     const addDepartment = () => {
-        setDepartments([...departments, {
-            department: '',
-            challenges: [],
-            outcomes: [],
-            budget: 0,
-            timeline: '6months'
-        }]);
+        setDepartments((current) => [
+            ...current,
+            {
+                department: '',
+                challenges: [],
+                outcomes: [],
+                budget: 0,
+                timeline
+            }
+        ]);
     };
 
     const removeDepartment = (index: number) => {
-        setDepartments(departments.filter((_, i) => i !== index));
+        setDepartments((current) => current.filter((_, i) => i !== index));
     };
 
     const updateDepartment = (index: number, field: keyof Department, value: any) => {
-        const updated = [...departments];
-        updated[index] = { ...updated[index], [field]: value };
-        setDepartments(updated);
+        setDepartments((current) =>
+            current.map((dept, i) => {
+                if (i !== index) return dept;
+
+                switch (field) {
+                    case 'budget': {
+                        const numericValue =
+                            typeof value === 'number'
+                                ? value
+                                : parseInt(String(value || 0), 10);
+                        return {
+                            ...dept,
+                            budget: Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0
+                        };
+                    }
+                    case 'timeline':
+                        return { ...dept, timeline: value || '6months' };
+                    case 'department':
+                        return { ...dept, department: value };
+                    case 'challenges':
+                        return { ...dept, challenges: Array.isArray(value) ? value : [] };
+                    case 'outcomes':
+                        return { ...dept, outcomes: Array.isArray(value) ? value : [] };
+                    default:
+                        return dept;
+                }
+            })
+        );
     };
 
     const handleSubmit = async () => {
@@ -158,8 +284,8 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
                         >
                             <div
                                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= s
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-200 text-gray-500'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-gray-200 text-gray-500'
                                     }`}
                             >
                                 {step > s ? <CheckCircle2 className="h-6 w-6" /> : s}
@@ -198,15 +324,15 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
                                 key={goal}
                                 onClick={() => toggleGoal(goal)}
                                 className={`p-4 rounded-lg border-2 text-left transition-all ${primaryGoals.includes(goal)
-                                        ? 'border-indigo-600 bg-indigo-50'
-                                        : 'border-gray-200 hover:border-indigo-300'
+                                    ? 'border-indigo-600 bg-indigo-50'
+                                    : 'border-gray-200 hover:border-indigo-300'
                                     }`}
                             >
                                 <div className="flex items-start gap-2">
                                     <div
                                         className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center ${primaryGoals.includes(goal)
-                                                ? 'border-indigo-600 bg-indigo-600'
-                                                : 'border-gray-300'
+                                            ? 'border-indigo-600 bg-indigo-600'
+                                            : 'border-gray-300'
                                             }`}
                                     >
                                         {primaryGoals.includes(goal) && (
@@ -262,6 +388,52 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
                         Add specific departments that will be involved in AI implementation (optional).
                     </p>
 
+                    <div className="mb-6">
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                            Suggested Departments
+                        </Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {recommendedDepartmentTemplates.map((template) => {
+                                const active = isTemplateActive(template);
+                                return (
+                                    <button
+                                        key={template.department}
+                                        type="button"
+                                        onClick={() => handleTemplateToggle(template)}
+                                        className={`rounded-lg border-2 p-4 text-left transition-all ${active
+                                            ? 'border-indigo-600 bg-indigo-50'
+                                            : 'border-dashed border-gray-300 hover:border-indigo-300'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-semibold text-gray-900">{template.department}</span>
+                                            {active ? (
+                                                <CheckCircle2 className="h-5 w-5 text-indigo-600" />
+                                            ) : (
+                                                <Plus className="h-5 w-5 text-gray-400" />
+                                            )}
+                                        </div>
+                                        <p className="mt-2 text-xs text-gray-600">
+                                            {template.outcomes[0]}
+                                        </p>
+                                        <p className="mt-3 text-xs text-gray-500">
+                                            {formatCurrency(template.budget)} • {getTimelineLabel(template.timeline)}
+                                        </p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p className="mt-2 text-xs text-gray-500">
+                            Toggle to include strategic teams like Academic Affairs, IT, and Student Services. You can add additional departments below.
+                        </p>
+                    </div>
+
+                    {departments.length === 0 && (
+                        <div className="mb-4 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-600">
+                            No departments selected yet. Use the buttons above to include recommended teams or add your own below.
+                        </div>
+                    )}
+
                     {departments.map((dept, index) => (
                         <Card key={index} className="p-4 mb-4 bg-gray-50">
                             <div className="flex justify-between items-start mb-4">
@@ -283,6 +455,36 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
                                         onChange={(e) => updateDepartment(index, 'department', e.target.value)}
                                         placeholder="e.g., Mathematics, Administration, IT"
                                     />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <Label>Budget Allocation ($)</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={dept.budget}
+                                            onChange={(e) => updateDepartment(index, 'budget', e.target.value)}
+                                            placeholder="e.g., 60000"
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Estimated investment reserved for this department.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <Label>Timeline Focus</Label>
+                                        <select
+                                            value={dept.timeline}
+                                            onChange={(e) => updateDepartment(index, 'timeline', e.target.value)}
+                                            className="w-full rounded-lg border p-3"
+                                        >
+                                            {timelineOptions.map((option) => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -348,8 +550,8 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
                                         key={style.value}
                                         onClick={() => setImplementationStyle(style.value as any)}
                                         className={`p-4 rounded-lg border-2 text-center ${implementationStyle === style.value
-                                                ? 'border-indigo-600 bg-indigo-50'
-                                                : 'border-gray-200 hover:border-indigo-300'
+                                            ? 'border-indigo-600 bg-indigo-50'
+                                            : 'border-gray-200 hover:border-indigo-300'
                                             }`}
                                     >
                                         <p className="font-bold">{style.label}</p>
@@ -366,10 +568,11 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
                                 onChange={(e) => setTimeline(e.target.value)}
                                 className="w-full p-3 border rounded-lg"
                             >
-                                <option value="3months">3 Months (Fast Track)</option>
-                                <option value="6months">6 Months (Recommended)</option>
-                                <option value="1year">1 Year (Comprehensive)</option>
-                                <option value="18months">18 Months (Gradual)</option>
+                                {timelineOptions.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -440,8 +643,11 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
                             <div>
                                 <h3 className="font-bold mb-2">Departments ({departments.length})</h3>
                                 {departments.map((dept, i) => (
-                                    <div key={i} className="text-sm text-gray-600">
-                                        • {dept.department}
+                                    <div key={i} className="flex items-center justify-between text-sm text-gray-600">
+                                        <span>• {dept.department || 'Unnamed Department'}</span>
+                                        <span className="text-gray-500">
+                                            {formatCurrency(dept.budget)} • {getTimelineLabel(dept.timeline)}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -449,13 +655,14 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <span className="font-medium">Style:</span> {implementationStyle}
+                                <span className="font-medium">Style:</span>{' '}
+                                {implementationStyle.charAt(0).toUpperCase() + implementationStyle.slice(1)}
                             </div>
                             <div>
-                                <span className="font-medium">Timeline:</span> {timeline}
+                                <span className="font-medium">Timeline:</span> {getTimelineLabel(timeline)}
                             </div>
                             <div>
-                                <span className="font-medium">Budget:</span> {budgetRange}
+                                <span className="font-medium">Budget:</span> {budgetRangeLabels[budgetRange] || budgetRange}
                             </div>
                             <div>
                                 <span className="font-medium">Training:</span> {trainingCapacity} hrs/week
@@ -464,7 +671,7 @@ export default function GoalSettingWizard({ assessmentId, onComplete, onCancel }
 
                         <div className="bg-indigo-50 p-4 rounded-lg">
                             <p className="text-sm text-indigo-900">
-                                <strong>Next Step:</strong> We'll generate a comprehensive AI implementation blueprint based on
+                                <strong>Next Step:</strong> We&rsquo;ll generate a comprehensive AI implementation blueprint based on
                                 your goals and your assessment results. This typically takes 2-3 minutes.
                             </p>
                         </div>

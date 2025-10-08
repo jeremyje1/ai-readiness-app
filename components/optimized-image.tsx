@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import Image from 'next/image'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react'
 
 interface OptimizedImageProps {
   src: string
@@ -23,7 +23,7 @@ interface OptimizedImageProps {
 
 export function OptimizedImage({
   src,
-  alt,
+  alt = '',
   width,
   height,
   priority = false,
@@ -68,9 +68,9 @@ export function OptimizedImage({
   const _generateSrcSet = (baseSrc: string) => {
     const formats = ['webp', 'avif']
     const sizes = [400, 800, 1200, 1600]
-    
-    return formats.map(format => 
-      sizes.map(size => 
+
+    return formats.map(format =>
+      sizes.map(size =>
         `${baseSrc}?w=${size}&q=${quality}&f=${format} ${size}w`
       ).join(', ')
     )
@@ -140,6 +140,7 @@ export function OptimizedImage({
     return (
       <Image
         {...imageProps}
+        alt={alt}
         fill
       />
     )
@@ -148,6 +149,7 @@ export function OptimizedImage({
   return (
     <Image
       {...imageProps}
+      alt={alt}
       width={width}
       height={height}
     />
@@ -202,7 +204,7 @@ export function LazyImage({
           {...props}
         />
       )}
-      
+
       {!hasLoaded && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
       )}
@@ -245,14 +247,14 @@ export function ResponsivePicture({
         sizes={sizes}
         type="image/avif"
       />
-      
+
       {/* WebP format */}
       <source
         srcSet={generateSourceSet('webp')}
         sizes={sizes}
         type="image/webp"
       />
-      
+
       {/* Fallback */}
       <img
         src={`${src}?w=${width || 800}&q=${quality}`}
@@ -300,12 +302,12 @@ export function OptimizedBackground({
     // Preload background image
     const img = document.createElement('img')
     img.onload = () => setIsLoaded(true)
-    img.src = supportsWebP 
+    img.src = supportsWebP
       ? `${src}?q=${quality}&f=webp`
       : `${src}?q=${quality}`
   }, [src, quality, supportsWebP])
 
-  const optimizedSrc = supportsWebP 
+  const optimizedSrc = supportsWebP
     ? `${src}?q=${quality}&f=webp`
     : `${src}?q=${quality}`
 
@@ -320,16 +322,16 @@ export function OptimizedBackground({
       }}
     >
       {overlay && (
-        <div 
+        <div
           className="absolute inset-0 bg-black"
           style={{ opacity: overlayOpacity }}
         />
       )}
-      
+
       {!isLoaded && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse" />
       )}
-      
+
       <div className="relative z-10">
         {children}
       </div>
@@ -344,7 +346,7 @@ export function useImagePreloader(images: string[]) {
 
   useEffect(() => {
     let loadedCount = 0
-    
+
     const preloadImage = (src: string) => {
       return new Promise<void>((resolve) => {
         const img = document.createElement('img')

@@ -5,13 +5,13 @@
 
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
 import { useAudience } from '@/lib/audience/AudienceContext';
-import { 
-  AssessmentProgress, 
-  AssessmentAutosave, 
-  generateSessionId, 
-  calculateProgress 
+import { useCallback, useEffect, useState } from 'react';
+import {
+  AssessmentAutosave,
+  AssessmentProgress,
+  calculateProgress,
+  generateSessionId
 } from './autosave';
 
 // Assessment bank types
@@ -79,13 +79,13 @@ interface AssessmentState {
 interface AssessmentHookReturn {
   // State
   state: AssessmentState;
-  
+
   // Assessment data
   currentSectionData: AssessmentSection | null;
   currentQuestionData: AssessmentQuestion | null;
   progressPercent: number;
   totalQuestions: number;
-  
+
   // Actions
   loadAssessment: (sessionId?: string) => Promise<void>;
   answerQuestion: (questionId: string, answer: any) => Promise<void>;
@@ -94,7 +94,7 @@ interface AssessmentHookReturn {
   goToSection: (sectionIndex: number) => Promise<void>;
   completeAssessment: () => Promise<void>;
   resetAssessment: () => void;
-  
+
   // Autosave
   saveStatus: {
     isSaving: boolean;
@@ -109,7 +109,7 @@ interface AssessmentHookReturn {
  */
 export function useAssessment(userId?: string): AssessmentHookReturn {
   const { audience } = useAudience();
-  
+
   const [state, setState] = useState<AssessmentState>({
     bank: null,
     currentSection: 0,
@@ -122,34 +122,34 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
     error: null,
     isComplete: false
   });
-  
+
   const [autosave] = useState(() => new AssessmentAutosave({
     debounceMs: 500,
     retryAttempts: 3,
     enableOptimisticUI: true
   }));
-  
+
   const [saveStatus, setSaveStatus] = useState(autosave.getSaveStatus());
 
   // Load assessment bank for current audience
   const loadAssessmentBank = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
-      
+
       const response = await fetch(`/api/assessment/banks?audience=${audience}&format=full`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to load assessment bank: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
+
       setState(prev => ({
         ...prev,
         bank: data.bank,
         isLoading: false
       }));
-      
+
     } catch (error) {
       console.error('Error loading assessment bank:', error);
       setState(prev => ({
@@ -164,12 +164,12 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
   const loadAssessment = useCallback(async (existingSessionId?: string) => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
-      
+
       const sessionId = existingSessionId || state.sessionId;
-      
+
       // Try to load existing progress
       const progress = await autosave.loadProgress(sessionId, userId);
-      
+
       if (progress) {
         // Resume existing assessment
         setState(prev => ({
@@ -181,13 +181,13 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
           progress,
           isLoading: false
         }));
-        
+
         // Find current section and question indices
         if (state.bank) {
           const sectionIndex = state.bank.sections.findIndex(s => s.id === progress.currentSection);
           const section = state.bank.sections[sectionIndex];
           const questionIndex = section ? section.questions.findIndex(q => q.id === progress.currentQuestion) : 0;
-          
+
           setState(prev => ({
             ...prev,
             currentSection: Math.max(0, sectionIndex),
@@ -202,7 +202,7 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
           isLoading: false
         }));
       }
-      
+
     } catch (error) {
       console.error('Error loading assessment progress:', error);
       setState(prev => ({
@@ -216,15 +216,15 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
   // Save progress
   const saveProgress = useCallback(async () => {
     if (!state.bank) return;
-    
+
     const currentSection = state.bank.sections[state.currentSection];
     const currentQuestion = currentSection?.questions[state.currentQuestion];
-    
+
     if (!currentSection || !currentQuestion) return;
-    
+
     const totalQuestions = state.bank.sections.reduce((sum, s) => sum + s.questions.length, 0);
     const progressPercent = calculateProgress(state.responses, totalQuestions);
-    
+
     const progress: AssessmentProgress = {
       assessmentId: state.bank.bankId,
       audience,
@@ -244,10 +244,10 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
         source: 'assessment-hook'
       }
     };
-    
+
     const result = await autosave.saveProgress(progress);
     setSaveStatus(autosave.getSaveStatus());
-    
+
     return result;
   }, [state, audience, userId, autosave]);
 
@@ -260,19 +260,28 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
         [questionId]: answer
       }
     }));
-    
+
     // Auto-save after answering
     setTimeout(() => saveProgress(), 100);
+  }, [saveProgress]);
+
+  const completeAssessment = useCallback(async () => {
+    setState(prev => ({
+      ...prev,
+      isComplete: true
+    }));
+
+    await saveProgress();
   }, [saveProgress]);
 
   // Navigation functions
   const nextQuestion = useCallback(async () => {
     if (!state.bank) return;
-    
+
     const currentSection = state.bank.sections[state.currentSection];
     const isLastQuestion = state.currentQuestion >= currentSection.questions.length - 1;
     const isLastSection = state.currentSection >= state.bank.sections.length - 1;
-    
+
     if (isLastQuestion && !isLastSection) {
       // Move to next section
       setState(prev => {
@@ -281,7 +290,7 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
         if (!newCompletedSections.includes(currentSectionId)) {
           newCompletedSections.push(currentSectionId);
         }
-        
+
         return {
           ...prev,
           currentSection: prev.currentSection + 1,
@@ -299,9 +308,9 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
       // Complete assessment
       await completeAssessment();
     }
-    
+
     await saveProgress();
-  }, [state.bank, state.currentSection, state.currentQuestion, saveProgress]);
+  }, [state.bank, state.currentSection, state.currentQuestion, saveProgress, completeAssessment]);
 
   const previousQuestion = useCallback(async () => {
     if (state.currentQuestion > 0) {
@@ -317,7 +326,7 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
         currentQuestion: previousSection.questions.length - 1
       }));
     }
-    
+
     await saveProgress();
   }, [state.currentSection, state.currentQuestion, state.bank, saveProgress]);
 
@@ -328,19 +337,10 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
         currentSection: sectionIndex,
         currentQuestion: 0
       }));
-      
+
       await saveProgress();
     }
   }, [state.bank, saveProgress]);
-
-  const completeAssessment = useCallback(async () => {
-    setState(prev => ({
-      ...prev,
-      isComplete: true
-    }));
-    
-    await saveProgress();
-  }, [saveProgress]);
 
   const resetAssessment = useCallback(() => {
     const newSessionId = generateSessionId();
@@ -356,7 +356,7 @@ export function useAssessment(userId?: string): AssessmentHookReturn {
       error: null,
       isComplete: false
     });
-    
+
     // Clear saved progress
     autosave.clearProgress(state.sessionId);
   }, [state.bank, state.sessionId, autosave]);

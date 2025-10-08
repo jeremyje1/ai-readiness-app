@@ -78,7 +78,13 @@ export function SubscriptionGuard({
   }
 
   // Check if subscription is active
+  const normalizedStatus = paymentStatus?.paymentStatus;
+  const hasVerifiedPayment =
+    paymentStatus?.accessGranted === true &&
+    ['active', 'completed', 'premium'].includes(normalizedStatus);
+
   const isSubscribed =
+    hasVerifiedPayment ||
     paymentStatus?.isVerified ||
     profile?.subscription_status === 'active' ||
     profile?.subscription_status === 'trial';
@@ -134,9 +140,9 @@ export function SubscriptionGuard({
           </div>
         </div>
 
-        {/* What's Included */}
+        {/* What&rsquo;s Included */}
         <div className="mb-8">
-          <h3 className="font-semibold mb-4">What's Included:</h3>
+          <h3 className="font-semibold mb-4">What&rsquo;s Included:</h3>
           <div className="grid gap-3">
             {[
               'Full AI Readiness Assessment',

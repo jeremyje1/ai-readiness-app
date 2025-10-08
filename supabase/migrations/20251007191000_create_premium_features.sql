@@ -43,6 +43,17 @@ CREATE TABLE IF NOT EXISTS public.tasks (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
+-- 3a. Task Comments Table
+CREATE TABLE IF NOT EXISTS public.task_comments (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    organization VARCHAR(255) NOT NULL,
+    task_id UUID REFERENCES public.tasks(id) ON DELETE CASCADE,
+    author_id UUID REFERENCES public.team_members(id) ON DELETE SET NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
 -- 4. ROI Metrics Table
 CREATE TABLE IF NOT EXISTS public.roi_metrics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -56,6 +67,23 @@ CREATE TABLE IF NOT EXISTS public.roi_metrics (
     measurement_date DATE DEFAULT CURRENT_DATE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- 4b. ROI Scenarios Table
+CREATE TABLE IF NOT EXISTS public.roi_scenarios (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    organization VARCHAR(255) NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    audience_label TEXT,
+    assumptions JSONB NOT NULL,
+    results JSONB NOT NULL,
+    is_favorite BOOLEAN DEFAULT FALSE,
+    last_used_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    UNIQUE (organization, name)
 );
 
 -- 5. Calendar Events Table
@@ -73,6 +101,33 @@ CREATE TABLE IF NOT EXISTS public.calendar_events (
     created_by UUID REFERENCES public.team_members(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- 6. Team Documents Table
+CREATE TABLE IF NOT EXISTS public.team_documents (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    organization VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    storage_path TEXT NOT NULL,
+    tags TEXT[],
+    created_by UUID REFERENCES public.team_members(id) ON DELETE SET NULL,
+    last_modified_by UUID REFERENCES public.team_members(id) ON DELETE SET NULL,
+    last_modified_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- 7. Collaboration Rooms Table (for shared real-time notes)
+CREATE TABLE IF NOT EXISTS public.collaboration_rooms (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    organization VARCHAR(255) NOT NULL,
+    slug VARCHAR(120) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content TEXT DEFAULT '',
+    last_editor UUID REFERENCES public.team_members(id) ON DELETE SET NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+    UNIQUE (organization, slug)
 );
 
 -- Ensure organization columns exist on legacy tables
@@ -134,15 +189,26 @@ $$;
 CREATE INDEX IF NOT EXISTS idx_team_members_org ON public.team_members(organization);
 CREATE INDEX IF NOT EXISTS idx_implementation_phases_org ON public.implementation_phases(organization);
 CREATE INDEX IF NOT EXISTS idx_tasks_org ON public.tasks(organization);
+CREATE INDEX IF NOT EXISTS idx_task_comments_org ON public.task_comments(organization);
+CREATE INDEX IF NOT EXISTS idx_task_comments_task ON public.task_comments(task_id);
 CREATE INDEX IF NOT EXISTS idx_roi_metrics_org ON public.roi_metrics(organization);
+CREATE INDEX IF NOT EXISTS idx_roi_scenarios_org ON public.roi_scenarios(organization);
+CREATE INDEX IF NOT EXISTS idx_roi_scenarios_user ON public.roi_scenarios(user_id);
+CREATE INDEX IF NOT EXISTS idx_roi_scenarios_favorite ON public.roi_scenarios(is_favorite, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_calendar_events_org ON public.calendar_events(organization);
+CREATE INDEX IF NOT EXISTS idx_team_documents_org ON public.team_documents(organization);
+CREATE INDEX IF NOT EXISTS idx_collaboration_rooms_org ON public.collaboration_rooms(organization);
 
 -- Enable Row Level Security
 ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.implementation_phases ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.task_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.roi_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.roi_scenarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.calendar_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.team_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.collaboration_rooms ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies with EXISTS for clarity
 -- Team Members policies
@@ -161,7 +227,8 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = team_members.organization
-                AND user_payments.payment_status = 'premium'
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
         )
 );$$;
     END IF;
@@ -183,7 +250,8 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = team_members.organization
-                AND user_payments.payment_status = 'premium'
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
                 AND user_payments.role IN ('admin', 'owner')
         )
 );$$;
@@ -207,7 +275,8 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = implementation_phases.organization
-                AND user_payments.payment_status = 'premium'
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
         )
 );$$;
     END IF;
@@ -229,8 +298,9 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = implementation_phases.organization
-                AND user_payments.payment_status = 'premium'
-                AND user_payments.role IN ('admin', 'owner', 'editor')
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+                AND (user_payments.role IS NULL OR user_payments.role IN ('admin', 'owner', 'editor', 'member'))
         )
 );$$;
     END IF;
@@ -253,7 +323,8 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = tasks.organization
-                AND user_payments.payment_status = 'premium'
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
         )
 );$$;
     END IF;
@@ -275,8 +346,57 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = tasks.organization
-                AND user_payments.payment_status = 'premium'
-                AND user_payments.role IN ('admin', 'owner', 'editor')
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+                AND (user_payments.role IS NULL OR user_payments.role IN ('admin', 'owner', 'editor', 'member'))
+        )
+);$$;
+    END IF;
+END
+$policy$;
+
+-- Task Comments policies
+DO $policy$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public'
+            AND tablename = 'task_comments'
+            AND policyname = 'Users can view task comments in their organization'
+    ) THEN
+        EXECUTE $$CREATE POLICY "Users can view task comments in their organization"
+ON public.task_comments FOR SELECT
+USING (
+        EXISTS (
+                SELECT 1 FROM public.user_payments
+                WHERE user_payments.user_id = auth.uid()
+                AND user_payments.organization = task_comments.organization
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+        )
+);$$;
+    END IF;
+END
+$policy$;
+
+DO $policy$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public'
+            AND tablename = 'task_comments'
+            AND policyname = 'Users can manage task comments in their organization'
+    ) THEN
+        EXECUTE $$CREATE POLICY "Users can manage task comments in their organization"
+ON public.task_comments FOR ALL
+USING (
+        EXISTS (
+                SELECT 1 FROM public.user_payments
+                WHERE user_payments.user_id = auth.uid()
+                AND user_payments.organization = task_comments.organization
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+                AND (user_payments.role IS NULL OR user_payments.role IN ('admin', 'owner', 'editor', 'member'))
         )
 );$$;
     END IF;
@@ -299,7 +419,104 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = roi_metrics.organization
-                AND user_payments.payment_status = 'premium'
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+        )
+);$$;
+    END IF;
+END
+$policy$;
+
+-- Team Documents policies
+DO $policy$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public'
+            AND tablename = 'team_documents'
+            AND policyname = 'Users can view team documents in their organization'
+    ) THEN
+        EXECUTE $$CREATE POLICY "Users can view team documents in their organization"
+ON public.team_documents FOR SELECT
+USING (
+        EXISTS (
+                SELECT 1 FROM public.user_payments
+                WHERE user_payments.user_id = auth.uid()
+                AND user_payments.organization = team_documents.organization
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+        )
+);$$;
+    END IF;
+END
+$policy$;
+
+DO $policy$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public'
+            AND tablename = 'team_documents'
+            AND policyname = 'Users can manage team documents in their organization'
+    ) THEN
+        EXECUTE $$CREATE POLICY "Users can manage team documents in their organization"
+ON public.team_documents FOR ALL
+USING (
+        EXISTS (
+                SELECT 1 FROM public.user_payments
+                WHERE user_payments.user_id = auth.uid()
+                AND user_payments.organization = team_documents.organization
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+                AND user_payments.role IN ('admin', 'owner', 'editor')
+        )
+);$$;
+    END IF;
+END
+$policy$;
+
+-- Collaboration Rooms policies
+DO $policy$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public'
+            AND tablename = 'collaboration_rooms'
+            AND policyname = 'Users can view collaboration rooms in their organization'
+    ) THEN
+        EXECUTE $$CREATE POLICY "Users can view collaboration rooms in their organization"
+ON public.collaboration_rooms FOR SELECT
+USING (
+        EXISTS (
+                SELECT 1 FROM public.user_payments
+                WHERE user_payments.user_id = auth.uid()
+                AND user_payments.organization = collaboration_rooms.organization
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+        )
+);$$;
+    END IF;
+END
+$policy$;
+
+DO $policy$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public'
+            AND tablename = 'collaboration_rooms'
+            AND policyname = 'Users can collaborate in their organization'
+    ) THEN
+        EXECUTE $$CREATE POLICY "Users can collaborate in their organization"
+ON public.collaboration_rooms FOR ALL
+USING (
+        EXISTS (
+                SELECT 1 FROM public.user_payments
+                WHERE user_payments.user_id = auth.uid()
+                AND user_payments.organization = collaboration_rooms.organization
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
+                AND user_payments.role IN ('admin', 'owner', 'editor')
         )
 );$$;
     END IF;
@@ -321,9 +538,68 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = roi_metrics.organization
-                AND user_payments.payment_status = 'premium'
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
                 AND user_payments.role IN ('admin', 'owner', 'editor')
         )
+);$$;
+    END IF;
+END
+$policy$;
+
+-- ROI Scenarios policies
+DO $policy$
+BEGIN
+    IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'roi_scenarios'
+        AND policyname = 'Users can view ROI scenarios in their organization'
+    ) THEN
+    EXECUTE $$CREATE POLICY "Users can view ROI scenarios in their organization"
+ON public.roi_scenarios FOR SELECT
+USING (
+    EXISTS (
+        SELECT 1 FROM public.user_payments
+        WHERE user_payments.user_id = auth.uid()
+        AND user_payments.organization = roi_scenarios.organization
+        AND user_payments.payment_status IN ('active', 'completed', 'premium')
+        AND user_payments.access_granted IS TRUE
+    )
+);$$;
+    END IF;
+END
+$policy$;
+
+DO $policy$
+BEGIN
+    IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'roi_scenarios'
+        AND policyname = 'Users can manage ROI scenarios in their organization'
+    ) THEN
+    EXECUTE $$CREATE POLICY "Users can manage ROI scenarios in their organization"
+ON public.roi_scenarios FOR ALL
+USING (
+    EXISTS (
+        SELECT 1 FROM public.user_payments
+        WHERE user_payments.user_id = auth.uid()
+        AND user_payments.organization = roi_scenarios.organization
+        AND user_payments.payment_status IN ('active', 'completed', 'premium')
+        AND user_payments.access_granted IS TRUE
+        AND (user_payments.role IS NULL OR user_payments.role IN ('admin', 'owner', 'editor', 'member'))
+    )
+)
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.user_payments
+        WHERE user_payments.user_id = auth.uid()
+        AND user_payments.organization = roi_scenarios.organization
+        AND user_payments.payment_status IN ('active', 'completed', 'premium')
+        AND user_payments.access_granted IS TRUE
+        AND (user_payments.role IS NULL OR user_payments.role IN ('admin', 'owner', 'editor', 'member'))
+    )
 );$$;
     END IF;
 END
@@ -345,7 +621,8 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = calendar_events.organization
-                AND user_payments.payment_status = 'premium'
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
         )
 );$$;
     END IF;
@@ -367,7 +644,8 @@ USING (
                 SELECT 1 FROM public.user_payments
                 WHERE user_payments.user_id = auth.uid()
                 AND user_payments.organization = calendar_events.organization
-                AND user_payments.payment_status = 'premium'
+                AND user_payments.payment_status IN ('active', 'completed', 'premium')
+                AND user_payments.access_granted IS TRUE
                 AND user_payments.role IN ('admin', 'owner', 'editor')
         )
 );$$;

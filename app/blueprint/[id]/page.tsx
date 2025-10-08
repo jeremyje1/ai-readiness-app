@@ -8,7 +8,7 @@ import { Card } from '@/components/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
 
 interface BlueprintPageProps {
     params: Promise<{
@@ -24,20 +24,7 @@ export default function BlueprintPage({ params }: BlueprintPageProps) {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => {
-        fetchBlueprint();
-
-        // Auto-refresh if generating
-        const interval = setInterval(() => {
-            if (blueprint?.status === 'generating') {
-                fetchBlueprint();
-            }
-        }, 10000); // Check every 10 seconds
-
-        return () => clearInterval(interval);
-    }, [id, blueprint?.status]);
-
-    const fetchBlueprint = async () => {
+    const fetchBlueprint = useCallback(async () => {
         try {
             const response = await fetch(`/api/blueprint/${id}`);
             if (!response.ok) throw new Error('Blueprint not found');
@@ -51,7 +38,20 @@ export default function BlueprintPage({ params }: BlueprintPageProps) {
             setLoading(false);
             setRefreshing(false);
         }
-    };
+    }, [id, router]);
+
+    useEffect(() => {
+        fetchBlueprint();
+
+        // Auto-refresh if generating
+        const interval = setInterval(() => {
+            if (blueprint?.status === 'generating') {
+                fetchBlueprint();
+            }
+        }, 10000); // Check every 10 seconds
+
+        return () => clearInterval(interval);
+    }, [blueprint?.status, fetchBlueprint]);
 
     const handleRefresh = () => {
         setRefreshing(true);
@@ -74,7 +74,7 @@ export default function BlueprintPage({ params }: BlueprintPageProps) {
                 <Card className="p-8 text-center">
                     <h2 className="text-2xl font-bold mb-2">Blueprint Not Found</h2>
                     <p className="text-gray-600 mb-6">
-                        The blueprint you're looking for doesn't exist or you don't have access to it.
+                        The blueprint you&rsquo;re looking for doesn&rsquo;t exist or you don&rsquo;t have access to it.
                     </p>
                     <Button onClick={() => router.push('/blueprint')}>
                         View All Blueprints
@@ -104,7 +104,7 @@ export default function BlueprintPage({ params }: BlueprintPageProps) {
 
                     <h2 className="text-2xl font-bold mb-2">Generating Your Blueprint</h2>
                     <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                        We're creating your comprehensive AI implementation blueprint. This typically takes 2-3 minutes.
+                        We&rsquo;re creating your comprehensive AI implementation blueprint. This typically takes 2-3 minutes.
                     </p>
 
                     <div className="flex flex-col items-center gap-4">

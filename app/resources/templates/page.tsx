@@ -1,19 +1,18 @@
 'use client';
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Download, 
-  Calendar, 
-  FileText, 
-  Users, 
-  Shield, 
-  Zap,
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
   BookOpen,
+  Calendar,
+  Download,
+  FileText,
+  MessageSquare,
+  Shield,
+  Users,
   Video,
-  MessageSquare
+  Zap
 } from 'lucide-react';
 
 interface Template {
@@ -114,10 +113,10 @@ export default function ResourcesTemplatesPage() {
     toast.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full`;
     toast.textContent = message;
     document.body.appendChild(toast);
-    
+
     // Slide in
     setTimeout(() => toast.classList.remove('translate-x-full'), 100);
-    
+
     // Auto-remove after 4 seconds
     setTimeout(() => {
       toast.classList.add('translate-x-full');
@@ -137,14 +136,14 @@ export default function ResourcesTemplatesPage() {
           template_title: template.title,
           template_type: template.type
         })
-      }).catch(() => {}); // Silent fail for analytics
-    } catch (e) {}
+      }).catch(() => { }); // Silent fail for analytics
+    } catch (e) { }
 
     // Handle different types of resources
     if (template.type === 'webinar') {
       // For webinars, provide immediate access plus email backup
       const webinarContent = `🎥 ${template.title}\n\n✅ Instant Access Available!\n\n� Immediate Options:\n• Click "Open Webinar" below for instant access\n• Recording available for 90 days\n• Download slides and resources\n\n📧 Backup Email:\n• We'll also email you the access link\n• Sent to your registered email within 5 minutes\n• Includes Q&A transcript and additional resources`;
-      
+
       if (confirm(webinarContent + '\n\nOpen webinar now?')) {
         // Show toast notification for email backup
         showToastNotification('📧 Webinar link emailed as backup!', 'success');
@@ -157,17 +156,17 @@ export default function ResourcesTemplatesPage() {
     // For templates and documents - provide instant download + email backup
     if (template.downloadUrl.startsWith('/resources/downloads/')) {
       const downloadContent = `📄 ${template.title}\n\n✅ Ready for Download!\n\n⚡ Instant Download:\n• Click "Download Now" for immediate access\n• Includes implementation guide and best practices\n• Compatible with Microsoft Office and Google Workspace\n\n📧 Email Backup:\n• Link also sent to your registered email\n• Arrives within 5 minutes for future access`;
-      
+
       if (confirm(downloadContent + '\n\nDownload now?')) {
         // Simulate instant download
         const link = document.createElement('a');
         link.href = '#'; // In real implementation, this would be the actual file URL
         link.download = `${template.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
         link.click();
-        
+
         // Show toast notification for email backup
         showToastNotification('📧 Download link also emailed as backup!', 'success');
-        
+
         // Show download success notification
         setTimeout(() => {
           showToastNotification(`✅ ${template.title} downloaded successfully!`, 'success');
@@ -202,7 +201,7 @@ export default function ResourcesTemplatesPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Zap className="h-6 w-6" />
-              This Month's New Resources
+              This Month’s New Resources
             </CardTitle>
             <CardDescription className="text-blue-100">
               Fresh content added to your subscription
@@ -226,10 +225,10 @@ export default function ResourcesTemplatesPage() {
                         New
                       </Badge>
                     </div>
-                    <Button 
+                    <Button
                       onClick={() => handleDownload(template)}
-                      variant="secondary" 
-                      size="sm" 
+                      variant="secondary"
+                      size="sm"
                       className="mt-3 bg-white text-blue-600 hover:bg-blue-50"
                     >
                       <Download className="h-4 w-4 mr-2" />
@@ -246,7 +245,7 @@ export default function ResourcesTemplatesPage() {
         {Object.entries(categorizedTemplates).map(([category, categoryTemplates]) => {
           const CategoryIcon = getCategoryIcon(category as Template['category']);
           const categoryTitle = category.charAt(0).toUpperCase() + category.slice(1);
-          
+
           return (
             <Card key={category} className="mb-6">
               <CardHeader>
@@ -280,15 +279,15 @@ export default function ResourcesTemplatesPage() {
                             </Badge>
                           )}
                         </div>
-                        
+
                         <h4 className="font-semibold text-gray-900 mb-2">{template.title}</h4>
                         <p className="text-sm text-gray-600 mb-3">{template.description}</p>
-                        
+
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-500">
                             {new Date(template.date).toLocaleDateString()}
                           </span>
-                          <Button 
+                          <Button
                             onClick={() => handleDownload(template)}
                             size="sm"
                             variant="outline"
@@ -329,7 +328,7 @@ export default function ResourcesTemplatesPage() {
                 </ul>
               </div>
               <div className="space-y-2">
-                <Button 
+                <Button
                   className="w-full bg-purple-600 hover:bg-purple-700"
                   onClick={() => {
                     // Track community access
@@ -345,8 +344,8 @@ export default function ResourcesTemplatesPage() {
                 >
                   Join Slack Community
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full"
                   onClick={() => {
                     // Track guidelines view

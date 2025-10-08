@@ -162,6 +162,11 @@ describe.skip('Real Customer Data Flow', () => {
         expect(data.metrics.recommendations).toHaveLength(2);
         expect(data.metrics.recommendations[0].title).toBe('Develop District-Wide AI Policy');
         expect(data.metrics.recommendations[0].priority).toBe('high');
+
+        // Quick wins should surface actionable tasks from recommendations
+        expect(Array.isArray(data.metrics.quickWins)).toBe(true);
+        expect(data.metrics.quickWins.length).toBeGreaterThan(0);
+        expect(data.metrics.quickWins[0].title).toContain('AI Policy');
     });
 
     it('should calculate real benchmarking against peer institutions', async () => {

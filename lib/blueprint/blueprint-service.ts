@@ -2,14 +2,17 @@ import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
 import { Blueprint, BlueprintGoals, ImplementationPhase, SuccessMetric } from '@/types/blueprint';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BlueprintGenerator } from './blueprint-generator';
+import { PolicyRecommender } from './policy-recommender';
 
 export class BlueprintService {
     private supabase: SupabaseClient;
     private generator: BlueprintGenerator;
+    private policyRecommender: PolicyRecommender;
 
     constructor(supabase: SupabaseClient) {
         this.supabase = supabase;
         this.generator = new BlueprintGenerator();
+        this.policyRecommender = new PolicyRecommender();
     }
 
     async generateBlueprint(
@@ -20,6 +23,10 @@ export class BlueprintService {
     ): Promise<void> {
         try {
             console.log('Starting blueprint generation for:', blueprintId);
+
+            // Clear existing phases and tasks if regenerating an existing blueprint
+            await this.supabase.from('blueprint_tasks').delete().eq('blueprint_id', blueprintId);
+            await this.supabase.from('blueprint_phases').delete().eq('blueprint_id', blueprintId);
 
             // Step 1: Calculate readiness scores
             // Handle both old assessment format and new streamlined format
@@ -118,10 +125,18 @@ export class BlueprintService {
                 departmentPlans
             );
 
-            // Step 12: Insert phases and tasks into database
+            // Step 12: Recommend policy templates based on identified gaps
+            const recommendedPolicies = this.policyRecommender.buildRecommendations({
+                goals,
+                assessment,
+                readinessScores,
+                quickWins
+            });
+
+            // Step 13: Insert phases and tasks into database
             await this.insertPhasesAndTasks(blueprintId, phases);
 
-            // Step 13: Final update with all content
+            // Step 14: Final update with all content
             await this.updateBlueprint(blueprintId, {
                 implementation_phases: phases,
                 department_plans: departmentPlans,
@@ -133,10 +148,11 @@ export class BlueprintService {
                 total_budget: totalBudget,
                 quick_wins: quickWins,
                 recommended_tools: recommendedTools,
+                recommended_policies: recommendedPolicies,
                 status: 'complete'
             });
 
-            // Step 14: Generate PDFs (async, non-blocking)
+            // Step 15: Generate PDFs (async, non-blocking)
             this.generatePDFs(blueprintId, userId).catch(console.error);
 
             console.log('Blueprint generation completed:', blueprintId);
@@ -144,6 +160,124 @@ export class BlueprintService {
             console.error('Error generating blueprint:', error);
             throw error;
         }
+    }
+
+    async regeneratePhase(
+        blueprintId: string,
+        phaseNumber: number,
+        goals: BlueprintGoals,
+        assessment: any,
+        userId: string
+    ): Promise<void> {
+        // Verify ownership and fetch existing phases
+        const { data: blueprintRecord, error: blueprintError } = await this.supabase
+            .from('blueprints')
+            .select('user_id, implementation_phases')
+            .eq('id', blueprintId)
+            .single();
+
+        if (blueprintError || !blueprintRecord) {
+            throw new Error('Blueprint not found');
+        }
+
+        if (blueprintRecord.user_id !== userId) {
+            throw new Error('Unauthorized to regenerate this blueprint');
+        }
+
+        const responses = assessment.assessment_responses || assessment.responses || [];
+        const aiMetrics = await calculateAIReadinessMetrics(responses);
+        const overallScore = aiMetrics.airix.overallScore / 100;
+        const maturityLevel = this.determineMaturityLevel(overallScore);
+
+        const regeneratedPhases = await this.generator.generateImplementationPhases(
+            goals,
+            aiMetrics,
+            maturityLevel
+        );
+
+        const regeneratedPhase = regeneratedPhases.find((phase) => phase.phase === phaseNumber);
+
+        if (!regeneratedPhase) {
+            throw new Error('Requested phase could not be regenerated');
+        }
+
+        const { data: existingPhase, error: existingPhaseError } = await this.supabase
+            .from('blueprint_phases')
+            .select('id')
+            .eq('blueprint_id', blueprintId)
+            .eq('phase_number', phaseNumber)
+            .single();
+
+        if (existingPhaseError || !existingPhase) {
+            throw new Error('Phase not found for regeneration');
+        }
+
+        const { error: phaseUpdateError } = await this.supabase
+            .from('blueprint_phases')
+            .update({
+                title: regeneratedPhase.title,
+                duration: regeneratedPhase.duration,
+                objectives: regeneratedPhase.objectives,
+                deliverables: regeneratedPhase.deliverables,
+                budget: regeneratedPhase.budget,
+                required_resources: regeneratedPhase.required_resources,
+                success_criteria: regeneratedPhase.success_criteria,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', existingPhase.id);
+
+        if (phaseUpdateError) {
+            console.error('Error updating phase during regeneration:', phaseUpdateError);
+            throw phaseUpdateError;
+        }
+
+        const { error: deleteTasksError } = await this.supabase
+            .from('blueprint_tasks')
+            .delete()
+            .eq('phase_id', existingPhase.id);
+
+        if (deleteTasksError) {
+            console.error('Error clearing phase tasks during regeneration:', deleteTasksError);
+            throw deleteTasksError;
+        }
+
+        if (regeneratedPhase.tasks && regeneratedPhase.tasks.length > 0) {
+            const tasksToInsert = regeneratedPhase.tasks.map((task) => ({
+                blueprint_id: blueprintId,
+                phase_id: existingPhase.id,
+                task_title: task.title,
+                task_description: task.description,
+                task_type: task.type,
+                priority: task.priority,
+                department: task.department || null,
+                estimated_hours: task.estimated_hours,
+                dependencies: task.dependencies || [],
+                status: 'pending',
+                completion_percentage: 0
+            }));
+
+            const { error: insertTasksError } = await this.supabase
+                .from('blueprint_tasks')
+                .insert(tasksToInsert);
+
+            if (insertTasksError) {
+                console.error('Error inserting regenerated tasks:', insertTasksError);
+                throw insertTasksError;
+            }
+        }
+
+        const updatedImplementationPhases: ImplementationPhase[] = Array.isArray(blueprintRecord.implementation_phases)
+            ? (blueprintRecord.implementation_phases as ImplementationPhase[]).map((phase) =>
+                phase.phase === phaseNumber
+                    ? { ...phase, ...regeneratedPhase }
+                    : phase
+            )
+            : [regeneratedPhase];
+
+        await this.updateBlueprint(blueprintId, {
+            implementation_phases: updatedImplementationPhases,
+            status: 'updated'
+        });
     }
 
     private determineMaturityLevel(overallScore: number): string {

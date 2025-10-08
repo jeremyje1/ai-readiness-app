@@ -41,26 +41,37 @@ export default function BlueprintListPage() {
     const [statusFilter, setStatusFilter] = useState<string>('all');
 
     useEffect(() => {
-        fetchBlueprints();
+        let isMounted = true;
+
+        const fetchBlueprints = async () => {
+            try {
+                setLoading(true);
+                const url = statusFilter === 'all'
+                    ? '/api/blueprint?limit=50'
+                    : `/api/blueprint?status=${statusFilter}&limit=50`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch blueprints');
+
+                const data = await response.json();
+                if (isMounted) {
+                    setBlueprints(data.blueprints || []);
+                }
+            } catch (error) {
+                console.error('Error fetching blueprints:', error);
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void fetchBlueprints();
+
+        return () => {
+            isMounted = false;
+        };
     }, [statusFilter]);
-
-    const fetchBlueprints = async () => {
-        try {
-            const url = statusFilter === 'all'
-                ? '/api/blueprint?limit=50'
-                : `/api/blueprint?status=${statusFilter}&limit=50`;
-
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Failed to fetch blueprints');
-
-            const data = await response.json();
-            setBlueprints(data.blueprints || []);
-        } catch (error) {
-            console.error('Error fetching blueprints:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const filteredBlueprints = blueprints.filter(blueprint =>
         blueprint.title.toLowerCase().includes(searchTerm.toLowerCase())

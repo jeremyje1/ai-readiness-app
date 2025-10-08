@@ -9,7 +9,7 @@ import {
     DollarSign,
     Target
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface BlueprintProgressProps {
     blueprintId: string;
@@ -38,14 +38,7 @@ export default function BlueprintProgressTracker({ blueprintId }: BlueprintProgr
     const [progress, setProgress] = useState<ProgressData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchProgress();
-        // Refresh every 30 seconds
-        const interval = setInterval(fetchProgress, 30000);
-        return () => clearInterval(interval);
-    }, [blueprintId]);
-
-    const fetchProgress = async () => {
+    const fetchProgress = useCallback(async () => {
         try {
             const response = await fetch(`/api/blueprint/${blueprintId}/progress`);
             if (!response.ok) throw new Error('Failed to fetch progress');
@@ -56,7 +49,14 @@ export default function BlueprintProgressTracker({ blueprintId }: BlueprintProgr
         } finally {
             setLoading(false);
         }
-    };
+    }, [blueprintId]);
+
+    useEffect(() => {
+        fetchProgress();
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchProgress, 30000);
+        return () => clearInterval(interval);
+    }, [fetchProgress]);
 
     if (loading) {
         return (
@@ -174,12 +174,12 @@ export default function BlueprintProgressTracker({ blueprintId }: BlueprintProgr
                 <Card className="p-4">
                     <div className="flex items-start gap-3">
                         <div className={`p-2 rounded-lg ${progress.active_risks > 0 || progress.open_issues > 0
-                                ? 'bg-red-100'
-                                : 'bg-gray-100'
+                            ? 'bg-red-100'
+                            : 'bg-gray-100'
                             }`}>
                             <AlertCircle className={`h-5 w-5 ${progress.active_risks > 0 || progress.open_issues > 0
-                                    ? 'text-red-600'
-                                    : 'text-gray-600'
+                                ? 'text-red-600'
+                                : 'text-gray-600'
                                 }`} />
                         </div>
                         <div className="flex-1">

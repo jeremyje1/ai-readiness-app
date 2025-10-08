@@ -65,7 +65,7 @@ export default function InstitutionSetupModal({ isOpen, onComplete }: Institutio
                         Welcome! Tell us about your institution
                     </CardTitle>
                     <p className="text-muted-foreground">
-                        We'll personalize your AI readiness experience based on your institution's context
+                        We’ll personalize your AI readiness experience based on your institution’s context
                     </p>
                 </CardHeader>
                 <CardContent>
@@ -93,8 +93,8 @@ export default function InstitutionSetupModal({ isOpen, onComplete }: Institutio
                                             type="button"
                                             onClick={() => setFormData(prev => ({ ...prev, org_type: type.value }))}
                                             className={`p-4 border rounded-lg text-left transition-colors ${formData.org_type === type.value
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <Icon className="h-6 w-6 mb-2 text-blue-600" />

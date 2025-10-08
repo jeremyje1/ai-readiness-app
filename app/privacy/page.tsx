@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li>Provide personalized AI readiness assessments and recommendations</li>
           <li>Generate custom reports, dashboards, and strategic guidance</li>
-          <li>Track your institution's progress over time</li>
+          <li>Track your institution&rsquo;s progress over time</li>
           <li>Deliver tier-appropriate content and features</li>
         </ul>
 
@@ -125,8 +125,8 @@ export default function PrivacyPolicyPage() {
         </p>
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li><strong>FERPA (Family Educational Rights and Privacy Act)</strong> - Student privacy protection</li>
-          <li><strong>COPPA (Children's Online Privacy Protection Act)</strong> - Protection for users under 13</li>
-          <li><strong>State Privacy Laws</strong> - Including California's CCPA and other regional requirements</li>
+          <li><strong>COPPA (Children&rsquo;s Online Privacy Protection Act)</strong> - Protection for users under 13</li>
+          <li><strong>State Privacy Laws</strong> - Including California&rsquo;s CCPA and other regional requirements</li>
           <li><strong>International Standards</strong> - GDPR compliance for global institutions</li>
         </ul>
 
@@ -151,7 +151,7 @@ export default function PrivacyPolicyPage() {
           <li><strong>Legal Requirements:</strong> Some data may be retained longer for compliance purposes</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Children's Privacy</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">Children&rsquo;s Privacy</h2>
         <p className="text-gray-700 mb-4">
           Our platform is designed for institutional use by adults. We do not knowingly collect personal information
           from children under 13 without proper consent and oversight from educational institutions.

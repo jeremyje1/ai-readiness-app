@@ -139,7 +139,7 @@ export default function NewBlueprintPage() {
                     <div>
                         <h1 className="text-3xl font-bold">Create AI Implementation Blueprint</h1>
                         <p className="text-gray-600 mt-1">
-                            Let's define your goals and preferences for AI implementation
+                            Let&rsquo;s define your goals and preferences for AI implementation
                         </p>
                     </div>
                 </div>
@@ -152,7 +152,7 @@ export default function NewBlueprintPage() {
                         <Sparkles className="h-6 w-6 text-indigo-600" />
                     </div>
                     <div>
-                        <h3 className="font-bold mb-2">What You'll Get</h3>
+                        <h3 className="font-bold mb-2">What You&rsquo;ll Get</h3>
                         <ul className="space-y-1 text-sm text-gray-700">
                             <li>• Comprehensive AI implementation roadmap tailored to your institution</li>
                             <li>• Phase-by-phase action plans with specific tasks and timelines</li>

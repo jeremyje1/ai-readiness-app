@@ -15,7 +15,7 @@ import {
   Upload,
   X
 } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface UploadedDocument {
   id: string;
@@ -83,16 +83,13 @@ export default function AIReadinessDocumentUploader({
     }
   }, [documents, isAnalyzing, hasNotifiedParent, onDocumentsAnalyzed]);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      setIsDragOver(false);
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
 
-      const files = Array.from(e.dataTransfer.files);
-      handleFiles(files);
-    },
-    []
-  );
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  };
 
   const handleFiles = async (files: File[]) => {
     if (documents.length + files.length > maxFiles) {

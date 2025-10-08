@@ -8,25 +8,25 @@
 
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import { EnhancedFileUpload } from '@/components/enhanced-file-upload';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { EnhancedFileUpload } from '@/components/enhanced-file-upload';
-import { 
-  Upload, 
-  FileText, 
-  CheckCircle2, 
-  Clock, 
+import {
   AlertTriangle,
+  BarChart3,
+  CheckCircle2,
+  Clock,
   Download,
   Eye,
-  Users,
+  FileText,
   Shield,
   Target,
-  Zap,
-  BarChart3
+  Upload,
+  Users,
+  Zap
 } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
 interface DocumentPolicyEngineProps {
   institutionType: 'K12' | 'HigherEd';
@@ -54,7 +54,7 @@ const ALGORITHM_CARDS = [
   },
   {
     id: 'airs',
-    name: 'AIRS™', 
+    name: 'AIRS™',
     title: 'Risk Assessment Engine',
     description: 'Analyzes vendor contracts and system documentation',
     output: 'Risk matrices, mitigation strategies',
@@ -82,7 +82,7 @@ const ALGORITHM_CARDS = [
   {
     id: 'aips',
     name: 'AIPS™',
-    title: 'Priority Planning Engine', 
+    title: 'Priority Planning Engine',
     description: 'Processes budget and infrastructure assessments',
     output: 'Prioritized roadmaps, resource allocation',
     icon: Zap,
@@ -178,10 +178,10 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
 
   const handleGeneratePolicies = async () => {
     if (uploadedFiles.length === 0) return;
-    
+
     setProcessing(true);
     setStep('processing');
-    
+
     try {
       // Create FormData for file upload
       const formData = new FormData();
@@ -202,7 +202,7 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
       }
 
       const uploadResult = await uploadResponse.json();
-      
+
       if (!uploadResult.success) {
         throw new Error(uploadResult.error || 'Upload failed');
       }
@@ -242,7 +242,7 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
       setGeneratedPolicies(generatedArtifacts);
       setStep('results');
       onPolicyGenerated?.(generatedArtifacts);
-      
+
     } catch (error) {
       console.error('Processing error:', error);
       // Fall back to sample data for demo purposes
@@ -256,13 +256,13 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
   };
 
   const getFrameworkText = () => {
-    return institutionType === 'K12' 
+    return institutionType === 'K12'
       ? 'COPPA/FERPA and State Education AI Guidance'
       : 'NIST AI RMF and U.S. Dept. of Education AI Guidance';
   };
 
   const getInstitutionText = () => {
-    return institutionType === 'K12' 
+    return institutionType === 'K12'
       ? 'School District'
       : 'Higher Education Institution';
   };
@@ -275,8 +275,8 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
           Document-In, Policy-Out Engine
         </h2>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Upload your current policies, vendor contracts, and governance documents. 
-          Our 6 patent-pending algorithms will analyze them against {getFrameworkText()} 
+          Upload your current policies, vendor contracts, and governance documents.
+          Our 6 patent-pending algorithms will analyze them against {getFrameworkText()}
           and generate board-ready policies, compliance scorecards, and implementation plans.
         </p>
       </div>
@@ -311,27 +311,24 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
       {/* Step Indicator */}
       <div className="flex items-center justify-center space-x-8">
         <div className={`flex items-center space-x-2 ${step === 'upload' ? 'text-blue-600' : 'text-gray-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            step === 'upload' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-          }`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'upload' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+            }`}>
             1
           </div>
           <span className="font-medium">Upload Documents</span>
         </div>
         <div className="w-12 h-0.5 bg-gray-300" />
         <div className={`flex items-center space-x-2 ${step === 'processing' ? 'text-blue-600' : 'text-gray-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            step === 'processing' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-          }`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'processing' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+            }`}>
             2
           </div>
           <span className="font-medium">AI Analysis</span>
         </div>
         <div className="w-12 h-0.5 bg-gray-300" />
         <div className={`flex items-center space-x-2 ${step === 'results' ? 'text-blue-600' : 'text-gray-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            step === 'results' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-          }`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'results' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+            }`}>
             3
           </div>
           <span className="font-medium">Get Policies</span>
@@ -347,7 +344,7 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
               Upload Your {getInstitutionText()} Documents
             </h3>
             <p className="text-gray-600">
-              Upload current policies, vendor contracts, handbooks, and governance documents 
+              Upload current policies, vendor contracts, handbooks, and governance documents
               to generate {getFrameworkText()}-aligned policies.
             </p>
           </div>
@@ -376,8 +373,8 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
                   </div>
                 ))}
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={handleGeneratePolicies}
                 className="w-full"
                 size="lg"
@@ -438,7 +435,7 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
               Your Policies Are Ready!
             </h3>
             <p className="text-gray-600">
-              We've generated {generatedPolicies.length} deliverables aligned to {getFrameworkText()}.
+              We’ve generated {generatedPolicies.length} deliverables aligned to {getFrameworkText()}.
             </p>
           </div>
 
@@ -449,7 +446,7 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-2">
                       <h4 className="font-semibold text-gray-900">{policy.title}</h4>
-                      <Badge 
+                      <Badge
                         variant={policy.type === 'policy' ? 'default' : 'secondary'}
                         className="capitalize"
                       >
@@ -482,7 +479,7 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
           </div>
 
           <div className="text-center">
-            <Button 
+            <Button
               onClick={() => {
                 setStep('upload');
                 setUploadedFiles([]);

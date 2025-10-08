@@ -5,29 +5,29 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAudience } from '@/lib/audience/AudienceContext';
-import { useAudienceAnalytics } from '@/lib/analytics/audienceAnalytics';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAudienceAnalytics } from '@/lib/analytics/audienceAnalytics';
+import { useAudience } from '@/lib/audience/AudienceContext';
 import {
-  Calendar,
-  Clock,
-  Users,
-  Video,
-  GraduationCap,
-  Building,
-  CheckCircle,
-  Star,
-  ArrowRight,
-  ExternalLink,
   AlertTriangle,
+  ArrowRight,
+  Building,
+  Calendar,
+  CheckCircle,
+  Clock,
+  ExternalLink,
+  GraduationCap,
   MessageSquare,
-  Phone
+  Phone,
+  Star,
+  Users,
+  Video
 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface ExpertSession {
   id: string;
@@ -55,14 +55,14 @@ interface ExpertSessionsProps {
   onBookingComplete?: (sessionId: string) => void;
 }
 
-export function ExpertSessions({ 
-  userId, 
-  showBookingModal = false, 
-  onBookingComplete 
+export function ExpertSessions({
+  userId,
+  showBookingModal = false,
+  onBookingComplete
 }: ExpertSessionsProps) {
   const { audience, config } = useAudience();
   const analytics = useAudienceAnalytics(audience, userId);
-  
+
   const [sessions, setSessions] = useState<ExpertSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,32 +71,13 @@ export function ExpertSessions({
   const [activeTab, setActiveTab] = useState('all');
 
   // Load expert sessions
-  useEffect(() => {
-    fetchExpertSessions();
-  }, [audience]);
-
-  // Load Calendly widget script
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !calendlyLoaded) {
-      const script = document.createElement('script');
-      script.src = 'https://assets.calendly.com/assets/external/widget.js';
-      script.async = true;
-      script.onload = () => setCalendlyLoaded(true);
-      document.head.appendChild(script);
-      
-      return () => {
-        document.head.removeChild(script);
-      };
-    }
-  }, [calendlyLoaded]);
-
-  const fetchExpertSessions = async () => {
+  const fetchExpertSessions = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const response = await fetch(`/api/expert-sessions?audience=${audience}`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch expert sessions: ${response.statusText}`);
       }
@@ -116,11 +97,30 @@ export function ExpertSessions({
     } finally {
       setLoading(false);
     }
-  };
+  }, [analytics, audience]);
+
+  useEffect(() => {
+    fetchExpertSessions();
+  }, [fetchExpertSessions]);
+
+  // Load Calendly widget script
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !calendlyLoaded) {
+      const script = document.createElement('script');
+      script.src = 'https://assets.calendly.com/assets/external/widget.js';
+      script.async = true;
+      script.onload = () => setCalendlyLoaded(true);
+      document.head.appendChild(script);
+
+      return () => {
+        document.head.removeChild(script);
+      };
+    }
+  }, [calendlyLoaded]);
 
   const handleBookSession = (session: ExpertSession) => {
     setSelectedSession(session);
-    
+
     // Track booking attempt
     analytics.trackFeature('expert_sessions', 'accessed', {
       session_id: session.id,
@@ -156,7 +156,7 @@ export function ExpertSessions({
       // Fallback to direct link
       const bookingUrl = session.calendlyUrl + `?utm_source=ai-blueprint&utm_medium=expert-sessions&utm_campaign=${audience}`;
       window.open(bookingUrl, '_blank');
-      
+
       analytics.trackConversion('expert_session_booking_started', session.price, {
         session_id: session.id,
         booking_method: 'direct_link'
@@ -283,7 +283,7 @@ export function ExpertSessions({
                   No sessions available
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  We're working on adding more expert sessions for {config.name}.
+                  We&rsquo;re working on adding more expert sessions for {config.name}.
                 </p>
                 <Button variant="outline" onClick={() => window.open('/contact', '_blank')}>
                   Request Custom Session
@@ -309,7 +309,7 @@ export function ExpertSessions({
                       {session.description}
                     </CardDescription>
                   </CardHeader>
-                  
+
                   <CardContent className="flex-1 flex flex-col space-y-4">
                     {/* Expert Info */}
                     <div className="bg-gray-50 rounded-lg p-3">
@@ -330,10 +330,10 @@ export function ExpertSessions({
                         <Clock className="w-4 h-4 text-gray-400" />
                         <span>{session.duration} minutes</span>
                       </div>
-                      
+
                       {session.audience !== 'both' && (
                         <div className="flex items-center space-x-2">
-                          {session.audience === 'k12' ? 
+                          {session.audience === 'k12' ?
                             <GraduationCap className="w-4 h-4 text-gray-400" /> :
                             <Building className="w-4 h-4 text-gray-400" />
                           }
@@ -391,7 +391,7 @@ export function ExpertSessions({
                     {/* Booking Button */}
                     <div className="mt-auto pt-4">
                       <div className="space-y-2">
-                        <Button 
+                        <Button
                           onClick={() => handleBookSession(session)}
                           disabled={session.availability === 'waitlist'}
                           className="w-full"
@@ -406,10 +406,10 @@ export function ExpertSessions({
                           )}
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
-                        
+
                         {session.fallbackUrl && (
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => handleFallbackContact(session)}
                             className="w-full"
@@ -440,7 +440,7 @@ export function ExpertSessions({
               Get personalized guidance from AI education specialists who understand {audience === 'k12' ? 'K-12' : 'higher education'} challenges
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <Users className="w-8 h-8 text-blue-600 mx-auto mb-3" />
@@ -449,7 +449,7 @@ export function ExpertSessions({
                 Experts specialized in {audience === 'k12' ? 'K-12 district' : 'higher education'} AI implementation
               </p>
             </div>
-            
+
             <div className="text-center">
               <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-3" />
               <h4 className="font-medium text-gray-900 mb-2">Actionable Insights</h4>
@@ -457,7 +457,7 @@ export function ExpertSessions({
                 Walk away with specific action items and implementation strategies
               </p>
             </div>
-            
+
             <div className="text-center">
               <Star className="w-8 h-8 text-yellow-600 mx-auto mb-3" />
               <h4 className="font-medium text-gray-900 mb-2">Proven Results</h4>

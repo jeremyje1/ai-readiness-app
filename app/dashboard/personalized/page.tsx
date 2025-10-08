@@ -1,23 +1,33 @@
 'use client';
 
 import BlueprintDashboardWidget from '@/components/blueprint/BlueprintDashboardWidget';
+import GoalSettingWizard from '@/components/blueprint/GoalSettingWizard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
+import { buildNistAlignment, buildRiskHotspots, type NistAlignmentInsight, type RiskHotspot } from '@/lib/analysis/gap-insights';
 import { createClient } from '@/lib/supabase/client';
 import {
   ArrowRight,
   Calendar,
   CheckCircle2,
+  DollarSign,
   Download,
   FileText,
+  Loader2,
+  Scale,
+  ShieldAlert,
+  Sparkles,
   Target,
   TrendingUp,
+  Users,
   Zap
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface GapAnalysis {
   id: string;
@@ -25,25 +35,101 @@ interface GapAnalysis {
   overall_score: number;
   maturity_level: string;
   govern_score: number;
-  govern_gaps: string[];
-  govern_strengths: string[];
-  govern_recommendations: string[];
+  govern_gaps: string[] | null;
+  govern_strengths: string[] | null;
+  govern_recommendations: string[] | null;
   map_score: number;
-  map_gaps: string[];
-  map_strengths: string[];
-  map_recommendations: string[];
+  map_gaps: string[] | null;
+  map_strengths: string[] | null;
+  map_recommendations: string[] | null;
   measure_score: number;
-  measure_gaps: string[];
-  measure_strengths: string[];
-  measure_recommendations: string[];
+  measure_gaps: string[] | null;
+  measure_strengths: string[] | null;
+  measure_recommendations: string[] | null;
   manage_score: number;
-  manage_gaps: string[];
-  manage_strengths: string[];
-  manage_recommendations: string[];
-  priority_actions: string[];
-  quick_wins: string[];
+  manage_gaps: string[] | null;
+  manage_strengths: string[] | null;
+  manage_recommendations: string[] | null;
+  priority_actions: string[] | null;
+  quick_wins: string[] | null;
+  risk_hotspots: RiskHotspot[] | null;
+  nist_alignment: NistAlignmentInsight[] | null;
   analysis_date: string;
 }
+
+const buildDomainInsightsFromGap = (data: Partial<GapAnalysis>) => ([
+  {
+    key: 'govern' as const,
+    label: 'Govern',
+    score: data.govern_score ?? 0,
+    recommendation: data.govern_recommendations?.[0] ?? null
+  },
+  {
+    key: 'map' as const,
+    label: 'Map',
+    score: data.map_score ?? 0,
+    recommendation: data.map_recommendations?.[0] ?? null
+  },
+  {
+    key: 'measure' as const,
+    label: 'Measure',
+    score: data.measure_score ?? 0,
+    recommendation: data.measure_recommendations?.[0] ?? null
+  },
+  {
+    key: 'manage' as const,
+    label: 'Manage',
+    score: data.manage_score ?? 0,
+    recommendation: data.manage_recommendations?.[0] ?? null
+  }
+]);
+
+const computeRiskHotspots = (data: Partial<GapAnalysis>): RiskHotspot[] => {
+  const quickWins = Array.isArray(data.quick_wins) ? data.quick_wins : [];
+  const domains = buildDomainInsightsFromGap(data);
+  const recommendations = domains
+    .filter((domain) => (domain.recommendation ?? '').trim().length > 0)
+    .map((domain) => ({
+      title: domain.recommendation as string,
+      category: domain.label
+    }));
+
+  return buildRiskHotspots({
+    overallScore: data.overall_score ?? 0,
+    domains,
+    recommendations,
+    quickWins
+  });
+};
+
+const computeNistAlignment = (data: Partial<GapAnalysis>): NistAlignmentInsight[] => {
+  const domains = buildDomainInsightsFromGap(data);
+  return buildNistAlignment({
+    overallScore: data.overall_score ?? 0,
+    domains
+  });
+};
+
+const SEVERITY_RANK: Record<RiskHotspot['severity'], number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3
+};
+
+const SEVERITY_BADGE_CLASSES: Record<RiskHotspot['severity'], string> = {
+  critical: 'bg-red-100 text-red-800 border border-red-200',
+  high: 'bg-orange-100 text-orange-800 border border-orange-200',
+  medium: 'bg-amber-100 text-amber-800 border border-amber-200',
+  low: 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+};
+
+const ALIGNMENT_BADGE_CLASSES: Record<NistAlignmentInsight['status'], string> = {
+  critical: 'bg-red-100 text-red-800 border border-red-200',
+  attention: 'bg-orange-100 text-orange-800 border border-orange-200',
+  progressing: 'bg-amber-100 text-amber-800 border border-amber-200',
+  optimized: 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+};
 
 interface Roadmap {
   id: string;
@@ -64,6 +150,7 @@ interface Document {
 
 export default function PersonalizedDashboard() {
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [gapAnalysis, setGapAnalysis] = useState<GapAnalysis | null>(null);
@@ -71,16 +158,110 @@ export default function PersonalizedDashboard() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [blueprints, setBlueprints] = useState<any[]>([]);
   const [hasAssessment, setHasAssessment] = useState(false);
+  const [showGoalWizard, setShowGoalWizard] = useState(false);
+  const [goalWizardLoading, setGoalWizardLoading] = useState(false);
+  const [goalWizardAssessmentId, setGoalWizardAssessmentId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  const quickWinHighlights = useMemo(() => {
+    if (!gapAnalysis) return [];
 
-  const loadDashboardData = async () => {
+    type QuickWinHighlight = {
+      title: string;
+      category: string;
+      context: string;
+      score: number;
+    };
+
+    const items: QuickWinHighlight[] = [];
+    const seen = new Set<string>();
+
+    const addItem = (item: QuickWinHighlight) => {
+      const normalized = item.title?.trim().toLowerCase();
+      if (!normalized || seen.has(normalized)) return;
+      seen.add(normalized);
+      items.push(item);
+    };
+
+    const domains = [
+      {
+        label: 'Govern',
+        score: gapAnalysis.govern_score,
+        recommendations: gapAnalysis.govern_recommendations,
+        gaps: gapAnalysis.govern_gaps
+      },
+      {
+        label: 'Map',
+        score: gapAnalysis.map_score,
+        recommendations: gapAnalysis.map_recommendations,
+        gaps: gapAnalysis.map_gaps
+      },
+      {
+        label: 'Measure',
+        score: gapAnalysis.measure_score,
+        recommendations: gapAnalysis.measure_recommendations,
+        gaps: gapAnalysis.measure_gaps
+      },
+      {
+        label: 'Manage',
+        score: gapAnalysis.manage_score,
+        recommendations: gapAnalysis.manage_recommendations,
+        gaps: gapAnalysis.manage_gaps
+      }
+    ];
+
+    domains
+      .filter((domain) => domain.score < 80)
+      .sort((a, b) => a.score - b.score)
+      .forEach((domain) => {
+        const candidate = domain.recommendations?.find((text) => text?.trim().length) ??
+          domain.gaps?.find((text) => text?.trim().length);
+
+        if (!candidate) return;
+
+        const emphasis = domain.score < 40 ? 'Immediate stabilization needed.' : 'High-impact 30-day momentum builder.';
+        addItem({
+          title: candidate,
+          category: `${domain.label} pillar`,
+          context: `${emphasis} Current score: ${domain.score}/100.`,
+          score: domain.score
+        });
+      });
+
+    const addFromList = (list: (string | null)[] | null | undefined, category: string, context: string) => {
+      if (!list) return;
+      list
+        .filter((item): item is string => !!item && item.trim().length > 0)
+        .forEach((item) => addItem({ title: item, category, context, score: gapAnalysis.overall_score }));
+    };
+
+    if (items.length < 3) {
+      addFromList(gapAnalysis.priority_actions, 'Cross-functional', 'Pulled directly from your priority action list.');
+    }
+
+    if (items.length < 3) {
+      addFromList(gapAnalysis.quick_wins, 'Quick win', 'Flagged in your readiness results as a fast-start initiative.');
+    }
+
+    return items.slice(0, 4);
+  }, [gapAnalysis]);
+
+  const riskHotspots = useMemo(() => {
+    if (!gapAnalysis?.risk_hotspots) return [] as RiskHotspot[];
+    return [...gapAnalysis.risk_hotspots].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]);
+  }, [gapAnalysis]);
+
+  const nistAlignment = useMemo(() => {
+    if (!gapAnalysis?.nist_alignment) return [] as NistAlignmentInsight[];
+    return [...gapAnalysis.nist_alignment];
+  }, [gapAnalysis]);
+
+  const loadDashboardData = useCallback(async () => {
     const supabase = createClient();
     try {
       console.log('🔄 Loading dashboard data...');
       console.log('⏰ Timestamp:', new Date().toISOString());
+
+      let hasAssessmentRecord = false;
 
       // Add timeout for authentication check (increased to 15 seconds)
       const authTimeout = new Promise((_, reject) =>
@@ -123,7 +304,20 @@ export default function PersonalizedDashboard() {
 
       if (gapData && !gapError) {
         console.log('✅ Gap analysis loaded:', gapData);
-        setGapAnalysis(gapData);
+        const riskHotspots = Array.isArray(gapData.risk_hotspots) && gapData.risk_hotspots.length > 0
+          ? gapData.risk_hotspots as RiskHotspot[]
+          : computeRiskHotspots(gapData as Partial<GapAnalysis>);
+
+        const nistAlignment = Array.isArray(gapData.nist_alignment) && gapData.nist_alignment.length > 0
+          ? gapData.nist_alignment as NistAlignmentInsight[]
+          : computeNistAlignment(gapData as Partial<GapAnalysis>);
+
+        setGapAnalysis({
+          ...(gapData as GapAnalysis),
+          risk_hotspots: riskHotspots,
+          nist_alignment: nistAlignment
+        });
+        hasAssessmentRecord = true;
       } else {
         if (gapError) {
           console.error('❌ Error loading gap analysis:', gapError);
@@ -145,7 +339,7 @@ export default function PersonalizedDashboard() {
           console.log('✅ Found assessment, converting to gap analysis format');
           // Convert assessment to gap analysis format
           const scores = assessmentData.scores;
-          setGapAnalysis({
+          const fallbackBase: GapAnalysis = {
             id: assessmentData.id,
             user_id: user.id,
             overall_score: scores?.OVERALL?.percentage || 0,
@@ -168,8 +362,17 @@ export default function PersonalizedDashboard() {
             manage_recommendations: ['Implement risk management'],
             priority_actions: ['Review policies', 'Train staff', 'Document systems'],
             quick_wins: ['Create AI policy', 'Awareness training', 'Tool inventory'],
+            risk_hotspots: [],
+            nist_alignment: [],
             analysis_date: assessmentData.completed_at || new Date().toISOString()
+          };
+
+          setGapAnalysis({
+            ...fallbackBase,
+            risk_hotspots: computeRiskHotspots(fallbackBase),
+            nist_alignment: computeNistAlignment(fallbackBase)
           });
+          hasAssessmentRecord = true;
         } else {
           console.log('ℹ️ No assessment found either');
         }
@@ -226,13 +429,88 @@ export default function PersonalizedDashboard() {
       }
 
       // Set hasAssessment flag based on loaded gap analysis
-      setHasAssessment(!!gapData || !!gapAnalysis);
+      setHasAssessment(hasAssessmentRecord);
 
       setLoading(false);
     } catch (error) {
       console.error('Error loading dashboard:', error);
       setLoading(false);
     }
+  }, [router]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  const handleOpenGoalWizard = async () => {
+    setGoalWizardLoading(true);
+    setGoalWizardAssessmentId(null);
+
+    try {
+      const response = await fetch('/api/assessment/latest');
+      if (!response.ok) {
+        throw new Error('Please complete the AI readiness assessment before planning goals.');
+      }
+
+      const data = await response.json();
+      const assessmentId = data.assessment?.id;
+
+      if (!assessmentId) {
+        throw new Error('Please complete the AI readiness assessment before planning goals.');
+      }
+
+      setGoalWizardAssessmentId(assessmentId);
+      setShowGoalWizard(true);
+    } catch (error: any) {
+      console.error('Error preparing goal wizard:', error);
+      toast({
+        title: 'Assessment required',
+        description:
+          error?.message ||
+          'We could not find a recent assessment. Complete the readiness assessment to tailor your blueprint.',
+        variant: 'destructive'
+      });
+    } finally {
+      setGoalWizardLoading(false);
+    }
+  };
+
+  const handleGoalWizardComplete = async (goalsId: string) => {
+    if (!goalWizardAssessmentId) return;
+
+    try {
+      setGoalWizardLoading(true);
+      const response = await fetch('/api/blueprint/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goals_id: goalsId,
+          assessment_id: goalWizardAssessmentId
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate blueprint from your goals.');
+      }
+
+      const data = await response.json();
+      setShowGoalWizard(false);
+      router.push(`/blueprint/${data.blueprint_id}`);
+    } catch (error: any) {
+      console.error('Error generating blueprint:', error);
+      toast({
+        title: 'Blueprint generation failed',
+        description: error?.message || 'We could not generate the blueprint. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setGoalWizardLoading(false);
+    }
+  };
+
+  const handleCloseGoalWizard = () => {
+    setShowGoalWizard(false);
   };
 
   const getMaturityColor = (level: string) => {
@@ -363,10 +641,19 @@ export default function PersonalizedDashboard() {
           </div>
           ` : ''}
 
-          ${gapAnalysis.quick_wins && gapAnalysis.quick_wins.length > 0 ? `
+          ${quickWinHighlights.length > 0 ? `
           <div class="section">
-            <h2>⚡ Quick Wins (30 Days)</h2>
-            ${gapAnalysis.quick_wins.map((win, i) => `<div class="recommendation">${i + 1}. ${win}</div>`).join('')}
+            <h2>⚡ Quick Momentum Plays</h2>
+            ${quickWinHighlights
+            .map((win, i) => `
+                <div class="recommendation">
+                  ${i + 1}. <strong>${win.category}:</strong> ${win.title}
+                  <div style="font-size: 13px; color: #4b5563; margin-top: 4px;">
+                    ${win.context.replace(/"/g, '&quot;')}
+                  </div>
+                </div>
+              `)
+            .join('')}
           </div>
           ` : ''}
 
@@ -436,7 +723,7 @@ export default function PersonalizedDashboard() {
                     </div>
                     <h3 className="font-semibold mb-2">Quick Assessment</h3>
                     <p className="text-sm text-gray-600">
-                      Answer 5 strategic questions about your institution's AI goals and challenges (5 minutes)
+                      Answer 5 strategic questions about your institution&rsquo;s AI goals and challenges (5 minutes)
                     </p>
                   </div>
 
@@ -462,9 +749,9 @@ export default function PersonalizedDashboard() {
                 </div>
               </div>
 
-              {/* What You'll Get Section */}
+              {/* What You&rsquo;ll Get Section */}
               <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-6 mb-8">
-                <h3 className="font-semibold text-lg mb-3">What You'll Receive:</h3>
+                <h3 className="font-semibold text-lg mb-3">What You&rsquo;ll Receive:</h3>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -498,7 +785,7 @@ export default function PersonalizedDashboard() {
                 <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
                   <h3 className="font-semibold text-blue-900 mb-2">✨ Your Analysis is Being Generated</h3>
                   <p className="text-blue-700 mb-4">
-                    We're analyzing your institution's current AI readiness. Complete the assessment and upload documents to unlock your personalized roadmap!
+                    We&rsquo;re analyzing your institution&rsquo;s current AI readiness. Complete the assessment and upload documents to unlock your personalized roadmap!
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
                     <div className="flex items-center gap-2 text-sm text-blue-600">
@@ -519,7 +806,7 @@ export default function PersonalizedDashboard() {
                 </div>
 
                 <p className="text-gray-600 mb-6">
-                  Ready to transform your institution's AI strategy? Let's get started!
+                  Ready to transform your institution&rsquo;s AI strategy? Let&rsquo;s get started!
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -574,6 +861,64 @@ export default function PersonalizedDashboard() {
             Personalized insights and roadmap based on your institutional analysis
           </p>
         </div>
+
+        <Card className="mb-8 border border-dashed border-indigo-200 bg-white/80">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="rounded-full bg-indigo-100 p-3">
+                  <Sparkles className="h-6 w-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">Goal-driven blueprint planning</h2>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Capture institutional priorities, budgets, and departmental strategies to generate a tailored AI implementation blueprint.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-indigo-700">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1">
+                      <Target className="h-3 w-3" />
+                      Priorities
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1">
+                      <Users className="h-3 w-3" />
+                      Departments
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1">
+                      <Calendar className="h-3 w-3" />
+                      Timelines
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1">
+                      <DollarSign className="h-3 w-3" />
+                      Budgets
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex w-full flex-col gap-2 md:w-auto md:items-end">
+                <Button
+                  onClick={handleOpenGoalWizard}
+                  disabled={goalWizardLoading}
+                  className="bg-indigo-600 text-white hover:bg-indigo-700"
+                >
+                  {goalWizardLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Preparing wizard...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Launch goal wizard
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-gray-500 md:text-right">
+                  Tailor blueprints for Academic Affairs, IT, Student Services, and more.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Overall Score Card */}
         <Card className="mb-8 border-2 border-indigo-200 bg-gradient-to-br from-white to-indigo-50">
@@ -645,24 +990,136 @@ export default function PersonalizedDashboard() {
           loading={loading}
         />
 
+        {/* Risk Mitigation Hotspots */}
+        {riskHotspots.length > 0 && (
+          <Card className="mb-8 border border-red-200 bg-red-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-900">
+                <ShieldAlert className="h-5 w-5" />
+                Risk Mitigation Hotspots
+              </CardTitle>
+              <p className="text-sm text-red-800/80">
+                High-leverage risk areas surfaced by your NIST AI RMF readiness assessment.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-4">
+                {riskHotspots.map((risk) => (
+                  <li key={risk.id} className="rounded-xl border border-red-100 bg-white p-4 shadow-sm">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="max-w-2xl">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {risk.pillar} • {risk.riskStatement}
+                        </p>
+                        <p className="mt-2 text-sm text-gray-700">
+                          {risk.recommendedMitigation}
+                        </p>
+                      </div>
+                      <span className={`${SEVERITY_BADGE_CLASSES[risk.severity]} rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide`}>
+                        {risk.severityLabel}
+                      </span>
+                    </div>
+                    <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-gray-400" />
+                        Likelihood: <strong className="font-medium text-gray-800">{risk.likelihood}</strong>
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-gray-400" />
+                        Impact: <strong className="font-medium text-gray-800">{risk.impact}</strong>
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <Scale className="h-3.5 w-3.5 text-indigo-500" />
+                        {risk.nistReference}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
+                        Score: <strong className="font-medium text-gray-800">{risk.score}/100</strong>
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Quick Wins */}
-        {gapAnalysis.quick_wins && gapAnalysis.quick_wins.length > 0 && (
+        {quickWinHighlights.length > 0 && (
           <Card className="mb-8 border-2 border-yellow-200 bg-yellow-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-yellow-600" />
-                Quick Wins (30 Days)
+                Quick Momentum Plays
               </CardTitle>
+              <p className="text-sm text-yellow-700/90">
+                Prioritized 30-day actions pulled straight from your readiness assessment to build early wins.
+              </p>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
-                {gapAnalysis.quick_wins.map((win, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <span>{win}</span>
+              <ul className="space-y-4">
+                {quickWinHighlights.map((item, index) => (
+                  <li key={index} className="flex items-start gap-3 rounded-lg bg-white/70 p-4 shadow-sm">
+                    <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-yellow-100 text-yellow-700">
+                      <CheckCircle2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-gray-900">{item.title}</span>
+                        <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+                          {item.category}
+                        </span>
+                        <span className="text-xs font-medium uppercase tracking-wide text-yellow-700/80">
+                          {item.score}/100 focus
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-700">{item.context}</p>
+                    </div>
                   </li>
                 ))}
               </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* NIST Gap Analysis */}
+        {nistAlignment.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Scale className="h-5 w-5 text-indigo-600" />
+                NIST Gap Analysis
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                Where your practices align with, or diverge from, NIST AI RMF expectations—and how to course-correct.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {nistAlignment.map((item) => (
+                <div key={item.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="max-w-2xl">
+                      <p className="text-sm font-semibold text-gray-900">{item.function}</p>
+                      <p className="mt-1 text-sm text-gray-600">{item.requirement}</p>
+                    </div>
+                    <span className={`${ALIGNMENT_BADGE_CLASSES[item.status]} rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide`}>
+                      {item.statusLabel}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center">
+                    <Progress value={item.score} className="h-2 flex-1" />
+                    <span className="text-sm font-medium text-gray-800">{item.score}/100</span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-600">
+                    <p className="flex-1 min-w-[200px]">
+                      {item.guidance}
+                    </p>
+                    <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+                      {item.priority}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         )}
@@ -861,6 +1318,33 @@ export default function PersonalizedDashboard() {
           </Card>
         )}
       </div>
+
+      <Dialog
+        open={showGoalWizard}
+        onOpenChange={(value) => {
+          if (!value) {
+            handleCloseGoalWizard();
+          }
+        }}
+      >
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Plan your AI implementation blueprint</DialogTitle>
+          </DialogHeader>
+          {goalWizardAssessmentId && !goalWizardLoading ? (
+            <GoalSettingWizard
+              assessmentId={goalWizardAssessmentId}
+              onComplete={handleGoalWizardComplete}
+              onCancel={handleCloseGoalWizard}
+            />
+          ) : (
+            <div className="py-12 text-center text-sm text-gray-600">
+              <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin text-indigo-600" />
+              Preparing your goal wizard...
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

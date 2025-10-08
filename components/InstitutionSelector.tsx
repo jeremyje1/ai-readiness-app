@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { GraduationCap, School, ChevronRight } from 'lucide-react';
+import { ChevronRight, GraduationCap, School } from 'lucide-react';
+import { useState } from 'react';
 
 interface InstitutionSelectorProps {
   onSelect: (type: 'K12' | 'HigherEd') => void;
@@ -11,8 +11,8 @@ interface InstitutionSelectorProps {
   subtitle?: string;
 }
 
-export default function InstitutionSelector({ 
-  onSelect, 
+export default function InstitutionSelector({
+  onSelect,
   title = "Welcome to AI Blueprint™",
   subtitle = "Let's personalize your experience based on your institution type"
 }: InstitutionSelectorProps) {
@@ -36,12 +36,11 @@ export default function InstitutionSelector({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* K-12 Option */}
-          <Card 
-            className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl border-2 ${
-              selected === 'K12' 
-                ? 'border-blue-500 bg-blue-50 shadow-blue-500/20' 
+          <Card
+            className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl border-2 ${selected === 'K12'
+                ? 'border-blue-500 bg-blue-50 shadow-blue-500/20'
                 : 'border-slate-700 bg-slate-800 hover:border-blue-400'
-            }`}
+              }`}
             onClick={() => handleSelection('K12')}
           >
             <CardHeader className="text-center pb-4">
@@ -62,12 +61,11 @@ export default function InstitutionSelector({
                 <li>• Student safety and privacy focus</li>
                 <li>• Curriculum integration guidance</li>
               </ul>
-              <Button 
-                className={`w-full ${
-                  selected === 'K12' 
-                    ? 'bg-blue-600 hover:bg-blue-700' 
+              <Button
+                className={`w-full ${selected === 'K12'
+                    ? 'bg-blue-600 hover:bg-blue-700'
                     : 'bg-slate-700 hover:bg-slate-600'
-                }`}
+                  }`}
                 size="lg"
               >
                 Choose K-12 <ChevronRight className="w-4 h-4 ml-2" />
@@ -76,12 +74,11 @@ export default function InstitutionSelector({
           </Card>
 
           {/* Higher Ed Option */}
-          <Card 
-            className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl border-2 ${
-              selected === 'HigherEd' 
-                ? 'border-purple-500 bg-purple-50 shadow-purple-500/20' 
+          <Card
+            className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl border-2 ${selected === 'HigherEd'
+                ? 'border-purple-500 bg-purple-50 shadow-purple-500/20'
                 : 'border-slate-700 bg-slate-800 hover:border-purple-400'
-            }`}
+              }`}
             onClick={() => handleSelection('HigherEd')}
           >
             <CardHeader className="text-center pb-4">
@@ -102,12 +99,11 @@ export default function InstitutionSelector({
                 <li>• Accreditation & certification compliance</li>
                 <li>• Industry partnership policies</li>
               </ul>
-              <Button 
-                className={`w-full ${
-                  selected === 'HigherEd' 
-                    ? 'bg-purple-600 hover:bg-purple-700' 
+              <Button
+                className={`w-full ${selected === 'HigherEd'
+                    ? 'bg-purple-600 hover:bg-purple-700'
                     : 'bg-slate-700 hover:bg-slate-600'
-                }`}
+                  }`}
                 size="lg"
               >
                 Choose Higher Ed <ChevronRight className="w-4 h-4 ml-2" />
@@ -118,7 +114,7 @@ export default function InstitutionSelector({
 
         <div className="text-center mt-8">
           <p className="text-slate-400 text-sm">
-            Don't worry - you can change this preference later in your account settings
+            Don’t worry - you can change this preference later in your account settings
           </p>
         </div>
       </div>

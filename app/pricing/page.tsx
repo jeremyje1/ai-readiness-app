@@ -100,7 +100,7 @@ export default function AIBlueprintPricingPage() {
               AI Blueprint for Education
             </h1>
             <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Transform your institution's AI readiness with our comprehensive assessment,
+              Transform your institution&rsquo;s AI readiness with our comprehensive assessment,
               implementation roadmap, and ongoing support designed specifically for higher education.
             </p>
           </motion.div>
@@ -253,7 +253,7 @@ export default function AIBlueprintPricingPage() {
       <section className="bg-indigo-600 py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Transform Your Institution's AI Strategy?
+            Ready to Transform Your Institution&rsquo;s AI Strategy?
           </h2>
           <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
             Join hundreds of institutions already using AI Blueprint to navigate their AI transformation journey.

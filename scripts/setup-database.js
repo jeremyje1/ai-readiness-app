@@ -156,6 +156,8 @@ const tables = [
         manage_recommendations JSONB,
         priority_actions JSONB,
         quick_wins JSONB,
+  risk_hotspots JSONB,
+  nist_alignment JSONB,
         analysis_date TIMESTAMPTZ DEFAULT NOW(),
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),

@@ -22,7 +22,8 @@ export async function GET(request: Request) {
             .from('user_payments')
             .select('payment_status, access_granted')
             .eq('user_id', user.id)
-            .eq('payment_status', 'active')
+            .in('payment_status', ['active', 'completed', 'premium'])
+            .eq('access_granted', true)
             .single();
 
         // Check if premium user (check both tables for compatibility)

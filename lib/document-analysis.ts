@@ -2,15 +2,37 @@ import { createClient } from '@/lib/supabase/client';
 import OpenAI from 'openai';
 
 // Document analysis types
+export interface ComplianceFinding {
+    area: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    description: string;
+    recommendation: string;
+}
+
+export interface BudgetSignal {
+    category: string;
+    amount?: number;
+    opportunity: string;
+}
+export interface BlueprintAlignmentItem {
+    area: string;
+    impact: string;
+    recommendation: string;
+}
+
 export interface DocumentAnalysisResult {
     documentType: string;
     keyThemes: string[];
     aiReadinessIndicators: string[];
     alignmentOpportunities: string[];
+    complianceFindings: ComplianceFinding[];
+    budgetSignals?: BudgetSignal[];
+    blueprintAlignment?: BlueprintAlignmentItem[];
+    summary: string;
     confidenceScore: number;
     gaps?: string[];
     recommendations?: string[];
-    rawAnalysis?: any; // Full AI response for paid users
+    rawAnalysis?: any;
 }
 
 export interface AnalysisOptions {
@@ -73,7 +95,6 @@ export async function extractTextFromDocument(file: File): Promise<string> {
             throw new Error(`Unsupported file type: ${file.type}`);
         }
     } catch (error) {
-        console.error('Text extraction error:', error);
         throw new Error('Failed to extract text from document');
     }
 }
@@ -91,40 +112,52 @@ export async function performAIAnalysis(
     }
 
     const prompt = `
-Analyze this educational institution document for AI readiness assessment.
+    Analyze this educational institution document for AI readiness, governance, and budgeting insights.
 
-Institution Type: ${options.institutionType || 'Not specified'}
-Document Name: ${options.fileName}
+    Institution Type: ${options.institutionType || 'Not specified'}
+    Document Name: ${options.fileName}
 
-Document Content:
-${textContent.substring(0, 8000)} // Limit to prevent token overflow
+    Document Content (truncated for safety):
+    ${textContent.substring(0, 8000)}
 
-Please provide a structured analysis with the following:
+    Return ONLY valid JSON matching the structure below:
+    {
+      "documentType": string,
+      "keyThemes": string[],
+      "aiReadinessIndicators": string[],
+      "alignmentOpportunities": string[],
+      "complianceFindings": [{
+        "area": string,
+        "severity": "low" | "medium" | "high" | "critical",
+        "description": string,
+        "recommendation": string
+      }],
+      "budgetSignals"?: [{
+        "category": string,
+        "amount"?: number,
+        "opportunity": string
+      }],
+      "blueprintAlignment"?: [{
+        "area": string,
+        "impact": string,
+        "recommendation": string
+      }],
+      "gaps": string[],
+      "recommendations": string[],
+      "summary": string,
+      "confidenceScore": number
+    }
 
-1. Document Type Classification (e.g., Strategic Plan, Policy Document, Academic Program, etc.)
-2. Key Themes - List 5-7 main themes or topics covered
-3. AI Readiness Indicators - Specific mentions or implications for AI adoption (technology initiatives, data usage, innovation goals, etc.)
-4. Alignment Opportunities - How this document's goals could benefit from AI implementation
-5. Gaps or Concerns - What's missing for AI readiness
-6. Specific Recommendations - 3-5 actionable recommendations based on the document
-
-Also provide a confidence score (0-100) based on:
-- Document completeness and relevance
-- Clarity of AI-related opportunities
-- Alignment with educational AI best practices
-
-Format your response as JSON with the following structure:
-{
-  "documentType": "string",
-  "keyThemes": ["string array"],
-  "aiReadinessIndicators": ["string array"],
-  "alignmentOpportunities": ["string array"],
-  "gaps": ["string array"],
-  "recommendations": ["string array"],
-  "confidenceScore": number,
-  "summary": "brief summary paragraph"
-}
-`;
+    Guidance:
+    - keyThemes: 5-7 concise themes.
+    - aiReadinessIndicators: cite language hinting at data infrastructure, innovation appetite, governance, workforce readiness, etc.
+    - alignmentOpportunities: actionable areas where AI can accelerate the document goals.
+    - complianceFindings: focus on policy/privacy/budgeting gaps; severity should reflect institutional risk.
+    - budgetSignals: surface notable budget references that influence AI investment decisions.
+    - blueprintAlignment: tie findings to roadmap priorities (governance, talent, infrastructure, change management, etc.).
+    - summary: 3-4 sentences for executives linking opportunities and risks.
+    - confidenceScore: integer 0-100 reflecting clarity and completeness of the document.
+    `;
 
     try {
         const completion = await openai.chat.completions.create({
@@ -150,9 +183,13 @@ Format your response as JSON with the following structure:
             keyThemes: analysis.keyThemes || [],
             aiReadinessIndicators: analysis.aiReadinessIndicators || [],
             alignmentOpportunities: analysis.alignmentOpportunities || [],
-            confidenceScore: analysis.confidenceScore || 70,
-            gaps: analysis.gaps,
-            recommendations: analysis.recommendations,
+            complianceFindings: Array.isArray(analysis.complianceFindings) ? analysis.complianceFindings : [],
+            budgetSignals: Array.isArray(analysis.budgetSignals) ? analysis.budgetSignals : undefined,
+            blueprintAlignment: Array.isArray(analysis.blueprintAlignment) ? analysis.blueprintAlignment : undefined,
+            summary: analysis.summary || '',
+            confidenceScore: typeof analysis.confidenceScore === 'number' ? analysis.confidenceScore : 70,
+            gaps: Array.isArray(analysis.gaps) ? analysis.gaps : [],
+            recommendations: Array.isArray(analysis.recommendations) ? analysis.recommendations : [],
             rawAnalysis: analysis
         };
     } catch (error) {
@@ -246,6 +283,15 @@ export async function analyzeDocument(
             ...getMockAnalysis(file),
             documentType: 'Analysis Error',
             keyThemes: ['Error occurred during analysis'],
+            complianceFindings: [
+                {
+                    area: 'processing',
+                    severity: 'high',
+                    description: 'The analysis service encountered an unexpected error.',
+                    recommendation: 'Retry the upload later or contact support if the issue persists.'
+                }
+            ],
+            summary: 'The analysis service was unable to process this document due to an internal error.',
             confidenceScore: 0
         };
     }
@@ -267,10 +313,14 @@ async function storeAnalysisResults(
             key_themes: analysis.keyThemes,
             ai_readiness_indicators: analysis.aiReadinessIndicators,
             alignment_opportunities: analysis.alignmentOpportunities,
+            compliance_findings: analysis.complianceFindings,
+            budget_signals: analysis.budgetSignals || null,
+            blueprint_alignment: analysis.blueprintAlignment || null,
+            summary: analysis.summary,
             confidence_score: analysis.confidenceScore,
             gaps: analysis.gaps,
             recommendations: analysis.recommendations,
-            analysis_data: analysis.rawAnalysis,
+            analysis_data: analysis.rawAnalysis || null,
             analyzed_at: new Date().toISOString()
         });
     } catch (error) {
@@ -299,7 +349,37 @@ export function getMockAnalysis(file: File): DocumentAnalysisResult {
                 'Integrate AI initiatives into digital transformation goals',
                 'Leverage AI for student success analytics'
             ],
-            confidenceScore: 85
+            complianceFindings: [
+                {
+                    area: 'Data governance',
+                    severity: 'medium',
+                    description: 'The plan emphasizes data use but lacks explicit privacy controls for AI projects.',
+                    recommendation: 'Establish an AI data governance charter with privacy and ethics checkpoints.'
+                }
+            ],
+            budgetSignals: [
+                {
+                    category: 'Innovation fund',
+                    opportunity: 'Earmark part of the transformation budget for AI pilots and faculty training.'
+                }
+            ],
+            blueprintAlignment: [
+                {
+                    area: 'Infrastructure',
+                    impact: 'High',
+                    recommendation: 'Invest in scalable analytics platforms to support AI-enabled services.'
+                }
+            ],
+            summary: 'Strategic plan focused on digital transformation with clear AI acceleration opportunities, though formal governance still needs definition.',
+            confidenceScore: 85,
+            gaps: [
+                'Limited mention of AI governance frameworks',
+                'Needs clearer roadmap for technology investments'
+            ],
+            recommendations: [
+                'Create an AI governance task force',
+                'Define metrics for AI-driven student success outcomes'
+            ]
         };
     } else if (fileName.includes('policy') || fileName.includes('governance')) {
         return {
@@ -317,7 +397,31 @@ export function getMockAnalysis(file: File): DocumentAnalysisResult {
                 'Develop AI-specific governance policies',
                 'Integrate AI ethics into existing frameworks'
             ],
-            confidenceScore: 72
+            complianceFindings: [
+                {
+                    area: 'Privacy compliance',
+                    severity: 'high',
+                    description: 'Policy references FERPA broadly but lacks AI-specific safeguards.',
+                    recommendation: 'Update privacy policy to include AI data handling and model risk assessments.'
+                }
+            ],
+            blueprintAlignment: [
+                {
+                    area: 'Governance',
+                    impact: 'Medium',
+                    recommendation: 'Align policy review cycles with an AI ethics oversight committee.'
+                }
+            ],
+            summary: 'Governance policy establishes strong oversight foundations but requires explicit AI privacy and ethics directives to be AI-ready.',
+            confidenceScore: 72,
+            gaps: [
+                'Missing AI ethics guidelines',
+                'No process for AI model review'
+            ],
+            recommendations: [
+                'Introduce AI ethics review board',
+                'Define risk assessment process for AI projects'
+            ]
         };
     } else {
         return {
@@ -334,7 +438,23 @@ export function getMockAnalysis(file: File): DocumentAnalysisResult {
                 'Identify AI integration opportunities',
                 'Assess technology readiness'
             ],
-            confidenceScore: 60
+            complianceFindings: [
+                {
+                    area: 'Policy alignment',
+                    severity: 'medium',
+                    description: 'Document lacks specific oversight structures for AI or automation.',
+                    recommendation: 'Add governance language describing review checkpoints for AI-enabled initiatives.'
+                }
+            ],
+            summary: 'General institutional document that signals openness to innovation while leaving room to formalize AI priorities and guardrails.',
+            confidenceScore: 60,
+            gaps: [
+                'Needs clearer AI roadmap'
+            ],
+            recommendations: [
+                'Conduct AI readiness workshop',
+                'Inventory current data infrastructure'
+            ]
         };
     }
 }

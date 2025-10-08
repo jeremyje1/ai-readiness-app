@@ -237,7 +237,7 @@ export default function EducatorOnboardingPage() {
                         Welcome to AI Blueprint for Education
                     </h1>
                     <p className="text-gray-600">
-                        Let's personalize your experience in just a few steps
+                        Let&rsquo;s personalize your experience in just a few steps
                     </p>
                 </div>
 
@@ -271,8 +271,8 @@ export default function EducatorOnboardingPage() {
                                                 key={role.value}
                                                 onClick={() => setData({ ...data, userRole: role.value })}
                                                 className={`p-4 rounded-lg border-2 transition-all ${data.userRole === role.value
-                                                        ? 'border-indigo-600 bg-indigo-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-indigo-600 bg-indigo-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <role.icon className="h-6 w-6 mx-auto mb-2 text-indigo-600" />
@@ -333,8 +333,8 @@ export default function EducatorOnboardingPage() {
                                                 key={size.value}
                                                 onClick={() => setData({ ...data, institutionSize: size.value })}
                                                 className={`p-3 rounded-lg border text-left transition-all ${data.institutionSize === size.value
-                                                        ? 'border-indigo-600 bg-indigo-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-indigo-600 bg-indigo-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <p className="text-sm font-medium">{size.label}</p>
@@ -351,8 +351,8 @@ export default function EducatorOnboardingPage() {
                                                 key={level.value}
                                                 onClick={() => setData({ ...data, currentAIAdoption: level.value })}
                                                 className={`w-full p-4 rounded-lg border text-left transition-all ${data.currentAIAdoption === level.value
-                                                        ? 'border-indigo-600 bg-indigo-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-indigo-600 bg-indigo-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <p className="font-medium">{level.label}</p>
@@ -447,8 +447,8 @@ export default function EducatorOnboardingPage() {
                                                 key={timeline.value}
                                                 onClick={() => setData({ ...data, timeline: timeline.value })}
                                                 className={`p-3 rounded-lg border text-center transition-all ${data.timeline === timeline.value
-                                                        ? 'border-indigo-600 bg-indigo-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-indigo-600 bg-indigo-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <Clock className="h-5 w-5 mx-auto mb-1 text-indigo-600" />

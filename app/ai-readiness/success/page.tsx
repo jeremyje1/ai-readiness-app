@@ -161,10 +161,10 @@ export default function AIReadinessSuccessPage() {
                             <div className="bg-indigo-50 rounded-lg p-6 mb-8">
                                 <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                     <Sparkles className="h-5 w-5 text-indigo-600" />
-                                    What's Next?
+                                    What&rsquo;s Next?
                                 </h3>
                                 <ol className="space-y-2 text-sm text-gray-700">
-                                    <li>1. Complete your AI readiness assessment if you haven't already</li>
+                                    <li>1. Complete your AI readiness assessment if you haven&rsquo;t already</li>
                                     <li>2. Generate your personalized AI implementation blueprint</li>
                                     <li>3. Share with your team and start executing your roadmap</li>
                                     <li>4. Track progress and celebrate milestones along the way</li>

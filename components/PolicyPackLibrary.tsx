@@ -1,26 +1,25 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useUserProfile } from '@/lib/hooks/useUserProfile'
 import {
-  FileText,
-  Download,
-  Shield,
   BookOpen,
-  Users,
+  Calendar,
+  CheckCircle,
+  Download,
+  ExternalLink,
+  FileText,
+  GraduationCap,
   Map,
   MessageSquare,
-  GraduationCap,
-  ExternalLink,
-  Calendar,
-  AlertTriangle,
-  CheckCircle
+  Shield,
+  Users
 } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface PolicyTemplate {
   id: string
@@ -103,16 +102,11 @@ export default function PolicyPackLibrary({
   const actualInstitutionName = profile?.institution_name || institutionName || '[Please complete your profile]'
   const actualState = profile?.state || state || '[State - Please complete your profile]'
 
-  useEffect(() => {
-    loadTemplates()
-    loadRedlines()
-  }, [profile?.institution_type])
-
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     try {
       const response = await fetch(`/api/policy-packs?action=getAvailableTemplates&institutionType=${actualInstitutionType}`)
       const data = await response.json()
-      
+
       if (data.success) {
         setTemplates(data.templates)
       }
@@ -121,9 +115,9 @@ export default function PolicyPackLibrary({
     } finally {
       setLoading(false)
     }
-  }
+  }, [actualInstitutionType])
 
-  const loadRedlines = async () => {
+  const loadRedlines = useCallback(async () => {
     try {
       const response = await fetch('/api/policy-packs', {
         method: 'POST',
@@ -131,14 +125,19 @@ export default function PolicyPackLibrary({
         body: JSON.stringify({ action: 'getMonthlyRedlines' })
       })
       const data = await response.json()
-      
+
       if (data.success) {
         setRedlines(data.redlines)
       }
     } catch (error) {
       console.error('Error loading redlines:', error)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    loadTemplates()
+    loadRedlines()
+  }, [loadTemplates, loadRedlines])
 
   const generatePolicyPack = async () => {
     if (selectedTemplates.length === 0) {
@@ -162,7 +161,7 @@ export default function PolicyPackLibrary({
       })
 
       const data = await response.json()
-      
+
       if (data.success) {
         alert('Policy pack generated successfully!')
         // In production, would trigger download or redirect to policy pack view
@@ -191,7 +190,7 @@ export default function PolicyPackLibrary({
       })
 
       const data = await response.json()
-      
+
       if (data.success) {
         // In production, would display or download the communication kit
         console.log('Communication Kit:', data.communicationKit)
@@ -205,8 +204,8 @@ export default function PolicyPackLibrary({
     }
   }
 
-  const filteredTemplates = activeCategory === 'all' 
-    ? templates 
+  const filteredTemplates = activeCategory === 'all'
+    ? templates
     : templates.filter(t => t.category === activeCategory)
 
   const categories = [
@@ -236,7 +235,7 @@ export default function PolicyPackLibrary({
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg">
         <h1 className="text-2xl font-bold mb-2">Policy Pack Library</h1>
         <p className="text-blue-100">
-          Maintained templates with monthly redlines • Anchored to external authorities • 
+          Maintained templates with monthly redlines • Anchored to external authorities •
           Ready for {actualInstitutionType} institutions in {actualState}
         </p>
       </div>
@@ -261,9 +260,9 @@ export default function PolicyPackLibrary({
                     <span className="font-medium">{change.sourceReference}</span>
                     <p className="text-sm text-gray-600">{change.summary}</p>
                   </div>
-                  <Badge className={change.impactLevel === 'Major' ? 'bg-red-100 text-red-800' : 
-                                  change.impactLevel === 'Moderate' ? 'bg-yellow-100 text-yellow-800' : 
-                                  'bg-green-100 text-green-800'}>
+                  <Badge className={change.impactLevel === 'Major' ? 'bg-red-100 text-red-800' :
+                    change.impactLevel === 'Moderate' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-green-100 text-green-800'}>
                     {change.impactLevel}
                   </Badge>
                 </div>
@@ -292,17 +291,17 @@ export default function PolicyPackLibrary({
 
       {/* Action Buttons */}
       <div className="flex gap-4">
-        <Button 
-          onClick={generatePolicyPack} 
+        <Button
+          onClick={generatePolicyPack}
           disabled={generating || selectedTemplates.length === 0}
           className="bg-blue-600 hover:bg-blue-700"
         >
           <Download className="h-4 w-4 mr-2" />
           Generate Policy Pack ({selectedTemplates.length} selected)
         </Button>
-        
-        <Button 
-          onClick={generateCommunicationKit} 
+
+        <Button
+          onClick={generateCommunicationKit}
           disabled={generating}
           variant="outline"
         >
@@ -316,11 +315,10 @@ export default function PolicyPackLibrary({
         {filteredTemplates.map((template) => {
           const CategoryIcon = categoryIcons[template.category]
           const isSelected = selectedTemplates.includes(template.id)
-          
+
           return (
-            <Card key={template.id} className={`transition-all duration-200 ${
-              isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-lg'
-            }`}>
+            <Card key={template.id} className={`transition-all duration-200 ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-lg'
+              }`}>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2 mb-2">
@@ -343,14 +341,14 @@ export default function PolicyPackLibrary({
                 <CardTitle className="text-lg">{template.title}</CardTitle>
                 <CardDescription>{template.description}</CardDescription>
               </CardHeader>
-              
+
               <CardContent className="space-y-3">
                 {/* Source Authority */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Source Authority:</span>
-                  <a 
-                    href={template.sourceUrl} 
-                    target="_blank" 
+                  <a
+                    href={template.sourceUrl}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
                   >

@@ -20,11 +20,11 @@ import {
     Star
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function GetStartedPage() {
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
     // Form state
     const [institutionType, setInstitutionType] = useState<'K12' | 'HigherEd'>('K12');
@@ -43,6 +43,8 @@ export default function GetStartedPage() {
 
     // Check if user is already logged in
     useEffect(() => {
+        let isMounted = true;
+
         const checkUser = async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
@@ -54,8 +56,15 @@ export default function GetStartedPage() {
                 console.error('❌ Error checking session:', error);
             }
         };
-        checkUser();
-    }, [router]);
+
+        if (isMounted) {
+            void checkUser();
+        }
+
+        return () => {
+            isMounted = false;
+        };
+    }, [router, supabase]);
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -403,7 +412,7 @@ export default function GetStartedPage() {
                         {/* Features */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>What's Included in Your Trial</CardTitle>
+                                <CardTitle>What&rsquo;s Included in Your Trial</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <ul className="space-y-3">

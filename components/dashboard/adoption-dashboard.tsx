@@ -6,25 +6,25 @@
 
 'use client'
 
-import React, { useState, useEffect, Suspense } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  CheckCircleIcon,
-  GraduationCapIcon,
-  WrenchIcon,
-  UsersIcon,
+import { AdoptionMetrics, DashboardFilters } from '@/lib/types/dashboard'
+import { formatDistanceToNow } from 'date-fns'
+import {
+  BuildingIcon,
   CalendarIcon,
+  CheckCircleIcon,
   FilterIcon,
+  GraduationCapIcon,
   RefreshCwIcon,
   TrendingUpIcon,
-  BuildingIcon
+  UsersIcon,
+  WrenchIcon
 } from 'lucide-react'
-import { AdoptionMetrics, DashboardFilters } from '@/lib/types/dashboard'
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
-import { formatDistanceToNow } from 'date-fns'
+import { Suspense, useCallback, useEffect, useState } from 'react'
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 interface AdoptionDashboardProps {
   currentUserId: string
@@ -41,15 +41,11 @@ function AdoptionDashboardContent({ currentUserId, className = '' }: AdoptionDas
   const [filters, setFilters] = useState<DashboardFilters>({})
 
   // Fetch metrics
-  useEffect(() => {
-    fetchMetrics()
-  }, [filters])
-
-  const fetchMetrics = async () => {
+  const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const params = new URLSearchParams()
       if (filters.department) params.append('department', filters.department)
       if (filters.dateRange) {
@@ -75,7 +71,11 @@ function AdoptionDashboardContent({ currentUserId, className = '' }: AdoptionDas
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentUserId, filters])
+
+  useEffect(() => {
+    fetchMetrics()
+  }, [fetchMetrics])
 
   if (loading) {
     return <AdoptionDashboardSkeleton className={className} />
@@ -102,13 +102,13 @@ function AdoptionDashboardContent({ currentUserId, className = '' }: AdoptionDas
             </p>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <Select 
-            value={filters.department || 'all'} 
-            onValueChange={(value) => setFilters(prev => ({ 
-              ...prev, 
-              department: value === 'all' ? undefined : value 
+          <Select
+            value={filters.department || 'all'}
+            onValueChange={(value) => setFilters(prev => ({
+              ...prev,
+              department: value === 'all' ? undefined : value
             }))}
           >
             <SelectTrigger className="w-48">
@@ -123,7 +123,7 @@ function AdoptionDashboardContent({ currentUserId, className = '' }: AdoptionDas
               <SelectItem value="Student Services">Student Services</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline" size="sm" onClick={fetchMetrics}>
             <RefreshCwIcon className="h-4 w-4" />
           </Button>
@@ -346,7 +346,7 @@ function AdoptionDashboardContent({ currentUserId, className = '' }: AdoptionDas
                     <h3 className="text-lg font-semibold">{dept.department}</h3>
                     <Badge variant="outline">{dept.totalTools} tools</Badge>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {dept.tools.slice(0, 6).map((tool, index) => (
                       <div key={index} className="bg-gray-50 rounded p-3">
@@ -388,7 +388,7 @@ function AdoptionDashboardSkeleton({ className = '' }: { className?: string }) {
           <div className="h-10 bg-gray-200 rounded w-10 animate-pulse"></div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
@@ -398,7 +398,7 @@ function AdoptionDashboardSkeleton({ className = '' }: { className?: string }) {
           </Card>
         ))}
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {[...Array(2)].map((_, i) => (
           <Card key={i}>
@@ -412,14 +412,14 @@ function AdoptionDashboardSkeleton({ className = '' }: { className?: string }) {
   )
 }
 
-function AdoptionDashboardError({ 
-  error, 
-  onRetry, 
-  className = '' 
-}: { 
+function AdoptionDashboardError({
+  error,
+  onRetry,
+  className = ''
+}: {
   error: string
   onRetry: () => void
-  className?: string 
+  className?: string
 }) {
   return (
     <div className={`space-y-6 ${className}`}>

@@ -6,40 +6,46 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft, CheckCircle2, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function AssessmentUploadDocumentsPage() {
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const [loading, setLoading] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        checkAuth();
-    }, []);
+        let isMounted = true;
 
-    const checkAuth = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            router.push('/get-started');
-            return;
-        }
-        setUserId(user.id);
+        const verifyAuth = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                router.push('/get-started');
+                return;
+            }
 
-        // Check if assessment was completed
-        // Note: We're not redirecting back if there's an error or no assessment
-        // because the user may have just completed it and the query might fail due to timing/RLS
-        const { data: assessment, error } = await supabase
-            .from('streamlined_assessment_responses')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle(); // Use maybeSingle to avoid 406 errors
+            if (isMounted) {
+                setUserId(user.id);
+            }
 
-        if (error) {
-            console.log('⚠️ Could not verify assessment (this is OK if just completed):', error.message);
-        }
-    };
+            const { error } = await supabase
+                .from('streamlined_assessment_responses')
+                .select('*')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            if (error) {
+                console.log('⚠️ Could not verify assessment (this is OK if just completed):', error.message);
+            }
+        };
+
+        void verifyAuth();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [router, supabase]);
 
     const handleDocumentsAnalyzed = (documents: any[]) => {
         console.log('📄 Documents analyzed:', documents.length, 'documents');

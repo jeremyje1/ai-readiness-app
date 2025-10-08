@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface PasswordSetupGuardProps {
     children: React.ReactNode;
@@ -17,23 +17,14 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
     const [needsSetup, setNeedsSetup] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
 
     // Don't check on auth-related pages and public pages to avoid redirect loops
     const publicPaths = ['/auth/', '/login', '/get-started', '/pricing', '/privacy', '/terms', '/contact', '/welcome'];
     const isPublicPage = publicPaths.some(path => pathname?.startsWith(path)) || pathname === '/';
     const isPasswordSetupPage = pathname === '/auth/password/setup';
 
-    useEffect(() => {
-        if (isPublicPage) {
-            setIsChecking(false);
-            return;
-        }
-
-        checkPasswordSetupRequired();
-    }, [pathname, isPublicPage]);
-
-    const checkPasswordSetupRequired = async () => {
+    const checkPasswordSetupRequired = useCallback(async () => {
         try {
             // Get current session with increased timeout (15 seconds)
             const sessionPromise = supabase.auth.getSession();
@@ -108,7 +99,16 @@ export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
             // On error, allow the page to load rather than blocking
             setIsChecking(false);
         }
-    };
+    }, [isPasswordSetupPage, pathname, router, supabase]);
+
+    useEffect(() => {
+        if (isPublicPage) {
+            setIsChecking(false);
+            return;
+        }
+
+        checkPasswordSetupRequired();
+    }, [pathname, isPublicPage, checkPasswordSetupRequired]);
 
     // Show loading state while checking
     if (isChecking && !isPublicPage) {

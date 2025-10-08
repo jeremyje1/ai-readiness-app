@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { BlueprintTask } from '@/types/blueprint';
 import { NextResponse } from 'next/server';
 
 // GET: Fetch a specific blueprint
@@ -84,7 +85,33 @@ export async function GET(
             .order('phase_number');
 
         if (!phasesError && phases) {
-            blueprint.phases = phases;
+            const priorityOrder: Record<string, number> = {
+                critical: 0,
+                high: 1,
+                medium: 2,
+                low: 3
+            };
+
+            blueprint.phases = phases.map((phase) => ({
+                ...phase,
+                objectives: Array.isArray(phase.objectives) ? phase.objectives : [],
+                deliverables: Array.isArray(phase.deliverables) ? phase.deliverables : [],
+                blueprint_tasks: ((phase.blueprint_tasks || []) as Partial<BlueprintTask>[])
+                    .map((task) => ({
+                        ...task,
+                        assigned_to: task.assigned_to || [],
+                        dependencies: task.dependencies || [],
+                        blocks: task.blocks || [],
+                        deliverables: task.deliverables || [],
+                        resources_needed: task.resources_needed || []
+                    }))
+                    .sort((a, b) => {
+                        const priorityComparison = (priorityOrder[a.priority || 'medium'] ?? 3) - (priorityOrder[b.priority || 'medium'] ?? 3);
+                        if (priorityComparison !== 0) return priorityComparison;
+                        return (a.due_date ? new Date(a.due_date).getTime() : Number.MAX_SAFE_INTEGER) -
+                            (b.due_date ? new Date(b.due_date).getTime() : Number.MAX_SAFE_INTEGER);
+                    })
+            }));
         }
 
         // Fetch progress if exists

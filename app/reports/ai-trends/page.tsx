@@ -120,7 +120,7 @@ export default function AITrendsReport() {
                         <div>
                             <Badge className="bg-amber-400 text-amber-900 mb-4">Premium Report</Badge>
                             <h1 className="text-4xl font-bold mb-2">{currentMonth} AI Trends Report</h1>
-                            <p className="text-xl text-indigo-100">Personalized insights for your institution's AI journey</p>
+                            <p className="text-xl text-indigo-100">Personalized insights for your institution&rsquo;s AI journey</p>
                         </div>
                         <div className="flex gap-3">
                             <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0">
@@ -150,9 +150,9 @@ export default function AITrendsReport() {
                         </h2>
                         <div className="prose max-w-none">
                             <p className="text-lg text-gray-700 mb-4">
-                                This month's analysis reveals significant opportunities for your institution to leverage
+                                This month&rsquo;s analysis reveals significant opportunities for your institution to leverage
                                 emerging AI technologies, particularly in student support and personalized learning.
-                                Based on your current pilot programs and 72% readiness score, we've identified
+                                Based on your current pilot programs and 72% readiness score, we&rsquo;ve identified
                                 3 high-impact initiatives that align with your strategic goals.
                             </p>
                             <div className="grid md:grid-cols-3 gap-4 mt-6">

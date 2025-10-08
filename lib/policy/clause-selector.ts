@@ -4,14 +4,14 @@
  * @version 1.0.0
  */
 
-import { 
-  ClauseSelectionInput, 
-  SelectedClause, 
-  PolicyClause, 
-  RiskLevel, 
-  ToolUseMode 
+import { CLAUSE_WEIGHTS, POLICY_CLAUSES } from './templates'
+import {
+  ClauseSelectionInput,
+  PolicyClause,
+  RiskLevel,
+  SelectedClause,
+  ToolUseMode
 } from './types'
-import { POLICY_CLAUSES, CLAUSE_WEIGHTS } from './templates'
 
 export class ClauseSelector {
   private clauses: PolicyClause[]
@@ -29,15 +29,15 @@ export class ClauseSelector {
     console.log('Selecting clauses for:', input)
 
     // Filter clauses by audience and jurisdiction
-    let candidateClauses = this.clauses.filter(clause => {
+    const candidateClauses = this.clauses.filter(clause => {
       // Audience filter
       if (clause.audience && !clause.audience.includes(input.audience)) {
         return false
       }
 
       // Jurisdiction filter
-      if (input.jurisdiction && clause.jurisdictions && 
-          !clause.jurisdictions.includes(input.jurisdiction)) {
+      if (input.jurisdiction && clause.jurisdictions &&
+        !clause.jurisdictions.includes(input.jurisdiction)) {
         return false
       }
 
@@ -154,8 +154,8 @@ export class ClauseSelector {
   private getTagScore(clause: PolicyClause, input: ClauseSelectionInput): number {
     if (!input.customTags || input.customTags.length === 0) return 0.5
 
-    const matchingTags = clause.tags.filter(tag => 
-      input.customTags!.some(customTag => 
+    const matchingTags = clause.tags.filter(tag =>
+      input.customTags!.some(customTag =>
         tag.toLowerCase().includes(customTag.toLowerCase()) ||
         customTag.toLowerCase().includes(tag.toLowerCase())
       )
@@ -168,8 +168,8 @@ export class ClauseSelector {
    * Generate human-readable reasons for clause selection
    */
   private generateSelectionReasons(
-    clause: PolicyClause, 
-    input: ClauseSelectionInput, 
+    clause: PolicyClause,
+    input: ClauseSelectionInput,
     score: number
   ): string[] {
     const reasons: string[] = []
@@ -203,8 +203,8 @@ export class ClauseSelector {
 
     // Tag matching
     if (input.customTags) {
-      const matchingTags = clause.tags.filter(tag => 
-        input.customTags!.some(customTag => 
+      const matchingTags = clause.tags.filter(tag =>
+        input.customTags!.some(customTag =>
           tag.toLowerCase().includes(customTag.toLowerCase())
         )
       )
@@ -328,7 +328,7 @@ export class ClauseSelector {
    */
   searchClauses(query: string): PolicyClause[] {
     const lowercaseQuery = query.toLowerCase()
-    return this.clauses.filter(clause => 
+    return this.clauses.filter(clause =>
       clause.title.toLowerCase().includes(lowercaseQuery) ||
       clause.body.toLowerCase().includes(lowercaseQuery) ||
       clause.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))

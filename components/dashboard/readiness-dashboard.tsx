@@ -6,25 +6,25 @@
 
 'use client'
 
-import React, { useState, useEffect, Suspense } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  TrendingUpIcon,
-  TrendingDownIcon,
-  MinusIcon,
+import { DashboardFilters, ReadinessMetrics } from '@/lib/types/dashboard'
+import { formatDistanceToNow } from 'date-fns'
+import {
   AlertTriangleIcon,
-  ShieldIcon,
   BarChart3Icon,
   CalendarIcon,
   FilterIcon,
-  RefreshCwIcon
+  MinusIcon,
+  RefreshCwIcon,
+  ShieldIcon,
+  TrendingDownIcon,
+  TrendingUpIcon
 } from 'lucide-react'
-import { ReadinessMetrics, DashboardFilters } from '@/lib/types/dashboard'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { formatDistanceToNow } from 'date-fns'
+import { Suspense, useCallback, useEffect, useState } from 'react'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 interface ReadinessDashboardProps {
   currentUserId: string
@@ -39,15 +39,11 @@ function ReadinessDashboardContent({ currentUserId, className = '' }: ReadinessD
   const [filters, setFilters] = useState<DashboardFilters>({})
 
   // Fetch metrics
-  useEffect(() => {
-    fetchMetrics()
-  }, [filters])
-
-  const fetchMetrics = async () => {
+  const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const params = new URLSearchParams()
       if (filters.department) params.append('department', filters.department)
       if (filters.dateRange) {
@@ -73,7 +69,11 @@ function ReadinessDashboardContent({ currentUserId, className = '' }: ReadinessD
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentUserId, filters])
+
+  useEffect(() => {
+    fetchMetrics()
+  }, [fetchMetrics])
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
@@ -122,13 +122,13 @@ function ReadinessDashboardContent({ currentUserId, className = '' }: ReadinessD
             </p>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <Select 
-            value={filters.department || 'all'} 
-            onValueChange={(value) => setFilters(prev => ({ 
-              ...prev, 
-              department: value === 'all' ? undefined : value 
+          <Select
+            value={filters.department || 'all'}
+            onValueChange={(value) => setFilters(prev => ({
+              ...prev,
+              department: value === 'all' ? undefined : value
             }))}
           >
             <SelectTrigger className="w-48">
@@ -143,7 +143,7 @@ function ReadinessDashboardContent({ currentUserId, className = '' }: ReadinessD
               <SelectItem value="Student Services">Student Services</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline" size="sm" onClick={fetchMetrics}>
             <RefreshCwIcon className="h-4 w-4" />
           </Button>
@@ -160,10 +160,9 @@ function ReadinessDashboardContent({ currentUserId, className = '' }: ReadinessD
                 <p className="text-3xl font-bold text-blue-600">{metrics.assessmentScores.current}</p>
                 <div className="flex items-center gap-1 mt-1">
                   {getTrendIcon(metrics.assessmentScores.trend)}
-                  <span className={`text-sm ${
-                    metrics.assessmentScores.trend === 'up' ? 'text-green-600' : 
-                    metrics.assessmentScores.trend === 'down' ? 'text-red-600' : 'text-gray-600'
-                  }`}>
+                  <span className={`text-sm ${metrics.assessmentScores.trend === 'up' ? 'text-green-600' :
+                      metrics.assessmentScores.trend === 'down' ? 'text-red-600' : 'text-gray-600'
+                    }`}>
                     {Math.abs(metrics.assessmentScores.change)} from last period
                   </span>
                 </div>
@@ -234,33 +233,33 @@ function ReadinessDashboardContent({ currentUserId, className = '' }: ReadinessD
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={metrics.trendData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   tickFormatter={(value) => new Date(value).toLocaleDateString()}
                 />
                 <YAxis />
-                <Tooltip 
+                <Tooltip
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
                   formatter={(value, name) => [value, name === 'score' ? 'Score' : name === 'completions' ? 'Completions' : 'New Risks']}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="score" 
-                  stroke="#3b82f6" 
+                <Line
+                  type="monotone"
+                  dataKey="score"
+                  stroke="#3b82f6"
                   strokeWidth={2}
                   name="score"
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="completions" 
-                  stroke="#10b981" 
+                <Line
+                  type="monotone"
+                  dataKey="completions"
+                  stroke="#10b981"
                   strokeWidth={2}
                   name="completions"
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="risks" 
-                  stroke="#f59e0b" 
+                <Line
+                  type="monotone"
+                  dataKey="risks"
+                  stroke="#f59e0b"
                   strokeWidth={2}
                   name="risks"
                 />
@@ -290,16 +289,16 @@ function ReadinessDashboardContent({ currentUserId, className = '' }: ReadinessD
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold">{risk.title}</h3>
-                        {getRiskBadge(risk.level, 0).props.children.includes('critical') && 
+                        {getRiskBadge(risk.level, 0).props.children.includes('critical') &&
                           <Badge className="bg-red-100 text-red-800">{risk.level}</Badge>
                         }
-                        {getRiskBadge(risk.level, 0).props.children.includes('high') && 
+                        {getRiskBadge(risk.level, 0).props.children.includes('high') &&
                           <Badge className="bg-orange-100 text-orange-800">{risk.level}</Badge>
                         }
-                        {getRiskBadge(risk.level, 0).props.children.includes('medium') && 
+                        {getRiskBadge(risk.level, 0).props.children.includes('medium') &&
                           <Badge className="bg-yellow-100 text-yellow-800">{risk.level}</Badge>
                         }
-                        {getRiskBadge(risk.level, 0).props.children.includes('low') && 
+                        {getRiskBadge(risk.level, 0).props.children.includes('low') &&
                           <Badge className="bg-green-100 text-green-800">{risk.level}</Badge>
                         }
                       </div>
@@ -337,7 +336,7 @@ function ReadinessDashboardSkeleton({ className = '' }: { className?: string }) 
           <div className="h-10 bg-gray-200 rounded w-10 animate-pulse"></div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
@@ -347,7 +346,7 @@ function ReadinessDashboardSkeleton({ className = '' }: { className?: string }) 
           </Card>
         ))}
       </div>
-      
+
       <Card>
         <CardContent className="p-6">
           <div className="h-80 bg-gray-200 rounded animate-pulse"></div>
@@ -357,14 +356,14 @@ function ReadinessDashboardSkeleton({ className = '' }: { className?: string }) 
   )
 }
 
-function ReadinessDashboardError({ 
-  error, 
-  onRetry, 
-  className = '' 
-}: { 
+function ReadinessDashboardError({
+  error,
+  onRetry,
+  className = ''
+}: {
   error: string
   onRetry: () => void
-  className?: string 
+  className?: string
 }) {
   return (
     <div className={`space-y-6 ${className}`}>

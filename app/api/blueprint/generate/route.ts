@@ -162,6 +162,7 @@ export async function POST(request: Request) {
             total_budget: 0,
             quick_wins: [],
             recommended_tools: [],
+            recommended_policies: [],
             is_public: false,
             share_token: Math.random().toString(36).substring(2, 15),
             shared_with: []

@@ -16,7 +16,7 @@ export default function DemoPage() {
                         <div className="text-center">
                             <div className="text-6xl mb-4">🎬</div>
                             <div className="text-2xl font-semibold text-gray-700">Demo Video Coming Soon</div>
-                            <p className="text-gray-600 mt-2">We're preparing a comprehensive video walkthrough</p>
+                            <p className="text-gray-600 mt-2">We&rsquo;re preparing a comprehensive video walkthrough</p>
                         </div>
                     </div>
                 </div>

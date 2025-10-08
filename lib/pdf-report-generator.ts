@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { translateText, translateUIElement, getReportLabels, InstitutionType } from './industryLanguageMapping';
+import { getReportLabels, InstitutionType, translateText, translateUIElement } from './industryLanguageMapping';
 
 export interface ReportData {
   analysis: any;
@@ -48,7 +48,7 @@ export class PDFReportGenerator {
     if (data.institutionType) {
       this.institutionType = data.institutionType;
     }
-    
+
     // Handle static content documents
     if (data.isStaticContent) {
       return await this.generateStaticContentPDF(data);
@@ -57,19 +57,19 @@ export class PDFReportGenerator {
     // Create a simplified PDF for now to avoid complex template issues
     await this.createCoverPage(data);
     await this.createSimplifiedReport(data.analysis);
-    
+
     return this.pdf.output('blob');
   }
 
   async createSimplifiedReport(analysis: any): Promise<void> {
     this.checkPageSpace(30);
-    
+
     // Executive Summary
     this.pdf.setFontSize(18);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.text('Executive Summary', this.margin, this.currentY);
     this.currentY += 15;
-    
+
     // Overall Score - Fixed NaN issue
     this.pdf.setFontSize(12);
     this.pdf.setFont('helvetica', 'normal');
@@ -79,14 +79,14 @@ export class PDFReportGenerator {
       this.currentY += 8;
       this.pdf.text(`Status: ${analysis.executiveSummary.organizationalHealth.status || 'Not Available'}`, this.margin, this.currentY);
       this.currentY += 8;
-      
+
       // Description with text wrapping
       const description = analysis.executiveSummary.organizationalHealth.description || 'Assessment analysis not available';
       const lines = this.pdf.splitTextToSize(description, this.pageWidth - 2 * this.margin);
       this.pdf.text(lines, this.margin, this.currentY);
       this.currentY += lines.length * 6 + 10;
     }
-    
+
     // Assessment Details - NEW SECTION
     if (analysis.submissionDetails) {
       this.checkPageSpace(30);
@@ -94,18 +94,18 @@ export class PDFReportGenerator {
       this.pdf.text('Assessment Details', this.margin, this.currentY);
       this.currentY += 10;
       this.pdf.setFont('helvetica', 'normal');
-      
+
       this.pdf.text(`Institution: ${analysis.submissionDetails.institution_name || 'Not provided'}`, this.margin, this.currentY);
       this.currentY += 8;
       this.pdf.text(`Organization Type: ${analysis.submissionDetails.organization_type || 'Not specified'}`, this.margin, this.currentY);
       this.currentY += 8;
       this.pdf.text(`Total Questions Answered: ${analysis.submissionDetails.total_responses || 0}`, this.margin, this.currentY);
       this.currentY += 8;
-      
+
       if (analysis.uploadedFiles && analysis.uploadedFiles.length > 0) {
         this.pdf.text(`Uploaded Documents: ${analysis.uploadedFiles.length} files`, this.margin, this.currentY);
         this.currentY += 8;
-        
+
         // List uploaded files
         analysis.uploadedFiles.forEach((file: any, index: number) => {
           if (index < 5) { // Limit to first 5 files
@@ -114,7 +114,7 @@ export class PDFReportGenerator {
             this.currentY += 6;
           }
         });
-        
+
         if (analysis.uploadedFiles.length > 5) {
           this.pdf.text(`  ... and ${analysis.uploadedFiles.length - 5} more files`, this.margin + 10, this.currentY);
           this.currentY += 6;
@@ -122,7 +122,7 @@ export class PDFReportGenerator {
       }
       this.currentY += 5;
     }
-    
+
     // AI Readiness
     if (analysis.executiveSummary?.aiReadiness) {
       this.checkPageSpace(20);
@@ -132,17 +132,17 @@ export class PDFReportGenerator {
       this.pdf.setFont('helvetica', 'normal');
       this.pdf.text(`AI Readiness Level: ${analysis.executiveSummary.aiReadiness.level || 'Not assessed'}`, this.margin, this.currentY);
       this.currentY += 8;
-      
+
       const aiScore = analysis.executiveSummary.aiReadiness.score || 0;
       this.pdf.text(`AI Score: ${aiScore}/100`, this.margin, this.currentY);
       this.currentY += 8;
-      
+
       const aiDescription = analysis.executiveSummary.aiReadiness.description || 'AI readiness analysis not available';
       const aiLines = this.pdf.splitTextToSize(aiDescription, this.pageWidth - 2 * this.margin);
       this.pdf.text(aiLines, this.margin, this.currentY);
       this.currentY += aiLines.length * 6 + 10;
     }
-    
+
     // Recommendations - Fixed [object Object] issue
     if (analysis.recommendations && analysis.recommendations.length > 0) {
       this.checkPageSpace(30);
@@ -150,7 +150,7 @@ export class PDFReportGenerator {
       this.pdf.text('Key Recommendations', this.margin, this.currentY);
       this.currentY += 10;
       this.pdf.setFont('helvetica', 'normal');
-      
+
       analysis.recommendations.forEach((rec: any, index: number) => {
         this.checkPageSpace(10);
         // Convert object to string if necessary
@@ -161,7 +161,7 @@ export class PDFReportGenerator {
         this.currentY += recLines.length * 6 + 5;
       });
     }
-    
+
     // Key Assessment Insights - NEW SECTION
     if (analysis.responses && Object.keys(analysis.responses).length > 0) {
       this.checkPageSpace(40);
@@ -169,29 +169,29 @@ export class PDFReportGenerator {
       this.pdf.text('Key Assessment Insights', this.margin, this.currentY);
       this.currentY += 10;
       this.pdf.setFont('helvetica', 'normal');
-      
+
       // Analyze and display top insights from responses
       const responses = analysis.responses;
       const responseCount = Object.keys(responses).length;
-      
+
       this.pdf.text(`Based on your ${responseCount} detailed responses, key insights include:`, this.margin, this.currentY);
       this.currentY += 10;
-      
+
       // Find highest and lowest scoring areas
       const sectionScores = analysis.sectionScores || {};
-      const sortedSections = Object.entries(sectionScores).sort(([,a], [,b]) => (b as number) - (a as number));
-      
+      const sortedSections = Object.entries(sectionScores).sort(([, a], [, b]) => (b as number) - (a as number));
+
       if (sortedSections.length > 0) {
         const [highestSection, highestScore] = sortedSections[0];
         const [lowestSection, lowestScore] = sortedSections[sortedSections.length - 1];
-        
+
         this.pdf.text(`• Strongest area: ${highestSection.charAt(0).toUpperCase() + highestSection.slice(1)} (${Math.round((highestScore as number) * 100)}%)`, this.margin + 10, this.currentY);
         this.currentY += 8;
-        
+
         this.pdf.text(`• Area for improvement: ${lowestSection.charAt(0).toUpperCase() + lowestSection.slice(1)} (${Math.round((lowestScore as number) * 100)}%)`, this.margin + 10, this.currentY);
         this.currentY += 8;
       }
-      
+
       // Sample of specific responses (first few non-null responses)
       let responseCount2 = 0;
       for (const [question, answer] of Object.entries(responses)) {
@@ -208,7 +208,7 @@ export class PDFReportGenerator {
       }
       this.currentY += 5;
     }
-    
+
     // Action Items
     if (analysis.executiveSummary?.actionRequired) {
       this.checkPageSpace(25);
@@ -216,15 +216,15 @@ export class PDFReportGenerator {
       this.pdf.text('Executive Action Items', this.margin, this.currentY);
       this.currentY += 10;
       this.pdf.setFont('helvetica', 'normal');
-      
+
       const criticalItems = analysis.executiveSummary.actionRequired.critical || 0;
       const highPriorityItems = analysis.executiveSummary.actionRequired.high || 0;
-      
+
       this.pdf.text(`Critical Issues: ${criticalItems}`, this.margin, this.currentY);
       this.currentY += 8;
       this.pdf.text(`High Priority Items: ${highPriorityItems}`, this.margin, this.currentY);
       this.currentY += 8;
-      
+
       const actionDescription = analysis.executiveSummary.actionRequired.description || 'Action items based on assessment findings';
       const actionLines = this.pdf.splitTextToSize(actionDescription, this.pageWidth - 2 * this.margin);
       this.pdf.text(actionLines, this.margin, this.currentY);
@@ -236,7 +236,7 @@ export class PDFReportGenerator {
     // Create professional static content PDF
     this.pdf.setFillColor(25, 43, 81); // Professional dark blue header
     this.pdf.rect(0, 0, this.pageWidth, 60, 'F');
-    
+
     this.pdf.setTextColor(255, 255, 255);
     this.pdf.setFontSize(24);
     this.pdf.setFont('helvetica', 'bold');
@@ -251,10 +251,10 @@ export class PDFReportGenerator {
     if (data.analysis.content) {
       const content = this.translateContent(data.analysis.content);
       const lines = content.split('\n');
-      
+
       for (const line of lines) {
         this.checkPageSpace(15);
-        
+
         if (line.startsWith('# ')) {
           // Main heading
           this.pdf.setFontSize(18);
@@ -340,10 +340,10 @@ export class PDFReportGenerator {
     const organizationalHealth = executiveSummary.organizationalHealth?.score || 0;
     const aiReadinessScore = executiveSummary.aiReadiness?.score || 0;
     const redundancyIndex = executiveSummary.redundancyAssessment?.index || 0;
-    
+
     this.pdf.setFillColor(25, 43, 81);
     this.pdf.rect(this.margin, 225, this.pageWidth - 2 * this.margin, 25, 'F');
-    
+
     this.pdf.setTextColor(255, 255, 255);
     this.pdf.setFontSize(18);
     this.pdf.setFont('helvetica', 'bold');
@@ -351,7 +351,7 @@ export class PDFReportGenerator {
 
     this.pdf.setTextColor(0, 0, 0);
     this.pdf.setFillColor(255, 255, 255);
-    
+
     // Professional metric boxes
     const metrics = [
       { label: 'Organizational Health', value: `${Math.round(organizationalHealth)}/100`, color: this.getScoreColor(organizationalHealth) },
@@ -359,20 +359,20 @@ export class PDFReportGenerator {
       { label: 'Redundancy Index', value: `${Math.round(redundancyIndex)}%`, color: this.getRedundancyColor(redundancyIndex) }
     ];
 
-    let yPos = 260;
+    const yPos = 260;
     metrics.forEach((metric, index) => {
       const xPos = this.margin + (index * 65);
-      
+
       // Metric box
       this.pdf.setFillColor(250, 250, 250);
       this.pdf.rect(xPos, yPos, 60, 30, 'F');
-      
+
       // Metric value with color coding
       this.pdf.setTextColor(metric.color.r, metric.color.g, metric.color.b);
       this.pdf.setFontSize(16);
       this.pdf.setFont('helvetica', 'bold');
       this.pdf.text(metric.value, xPos + 5, yPos + 15);
-      
+
       // Metric label
       this.pdf.setTextColor(70, 70, 70);
       this.pdf.setFontSize(10);
@@ -386,7 +386,7 @@ export class PDFReportGenerator {
     this.pdf.setFontSize(12);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.text('CONFIDENTIAL - BOARD USE ONLY', this.margin, 310);
-    
+
     this.pdf.setFontSize(10);
     this.pdf.setFont('helvetica', 'normal');
     this.pdf.text('This report contains proprietary analysis and strategic recommendations.', this.margin, 320);
@@ -420,7 +420,7 @@ export class PDFReportGenerator {
     // Board-Ready Professional Header with logo space
     this.pdf.setFillColor(25, 43, 81); // Executive navy blue
     this.pdf.rect(0, 0, this.pageWidth, 80, 'F');
-    
+
     // Executive-level title styling
     this.pdf.setTextColor(255, 255, 255);
     this.pdf.setFontSize(36);
@@ -438,16 +438,16 @@ export class PDFReportGenerator {
 
     // Reset text color and add premium styling
     this.pdf.setTextColor(0, 0, 0);
-    
+
     // Executive institution name section
     if (data.institutionName) {
       this.pdf.setFillColor(245, 245, 245);
       this.pdf.rect(this.margin, 95, this.pageWidth - 2 * this.margin, 35, 'F');
-      
+
       this.pdf.setFontSize(28);
       this.pdf.setFont('helvetica', 'bold');
       this.pdf.text(data.institutionName, this.margin + 10, 115);
-      
+
       // Subtitle
       this.pdf.setFontSize(16);
       this.pdf.setFont('helvetica', 'normal');
@@ -476,7 +476,7 @@ export class PDFReportGenerator {
 
     // Key metrics preview with enhanced design
     const { organizationalHealth, aiReadinessScore, redundancyIndex } = data.analysis;
-    
+
     this.pdf.setFillColor(248, 249, 250);
     this.pdf.rect(this.margin, 175, this.pageWidth - 2 * this.margin, 60, 'F');
     this.pdf.setDrawColor(220, 221, 225);
@@ -490,13 +490,13 @@ export class PDFReportGenerator {
     this.pdf.setFont('helvetica', 'normal');
     const healthColor = organizationalHealth >= 80 ? [34, 197, 94] : organizationalHealth >= 60 ? [251, 146, 60] : [239, 68, 68];
     const aiColor = aiReadinessScore >= 80 ? [34, 197, 94] : aiReadinessScore >= 60 ? [251, 146, 60] : [239, 68, 68];
-    
+
     this.pdf.setTextColor(healthColor[0], healthColor[1], healthColor[2]);
     this.pdf.text(`Organizational Health: ${Math.round(organizationalHealth)}/100`, this.margin + 10, 205);
-    
+
     this.pdf.setTextColor(aiColor[0], aiColor[1], aiColor[2]);
     this.pdf.text(`AI Readiness Score: ${Math.round(aiReadinessScore)}/100`, this.margin + 10, 220);
-    
+
     this.pdf.setTextColor(0, 0, 0);
     this.pdf.text(`Optimization Potential: ${Math.round(redundancyIndex)}%`, this.margin + 10, 235);
 
@@ -505,7 +505,7 @@ export class PDFReportGenerator {
     this.pdf.setFont('helvetica', 'italic');
     this.pdf.text('Powered by OREA (Organizational Realignment Engine Algorithm)', this.margin, 255);
     this.pdf.text('Northpath Strategies - Strategic Organizational Consulting', this.margin, 265);
-    
+
     this.pdf.setFont('helvetica', 'normal');
     this.pdf.text('CONFIDENTIAL - For Internal Use Only', this.margin, 280);
     this.pdf.text('© 2025 Northpath Strategies', this.pageWidth - 80, 280);
@@ -515,7 +515,7 @@ export class PDFReportGenerator {
 
   private async createTableOfContents() {
     this.addSectionHeader('Table of Contents');
-    
+
     const contents = [
       { title: 'Executive Summary', page: 3 },
       { title: 'Key Performance Metrics', page: 4 },
@@ -534,7 +534,7 @@ export class PDFReportGenerator {
       const y = this.currentY + (index * 12);
       this.pdf.setFontSize(12);
       this.pdf.text(item.title, this.margin, y);
-      
+
       // Draw dots
       const dotsStart = this.margin + 120;
       const dotsEnd = this.pageWidth - 40;
@@ -544,7 +544,7 @@ export class PDFReportGenerator {
         this.pdf.text('.', dotX, y);
         dotX += 3;
       }
-      
+
       this.pdf.setFontSize(12);
       this.pdf.text(item.page.toString(), this.pageWidth - 30, y);
     });
@@ -555,11 +555,11 @@ export class PDFReportGenerator {
   private async createExecutiveSummary(executiveSummary: any) {
     // Board-ready executive summary with professional layout
     this.addBoardReadyHeader('Executive Summary');
-    
+
     // Strategic overview section
     this.addSubsectionHeader('Strategic Overview');
     this.addText('This executive summary provides board-level insights into organizational health, AI readiness, and strategic realignment opportunities. The analysis leverages our proprietary OREA™ algorithm to deliver actionable intelligence for executive decision-making.');
-    
+
     this.addLineBreak();
 
     // Organizational Health - Executive Format
@@ -567,7 +567,7 @@ export class PDFReportGenerator {
     this.addExecutiveMetric('Current Status', executiveSummary.organizationalHealth.status);
     this.addExecutiveMetric('Health Score', `${executiveSummary.organizationalHealth.score}/100`);
     this.addText(executiveSummary.organizationalHealth.description);
-    
+
     this.addLineBreak();
 
     // AI Readiness - Strategic Perspective
@@ -575,14 +575,14 @@ export class PDFReportGenerator {
     this.addExecutiveMetric('Readiness Level', executiveSummary.aiReadiness.level);
     this.addExecutiveMetric('AI Score', `${executiveSummary.aiReadiness.score}/100`);
     this.addText(executiveSummary.aiReadiness.description);
-    
+
     this.addLineBreak();
 
     // Redundancy Assessment - Cost Impact Focus
     this.addSubsectionHeader('Operational Efficiency & Redundancy Analysis');
     this.addExecutiveMetric('Redundancy Index', `${executiveSummary.redundancyAssessment.index}%`);
     this.addText(executiveSummary.redundancyAssessment.description);
-    
+
     this.addLineBreak();
 
     // Action Required - Board Decision Points
@@ -597,13 +597,13 @@ export class PDFReportGenerator {
   private addBoardReadyHeader(title: string) {
     this.pdf.setFillColor(25, 43, 81);
     this.pdf.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, 25, 'F');
-    
+
     this.pdf.setTextColor(255, 255, 255);
     this.pdf.setFontSize(20);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.text(title, this.margin + 10, this.currentY + 17);
     this.pdf.setTextColor(0, 0, 0);
-    
+
     this.currentY += 35;
   }
 
@@ -611,7 +611,7 @@ export class PDFReportGenerator {
     this.checkPageBreak(20);
     this.pdf.setFillColor(240, 240, 240);
     this.pdf.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, 18, 'F');
-    
+
     this.pdf.setFontSize(14);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.text(title, this.margin + 8, this.currentY + 12);
@@ -623,47 +623,47 @@ export class PDFReportGenerator {
     this.pdf.setFontSize(12);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.text(`${label}:`, this.margin + 5, this.currentY);
-    
+
     this.pdf.setFont('helvetica', 'normal');
     this.pdf.setTextColor(25, 43, 81);
     this.pdf.text(value, this.margin + 5 + this.pdf.getTextWidth(`${label}: `), this.currentY);
     this.pdf.setTextColor(0, 0, 0);
-    
+
     this.currentY += 15;
   }
 
   private async createAIExecutiveSummary(analysis: any) {
     this.addSectionHeader('AI-Enhanced Executive Summary');
-    
+
     if (analysis.executiveSummary) {
       this.addText(analysis.executiveSummary);
       this.addSpacing(10);
     }
-    
+
     this.addSubheader('AI-Generated Insights');
     this.addText('This analysis leverages advanced artificial intelligence to provide deeper insights into your organizational structure, efficiency patterns, and strategic opportunities.');
-    
+
     this.addNewPage();
   }
 
   private async createAIKeyFindings(analysis: any) {
     this.addSectionHeader('Key Findings');
-    
+
     if (analysis.keyFindings && Array.isArray(analysis.keyFindings)) {
       analysis.keyFindings.forEach((finding: string, index: number) => {
         this.pdf.setFontSize(12);
         this.pdf.setFont('helvetica', 'bold');
         this.pdf.text(`${index + 1}.`, this.margin, this.currentY);
-        
+
         this.pdf.setFont('helvetica', 'normal');
         const lines = this.pdf.splitTextToSize(finding, this.pageWidth - 2 * this.margin - 10);
         this.pdf.text(lines, this.margin + 10, this.currentY);
-        
+
         this.currentY += lines.length * 6 + 5;
         this.checkPageSpace(10);
       });
     }
-    
+
     this.addNewPage();
   }
 
@@ -681,18 +681,18 @@ export class PDFReportGenerator {
       const y = this.currentY + (index * 25);
       this.pdf.setFontSize(12);
       this.pdf.text(metric.label, this.margin, y);
-      
+
       // Draw bar
       const barWidth = (metric.value / 100) * 100;
-      this.pdf.setFillColor(metric.value > 70 ? 76 : metric.value > 50 ? 255 : 220, 
-                           metric.value > 70 ? 175 : metric.value > 50 ? 193 : 53, 
-                           metric.value > 70 ? 80 : metric.value > 50 ? 7 : 69);
+      this.pdf.setFillColor(metric.value > 70 ? 76 : metric.value > 50 ? 255 : 220,
+        metric.value > 70 ? 175 : metric.value > 50 ? 193 : 53,
+        metric.value > 70 ? 80 : metric.value > 50 ? 7 : 69);
       this.pdf.rect(this.margin + 50, y - 5, barWidth, 8, 'F');
-      
+
       // Draw border
       this.pdf.setDrawColor(200, 200, 200);
       this.pdf.rect(this.margin + 50, y - 5, 100, 8);
-      
+
       // Add percentage
       this.pdf.text(`${Math.round(metric.value)}%`, this.margin + 160, y);
     });
@@ -710,12 +710,12 @@ export class PDFReportGenerator {
 
     recommendations.slice(0, 8).forEach((rec, index) => {
       this.checkPageBreak(60);
-      
+
       // Recommendation header with priority styling
       const priorityColor = this.getPriorityColor(rec.priority);
       this.pdf.setFillColor(priorityColor.r, priorityColor.g, priorityColor.b);
       this.pdf.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, 20, 'F');
-      
+
       this.pdf.setTextColor(255, 255, 255);
       this.pdf.setFontSize(14);
       this.pdf.setFont('helvetica', 'bold');
@@ -727,39 +727,39 @@ export class PDFReportGenerator {
       this.addExecutiveMetric('Strategic Priority', rec.priority.toUpperCase());
       this.addExecutiveMetric('Financial Category', rec.category);
       this.addExecutiveMetric('Department/Division', rec.section);
-      
+
       // Financial impact section
       this.pdf.setFillColor(250, 250, 250);
       this.pdf.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, 40, 'F');
-      
+
       this.pdf.setFontSize(12);
       this.pdf.setFont('helvetica', 'bold');
       this.pdf.text('FINANCIAL IMPACT ANALYSIS', this.margin + 8, this.currentY + 12);
-      
+
       this.currentY += 20;
       this.addExecutiveMetric('Expected ROI', `${rec.expectedROI}% within ${rec.timeToImplement} months`);
-      
+
       // Calculate and display dollar impact
       const estimatedSavings = this.calculateSavings(rec.expectedROI, rec.section);
       this.addExecutiveMetric('Projected Annual Savings', `$${estimatedSavings.toLocaleString()}`);
       this.addExecutiveMetric('Risk Assessment', `${rec.riskLevel}/10 (${this.getRiskLabel(rec.riskLevel)})`);
-      
+
       this.currentY += 15;
-      
+
       // Implementation details
       this.addSubsectionHeader('Implementation Strategy');
       this.addText(rec.description);
-      
+
       if (rec.aiOpportunity) {
         this.addLineBreak();
         this.addExecutiveMetric('AI Automation Potential', `${rec.aiOpportunity.automationPotential}%`);
         this.addExecutiveMetric('Technology Requirements', rec.aiOpportunity.toolsRequired.join(', '));
       }
-      
+
       // Responsible party and timeline
       this.addExecutiveMetric('Executive Owner', this.getExecutiveOwner(rec.section));
       this.addExecutiveMetric('Board Review Date', this.getReviewDate(rec.timeToImplement));
-      
+
       this.currentY += 20;
     });
 
@@ -767,7 +767,7 @@ export class PDFReportGenerator {
   }
 
   private getPriorityColor(priority: string) {
-    switch(priority.toLowerCase()) {
+    switch (priority.toLowerCase()) {
       case 'critical': return { r: 220, g: 20, b: 60 }; // Red
       case 'high': return { r: 255, g: 140, b: 0 }; // Orange
       case 'medium': return { r: 255, g: 215, b: 0 }; // Gold
@@ -826,7 +826,7 @@ export class PDFReportGenerator {
 
     sectionsAnalysis.forEach((section) => {
       this.checkPageSpace(35);
-      
+
       this.addSubheader(section.section);
       this.addText(`Performance: ${section.performance}`);
       this.addText(`Average Score: ${section.averageScore}/5.0`);
@@ -834,7 +834,7 @@ export class PDFReportGenerator {
       this.addText(`Strength Areas: ${section.strengthAreas} questions`);
       this.addText(`Improvement Areas: ${section.improvementAreas} questions`);
       this.addText(`Total Questions: ${section.totalQuestions}`);
-      
+
       this.addSpacing(6);
     });
 
@@ -866,12 +866,12 @@ export class PDFReportGenerator {
 
     roadmap.forEach((phase) => {
       this.checkPageSpace(25);
-      
+
       this.addSubheader(`Phase ${phase.phase}: ${phase.name}`);
       this.addText(`Duration: ${phase.duration} months`);
       this.addText(`Expected Impact: ${phase.expectedImpact}`);
       this.addText(`Recommendations: ${phase.recommendations.length} items`);
-      
+
       this.addSpacing(6);
     });
 
@@ -880,10 +880,10 @@ export class PDFReportGenerator {
 
   private async createCostBenefitAnalysis(analysis: any) {
     this.addSectionHeader('Cost-Benefit Analysis');
-    
+
     if (analysis.costBenefitAnalysis) {
       const cba = analysis.costBenefitAnalysis;
-      
+
       this.addSubheader('Financial Impact Summary');
       this.addText(`Total Implementation Cost: $${cba.totalImplementationCost?.toLocaleString() || 'N/A'}`);
       this.addText(`Expected Annual Savings: $${cba.expectedAnnualSavings?.toLocaleString() || 'N/A'}`);
@@ -891,22 +891,22 @@ export class PDFReportGenerator {
       this.addText(`5-Year ROI: ${cba.fiveYearROI || 'N/A'}%`);
       this.addText(`Risk-Adjusted ROI: ${cba.riskAdjustedROI || 'N/A'}%`);
     }
-    
+
     this.addNewPage();
   }
 
   private async createBenchmarkComparison(analysis: any) {
     this.addSectionHeader('Industry Benchmarks');
-    
+
     if (analysis.benchmarkComparison) {
       const benchmark = analysis.benchmarkComparison;
-      
+
       this.addSubheader('Peer Comparison');
       this.addText(benchmark.peerComparison);
       this.addSpacing(10);
-      
+
       this.addSubheader('Performance Metrics vs Industry Standards');
-      
+
       if (benchmark.industryStandards) {
         benchmark.industryStandards.forEach((metric: any) => {
           this.addText(`${metric.metric}:`);
@@ -917,35 +917,35 @@ export class PDFReportGenerator {
         });
       }
     }
-    
+
     this.addNewPage();
   }
 
   private async createRiskAssessment(analysis: any) {
     this.addSectionHeader('Risk Assessment');
-    
+
     if (analysis.riskAssessment) {
       this.addText(analysis.riskAssessment);
     }
-    
+
     this.addNewPage();
   }
 
   private async createImplementationRoadmap(analysis: any) {
     this.addSectionHeader('Implementation Roadmap');
-    
+
     if (analysis.implementationRoadmap) {
       analysis.implementationRoadmap.forEach((phase: any) => {
         this.addSubheader(`${phase.phase.toUpperCase()} (${phase.timeframe})`);
         this.addText(`Priority: ${phase.priority.toUpperCase()}`);
-        
+
         if (phase.initiatives) {
           phase.initiatives.forEach((initiative: any) => {
             this.pdf.setFontSize(11);
             this.pdf.setFont('helvetica', 'bold');
             this.pdf.text(`• ${initiative.title}`, this.margin + 5, this.currentY);
             this.currentY += 6;
-            
+
             this.pdf.setFont('helvetica', 'normal');
             this.pdf.setFontSize(10);
             this.addText(`  ${initiative.description}`);
@@ -953,33 +953,33 @@ export class PDFReportGenerator {
             this.addSpacing(3);
           });
         }
-        
+
         this.addSpacing(10);
       });
     }
-    
+
     this.addNewPage();
   }
 
   private async createAppendix() {
     this.addSectionHeader('Appendix');
-    
+
     this.addSubheader('Methodology');
     this.addText('This analysis was conducted using the Organizational Realignment Engine Algorithm (OREA), which evaluates organizational efficiency, AI readiness, and optimization opportunities across multiple dimensions.');
-    
+
     this.addSpacing(5);
-    
+
     this.addSubheader('Data Sources');
     this.addText('• Assessment responses from key stakeholders');
     this.addText('• Industry benchmarking data');
     this.addText('• Best practice frameworks');
     this.addText('• AI capability assessments');
-    
+
     this.addSpacing(5);
-    
+
     this.addSubheader('Scoring Methodology');
     this.addText('Scores are calculated using weighted averages across response categories, with additional algorithms for consistency checking and outlier detection.');
-    
+
     this.addNewPage();
   }
 
@@ -1003,7 +1003,7 @@ export class PDFReportGenerator {
     this.checkPageSpace(8);
     this.pdf.setFontSize(10);
     this.pdf.setFont('helvetica', 'normal');
-    
+
     // Handle text wrapping
     const lines = this.pdf.splitTextToSize(text, this.pageWidth - (this.margin * 2));
     lines.forEach((line: string) => {
@@ -1030,7 +1030,7 @@ export class PDFReportGenerator {
 
   private addPageNumbers() {
     const pageCount = this.pdf.internal.getNumberOfPages();
-    
+
     for (let i = 1; i <= pageCount; i++) {
       this.pdf.setPage(i);
       this.pdf.setFontSize(10);
@@ -1052,7 +1052,7 @@ export class PDFReportGenerator {
 
 export async function generatePDFReport(analysisData: any, institutionName?: string): Promise<Blob> {
   const generator = new PDFReportGenerator();
-  
+
   // Transform simple assessment data into the expected complex structure
   const transformedAnalysis = {
     executiveSummary: {
@@ -1090,7 +1090,7 @@ export async function generatePDFReport(analysisData: any, institutionName?: str
       longTerm: ['Cultural transformation', 'Continuous improvement systems']
     }
   };
-  
+
   const reportData: ReportData = {
     analysis: transformedAnalysis,
     institutionName: institutionName || analysisData.assessmentData?.institutionName || 'Your Institution',
@@ -1141,7 +1141,7 @@ function getRedundancyDescription(score: number): string {
 function transformSectionScores(sectionScores: any): any {
   const sections = ['leadership', 'operations', 'technology', 'culture', 'strategy'];
   const result: any = {};
-  
+
   sections.forEach(section => {
     const score = sectionScores[section] || sectionScores.overall || 0.5;
     result[section] = {
@@ -1150,7 +1150,7 @@ function transformSectionScores(sectionScores: any): any {
       recommendations: [`Improve ${section} effectiveness`, `Enhance ${section} processes`]
     };
   });
-  
+
   return result;
 }
 
@@ -1162,13 +1162,13 @@ function generateAIImplementationPhases(tier: string): string[] {
     'Full Deployment',
     'Optimization and Scaling'
   ];
-  
+
   if (tier === 'enterprise-transformation') {
     return phases;
   } else if (tier === 'comprehensive-package') {
     return phases.slice(0, 4);
   }
-  
+
   return phases.slice(0, 3);
 }
 
@@ -1184,7 +1184,7 @@ function getInstitutionType(orgType: string): InstitutionType | undefined {
     'company_business': 'CorporateTraining',
     'trade_technical': 'HigherEd'
   };
-  
+
   return mapping[orgType];
 }
 
@@ -1193,35 +1193,35 @@ function getInstitutionType(orgType: string): InstitutionType | undefined {
  * This function is used for testing and specialized report generation
  */
 export function generateIndustrySpecificPDFContent(
-  analysisData: any, 
+  analysisData: any,
   institutionType: InstitutionType
 ): { translatedSections: Record<string, string>; customTerms: Record<string, string> } {
   const reportLabels = getReportLabels(institutionType);
-  
+
   // Create sample translated sections for testing
   const translatedSections: Record<string, string> = {};
   const customTerms: Record<string, string> = {};
-  
+
   // Translate common report sections
   const commonSections = [
     'Executive Summary',
-    'Recommendations', 
+    'Recommendations',
     'Implementation Plan',
     'Success Metrics',
     'Cost Analysis',
     'Risk Assessment'
   ];
-  
+
   commonSections.forEach(section => {
     translatedSections[section] = reportLabels[section] || section;
   });
-  
+
   // Translate common terms based on institution type
   const commonTerms = ['student', 'curriculum', 'enrollment'];
   commonTerms.forEach(term => {
     customTerms[term] = translateText(term, institutionType);
   });
-  
+
   return {
     translatedSections,
     customTerms

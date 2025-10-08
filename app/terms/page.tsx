@@ -100,7 +100,7 @@ export default function TermsOfServicePage() {
           <li>Custom reports, templates, and analytical frameworks</li>
           <li>Software code, user interfaces, and platform architecture</li>
           <li>Educational content, best practices, and research insights</li>
-          <li>Trademarks including "AI Blueprint™" and "NorthPath Strategies"</li>
+          <li>Trademarks including &ldquo;AI Blueprint™&rdquo; and &ldquo;NorthPath Strategies&rdquo;</li>
         </ul>
 
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Your Content</h3>
@@ -128,7 +128,7 @@ export default function TermsOfServicePage() {
         <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Refund Policy</h3>
         <div className="bg-green-50 p-4 rounded-lg">
           <p className="text-green-800 mb-2">
-            <strong>30-Day Satisfaction Guarantee:</strong> If you're not satisfied with our service,
+            <strong>30-Day Satisfaction Guarantee:</strong> If you’re not satisfied with our service,
             contact us within 30 days of your initial purchase for a full refund.
           </p>
           <ul className="list-disc pl-6 space-y-1 text-green-700 text-sm">
@@ -239,7 +239,7 @@ export default function TermsOfServicePage() {
         <ul className="list-disc pl-6 space-y-2 text-gray-700">
           <li>Email notification to registered users at least 30 days before changes take effect</li>
           <li>Prominent notice on our platform and website</li>
-          <li>Updated "Last modified" date at the top of these terms</li>
+          <li>Updated &ldquo;Last modified&rdquo; date at the top of these terms</li>
           <li>Continued use of our services constitutes acceptance of modified terms</li>
         </ul>
 

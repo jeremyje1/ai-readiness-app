@@ -460,7 +460,7 @@ export default function LoginPage() {
         </div>
 
         <div className='text-sm text-gray-600 text-center mt-4'>
-          Don't have an account?{' '}
+          Don&rsquo;t have an account?{' '}
           <a href='/get-started' className='font-medium text-indigo-600 hover:text-indigo-500'>
             Start your free trial
           </a>

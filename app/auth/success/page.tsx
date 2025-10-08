@@ -11,69 +11,77 @@ export default function AuthSuccessPage() {
     const router = useRouter();
 
     useEffect(() => {
-        checkUser();
-    }, []);
+        let isMounted = true;
 
-    const checkUser = async () => {
-        const supabase = createClient();
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) {
-            console.error('Error getting user:', error);
-            setLoading(false);
-            return;
-        }
-        setUser(user);
-
-        if (!user) {
-            console.warn('No authenticated user found on auth success page');
-            router.push('/auth/login');
-            return;
-        }
-
-        // Check if trial user - redirect immediately to dashboard
-        const isTrial = user?.user_metadata?.subscription_status === 'trial' ||
-            user?.user_metadata?.subscription_status === 'trialing';
-
-        if (isTrial) {
-            console.log('Trial user detected, redirecting to dashboard...');
-            router.push('/dashboard/personalized');
-            return;
-        }
-
-        // Check user metadata first
-        if (user?.user_metadata?.payment_verified || user?.user_metadata?.tier) {
-            console.log('User has paid subscription (metadata), redirecting to dashboard...');
-            router.push('/dashboard/personalized');
-            return;
-        }
-
-        // Also check user_payments table in case webhook hasn't updated metadata yet
-        const { data: payment } = await supabase
-            .from('user_payments')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('payment_status', 'completed')
-            .maybeSingle();
-
-        if (payment) {
-            console.log('User has paid subscription (payment record), redirecting to dashboard...');
-
-            // Update user metadata to reflect payment
-            await supabase.auth.updateUser({
-                data: {
-                    payment_verified: true,
-                    tier: payment.tier || 'platform-monthly'
+        const checkUser = async () => {
+            const supabase = createClient();
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error) {
+                console.error('Error getting user:', error);
+                if (isMounted) {
+                    setLoading(false);
                 }
-            });
+                return;
+            }
 
-            router.push('/dashboard/personalized');
-            return;
-        }
+            if (isMounted) {
+                setUser(user);
+            }
 
-        // No payment found - free user, redirect to welcome or assessment
-        console.log('No payment found, showing free user options...');
-        setLoading(false);
-    };
+            if (!user) {
+                console.warn('No authenticated user found on auth success page');
+                router.push('/auth/login');
+                return;
+            }
+
+            const isTrial = user?.user_metadata?.subscription_status === 'trial' ||
+                user?.user_metadata?.subscription_status === 'trialing';
+
+            if (isTrial) {
+                console.log('Trial user detected, redirecting to dashboard...');
+                router.push('/dashboard/personalized');
+                return;
+            }
+
+            if (user?.user_metadata?.payment_verified || user?.user_metadata?.tier) {
+                console.log('User has paid subscription (metadata), redirecting to dashboard...');
+                router.push('/dashboard/personalized');
+                return;
+            }
+
+            const { data: payment } = await supabase
+                .from('user_payments')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('payment_status', 'completed')
+                .maybeSingle();
+
+            if (payment) {
+                console.log('User has paid subscription (payment record), redirecting to dashboard...');
+
+                await supabase.auth.updateUser({
+                    data: {
+                        payment_verified: true,
+                        tier: payment.tier || 'platform-monthly'
+                    }
+                });
+
+                router.push('/dashboard/personalized');
+                return;
+            }
+
+            console.log('No payment found, showing free user options...');
+            if (isMounted) {
+                setLoading(false);
+            }
+        };
+
+        void checkUser();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [router]);
 
     const handleSignOut = async () => {
         const supabase = createClient();
@@ -116,7 +124,7 @@ export default function AuthSuccessPage() {
                     <div className="p-6 bg-gray-50 rounded-lg">
                         <h2 className="text-xl font-semibold mb-3">✅ Login Successful!</h2>
                         <p className="text-gray-600 mb-4">
-                            You've successfully logged in. Since you don't have a paid subscription yet,
+                            You&rsquo;ve successfully logged in. Since you don&rsquo;t have a paid subscription yet,
                             you can explore the following options:
                         </p>
 

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+const STRIPE_API_VERSION = 'default';
+
 export async function GET() {
     try {
         // Test with a simple Stripe API call
@@ -14,8 +16,7 @@ export async function GET() {
         }
 
         // Try initializing Stripe - first without API version
-        let stripe;
-        let apiVersion = 'default';
+        let stripe: Stripe;
 
         try {
             // First try without API version
@@ -38,7 +39,7 @@ export async function GET() {
             return NextResponse.json({
                 success: true,
                 connection: 'working',
-                apiVersion,
+                apiVersion: STRIPE_API_VERSION,
                 keyPrefix: stripeKey.substring(0, 7),
                 pricesFound: prices.data.length,
                 firstPriceId: prices.data[0]?.id || null
@@ -53,7 +54,7 @@ export async function GET() {
                 type: apiError.type,
                 code: apiError.code,
                 statusCode: apiError.statusCode,
-                apiVersion,
+                apiVersion: STRIPE_API_VERSION,
                 keyPrefix: stripeKey.substring(0, 7),
                 hint: apiError.type === 'StripeAuthenticationError' ?
                     'Invalid API key - check if the key is correct and active' :

@@ -530,11 +530,11 @@ export default function ExecutiveDashboard() {
                       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                         <h4 className="font-medium mb-2">Auto-Generated Grant Narrative (Boilerplate):</h4>
                         <p className="text-sm text-gray-700">
-                          "{institutionName} requests funding under {opportunity.program} to implement
+                          “{institutionName} requests funding under {opportunity.program} to implement
                           AI governance and educational technology initiatives that directly support {opportunity.eligibility[0]}
                           and {opportunity.eligibility[1]}. Our comprehensive AI readiness assessment has identified
                           {opportunity.matchedRecommendations} specific recommendations that align with federal guidance
-                          on allowable uses of funds for artificial intelligence in education..."
+                          on allowable uses of funds for artificial intelligence in education…”
                         </p>
                         <Button className="mt-2" variant="outline" size="sm">
                           Generate Full Narrative

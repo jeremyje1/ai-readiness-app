@@ -83,6 +83,12 @@ export interface Blueprint {
     // Quick wins
     quick_wins: QuickWin[];
     recommended_tools: RecommendedTool[];
+    recommended_policies?: BlueprintPolicyRecommendation[];
+
+    // Document analysis integration
+    document_insights?: BlueprintDocumentInsight[];
+    document_compliance?: BlueprintDocumentComplianceOverview;
+    source_documents?: BlueprintDocumentSource[];
 
     // Documents
     master_pdf_url?: string;
@@ -99,6 +105,93 @@ export interface Blueprint {
     is_public: boolean;
     share_token: string;
     shared_with: string[];
+
+    // Relational data
+    phases?: BlueprintPhaseRecord[];
+}
+
+export interface BlueprintDocumentInsight {
+    documentId?: string;
+    fileName: string;
+    documentType: string;
+    keyThemes: string[];
+    aiReadinessIndicators: string[];
+    alignmentOpportunities: string[];
+    complianceFindings: BlueprintComplianceFinding[];
+    budgetSignals?: BlueprintBudgetSignal[];
+    summary: string;
+    confidenceScore: number;
+    analyzedAt?: string;
+}
+
+export interface BlueprintComplianceFinding {
+    area: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    description: string;
+    recommendation: string;
+}
+
+export interface BlueprintBudgetSignal {
+    category: string;
+    amount?: number;
+    opportunity: string;
+}
+
+export interface BlueprintDocumentSource {
+    documentId: string;
+    fileName: string;
+    url?: string;
+    uploadedAt?: string;
+}
+
+export interface BlueprintDocumentComplianceOverview {
+    severityTally: Record<'low' | 'medium' | 'high' | 'critical', number>;
+    focusAreas: string[];
+    notes: string[];
+}
+
+export interface BlueprintPolicyClauseRevision {
+    version: number;
+    body: string;
+    updatedAt: string;
+    updatedBy: string;
+    note?: string;
+}
+
+export interface BlueprintPolicyClauseDraft {
+    clauseId: string;
+    title: string;
+    tags: string[];
+    originalBody: string;
+    currentBody: string;
+    currentVersion: number;
+    metadata: {
+        sourceVersion: number;
+        author?: string;
+        legalReview?: boolean;
+        createdAt?: string;
+        updatedAt?: string;
+    };
+    lastEditedAt?: string;
+    lastEditedBy?: string;
+    revisions: BlueprintPolicyClauseRevision[];
+}
+
+export type BlueprintPolicyStatus = 'recommended' | 'in_progress' | 'ready_for_review' | 'approved';
+
+export interface BlueprintPolicyRecommendation {
+    templateId: string;
+    templateName: string;
+    templateVersion: number;
+    audience: string;
+    jurisdiction?: string;
+    matchScore: number;
+    matchReasons: string[];
+    status: BlueprintPolicyStatus;
+    lastEvaluatedAt: string;
+    lastEditedAt?: string;
+    lastEditedBy?: string;
+    clauses: BlueprintPolicyClauseDraft[];
 }
 
 export interface ValueProposition {
@@ -136,6 +229,28 @@ export interface ImplementationPhase {
     budget: number;
     required_resources: string[];
     success_criteria: string[];
+}
+
+export interface BlueprintPhaseRecord {
+    id: string;
+    blueprint_id: string;
+    phase_number: number;
+    title: string;
+    description?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
+    duration?: string | null;
+    objectives: string[];
+    key_outcomes?: string[] | null;
+    deliverables?: string[] | null;
+    success_criteria?: any;
+    budget?: number | null;
+    required_resources?: any;
+    status?: 'not_started' | 'in_progress' | 'completed' | 'delayed';
+    progress_percentage?: number | null;
+    created_at: string;
+    updated_at: string;
+    blueprint_tasks: BlueprintTask[];
 }
 
 export interface PhaseTask {

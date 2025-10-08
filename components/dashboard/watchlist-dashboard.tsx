@@ -6,25 +6,25 @@
 
 'use client'
 
-import React, { useState, useEffect, Suspense } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  ClockIcon,
+import { DashboardFilters, WatchlistMetrics } from '@/lib/types/dashboard'
+import { formatDistanceToNow } from 'date-fns'
+import {
+  AlertCircleIcon,
   AlertTriangleIcon,
   CalendarIcon,
+  CheckCircleIcon,
+  ClockIcon,
   DollarSignIcon,
   FileTextIcon,
-  ShieldIcon,
   FilterIcon,
   RefreshCwIcon,
-  AlertCircleIcon,
-  CheckCircleIcon
+  ShieldIcon
 } from 'lucide-react'
-import { WatchlistMetrics, DashboardFilters } from '@/lib/types/dashboard'
-import { formatDistanceToNow } from 'date-fns'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 
 interface WatchlistDashboardProps {
   currentUserId: string
@@ -39,15 +39,11 @@ function WatchlistDashboardContent({ currentUserId, className = '' }: WatchlistD
   const [filters, setFilters] = useState<DashboardFilters>({})
 
   // Fetch metrics
-  useEffect(() => {
-    fetchMetrics()
-  }, [filters])
-
-  const fetchMetrics = async () => {
+  const fetchMetrics = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const params = new URLSearchParams()
       if (filters.department) params.append('department', filters.department)
       if (filters.dateRange) {
@@ -72,13 +68,17 @@ function WatchlistDashboardContent({ currentUserId, className = '' }: WatchlistD
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentUserId, filters])
+
+  useEffect(() => {
+    fetchMetrics()
+  }, [fetchMetrics])
 
   const getPriorityBadge = (priority: string, isOverdue?: boolean) => {
     if (isOverdue) {
       return <Badge className="bg-red-100 text-red-800">Overdue</Badge>
     }
-    
+
     const variants = {
       high: 'bg-red-100 text-red-800',
       medium: 'bg-yellow-100 text-yellow-800',
@@ -122,13 +122,13 @@ function WatchlistDashboardContent({ currentUserId, className = '' }: WatchlistD
             </p>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <Select 
-            value={filters.department || 'all'} 
-            onValueChange={(value) => setFilters(prev => ({ 
-              ...prev, 
-              department: value === 'all' ? undefined : value 
+          <Select
+            value={filters.department || 'all'}
+            onValueChange={(value) => setFilters(prev => ({
+              ...prev,
+              department: value === 'all' ? undefined : value
             }))}
           >
             <SelectTrigger className="w-48">
@@ -143,7 +143,7 @@ function WatchlistDashboardContent({ currentUserId, className = '' }: WatchlistD
               <SelectItem value="Student Services">Student Services</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline" size="sm" onClick={fetchMetrics}>
             <RefreshCwIcon className="h-4 w-4" />
           </Button>
@@ -477,7 +477,7 @@ function WatchlistDashboardSkeleton({ className = '' }: { className?: string }) 
           <div className="h-10 bg-gray-200 rounded w-10 animate-pulse"></div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
@@ -487,7 +487,7 @@ function WatchlistDashboardSkeleton({ className = '' }: { className?: string }) 
           </Card>
         ))}
       </div>
-      
+
       <Card>
         <CardContent className="p-6">
           <div className="h-64 bg-gray-200 rounded animate-pulse"></div>
@@ -497,14 +497,14 @@ function WatchlistDashboardSkeleton({ className = '' }: { className?: string }) 
   )
 }
 
-function WatchlistDashboardError({ 
-  error, 
-  onRetry, 
-  className = '' 
-}: { 
+function WatchlistDashboardError({
+  error,
+  onRetry,
+  className = ''
+}: {
   error: string
   onRetry: () => void
-  className?: string 
+  className?: string
 }) {
   return (
     <div className={`space-y-6 ${className}`}>

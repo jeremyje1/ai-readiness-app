@@ -22,7 +22,8 @@ export async function GET() {
       .from('user_payments')
       .select('*')
       .eq('user_id', user.id)
-      .eq('payment_status', 'active')
+      .in('payment_status', ['active', 'completed', 'premium'])
+      .eq('access_granted', true)
       .single();
 
     if (paymentError && paymentError.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -31,15 +32,19 @@ export async function GET() {
     }
 
     // Return payment status
+    const isVerified = payment?.access_granted === true;
+
     return NextResponse.json({
-      isVerified: !!payment,
-      hasActiveSubscription: !!payment,
+      isVerified,
+      hasActiveSubscription: isVerified,
       tier: payment?.plan_type || 'free',
       email: user.email,
       userId: user.id,
       subscriptionId: payment?.stripe_subscription_id,
       customerId: payment?.stripe_customer_id,
-      priceId: payment?.stripe_price_id
+      priceId: payment?.stripe_price_id,
+      paymentStatus: payment?.payment_status,
+      accessGranted: payment?.access_granted === true
     });
 
   } catch (error) {

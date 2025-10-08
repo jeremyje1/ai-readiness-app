@@ -313,7 +313,7 @@ export default function ProgressTracker() {
             <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50">
                 <div className="flex items-center gap-2 mb-4">
                     <Zap className="h-6 w-6 text-green-600" />
-                    <h3 className="text-xl font-bold">This Week's Quick Wins</h3>
+                    <h3 className="text-xl font-bold">This Week&rsquo;s Quick Wins</h3>
                 </div>
                 <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
@@ -327,7 +327,7 @@ export default function ProgressTracker() {
                         <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
                         <div>
                             <p className="font-medium">Automated transcript processing saves 120 hours/month</p>
-                            <p className="text-sm text-gray-600">Registrar's office efficiency gain</p>
+                            <p className="text-sm text-gray-600">Registrar&rsquo;s office efficiency gain</p>
                         </div>
                     </div>
                 </div>

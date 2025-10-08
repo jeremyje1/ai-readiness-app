@@ -492,7 +492,7 @@ ${institutionName} is committed to responsible AI integration that enhances educ
                 <h3 className="text-lg font-semibold mb-2">Generate Grant Narrative</h3>
                 <p className="text-muted-foreground mb-6">
                   Select a funding opportunity from the first tab to generate a customized grant narrative
-                  that aligns your district's AI recommendations with federal funding guidelines.
+                  that aligns your district’s AI recommendations with federal funding guidelines.
                 </p>
                 <Button variant="outline">
                   View Funding Opportunities

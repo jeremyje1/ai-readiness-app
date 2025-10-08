@@ -121,7 +121,7 @@ export default function ContactPage() {
         <div className='mb-8'>
           <h1 className='text-4xl font-bold mb-4 text-gray-900 text-center'>Get Expert Support</h1>
           <p className='text-gray-600 mb-8 text-center max-w-2xl mx-auto'>
-            Choose the best way to connect with our AI governance experts. From quick questions to strategic planning, we're here to help your institution succeed.
+            Choose the best way to connect with our AI governance experts. From quick questions to strategic planning, we&rsquo;re here to help your institution succeed.
           </p>
 
           <div className='grid md:grid-cols-2 gap-6 mb-12'>
@@ -134,7 +134,7 @@ export default function ContactPage() {
                 <h2 className='text-xl font-semibold text-gray-900'>Schedule a Consultation</h2>
               </div>
               <p className='text-gray-600 mb-4'>
-                Book a personalized 30-minute session with our AI governance expert Jeremy Estrella to discuss your institution's specific needs and strategy.
+                Book a personalized 30-minute session with our AI governance expert Jeremy Estrella to discuss your institution&rsquo;s specific needs and strategy.
               </p>
               <a
                 href="https://calendly.com/jeremyestrella/30min"

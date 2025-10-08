@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 // NIST AI Risk Management Framework Questions
 const NIST_QUESTIONS = {
@@ -156,7 +156,7 @@ const RATING_OPTIONS = [
 
 export default function NISTAssessment() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -172,39 +172,46 @@ export default function NISTAssessment() {
   const progress = (answeredQuestions / totalQuestions) * 100;
 
   useEffect(() => {
-    checkUser();
-  }, []);
+    let isMounted = true;
 
-  const checkUser = async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+    const verifyUser = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
 
-      if (error || !user) {
+        if (error || !user) {
+          router.push('/auth/login');
+          return;
+        }
+
+        if (!isMounted) return;
+        setUserId(user.id);
+
+        const { data: existingAssessment } = await supabase
+          .from('streamlined_assessment_responses')
+          .select('id, completed_at')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (existingAssessment?.completed_at) {
+          router.push('/dashboard/personalized');
+          return;
+        }
+
+        if (isMounted) {
+          setInitialLoading(false);
+        }
+      } catch (error) {
+        console.error('Error checking user:', error);
         router.push('/auth/login');
-        return;
       }
+    };
 
-      setUserId(user.id);
+    void verifyUser();
 
-      // Check if assessment already completed
-      const { data: existingAssessment } = await supabase
-        .from('streamlined_assessment_responses')
-        .select('id, completed_at')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (existingAssessment?.completed_at) {
-        // Assessment already completed, go to dashboard
-        router.push('/dashboard/personalized');
-        return;
-      }
-
-      setInitialLoading(false);
-    } catch (error) {
-      console.error('Error checking user:', error);
-      router.push('/auth/login');
-    }
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [router, supabase]);
 
   const handleResponse = (questionId: number, value: number) => {
     setResponses({
@@ -332,10 +339,10 @@ export default function NISTAssessment() {
                 key={cat}
                 onClick={() => setCurrentCategory(idx)}
                 className={`p-3 rounded-lg font-medium transition-all ${idx === currentCategory
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : completed
-                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : completed
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    : 'bg-white text-gray-600 hover:bg-gray-100'
                   }`}
               >
                 {completed && <CheckCircle2 className="h-4 w-4 inline mr-1" />}
@@ -388,8 +395,8 @@ export default function NISTAssessment() {
                         key={option.value}
                         onClick={() => handleResponse(question.id, option.value)}
                         className={`p-4 rounded-lg border-2 transition-all text-left ${response === option.value
-                            ? `${option.color} border-current shadow-md scale-105`
-                            : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow'
+                          ? `${option.color} border-current shadow-md scale-105`
+                          : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow'
                           }`}
                       >
                         <div className="font-semibold mb-1">{option.label}</div>
@@ -462,7 +469,7 @@ export default function NISTAssessment() {
             <div className="text-center">
               <h3 className="font-semibold text-lg mb-2">What happens next?</h3>
               <p className="text-gray-600 text-sm">
-                After completing this assessment, you'll upload relevant documents for AI analysis,
+                After completing this assessment, you&rsquo;ll upload relevant documents for AI analysis,
                 then receive your personalized AI readiness score, gap analysis, and implementation blueprint.
               </p>
             </div>

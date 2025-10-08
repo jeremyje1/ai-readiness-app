@@ -17,7 +17,7 @@ import {
     SkipForward,
     X
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface TutorialStep {
     id: string
@@ -382,43 +382,7 @@ export default function InteractiveTutorial({
         }
     }, [isOpen])
 
-    useEffect(() => {
-        if (isVisible && currentStepData) {
-            updateTargetElement()
-        }
-    }, [currentStep, isVisible, currentStepData])
-
-    const addTutorialAttributes = () => {
-        // Add data-tutorial attributes to key elements for targeting
-        const elements = [
-            { selector: 'header', attribute: 'main-nav' },
-            { selector: '[href="/dashboard/personalized"]', attribute: 'user-email' },
-            { selector: '[data-testid="executive-dashboard"]', attribute: 'executive-dashboard' },
-            { selector: '[value="readiness"]', attribute: 'readiness-tab' },
-            { selector: '[value="adoption"]', attribute: 'adoption-tab' },
-            { selector: '[value="compliance"]', attribute: 'compliance-tab' },
-            { selector: '[value="funding"]', attribute: 'funding-tab' },
-            { selector: 'form', attribute: 'assessment-form' },
-            { selector: '.progress-bar', attribute: 'progress-bar' },
-            { selector: '.question-card', attribute: 'question-card' }
-        ]
-
-        elements.forEach(({ selector, attribute }) => {
-            const element = document.querySelector(selector)
-            if (element) {
-                element.setAttribute('data-tutorial', attribute)
-            }
-        })
-    }
-
-    const removeTutorialAttributes = () => {
-        const elements = document.querySelectorAll('[data-tutorial]')
-        elements.forEach(element => {
-            element.removeAttribute('data-tutorial')
-        })
-    }
-
-    const updateTargetElement = () => {
+    const updateTargetElement = useCallback(() => {
         if (!currentStepData) return
 
         const target = document.querySelector(currentStepData.target)
@@ -455,6 +419,42 @@ export default function InteractiveTutorial({
             // Scroll target into view
             target.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
+    }, [currentStepData])
+
+    useEffect(() => {
+        if (isVisible && currentStepData) {
+            updateTargetElement()
+        }
+    }, [currentStep, isVisible, currentStepData, updateTargetElement])
+
+    const addTutorialAttributes = () => {
+        // Add data-tutorial attributes to key elements for targeting
+        const elements = [
+            { selector: 'header', attribute: 'main-nav' },
+            { selector: '[href="/dashboard/personalized"]', attribute: 'user-email' },
+            { selector: '[data-testid="executive-dashboard"]', attribute: 'executive-dashboard' },
+            { selector: '[value="readiness"]', attribute: 'readiness-tab' },
+            { selector: '[value="adoption"]', attribute: 'adoption-tab' },
+            { selector: '[value="compliance"]', attribute: 'compliance-tab' },
+            { selector: '[value="funding"]', attribute: 'funding-tab' },
+            { selector: 'form', attribute: 'assessment-form' },
+            { selector: '.progress-bar', attribute: 'progress-bar' },
+            { selector: '.question-card', attribute: 'question-card' }
+        ]
+
+        elements.forEach(({ selector, attribute }) => {
+            const element = document.querySelector(selector)
+            if (element) {
+                element.setAttribute('data-tutorial', attribute)
+            }
+        })
+    }
+
+    const removeTutorialAttributes = () => {
+        const elements = document.querySelectorAll('[data-tutorial]')
+        elements.forEach(element => {
+            element.removeAttribute('data-tutorial')
+        })
     }
 
     const handleNext = () => {

@@ -1,5 +1,20 @@
-import { BlueprintGoals, DepartmentPlan, ImplementationPhase, MitigationStrategy, QuickWin, RecommendedTool, Risk, SuccessMetric, ValueProposition } from '@/types/blueprint';
+import {
+    BlueprintGoals,
+    DepartmentGoal,
+    DepartmentPlan,
+    ImplementationPhase,
+    MitigationStrategy,
+    PhaseTask,
+    QuickWin,
+    RecommendedTool,
+    Risk,
+    SuccessMetric,
+    TrainingRequirement,
+    ValueProposition
+} from '@/types/blueprint';
 import OpenAI from 'openai';
+
+type DepartmentStage = 'foundation' | 'pilot' | 'rollout' | 'measurement' | 'innovation';
 
 export class BlueprintGenerator {
     private openai: OpenAI;
@@ -95,127 +110,333 @@ export class BlueprintGenerator {
         metrics: any,
         maturityLevel: string
     ): Promise<ImplementationPhase[]> {
-        const phases: ImplementationPhase[] = [];
         const totalMonths = this.timelineToMonths(goals.timeline_preference);
-        const phaseCount = maturityLevel === 'Beginning' ? 5 : maturityLevel === 'Emerging' ? 4 : 3;
-        const monthsPerPhase = Math.floor(totalMonths / phaseCount);
+        const desiredPhaseCount =
+            maturityLevel === 'Beginning' ? 5 : maturityLevel === 'Emerging' ? 4 : 3;
+        const monthsPerPhase = Math.max(1, Math.round(totalMonths / desiredPhaseCount));
 
-        // Phase 1: Foundation
-        phases.push({
-            phase: 1,
-            title: 'Foundation & Assessment',
-            duration: `${monthsPerPhase} months`,
-            objectives: [
-                'Establish AI governance framework and ethical guidelines',
-                'Complete infrastructure readiness assessment',
-                'Form cross-functional AI implementation team',
-                'Conduct baseline performance measurements'
+        const basePhases: ImplementationPhase[] = [];
+
+        const createPhase = (
+            title: string,
+            objectives: string[],
+            tasks: PhaseTask[],
+            deliverables: string[],
+            requiredResources: string[],
+            successCriteria: string[],
+            durationMultiplier = 1
+        ) => {
+            basePhases.push({
+                phase: basePhases.length + 1,
+                title,
+                duration: `${Math.max(1, Math.round(monthsPerPhase * durationMultiplier))} months`,
+                objectives,
+                tasks,
+                deliverables,
+                budget: 0,
+                required_resources: requiredResources,
+                success_criteria: successCriteria
+            });
+        };
+
+        const primaryGoalSummary =
+            goals.primary_goals && goals.primary_goals.length > 0
+                ? goals.primary_goals[0]
+                : 'your strategic priorities';
+
+        createPhase(
+            'Foundation & Governance',
+            [
+                'Establish AI governance, ethics, and risk policies',
+                'Assess infrastructure, data, and security readiness',
+                'Stand up cross-functional AI leadership team',
+                `Define success measures tied to ${primaryGoalSummary}`
             ],
-            tasks: [
+            [
                 {
-                    title: 'Develop AI Policy Framework',
-                    description: 'Create comprehensive AI usage policies covering ethics, privacy, and academic integrity',
+                    title: 'Develop AI governance framework',
+                    description:
+                        'Create policies covering responsible use, transparency, data privacy, and accountability for AI initiatives.',
                     type: 'policy',
                     priority: 'critical',
-                    estimated_hours: 40
+                    estimated_hours: 48,
+                    dependencies: []
                 },
                 {
-                    title: 'Infrastructure Audit',
-                    description: 'Assess current technology infrastructure and identify upgrade requirements',
+                    title: 'Conduct infrastructure & data readiness audit',
+                    description:
+                        'Evaluate current systems, integrations, and data pipelines needed to support AI pilots and scale.',
                     type: 'assessment',
                     priority: 'high',
-                    estimated_hours: 20
+                    estimated_hours: 32,
+                    dependencies: []
                 },
                 {
-                    title: 'Stakeholder Alignment Sessions',
-                    description: 'Conduct workshops with faculty, staff, and administrators to align on AI vision',
+                    title: 'Align leadership on AI priorities',
+                    description:
+                        'Facilitate working sessions with executive sponsors and department leaders to prioritize AI use cases.',
                     type: 'communication',
                     priority: 'high',
-                    estimated_hours: 30
+                    estimated_hours: 24,
+                    dependencies: []
                 }
             ],
-            deliverables: [
-                'AI Governance Framework Document',
-                'Infrastructure Readiness Report',
-                'Stakeholder Alignment Charter',
-                'Baseline Performance Metrics'
+            [
+                'AI governance charter and policy playbook',
+                'Infrastructure and data readiness assessment',
+                'Executive steering committee with clear decision rights'
             ],
-            budget: this.calculatePhaseBudget(goals.budget_range, 0.2),
-            required_resources: [
-                'AI Ethics Consultant',
-                'IT Infrastructure Specialist',
-                'Change Management Expert',
-                'Project Manager'
+            [
+                'Executive sponsor',
+                'AI program manager',
+                'Data governance lead',
+                'Change management specialist'
             ],
-            success_criteria: [
-                'AI policies approved by board',
-                'Infrastructure gaps identified and budgeted',
-                '80% stakeholder buy-in achieved',
-                'Implementation team fully staffed'
+            [
+                'Policies approved by leadership',
+                'Infrastructure gaps documented with remediation plan',
+                'Success metrics and operating cadence defined'
             ]
-        });
+        );
 
-        // Phase 2: Pilot Implementation
-        if (goals.pilot_preference) {
-            phases.push({
-                phase: 2,
-                title: 'Pilot Programs',
-                duration: `${monthsPerPhase} months`,
-                objectives: [
-                    'Launch targeted AI pilots in selected departments',
-                    'Test and refine AI tools with early adopters',
-                    'Gather feedback and measure initial impact',
-                    'Develop best practices and use cases'
+        if (goals.pilot_preference && basePhases.length < desiredPhaseCount) {
+            createPhase(
+                'Pilot Programs & Validation',
+                [
+                    'Select and launch high-impact AI pilot initiatives',
+                    'Enable pilot teams with training and vendor support',
+                    'Capture qualitative and quantitative feedback',
+                    'Produce recommendations for scaling successful pilots'
                 ],
-                tasks: [
+                [
                     {
-                        title: 'Select Pilot Participants',
-                        description: 'Identify and recruit innovative faculty and departments for pilot programs',
+                        title: 'Prioritize pilot use cases',
+                        description:
+                            'Score potential AI pilots against impact, feasibility, and alignment with institutional goals.',
                         type: 'implementation',
-                        priority: 'high',
-                        estimated_hours: 15
-                    },
-                    {
-                        title: 'Deploy AI Tools for Pilots',
-                        description: 'Implement selected AI solutions in pilot departments',
-                        type: 'technical',
                         priority: 'critical',
-                        estimated_hours: 60
+                        estimated_hours: 28,
+                        dependencies: []
                     },
                     {
-                        title: 'Training for Pilot Groups',
-                        description: 'Provide comprehensive training to pilot participants',
-                        type: 'training',
+                        title: 'Deploy AI pilots and capture evidence',
+                        description:
+                            'Implement selected AI tools, monitor adoption, and document outcomes to inform the scale plan.',
+                        type: 'technical',
                         priority: 'high',
-                        estimated_hours: 40
+                        estimated_hours: 60,
+                        dependencies: []
+                    },
+                    {
+                        title: 'Facilitate pilot enablement program',
+                        description:
+                            'Provide targeted training, office hours, and support for pilot participants and faculty champions.',
+                        type: 'training',
+                        priority: 'medium',
+                        estimated_hours: 36,
+                        dependencies: []
                     }
                 ],
-                deliverables: [
-                    'Pilot Program Results Report',
-                    'Best Practices Documentation',
-                    'User Feedback Analysis',
-                    'ROI Initial Assessment'
+                [
+                    'Pilot implementation backlog with resource plan',
+                    'Pilot evaluation report with ROI and adoption findings',
+                    'Refined blueprint for enterprise rollout'
                 ],
-                budget: this.calculatePhaseBudget(goals.budget_range, 0.25),
-                required_resources: [
-                    'AI Solution Vendors',
-                    'Training Specialists',
-                    'Data Analysts',
-                    'Pilot Coordinators'
+                [
+                    'Pilot coordinators',
+                    'Department champions',
+                    'Vendor success teams',
+                    'IT support engineers'
                 ],
-                success_criteria: [
-                    'Pilot programs launched in 3+ departments',
-                    '75% pilot participant satisfaction',
-                    'Measurable improvement in pilot metrics',
-                    'Best practices documented and validated'
+                [
+                    'Pilot objectives met or exceeded',
+                    'Stakeholder satisfaction above 80%',
+                    'Scale decision documented for each pilot'
                 ]
-            });
+            );
         }
 
-        // Additional phases...
-        // This is a simplified version - in production, you'd generate all phases based on goals and context
+        if (basePhases.length < desiredPhaseCount) {
+            createPhase(
+                'Department Rollout & Change Management',
+                [
+                    'Codify rollout playbooks and change stories per department',
+                    'Scale AI workflows and integrations across priority teams',
+                    'Build coaching and support structures for staff',
+                    'Ensure policy, security, and compliance guardrails at scale'
+                ],
+                [
+                    {
+                        title: 'Publish department rollout playbooks',
+                        description:
+                            'Create prescriptive guidance covering process updates, communications, and role impacts for each department.',
+                        type: 'implementation',
+                        priority: 'high',
+                        estimated_hours: 40,
+                        dependencies: []
+                    },
+                    {
+                        title: 'Execute change management campaign',
+                        description:
+                            'Deliver messaging, town halls, and feedback loops to drive adoption and address resistance.',
+                        type: 'communication',
+                        priority: 'high',
+                        estimated_hours: 32,
+                        dependencies: []
+                    },
+                    {
+                        title: 'Integrate AI workflows into core systems',
+                        description:
+                            'Coordinate with IT to embed AI-enabled processes into LMS, SIS, or CRM platforms.',
+                        type: 'technical',
+                        priority: 'high',
+                        estimated_hours: 54,
+                        dependencies: []
+                    }
+                ],
+                [
+                    'Department rollout schedule and RACI',
+                    'Training completion and adoption dashboards',
+                    'Updated security and compliance sign-offs'
+                ],
+                [
+                    'Training specialists',
+                    'Systems integrators',
+                    'Department change champions',
+                    'Communications team'
+                ],
+                [
+                    '80%+ staff trained within target departments',
+                    'Critical workflows modernized with AI support',
+                    'Change feedback loop operating with rapid iteration'
+                ]
+            );
+        }
 
-        return phases;
+        if (basePhases.length < desiredPhaseCount) {
+            createPhase(
+                'Impact Measurement & Analytics',
+                [
+                    'Operationalize KPI tracking and ROI dashboards',
+                    'Monitor ethical, compliance, and risk indicators',
+                    'Adjust operating model based on performance insights',
+                    'Communicate wins and lessons learned to stakeholders'
+                ],
+                [
+                    {
+                        title: 'Deploy AI performance dashboards',
+                        description:
+                            'Configure analytics to monitor adoption, experience, and outcome metrics across departments.',
+                        type: 'assessment',
+                        priority: 'medium',
+                        estimated_hours: 30,
+                        dependencies: []
+                    },
+                    {
+                        title: 'Run benefits realization review',
+                        description:
+                            'Analyze ROI, cost savings, and qualitative impact data to validate business case.',
+                        type: 'assessment',
+                        priority: 'high',
+                        estimated_hours: 28,
+                        dependencies: []
+                    },
+                    {
+                        title: 'Evolve governance based on insights',
+                        description:
+                            'Update policies, guardrails, and operating rhythms using measurement findings.',
+                        type: 'policy',
+                        priority: 'medium',
+                        estimated_hours: 20,
+                        dependencies: []
+                    }
+                ],
+                [
+                    'Executive-ready performance dashboards',
+                    'Quarterly ROI and benefits realization brief',
+                    'Updated risk and compliance log'
+                ],
+                [
+                    'Business intelligence analysts',
+                    'Financial planning team',
+                    'Compliance officer',
+                    'AI steering committee'
+                ],
+                [
+                    'KPIs trending to targets within two quarters',
+                    'Risks tracked with clear mitigation owners',
+                    'Stakeholders informed of measurable outcomes'
+                ]
+            );
+        }
+
+        if (basePhases.length < desiredPhaseCount) {
+            createPhase(
+                'Innovation & Sustainability',
+                [
+                    'Institutionalize continuous improvement practices',
+                    'Explore emerging AI opportunities and partnerships',
+                    'Extend AI literacy and advanced training programs',
+                    'Refresh resourcing and investment roadmap annually'
+                ],
+                [
+                    {
+                        title: 'Launch AI innovation guild',
+                        description:
+                            'Create cross-functional forum to surface new AI ideas, evaluate feasibility, and prioritize pilots.',
+                        type: 'communication',
+                        priority: 'medium',
+                        estimated_hours: 24,
+                        dependencies: []
+                    },
+                    {
+                        title: 'Formalize continuous improvement cadence',
+                        description:
+                            'Establish quarterly retrospectives and backlog grooming for AI initiatives.',
+                        type: 'implementation',
+                        priority: 'medium',
+                        estimated_hours: 18,
+                        dependencies: []
+                    },
+                    {
+                        title: 'Assess next-wave AI investments',
+                        description:
+                            'Evaluate new AI capabilities, vendors, and partnerships aligned to institutional strategy.',
+                        type: 'assessment',
+                        priority: 'low',
+                        estimated_hours: 26,
+                        dependencies: []
+                    }
+                ],
+                [
+                    'Innovation backlog with prioritized experiments',
+                    'Annual AI investment and capability roadmap',
+                    'Advanced upskilling program outline'
+                ],
+                [
+                    'Innovation council or AI center of excellence',
+                    'External research partners',
+                    'Professional development team'
+                ],
+                [
+                    'New AI initiatives introduced every 6 months',
+                    'Advanced AI literacy above 60% in target roles',
+                    'Roadmap refreshed with clear funding sources'
+                ]
+            );
+        }
+
+        const normalizedPhases = basePhases
+            .slice(0, desiredPhaseCount)
+            .map((phase, index) => ({ ...phase, phase: index + 1 }));
+
+        const phasesWithDepartments = this.injectDepartmentTasks(normalizedPhases, goals);
+        const phasesWithBudgets = this.distributePhaseBudgets(
+            phasesWithDepartments,
+            goals.budget_range
+        );
+
+        return phasesWithBudgets;
     }
 
     async generateDepartmentPlans(
@@ -223,63 +444,91 @@ export class BlueprintGenerator {
         phases: ImplementationPhase[],
         metrics: any
     ): Promise<DepartmentPlan[]> {
-        const plans: DepartmentPlan[] = [];
+        if (!goals.department_goals || goals.department_goals.length === 0) {
+            return [];
+        }
 
-        // Generate plans based on department goals
-        for (const deptGoal of goals.department_goals) {
-            const plan: DepartmentPlan = {
+        const totalBudget = this.parseBudgetRange(goals.budget_range);
+        const defaultBudget = totalBudget / Math.max(1, goals.department_goals.length);
+        const tasksByDepartment: Record<string, PhaseTask[]> = {};
+
+        phases.forEach((phase) => {
+            (phase.tasks || []).forEach((task) => {
+                if (!task.department) return;
+                if (!tasksByDepartment[task.department]) {
+                    tasksByDepartment[task.department] = [];
+                }
+                tasksByDepartment[task.department].push(task);
+            });
+        });
+
+        const plans: DepartmentPlan[] = goals.department_goals.map((deptGoal) => {
+            const profile = this.identifyDepartmentProfile(deptGoal.department);
+            const startDate = new Date();
+            const timelineMonths = this.timelineToMonths(
+                deptGoal.timeline || goals.timeline_preference
+            );
+            const midpointDate = this.addMonths(
+                startDate,
+                Math.max(1, Math.floor(timelineMonths / 2))
+            );
+            const completionDate = this.addMonths(startDate, Math.max(1, timelineMonths));
+            const departmentTasks = tasksByDepartment[deptGoal.department] || [];
+
+            const kickoffDeliverables = departmentTasks.slice(0, 2).map((task) => task.title);
+            const midDeliverables = departmentTasks.slice(2, 4).map((task) => task.title);
+            const finalDeliverables = departmentTasks.slice(4).map((task) => task.title);
+
+            return {
                 department: deptGoal.department,
-                overview: `Strategic AI implementation plan for ${deptGoal.department} focusing on addressing key challenges and achieving targeted outcomes.`,
-                specific_goals: deptGoal.outcomes,
-                assigned_tasks: [], // Will be populated from phases
-                resources_needed: [
-                    'Department AI Champion',
-                    'Technical Support Staff',
-                    'Training Resources',
-                    'AI Software Licenses'
-                ],
-                training_requirements: [
-                    {
-                        topic: `AI Fundamentals for ${deptGoal.department}`,
-                        audience: 'All department staff',
-                        duration: '4 hours',
-                        format: 'hybrid',
-                        frequency: 'Once, with quarterly refreshers'
-                    },
-                    {
-                        topic: 'Advanced AI Tools Training',
-                        audience: 'Power users and champions',
-                        duration: '8 hours',
-                        format: 'in-person',
-                        frequency: 'Monthly workshops'
-                    }
-                ],
+                overview: this.buildDepartmentOverview(deptGoal),
+                specific_goals:
+                    deptGoal.outcomes && deptGoal.outcomes.length > 0
+                        ? deptGoal.outcomes
+                        : this.buildDefaultDepartmentGoals(deptGoal),
+                assigned_tasks: [],
+                resources_needed: this.getDepartmentResources(profile),
+                training_requirements: this.getDepartmentTraining(profile),
                 timeline: {
-                    start_date: new Date().toISOString(),
+                    start_date: startDate.toISOString(),
                     milestones: [
                         {
-                            name: 'Department Kickoff',
-                            date: this.addMonths(new Date(), 1).toISOString(),
-                            deliverables: ['Department AI Strategy', 'Champion Identified']
+                            name: 'Kickoff & Alignment',
+                            date: this.addMonths(startDate, 1).toISOString(),
+                            deliverables:
+                                kickoffDeliverables.length > 0
+                                    ? kickoffDeliverables
+                                    : [
+                                        'Department AI charter approved',
+                                        'Success measures finalized'
+                                    ]
                         },
                         {
-                            name: 'Initial Implementation',
-                            date: this.addMonths(new Date(), 3).toISOString(),
-                            deliverables: ['First AI Tool Deployed', 'Staff Training Complete']
+                            name: 'Pilot & Early Outcomes',
+                            date: midpointDate.toISOString(),
+                            deliverables:
+                                midDeliverables.length > 0
+                                    ? midDeliverables
+                                    : ['Pilot validated', 'Scale plan approved']
+                        },
+                        {
+                            name: 'Full Deployment & Measurement',
+                            date: completionDate.toISOString(),
+                            deliverables:
+                                finalDeliverables.length > 0
+                                    ? finalDeliverables
+                                    : ['Full rollout complete', 'Impact dashboard live']
                         }
                     ],
-                    completion_date: this.addMonths(new Date(), this.timelineToMonths(goals.timeline_preference)).toISOString()
+                    completion_date: completionDate.toISOString()
                 },
-                budget_allocation: deptGoal.budget || this.calculatePhaseBudget(goals.budget_range, 0.15),
-                success_metrics: [
-                    `${deptGoal.department} efficiency improved by 25%`,
-                    'Staff AI proficiency score above 80%',
-                    'Student/stakeholder satisfaction increased by 20%'
-                ]
+                budget_allocation:
+                    deptGoal.budget && deptGoal.budget > 0
+                        ? deptGoal.budget
+                        : Math.round(defaultBudget),
+                success_metrics: this.buildDepartmentSuccessMetrics(deptGoal, profile)
             };
-
-            plans.push(plan);
-        }
+        });
 
         return plans;
     }
@@ -555,6 +804,478 @@ export class BlueprintGenerator {
             '18months': 18
         };
         return map[timeline] || 6;
+    }
+
+    private injectDepartmentTasks(phases: ImplementationPhase[], goals: BlueprintGoals): ImplementationPhase[] {
+        if (!goals.department_goals || goals.department_goals.length === 0) {
+            return phases;
+        }
+
+        return phases.map((phase) => {
+            const stage = this.determineDepartmentStage(phase.title);
+            if (!stage) {
+                return phase;
+            }
+
+            const departmentTasks = goals.department_goals
+                .map((deptGoal) => this.getDepartmentStageTask(deptGoal, stage))
+                .filter((task): task is PhaseTask => Boolean(task));
+
+            if (departmentTasks.length === 0) {
+                return phase;
+            }
+
+            return {
+                ...phase,
+                tasks: [...(phase.tasks || []), ...departmentTasks]
+            };
+        });
+    }
+
+    private determineDepartmentStage(title: string): DepartmentStage | null {
+        const normalized = (title || '').toLowerCase();
+        if (normalized.includes('foundation') || normalized.includes('governance')) {
+            return 'foundation';
+        }
+        if (normalized.includes('pilot')) {
+            return 'pilot';
+        }
+        if (normalized.includes('rollout') || normalized.includes('change')) {
+            return 'rollout';
+        }
+        if (normalized.includes('measurement') || normalized.includes('analytics') || normalized.includes('impact')) {
+            return 'measurement';
+        }
+        if (normalized.includes('innovation') || normalized.includes('sustain')) {
+            return 'innovation';
+        }
+        return null;
+    }
+
+    private getDepartmentStageTask(deptGoal: DepartmentGoal, stage: DepartmentStage): PhaseTask | null {
+        const profile = this.identifyDepartmentProfile(deptGoal.department);
+        const departmentName = deptGoal.department;
+        const primaryChallenge =
+            deptGoal.challenges && deptGoal.challenges.length > 0
+                ? deptGoal.challenges[0]
+                : `align stakeholders within ${departmentName}`;
+        const primaryOutcome =
+            deptGoal.outcomes && deptGoal.outcomes.length > 0
+                ? deptGoal.outcomes[0]
+                : `deliver measurable AI benefits for ${departmentName}`;
+
+        const build = (config: {
+            title: string;
+            description: string;
+            type: PhaseTask['type'];
+            priority: PhaseTask['priority'];
+            estimatedHours: number;
+            dependencies?: string[];
+        }) => this.makeDepartmentTask(departmentName, config);
+
+        if (profile === 'academic') {
+            switch (stage) {
+                case 'foundation':
+                    return build({
+                        title: 'Curriculum alignment workshop',
+                        description: `Partner with faculty leadership to map AI competencies to priority programs and address ${primaryChallenge}.`,
+                        type: 'communication',
+                        priority: 'high',
+                        estimatedHours: 20
+                    });
+                case 'pilot':
+                    return build({
+                        title: 'Launch AI-enhanced course pilots',
+                        description: `Introduce AI tools into select courses and capture impact on ${primaryOutcome}.`,
+                        type: 'implementation',
+                        priority: 'high',
+                        estimatedHours: 36
+                    });
+                case 'rollout':
+                    return build({
+                        title: 'Faculty AI pedagogy development',
+                        description: 'Deliver a coaching series and resource hub to scale AI-enabled teaching practices.',
+                        type: 'training',
+                        priority: 'high',
+                        estimatedHours: 32
+                    });
+                case 'measurement':
+                    return build({
+                        title: 'Analyze AI course learning outcomes',
+                        description: 'Evaluate assessment data, student feedback, and equity impacts to inform curriculum revisions.',
+                        type: 'assessment',
+                        priority: 'medium',
+                        estimatedHours: 18
+                    });
+                case 'innovation':
+                    return build({
+                        title: 'Create instructional innovation community',
+                        description: 'Establish an innovation guild to share exemplars, iterate on course design, and explore generative AI.',
+                        type: 'communication',
+                        priority: 'medium',
+                        estimatedHours: 16
+                    });
+            }
+        }
+
+        if (profile === 'it') {
+            switch (stage) {
+                case 'foundation':
+                    return build({
+                        title: 'Assess AI infrastructure & security posture',
+                        description: `Evaluate compute, integration, and security requirements to address ${primaryChallenge}.`,
+                        type: 'assessment',
+                        priority: 'high',
+                        estimatedHours: 32
+                    });
+                case 'pilot':
+                    return build({
+                        title: 'Provision pilot sandbox environments',
+                        description: 'Stand up controlled environments, data pipelines, and access controls for AI pilots.',
+                        type: 'technical',
+                        priority: 'high',
+                        estimatedHours: 40
+                    });
+                case 'rollout':
+                    return build({
+                        title: 'Deploy production-ready AI integrations',
+                        description: 'Harden infrastructure, automate deployments, and integrate AI workflows into enterprise systems.',
+                        type: 'technical',
+                        priority: 'high',
+                        estimatedHours: 48
+                    });
+                case 'measurement':
+                    return build({
+                        title: 'Implement AI operations monitoring',
+                        description: 'Set up observability, logging, and alerting for AI workloads to protect uptime and compliance.',
+                        type: 'technical',
+                        priority: 'medium',
+                        estimatedHours: 24
+                    });
+                case 'innovation':
+                    return build({
+                        title: 'Evaluate emerging AI platforms',
+                        description: 'Research new AI services, partnerships, and reference architectures to expand capabilities.',
+                        type: 'assessment',
+                        priority: 'medium',
+                        estimatedHours: 20
+                    });
+            }
+        }
+
+        if (profile === 'student') {
+            switch (stage) {
+                case 'foundation':
+                    return build({
+                        title: 'Map student support workflows',
+                        description: `Document advising, enrollment, and case management processes to address ${primaryChallenge}.`,
+                        type: 'assessment',
+                        priority: 'high',
+                        estimatedHours: 24
+                    });
+                case 'pilot':
+                    return build({
+                        title: 'Pilot AI-powered student advising',
+                        description: 'Deploy an AI assistant or triage workflow to support students and gather satisfaction feedback.',
+                        type: 'implementation',
+                        priority: 'high',
+                        estimatedHours: 34
+                    });
+                case 'rollout':
+                    return build({
+                        title: 'Roll out AI engagement playbooks',
+                        description: 'Launch messaging, nudges, and knowledge management to scale personalized student support.',
+                        type: 'communication',
+                        priority: 'high',
+                        estimatedHours: 30
+                    });
+                case 'measurement':
+                    return build({
+                        title: 'Monitor student experience metrics',
+                        description: 'Track satisfaction, response times, and equity indicators for AI-assisted services.',
+                        type: 'assessment',
+                        priority: 'medium',
+                        estimatedHours: 18
+                    });
+                case 'innovation':
+                    return build({
+                        title: 'Design proactive student interventions',
+                        description: 'Leverage predictive insights to trigger timely outreach and wraparound services.',
+                        type: 'implementation',
+                        priority: 'medium',
+                        estimatedHours: 22
+                    });
+            }
+        }
+
+        switch (stage) {
+            case 'foundation':
+                return build({
+                    title: `Define AI use cases for ${departmentName}`,
+                    description: `Prioritize workflows and KPIs where AI can accelerate progress on ${primaryOutcome}.`,
+                    type: 'assessment',
+                    priority: 'high',
+                    estimatedHours: 24
+                });
+            case 'pilot':
+                return build({
+                    title: `Pilot AI workflow within ${departmentName}`,
+                    description: `Implement a focused proof of concept to validate AI impact and address ${primaryChallenge}.`,
+                    type: 'implementation',
+                    priority: 'high',
+                    estimatedHours: 32
+                });
+            case 'rollout':
+                return build({
+                    title: `Scale AI processes across ${departmentName}`,
+                    description: 'Deploy training, documentation, and support to embed the new AI-enabled workflow.',
+                    type: 'implementation',
+                    priority: 'high',
+                    estimatedHours: 30
+                });
+            case 'measurement':
+                return build({
+                    title: `Review performance of AI initiatives`,
+                    description: 'Monitor KPIs, adoption data, and stakeholder feedback to refine operations.',
+                    type: 'assessment',
+                    priority: 'medium',
+                    estimatedHours: 18
+                });
+            case 'innovation':
+                return build({
+                    title: `Plan next-wave AI enhancements`,
+                    description: `Identify additional automation and analytics opportunities for ${departmentName}.`,
+                    type: 'implementation',
+                    priority: 'medium',
+                    estimatedHours: 20
+                });
+            default:
+                return null;
+        }
+    }
+
+    private makeDepartmentTask(
+        department: string,
+        config: {
+            title: string;
+            description: string;
+            type: PhaseTask['type'];
+            priority: PhaseTask['priority'];
+            estimatedHours: number;
+            dependencies?: string[];
+        }
+    ): PhaseTask {
+        return {
+            title: config.title,
+            description: config.description,
+            type: config.type,
+            priority: config.priority,
+            department,
+            estimated_hours: config.estimatedHours,
+            dependencies: config.dependencies ?? []
+        };
+    }
+
+    private identifyDepartmentProfile(name: string): 'academic' | 'it' | 'student' | 'default' {
+        const normalized = (name || '').toLowerCase();
+        if (
+            normalized.includes('academic') ||
+            normalized.includes('curriculum') ||
+            normalized.includes('instruction') ||
+            normalized.includes('learning')
+        ) {
+            return 'academic';
+        }
+        if (
+            normalized.includes('it') ||
+            normalized.includes('technology') ||
+            normalized.includes('tech') ||
+            normalized.includes('information')
+        ) {
+            return 'it';
+        }
+        if (
+            normalized.includes('student') ||
+            normalized.includes('enrollment') ||
+            normalized.includes('advis')
+        ) {
+            return 'student';
+        }
+        return 'default';
+    }
+
+    private distributePhaseBudgets(phases: ImplementationPhase[], budgetRange: string): ImplementationPhase[] {
+        if (phases.length === 0) {
+            return phases;
+        }
+
+        const baseWeights = [0.24, 0.26, 0.22, 0.18, 0.1];
+        const normalizedWeights = phases.map((_, index) => baseWeights[index] ?? 1 / phases.length);
+        const totalWeight = normalizedWeights.reduce((sum, weight) => sum + weight, 0) || 1;
+        const totalBudget = this.parseBudgetRange(budgetRange);
+
+        return phases.map((phase, index) => ({
+            ...phase,
+            budget: Math.floor((normalizedWeights[index] / totalWeight) * totalBudget)
+        }));
+    }
+
+    private getDepartmentResources(profile: string): string[] {
+        switch (profile) {
+            case 'academic':
+                return [
+                    'Faculty AI champions',
+                    'Instructional designers',
+                    'Academic technology specialists',
+                    'Learning analytics support'
+                ];
+            case 'it':
+                return [
+                    'Cloud architects',
+                    'Data engineers',
+                    'Security analysts',
+                    'Integration specialists'
+                ];
+            case 'student':
+                return [
+                    'Advising leads',
+                    'Student success analysts',
+                    'Communications specialist',
+                    'Support operations manager'
+                ];
+            default:
+                return [
+                    'Department leadership sponsor',
+                    'Process owner',
+                    'Project analyst',
+                    'Training facilitator'
+                ];
+        }
+    }
+
+    private getDepartmentTraining(profile: string): TrainingRequirement[] {
+        switch (profile) {
+            case 'academic':
+                return [
+                    {
+                        topic: 'AI-enhanced pedagogy and assessment',
+                        audience: 'Faculty & instructional designers',
+                        duration: '6 hours',
+                        format: 'hybrid',
+                        frequency: 'Quarterly'
+                    },
+                    {
+                        topic: 'Learning analytics with AI',
+                        audience: 'Department chairs & assessment leads',
+                        duration: '4 hours',
+                        format: 'online',
+                        frequency: 'Biannual'
+                    }
+                ];
+            case 'it':
+                return [
+                    {
+                        topic: 'AI infrastructure & MLOps foundations',
+                        audience: 'IT engineers & architects',
+                        duration: '8 hours',
+                        format: 'in-person',
+                        frequency: 'Quarterly'
+                    },
+                    {
+                        topic: 'Security & compliance for AI workloads',
+                        audience: 'IT security & compliance teams',
+                        duration: '4 hours',
+                        format: 'online',
+                        frequency: 'Quarterly'
+                    }
+                ];
+            case 'student':
+                return [
+                    {
+                        topic: 'AI-powered student success workflows',
+                        audience: 'Advisors & student support staff',
+                        duration: '4 hours',
+                        format: 'hybrid',
+                        frequency: 'Monthly refreshers'
+                    },
+                    {
+                        topic: 'Responsible use of student data in AI tools',
+                        audience: 'Student services leadership',
+                        duration: '3 hours',
+                        format: 'online',
+                        frequency: 'Biannual'
+                    }
+                ];
+            default:
+                return [
+                    {
+                        topic: 'AI fundamentals for department leaders',
+                        audience: 'Department leadership team',
+                        duration: '4 hours',
+                        format: 'hybrid',
+                        frequency: 'Quarterly'
+                    },
+                    {
+                        topic: 'Operationalizing AI initiatives',
+                        audience: 'Project and operations managers',
+                        duration: '5 hours',
+                        format: 'in-person',
+                        frequency: 'Quarterly'
+                    }
+                ];
+        }
+    }
+
+    private buildDepartmentOverview(deptGoal: DepartmentGoal): string {
+        const challenge =
+            deptGoal.challenges && deptGoal.challenges.length > 0
+                ? deptGoal.challenges[0]
+                : 'drive adoption across teams';
+        const outcome =
+            deptGoal.outcomes && deptGoal.outcomes.length > 0
+                ? deptGoal.outcomes[0]
+                : 'deliver measurable AI benefits';
+        return `AI roadmap for ${deptGoal.department} focused on resolving ${challenge} and achieving ${outcome}.`;
+    }
+
+    private buildDefaultDepartmentGoals(deptGoal: DepartmentGoal): string[] {
+        return [
+            `Define priority AI use cases for ${deptGoal.department}`,
+            `Launch first AI-enabled workflow within ${deptGoal.department}`,
+            `Establish change champions and support structures for ${deptGoal.department}`
+        ];
+    }
+
+    private buildDepartmentSuccessMetrics(deptGoal: DepartmentGoal, profile: string): string[] {
+        const metrics: string[] = [];
+
+        (deptGoal.outcomes || []).slice(0, 2).forEach((outcome) => {
+            metrics.push(`Progress toward: ${outcome}`);
+        });
+
+        switch (profile) {
+            case 'academic':
+                metrics.push('AI-supported courses increased by 30%');
+                metrics.push('Faculty AI confidence above 80%');
+                metrics.push('Student performance uplift of 10% in AI-enhanced courses');
+                break;
+            case 'it':
+                metrics.push('AI platform uptime above 99%');
+                metrics.push('Integration delivery cycle time reduced by 40%');
+                metrics.push('Zero critical security incidents related to AI workloads');
+                break;
+            case 'student':
+                metrics.push('Student response time under 5 minutes via AI channels');
+                metrics.push('Student satisfaction with support services up by 15%');
+                metrics.push('At-risk students identified two weeks earlier on average');
+                break;
+            default:
+                metrics.push(`AI adoption within ${deptGoal.department} above 75%`);
+                metrics.push('Documented ROI meets or exceeds forecast');
+                metrics.push('Staff productivity improved by 20% through AI automation');
+        }
+
+        return Array.from(new Set(metrics));
     }
 
     private calculatePhaseBudget(budgetRange: string, percentage: number): number {

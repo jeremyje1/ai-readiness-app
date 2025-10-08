@@ -5,31 +5,31 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useAssessment } from '@/lib/assessment/useAssessment';
-import { useAudience } from '@/lib/audience/AudienceContext';
-import { useAudienceAnalytics } from '@/lib/analytics/audienceAnalytics';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { useAudienceAnalytics } from '@/lib/analytics/audienceAnalytics';
+import { useAssessment } from '@/lib/assessment/useAssessment';
+import { useAudience } from '@/lib/audience/AudienceContext';
 import {
+  AlertCircle,
+  BookOpen,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
-  Save,
   Clock,
-  AlertCircle,
-  CheckCircle,
-  BookOpen,
-  Users,
-  GraduationCap
+  GraduationCap,
+  Save,
+  Users
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface AudienceAwareAssessmentProps {
   userId?: string;
@@ -37,22 +37,22 @@ interface AudienceAwareAssessmentProps {
   onComplete?: (results: any) => void;
 }
 
-export function AudienceAwareAssessment({ 
-  userId, 
-  sessionId, 
-  onComplete 
+export function AudienceAwareAssessment({
+  userId,
+  sessionId,
+  onComplete
 }: AudienceAwareAssessmentProps) {
   const { audience, config } = useAudience();
   const analytics = useAudienceAnalytics(audience, userId);
   const assessment = useAssessment(userId);
-  
+
   const [currentAnswer, setCurrentAnswer] = useState<any>(null);
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
 
   // Initialize assessment
   useEffect(() => {
     assessment.loadAssessment(sessionId);
-    
+
     // Track assessment start
     if (assessment.state.bank) {
       analytics.trackAssessment('started', {
@@ -60,7 +60,7 @@ export function AudienceAwareAssessment({
         sessionId: assessment.state.sessionId
       });
     }
-  }, [sessionId, assessment.state.bank?.bankId]);
+  }, [sessionId, assessment, assessment.state.bank?.bankId, analytics]);
 
   // Load current answer when question changes
   useEffect(() => {
@@ -68,7 +68,7 @@ export function AudienceAwareAssessment({
       const savedAnswer = assessment.state.responses[assessment.currentQuestionData.id];
       setCurrentAnswer(savedAnswer || null);
     }
-  }, [assessment.currentQuestionData, assessment.state.responses]);
+  }, [assessment, assessment.currentQuestionData, assessment.state.responses]);
 
   // Show save indicator when saving
   useEffect(() => {
@@ -77,15 +77,15 @@ export function AudienceAwareAssessment({
       const timeout = setTimeout(() => setShowSaveIndicator(false), 1500);
       return () => clearTimeout(timeout);
     }
-  }, [assessment.saveStatus.isSaving]);
+  }, [assessment, assessment.saveStatus.isSaving]);
 
   // Handle answer submission
   const handleAnswer = async (answer: any) => {
     if (!assessment.currentQuestionData) return;
-    
+
     setCurrentAnswer(answer);
     await assessment.answerQuestion(assessment.currentQuestionData.id, answer);
-    
+
     // Track question answered
     analytics.trackAssessment('question_answered', {
       assessmentId: assessment.state.bank?.bankId,
@@ -100,11 +100,11 @@ export function AudienceAwareAssessment({
     if (assessment.currentQuestionData && currentAnswer !== null) {
       await assessment.answerQuestion(assessment.currentQuestionData.id, currentAnswer);
     }
-    
+
     // Check if this completes a section
     const currentSection = assessment.currentSectionData;
     const isLastQuestion = currentSection && assessment.state.currentQuestion >= currentSection.questions.length - 1;
-    
+
     if (isLastQuestion) {
       analytics.trackAssessment('section_completed', {
         assessmentId: assessment.state.bank?.bankId,
@@ -112,9 +112,9 @@ export function AudienceAwareAssessment({
         timeSpent: Date.now() // Could track actual time spent
       });
     }
-    
+
     await assessment.nextQuestion();
-    
+
     // Check if assessment is complete
     if (assessment.state.isComplete) {
       analytics.trackAssessment('completed', {
@@ -287,7 +287,7 @@ export function AudienceAwareAssessment({
                 <div className="text-sm text-gray-600">Sections</div>
               </div>
             </div>
-            
+
             <div className="text-center pt-4">
               <Button onClick={assessment.resetAssessment} variant="outline">
                 Take Assessment Again
@@ -392,8 +392,8 @@ export function AudienceAwareAssessment({
               onClick={handleNext}
               disabled={question.required && (currentAnswer === null || currentAnswer === '')}
             >
-              {assessment.state.currentSection === bank.sections.length - 1 && 
-               assessment.state.currentQuestion === section.questions.length - 1 ? 
+              {assessment.state.currentSection === bank.sections.length - 1 &&
+                assessment.state.currentQuestion === section.questions.length - 1 ?
                 'Complete' : 'Next'}
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
