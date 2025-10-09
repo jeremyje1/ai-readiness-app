@@ -1,4 +1,4 @@
-import { getOrganizationForUser, hasActivePayment } from '@/lib/payments/access';
+import { getOrganizationForUser, hasPremiumAccess } from '@/lib/payments/access';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
@@ -15,9 +15,17 @@ export async function GET(request: Request) {
         const blueprintId = url.searchParams.get('blueprintId');
         const phaseId = url.searchParams.get('phaseId');
 
-        const { organization: organizationFromPayment, payment } = await getOrganizationForUser(supabase, user.id);
+        const {
+            organization: organizationFromPayment,
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+        } = await getOrganizationForUser(supabase, user.id);
 
-        if (!payment || !hasActivePayment(payment)) {
+        const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+
+        if (!hasAccess) {
             return NextResponse.json({ error: 'Active subscription required' }, { status: 403 });
         }
 
@@ -98,9 +106,17 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { phase_id, task_title, description, assigned_to, priority, due_date } = body;
 
-        const { organization: organizationFromPayment, payment } = await getOrganizationForUser(supabase, user.id);
+        const {
+            organization: organizationFromPayment,
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+        } = await getOrganizationForUser(supabase, user.id);
 
-        if (!payment || !hasActivePayment(payment)) {
+        const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+
+        if (!hasAccess) {
             return NextResponse.json({ error: 'Active subscription required' }, { status: 403 });
         }
 

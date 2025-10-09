@@ -76,23 +76,53 @@ export function hasActivePayment(payment: UserPayment | null | undefined): boole
     return normalizedStatus ? activeStatuses.has(normalizedStatus) : false;
 }
 
+const PREMIUM_PROFILE_STATUSES = new Set(['active', 'trial', 'trialing', 'premium_trial', 'grace_period', 'onboarding']);
+
+export function hasPremiumAccess(
+    payment: UserPayment | null | undefined,
+    profileStatus?: string | null,
+    profileTier?: string | null,
+    trialEndsAt?: string | null
+): boolean {
+    if (hasActivePayment(payment)) {
+        return true;
+    }
+
+    const normalizedStatus = profileStatus?.toLowerCase();
+    if (normalizedStatus && PREMIUM_PROFILE_STATUSES.has(normalizedStatus)) {
+        return true;
+    }
+
+    const normalizedTier = profileTier?.toLowerCase();
+    if (normalizedTier && (normalizedTier.includes('premium') || normalizedTier.includes('trial'))) {
+        return true;
+    }
+
+    if (trialEndsAt) {
+        const trialExpiry = new Date(trialEndsAt);
+        if (!Number.isNaN(trialExpiry.getTime()) && trialExpiry.getTime() > Date.now()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export async function getOrganizationForUser(
     supabase: SupabaseClient<any>,
     userId: string
-): Promise<{ organization: string | null; payment: UserPayment | null }> {
+): Promise<{
+    organization: string | null;
+    payment: UserPayment | null;
+    subscriptionStatus: string | null;
+    subscriptionTier: string | null;
+    trialEndsAt: string | null;
+}> {
     const payment = await getLatestGrantedPayment(supabase, userId);
-
-    if (!payment) {
-        return { organization: null, payment: null };
-    }
-
-    if (payment.organization) {
-        return { organization: payment.organization, payment };
-    }
 
     const { data: profile, error } = await supabase
         .from('user_profiles')
-        .select('institution_name')
+        .select('institution_name, subscription_status, subscription_tier, trial_ends_at')
         .eq('user_id', userId)
         .maybeSingle();
 
@@ -100,6 +130,13 @@ export async function getOrganizationForUser(
         console.warn('Failed to resolve organization from profile', { userId, error });
     }
 
-    const fallback = profile?.institution_name || null;
-    return { organization: fallback, payment };
+    const organization = payment?.organization || profile?.institution_name || null;
+
+    return {
+        organization,
+        payment,
+        subscriptionStatus: profile?.subscription_status ?? null,
+        subscriptionTier: profile?.subscription_tier ?? null,
+        trialEndsAt: profile?.trial_ends_at ?? null,
+    };
 }

@@ -51,7 +51,7 @@ export default function AIReadinessSuccessPage() {
                 const response = await fetch('/api/payments/status');
                 const data = await response.json();
 
-                if (data.hasActiveSubscription) {
+                if (data.hasPremiumAccess || data.hasActiveSubscription) {
                     setStatus('success');
                     setMessage('Welcome to AI Blueprint Pro!');
 

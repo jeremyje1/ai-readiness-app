@@ -1,6 +1,6 @@
 "use client";
 
-import { getOrganizationForUser, hasActivePayment } from "@/lib/payments/access";
+import { getOrganizationForUser, hasPremiumAccess } from "@/lib/payments/access";
 import { createClient } from "@/lib/supabase/browser-client";
 import type {
     CollaborationRoom,
@@ -255,9 +255,17 @@ export function useCollaborationWorkspace(
                     throw new Error("Authentication required to access collaborative workspace");
                 }
 
-                const { organization: paymentOrganization, payment } = await getOrganizationForUser(supabase, user.id);
+                const {
+                    organization: paymentOrganization,
+                    payment,
+                    subscriptionStatus,
+                    subscriptionTier,
+                    trialEndsAt,
+                } = await getOrganizationForUser(supabase, user.id);
 
-                if (!payment || !hasActivePayment(payment)) {
+                const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+
+                if (!hasAccess) {
                     throw new Error("Active premium subscription required to access collaborative workspace");
                 }
 
@@ -270,7 +278,7 @@ export function useCollaborationWorkspace(
                 if (!active) return;
 
                 setOrganization(resolvedOrganization);
-                setRole(payment.role || null);
+                setRole(payment?.role || null);
 
                 await refreshWorkspace(resolvedOrganization);
 

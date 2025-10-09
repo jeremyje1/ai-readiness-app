@@ -110,8 +110,7 @@ export default function TeamWorkspacePage() {
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [selectedView, setSelectedView] = useState<'overview' | 'tasks' | 'activity'>('overview');
     const {
-        hasActiveSubscription,
-        canAccessPremiumFeatures,
+        hasPremiumAccess,
         isLoading,
         subscriptionTier,
         daysLeftInTrial,
@@ -178,7 +177,7 @@ export default function TeamWorkspacePage() {
         }
     };
 
-    if (!canAccessPremiumFeatures && !isLoading) {
+    if (!hasPremiumAccess && !isLoading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="bg-white rounded-lg shadow-sm p-8 max-w-md text-center">

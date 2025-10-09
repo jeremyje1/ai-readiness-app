@@ -133,7 +133,7 @@ export default function PolicyLibraryPage() {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredPolicies, setFilteredPolicies] = useState(policies);
-    const { hasActiveSubscription, isLoading } = useSubscription();
+    const { hasPremiumAccess, isLoading } = useSubscription();
 
     useEffect(() => {
         let filtered = policies;
@@ -157,7 +157,7 @@ export default function PolicyLibraryPage() {
     }, [selectedCategory, searchTerm]);
 
     const handleDownload = async (policyId: string, isPremium: boolean) => {
-        if (isPremium && !hasActiveSubscription) {
+    if (isPremium && !hasPremiumAccess) {
             // Redirect to upgrade
             window.location.href = '/dashboard#upgrade';
             return;
@@ -202,7 +202,7 @@ export default function PolicyLibraryPage() {
                             50+ expertly crafted, customizable policy templates to accelerate your AI governance implementation
                         </p>
 
-                        {!hasActiveSubscription && !isLoading && (
+                        {!hasPremiumAccess && !isLoading && (
                             <div className="bg-indigo-500/30 backdrop-blur rounded-lg p-4 inline-flex items-center">
                                 <Sparkles className="w-5 h-5 mr-2 text-yellow-300" />
                                 <span>Premium members get access to all templates + monthly updates</span>
@@ -307,7 +307,7 @@ export default function PolicyLibraryPage() {
                                 whileHover={{ y: -4 }}
                                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all p-6 relative"
                             >
-                                {policy.premium && !hasActiveSubscription && (
+                                {policy.premium && !hasPremiumAccess && (
                                     <div className="absolute top-4 right-4">
                                         <Lock className="w-5 h-5 text-indigo-600" />
                                     </div>
@@ -354,13 +354,13 @@ export default function PolicyLibraryPage() {
                                     </button>
                                     <button
                                         onClick={() => handleDownload(policy.id, policy.premium)}
-                                        className={`flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center ${policy.premium && !hasActiveSubscription
+                                        className={`flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center ${policy.premium && !hasPremiumAccess
                                             ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
                                             : 'bg-indigo-600 text-white hover:bg-indigo-700'
                                             }`}
                                     >
                                         <Download className="w-4 h-4 mr-2" />
-                                        {policy.premium && !hasActiveSubscription ? 'Upgrade' : 'Download'}
+                                        {policy.premium && !hasPremiumAccess ? 'Upgrade' : 'Download'}
                                     </button>
                                 </div>
                             </motion.div>
@@ -387,7 +387,7 @@ export default function PolicyLibraryPage() {
                 )}
 
                 {/* Bottom CTA */}
-                {!hasActiveSubscription && !isLoading && (
+                {!hasPremiumAccess && !isLoading && (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

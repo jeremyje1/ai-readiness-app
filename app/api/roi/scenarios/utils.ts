@@ -1,4 +1,4 @@
-import { getOrganizationForUser, hasActivePayment } from '@/lib/payments/access';
+import { getOrganizationForUser, hasPremiumAccess } from '@/lib/payments/access';
 import { resolveServerUser } from '@/lib/supabase/resolve-user';
 import { createClient } from '@/lib/supabase/server';
 import type { User } from '@supabase/supabase-js';
@@ -36,9 +36,17 @@ export async function getAuthContext(request?: NextRequest): Promise<AuthContext
         };
     }
 
-    const { organization: organizationFromPayment, payment } = await getOrganizationForUser(supabase, user.id);
+    const {
+        organization: organizationFromPayment,
+        payment,
+        subscriptionStatus,
+        subscriptionTier,
+        trialEndsAt,
+    } = await getOrganizationForUser(supabase, user.id);
 
-    if (!payment || !hasActivePayment(payment)) {
+    const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+
+    if (!hasAccess) {
         return {
             ok: false,
             response: NextResponse.json({ error: 'Active subscription required' }, { status: 403 }),

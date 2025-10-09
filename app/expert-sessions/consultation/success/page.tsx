@@ -82,7 +82,7 @@ export default function ConsultationSuccessPage() {
             <div className="container mx-auto px-6 lg:px-10 max-w-5xl space-y-10">
                 <div className="text-center space-y-4">
                     <Badge className="bg-emerald-100 text-emerald-700">Consultation Reserved</Badge>
-                    <h1 className="text-4xl font-bold text-slate-900">You're booked with Jeremy Estrella</h1>
+                    <h1 className="text-4xl font-bold text-slate-900">You&apos;re booked with Jeremy Estrella</h1>
                     <p className="text-lg text-slate-600 max-w-2xl mx-auto">
                         Your payment has been received. Choose your meeting time below and come prepared with your highest-priority AI questions so we can move fast.
                     </p>

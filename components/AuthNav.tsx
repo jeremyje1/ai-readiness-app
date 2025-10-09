@@ -18,7 +18,7 @@ export default function AuthNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const supabase = createClient();
-  const { hasActiveSubscription, isLoading: subLoading } = useSubscription();
+  const { hasPremiumAccess, isLoading: subLoading } = useSubscription();
 
   // Log version on mount for verification
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function AuthNav() {
         <div className='hidden md:flex items-center gap-3'>
           {!loading && userEmail && (
             <>
-              {!subLoading && !hasActiveSubscription && (
+              {!subLoading && !hasPremiumAccess && (
                 <Link
                   href='/pricing'
                   className='flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold shadow-lg hover:shadow-xl'
@@ -206,7 +206,7 @@ export default function AuthNav() {
                   </Link>
                 ))}
                 <div className='border-t border-gray-100 my-2'></div>
-                {hasActiveSubscription ? (
+                {hasPremiumAccess ? (
                   <>
                     <div className="text-xs text-gray-500 font-medium mb-1">PREMIUM FEATURES ✨</div>
                     {premiumLinks.map(l => (

@@ -1,4 +1,4 @@
-import { getLatestGrantedPayment, hasActivePayment, resolvePaymentTier } from '@/lib/payments/access';
+import { getLatestGrantedPayment, hasActivePayment, hasPremiumAccess, resolvePaymentTier } from '@/lib/payments/access';
 import { resolveServerUser } from '@/lib/supabase/resolve-user';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
@@ -30,14 +30,16 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    const subscriptionStatus = profile?.subscription_status || (isVerified ? (payment?.payment_status ?? 'active') : 'inactive');
-    const subscriptionTier = profile?.subscription_tier || tier || null;
-    const trialEndsAt = profile?.trial_ends_at ?? null;
+  const subscriptionStatus = profile?.subscription_status || (isVerified ? (payment?.payment_status ?? 'active') : 'inactive');
+  const subscriptionTier = profile?.subscription_tier || tier || null;
+  const trialEndsAt = profile?.trial_ends_at ?? null;
+  const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
 
     return NextResponse.json({
       isVerified,
-      hasActiveSubscription: isVerified,
-      tier,
+  hasActiveSubscription: isVerified,
+  hasPremiumAccess: hasAccess,
+  tier,
       email: user.email,
       userId: user.id,
       subscriptionId: payment?.stripe_subscription_id,

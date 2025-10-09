@@ -1,4 +1,4 @@
-import { getOrganizationForUser, hasActivePayment } from '@/lib/payments/access';
+import { getOrganizationForUser, hasPremiumAccess } from '@/lib/payments/access';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
@@ -16,9 +16,17 @@ export async function GET(request: Request) {
         const endDate = url.searchParams.get('end') || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
         const eventType = url.searchParams.get('type');
 
-        const { organization: organizationFromPayment, payment } = await getOrganizationForUser(supabase, user.id);
+        const {
+            organization: organizationFromPayment,
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+        } = await getOrganizationForUser(supabase, user.id);
 
-        if (!payment || !hasActivePayment(payment)) {
+        const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+
+        if (!hasAccess) {
             return NextResponse.json({ error: 'Active subscription required' }, { status: 403 });
         }
 
@@ -118,9 +126,17 @@ export async function POST(request: Request) {
             recurrence_rule
         } = body;
 
-        const { organization: organizationFromPayment, payment } = await getOrganizationForUser(supabase, user.id);
+        const {
+            organization: organizationFromPayment,
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+        } = await getOrganizationForUser(supabase, user.id);
 
-        if (!payment || !hasActivePayment(payment)) {
+        const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+
+        if (!hasAccess) {
             return NextResponse.json({ error: 'Active subscription required' }, { status: 403 });
         }
 

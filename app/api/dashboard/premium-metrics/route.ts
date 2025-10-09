@@ -1,4 +1,4 @@
-import { getLatestGrantedPayment, hasActivePayment } from '@/lib/payments/access';
+import { getLatestGrantedPayment, hasActivePayment, hasPremiumAccess } from '@/lib/payments/access';
 import { resolveServerUser } from '@/lib/supabase/resolve-user';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,17 +15,20 @@ export async function GET(request: NextRequest) {
         // Get user profile
         const { data: profile } = await supabase
             .from('user_profiles')
-            .select('institution_name, subscription_status')
+            .select('institution_name, subscription_status, subscription_tier, trial_ends_at')
             .eq('user_id', user.id)
             .single();
 
         const payment = await getLatestGrantedPayment(supabase, user.id);
 
-        const hasPremiumAccess =
-            profile?.subscription_status === 'active' ||
-            hasActivePayment(payment);
+        const hasAccess = hasPremiumAccess(
+            payment,
+            profile?.subscription_status,
+            profile?.subscription_tier,
+            profile?.trial_ends_at
+        );
 
-        if (!hasPremiumAccess) {
+        if (!hasAccess) {
             return NextResponse.json({ error: 'Premium subscription required' }, { status: 403 });
         }
 
@@ -88,8 +91,9 @@ export async function GET(request: NextRequest) {
             upcomingEvents,
             roiMetrics,
             subscription: {
-                status: 'active',
-                tier: 'premium',
+                status: profile?.subscription_status || (hasActivePayment(payment) ? payment?.payment_status ?? 'active' : 'inactive'),
+                tier: profile?.subscription_tier || payment?.plan_type || payment?.tier || 'premium',
+                trialEndsAt: profile?.trial_ends_at ?? null,
                 monthlyValue: 199
             }
         });
