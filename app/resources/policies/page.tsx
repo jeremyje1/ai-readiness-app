@@ -157,7 +157,7 @@ export default function PolicyLibraryPage() {
     }, [selectedCategory, searchTerm]);
 
     const handleDownload = async (policyId: string, isPremium: boolean) => {
-    if (isPremium && !hasPremiumAccess) {
+        if (isPremium && !hasPremiumAccess) {
             // Redirect to upgrade
             window.location.href = '/dashboard#upgrade';
             return;

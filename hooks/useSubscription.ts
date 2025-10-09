@@ -15,7 +15,7 @@ export function useSubscription(): SubscriptionStatus {
     const [status, setStatus] = useState<SubscriptionStatus>({
         isLoading: true,
         hasActiveSubscription: false,
-    hasPremiumAccess: false,
+        hasPremiumAccess: false,
         isTrialUser: false,
         trialEndsAt: null,
         daysLeftInTrial: 0,

@@ -21,11 +21,36 @@ export async function GET(request: NextRequest) {
 
         const payment = await getLatestGrantedPayment(supabase, user.id);
 
+        let subscriptionStatus = profile?.subscription_status ?? null;
+        let subscriptionTier = profile?.subscription_tier ?? null;
+        let trialEndsAt = profile?.trial_ends_at ?? null;
+
+        if (!trialEndsAt && user.created_at) {
+            const createdAtDate = new Date(user.created_at);
+            if (!Number.isNaN(createdAtDate.getTime())) {
+                const fallbackTrialEnd = new Date(createdAtDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+                if (fallbackTrialEnd.getTime() > Date.now()) {
+                    trialEndsAt = fallbackTrialEnd.toISOString();
+                }
+            }
+        }
+
+        if (!subscriptionStatus && trialEndsAt) {
+            const parsedTrialEnd = new Date(trialEndsAt);
+            if (!Number.isNaN(parsedTrialEnd.getTime()) && parsedTrialEnd.getTime() > Date.now()) {
+                subscriptionStatus = 'trialing';
+                if (!subscriptionTier) {
+                    subscriptionTier = 'trial';
+                }
+            }
+        }
+
         const hasAccess = hasPremiumAccess(
             payment,
-            profile?.subscription_status,
-            profile?.subscription_tier,
-            profile?.trial_ends_at
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+            user.created_at
         );
 
         if (!hasAccess) {
@@ -91,9 +116,9 @@ export async function GET(request: NextRequest) {
             upcomingEvents,
             roiMetrics,
             subscription: {
-                status: profile?.subscription_status || (hasActivePayment(payment) ? payment?.payment_status ?? 'active' : 'inactive'),
-                tier: profile?.subscription_tier || payment?.plan_type || payment?.tier || 'premium',
-                trialEndsAt: profile?.trial_ends_at ?? null,
+                status: subscriptionStatus || (hasActivePayment(payment) ? payment?.payment_status ?? 'active' : 'inactive'),
+                tier: subscriptionTier || payment?.plan_type || payment?.tier || 'premium',
+                trialEndsAt,
                 monthlyValue: 199
             }
         });

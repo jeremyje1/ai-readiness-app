@@ -154,7 +154,7 @@ export default function AuthNav() {
         <div className='hidden md:flex items-center gap-3'>
           {!loading && userEmail && (
             <>
-              {!subLoading && !hasPremiumAccess && (
+              {!subLoading && !hasPremiumAccess ? (
                 <Link
                   href='/pricing'
                   className='flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold shadow-lg hover:shadow-xl'
@@ -164,6 +164,14 @@ export default function AuthNav() {
                   </svg>
                   Upgrade to Premium
                 </Link>
+              ) : null}
+              {!subLoading && hasPremiumAccess && (
+                <span className='flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg font-semibold shadow-sm border border-emerald-200'>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Premium Active
+                </span>
               )}
               <Link
                 href='/dashboard/personalized'
@@ -229,6 +237,14 @@ export default function AuthNav() {
                     </svg>
                     Upgrade to Premium - $199/month
                   </Link>
+                )}
+                {hasPremiumAccess && (
+                  <div className='flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-3 rounded-lg font-semibold shadow-sm border border-emerald-200 mx-2 my-2'>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Premium Active
+                  </div>
                 )}
               </>
             )}

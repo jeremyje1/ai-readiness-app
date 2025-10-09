@@ -63,26 +63,53 @@ export function hasActivePayment(payment: UserPayment | null | undefined): boole
     if (!payment) return false;
 
     const normalizedStatus = payment.payment_status?.toLowerCase();
-    const activeStatuses = new Set(['active', 'completed', 'paid', 'premium', 'trialing']);
+    const activeStatuses = new Set(['active', 'completed', 'paid', 'premium', 'trial', 'trialing']);
 
     if (payment.access_granted === true) {
-        return normalizedStatus ? activeStatuses.has(normalizedStatus) : true;
+        if (!normalizedStatus) return true;
+        if (activeStatuses.has(normalizedStatus)) return true;
+        if (normalizedStatus.includes('active') || normalizedStatus.includes('trial')) return true;
+        return false;
     }
 
     if (payment.access_granted === false) {
-        return normalizedStatus ? activeStatuses.has(normalizedStatus) : false;
+        if (!normalizedStatus) return false;
+        if (activeStatuses.has(normalizedStatus)) return true;
+        if (normalizedStatus.includes('active') || normalizedStatus.includes('trial')) return true;
+        return false;
     }
 
-    return normalizedStatus ? activeStatuses.has(normalizedStatus) : false;
+    if (!normalizedStatus) return false;
+    if (activeStatuses.has(normalizedStatus)) return true;
+    if (normalizedStatus.includes('active') || normalizedStatus.includes('trial')) return true;
+
+    return false;
 }
 
-const PREMIUM_PROFILE_STATUSES = new Set(['active', 'trial', 'trialing', 'premium_trial', 'grace_period', 'onboarding']);
+const PREMIUM_PROFILE_STATUSES = new Set([
+    'active',
+    'trial',
+    'trialing',
+    'premium_trial',
+    'grace_period',
+    'onboarding',
+    'active_trial',
+    'active-trial',
+    'trial_active',
+    'trial-user',
+    'trial_user',
+    'trialing_active',
+    'trialing-active',
+    'subscribed'
+]);
 
 export function hasPremiumAccess(
     payment: UserPayment | null | undefined,
     profileStatus?: string | null,
     profileTier?: string | null,
-    trialEndsAt?: string | null
+    trialEndsAt?: string | null,
+    userCreatedAt?: string | Date | null,
+    trialWindowDays = 7
 ): boolean {
     if (hasActivePayment(payment)) {
         return true;
@@ -102,6 +129,16 @@ export function hasPremiumAccess(
         const trialExpiry = new Date(trialEndsAt);
         if (!Number.isNaN(trialExpiry.getTime()) && trialExpiry.getTime() > Date.now()) {
             return true;
+        }
+    }
+
+    if (userCreatedAt) {
+        const createdAtDate = typeof userCreatedAt === 'string' ? new Date(userCreatedAt) : userCreatedAt;
+        if (!Number.isNaN(createdAtDate.getTime())) {
+            const fallbackTrialExpiry = createdAtDate.getTime() + trialWindowDays * 24 * 60 * 60 * 1000;
+            if (fallbackTrialExpiry > Date.now()) {
+                return true;
+            }
         }
     }
 

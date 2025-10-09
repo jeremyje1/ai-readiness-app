@@ -44,7 +44,13 @@ export async function getAuthContext(request?: NextRequest): Promise<AuthContext
         trialEndsAt,
     } = await getOrganizationForUser(supabase, user.id);
 
-    const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+    const hasAccess = hasPremiumAccess(
+        payment,
+        subscriptionStatus,
+        subscriptionTier,
+        trialEndsAt,
+        user.created_at
+    );
 
     if (!hasAccess) {
         return {

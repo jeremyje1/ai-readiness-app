@@ -22,7 +22,13 @@ export async function GET(request: Request) {
             trialEndsAt,
         } = await getOrganizationForUser(supabase, user.id);
 
-        const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+        const hasAccess = hasPremiumAccess(
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+            user.created_at
+        );
 
         if (!hasAccess) {
             return NextResponse.json({ error: 'Active subscription required' }, { status: 403 });
@@ -142,7 +148,13 @@ export async function POST(request: Request) {
             trialEndsAt,
         } = await getOrganizationForUser(supabase, user.id);
 
-        const hasAccess = hasPremiumAccess(payment, subscriptionStatus, subscriptionTier, trialEndsAt);
+        const hasAccess = hasPremiumAccess(
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+            user.created_at
+        );
 
         if (!hasAccess) {
             return NextResponse.json({ error: 'Active subscription required' }, { status: 403 });

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { createClient } from '@/lib/supabase/browser-client';
+import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { motion } from 'framer-motion';
 import {
     ArrowRight,
@@ -17,143 +18,218 @@ import {
     Users
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export default function WelcomePage() {
     const router = useRouter();
     const supabase = useMemo(() => createClient(), []);
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState(0);
+    const [initializing, setInitializing] = useState(true);
+
+    const loadingProfileRef = useRef(false);
+    const lastLoadedUserRef = useRef<string | null>(null);
+    const isMountedRef = useRef(true);
 
     useEffect(() => {
-        const loadUser = async () => {
-            try {
-                console.log('🔍 Welcome page: Loading user...');
-                const { data: { user }, error: userError } = await supabase.auth.getUser();
-                if (userError || !user) {
-                    console.log('❌ No user found, redirecting to get-started', userError);
-                    router.push('/get-started');
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
+
+    const loadProfileForUser = useCallback(async (authUser: User) => {
+        if (!authUser?.id) {
+            return;
+        }
+
+        if (loadingProfileRef.current && lastLoadedUserRef.current === authUser.id) {
+            return;
+        }
+
+        loadingProfileRef.current = true;
+        lastLoadedUserRef.current = authUser.id;
+
+        try {
+            // Load user profile with retries (profile might be created asynchronously)
+            let attempts = 0;
+            const maxAttempts = 3;
+
+            while (attempts < maxAttempts) {
+                console.log(`🔄 Attempt ${attempts + 1}/${maxAttempts}: Loading profile for ${authUser.email}...`);
+                const { data: profileData, error } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('user_id', authUser.id)
+                    .maybeSingle();
+
+                if (profileData) {
+                    console.log('✅ Profile loaded:', profileData);
+                    if (isMountedRef.current) {
+                        setProfile(profileData);
+                    }
                     return;
                 }
-                console.log('✅ User loaded:', user.email);
-                setUser(user);
 
-                // Load user profile with retries (profile might be created asynchronously)
-                let attempts = 0;
-                const maxAttempts = 3; // Reduced from 5 to 3
-
-                while (attempts < maxAttempts) {
-                    console.log(`🔄 Attempt ${attempts + 1}/${maxAttempts}: Loading profile...`);
-                    const { data: profileData, error } = await supabase
-                        .from('user_profiles')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .maybeSingle(); // Use maybeSingle instead of single
-
-                    if (profileData) {
-                        console.log('✅ Profile loaded:', profileData);
-                        setProfile(profileData);
-                        return;
-                    }
-
-                    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-                        console.error('❌ Error loading profile:', error);
-                    }
-
-                    // Wait 500ms before retrying (faster retry)
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    attempts++;
+                if (error && error.code !== 'PGRST116') {
+                    console.error('❌ Error loading profile:', error);
                 }
 
-                // If profile still doesn't exist after retries, create one
-                console.log('⚠️ Profile not found after retries, creating minimal profile...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                attempts++;
+            }
 
-                // First, check if user has an institution
-                const { data: existingMembership } = await supabase
-                    .from('institution_memberships')
-                    .select('*, institutions(*)')
-                    .eq('user_id', user.id)
-                    .eq('active', true)
-                    .single();
+            if (!isMountedRef.current) {
+                return;
+            }
 
-                let institutionId = existingMembership?.institution_id;
+            console.log('⚠️ Profile not found after retries, creating minimal profile...');
 
-                // If no institution, create a default one for the user
-                if (!institutionId) {
-                    const orgName = user.user_metadata?.organization || user.email?.split('@')[1]?.split('.')[0] || 'My Institution';
-                    const { data: newInstitution } = await supabase
-                        .from('institutions')
-                        .insert({
-                            name: orgName,
-                            slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
-                            headcount: 500,
-                            budget: 1000000,
-                            org_type: user.user_metadata?.institution_type || 'K12'
-                        })
-                        .select()
-                        .single();
+            const { data: existingMembership } = await supabase
+                .from('institution_memberships')
+                .select('*, institutions(*)')
+                .eq('user_id', authUser.id)
+                .eq('active', true)
+                .single();
 
-                    if (newInstitution) {
-                        institutionId = newInstitution.id;
+            let institutionId = existingMembership?.institution_id;
 
-                        // Create membership
-                        await supabase
-                            .from('institution_memberships')
-                            .insert({
-                                user_id: user.id,
-                                institution_id: institutionId,
-                                role: 'admin',
-                                active: true
-                            });
-                    }
-                }
-
-                const { data: newProfile, error: createError } = await supabase
-                    .from('user_profiles')
-                    .upsert({
-                        user_id: user.id,
-                        email: user.email,
-                        full_name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                        institution_id: institutionId || null,
-                        institution_name: user.user_metadata?.organization || '',
-                        institution_type: user.user_metadata?.institution_type || 'K12',
-                        job_title: user.user_metadata?.title || '',
-                        phone: user.user_metadata?.phone || '',
-                        subscription_tier: 'trial',
-                        subscription_status: 'trial',
-                        trial_ends_at: user.user_metadata?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-                        onboarding_completed: false
-                    }, {
-                        onConflict: 'user_id'
+            if (!institutionId) {
+                const orgName = authUser.user_metadata?.organization || authUser.email?.split('@')[1]?.split('.')[0] || 'My Institution';
+                const { data: newInstitution } = await supabase
+                    .from('institutions')
+                    .insert({
+                        name: orgName,
+                        slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
+                        headcount: 500,
+                        budget: 1000000,
+                        org_type: authUser.user_metadata?.institution_type || 'K12'
                     })
                     .select()
                     .single();
 
-                if (newProfile) {
-                    console.log('✅ Profile created:', newProfile);
-                    setProfile(newProfile);
-                } else {
-                    console.error('❌ Failed to create profile:', createError);
-                    // Continue without profile data - allow user to proceed
-                    setProfile({
-                        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                        organization: user.user_metadata?.organization || '',
-                        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-                    });
+                if (newInstitution) {
+                    institutionId = newInstitution.id;
+
+                    await supabase
+                        .from('institution_memberships')
+                        .insert({
+                            user_id: authUser.id,
+                            institution_id: institutionId,
+                            role: 'admin',
+                            active: true
+                        });
                 }
-            } catch (error) {
-                console.error('❌ Error in loadUser:', error);
-                // Set minimal profile to allow user to continue
+            }
+
+            const { data: newProfile, error: createError } = await supabase
+                .from('user_profiles')
+                .upsert({
+                    user_id: authUser.id,
+                    email: authUser.email,
+                    full_name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+                    institution_id: institutionId || null,
+                    institution_name: authUser.user_metadata?.organization || '',
+                    institution_type: authUser.user_metadata?.institution_type || 'K12',
+                    job_title: authUser.user_metadata?.title || '',
+                    phone: authUser.user_metadata?.phone || '',
+                    subscription_tier: 'trial',
+                    subscription_status: 'trial',
+                    trial_ends_at: authUser.user_metadata?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    onboarding_completed: false
+                }, {
+                    onConflict: 'user_id'
+                })
+                .select()
+                .single();
+
+            if (!isMountedRef.current) {
+                return;
+            }
+
+            if (newProfile) {
+                console.log('✅ Profile created:', newProfile);
+                setProfile(newProfile);
+            } else {
+                console.error('❌ Failed to create profile:', createError);
+                setProfile({
+                    name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+                    organization: authUser.user_metadata?.organization || '',
+                    trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                });
+            }
+        } catch (error) {
+            console.error('❌ Error in loadProfileForUser:', error);
+            if (isMountedRef.current) {
                 setProfile({
                     name: 'User',
                     organization: '',
                     trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
                 });
             }
+        } finally {
+            loadingProfileRef.current = false;
+        }
+    }, [supabase]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const initialise = async () => {
+            try {
+                console.log('🔍 Welcome page: Loading user session...');
+                const { data, error } = await supabase.auth.getSession();
+                if (error) {
+                    console.error('❌ Welcome page session error:', error.message);
+                }
+
+                if (cancelled) {
+                    return;
+                }
+
+                const sessionUser = data?.session?.user ?? null;
+
+                if (sessionUser) {
+                    console.log('✅ User loaded:', sessionUser.email);
+                    setUser(sessionUser);
+                    await loadProfileForUser(sessionUser);
+                } else {
+                    console.log('❌ No authenticated session found on welcome page initial load');
+                }
+            } finally {
+                if (!cancelled) {
+                    setInitializing(false);
+                }
+            }
         };
-        loadUser();
-    }, [router, supabase]);
+
+        void initialise();
+
+        const { data: listener } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+            if (cancelled) {
+                return;
+            }
+
+            const authUser = session?.user ?? null;
+
+            if (authUser) {
+                console.log('🔁 Auth state change detected on welcome page:', authUser.email);
+                setUser(authUser);
+                void loadProfileForUser(authUser);
+            } else {
+                console.log('👋 Auth state cleared on welcome page');
+                setUser(null);
+                setProfile(null);
+            }
+
+            setInitializing(false);
+        });
+
+        return () => {
+            cancelled = true;
+            listener?.subscription.unsubscribe();
+        };
+    }, [loadProfileForUser, supabase]);
 
     const onboardingSteps = [
         {
@@ -205,12 +281,14 @@ export default function WelcomePage() {
                     <CardContent className="pt-6">
                         <div className="flex flex-col items-center space-y-4">
                             <div className="animate-pulse">Loading your account...</div>
-                            <Button
-                                variant="outline"
-                                onClick={() => router.push('/dashboard/personalized')}
-                            >
-                                Continue Anyway <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
+                            {!initializing && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => router.push('/dashboard/personalized')}
+                                >
+                                    Continue Anyway <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
