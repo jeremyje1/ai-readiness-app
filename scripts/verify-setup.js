@@ -313,7 +313,7 @@ async function printSummary() {
   log('\n📚 Documentation:', 'info');
   log('   • Setup guide: SETUP.md');
   log('   • Platform guide: PLATFORM_REDESIGN_PLAN.md');
-  log('   • Test the app: https://aiblueprint.k12aiblueprint.com\n');
+  log('   • Test the app: https://aiblueprint.educationaiblueprint.com\n');
 }
 
 async function runVerification() {

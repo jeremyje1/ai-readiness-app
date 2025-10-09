@@ -33,7 +33,7 @@ export default async function RootLayout({
   const referer = headersList.get('referer') || undefined;
 
   const derivation = deriveAudience({ host, referer });
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.educationaiblueprint.com';
 
   return (
     <html lang="en">

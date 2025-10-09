@@ -1,10 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-const HARD_CANONICAL = 'https://aiblueprint.k12aiblueprint.com';
+const HARD_CANONICAL = 'https://aiblueprint.educationaiblueprint.com';
 
 function simulateBuildRedirectBase(returnTo?: string) {
   const envCandidate = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || HARD_CANONICAL;
-  let canonical = envCandidate.replace('https://aireadiness.northpathstrategies.org', HARD_CANONICAL);
+  const legacyHosts = [
+    'https://aireadiness.northpathstrategies.org',
+    'https://aiblueprint.k12aiblueprint.com',
+    'https://aiblueprint.higheredaiblueprint.com'
+  ];
+  let canonical = envCandidate;
+  for (const legacy of legacyHosts) {
+    canonical = canonical.replace(legacy, HARD_CANONICAL);
+  }
   if (!canonical.startsWith(HARD_CANONICAL)) canonical = HARD_CANONICAL;
   const destination = (() => {
     switch (returnTo) {

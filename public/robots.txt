@@ -16,4 +16,4 @@ Disallow: /auth/
 Disallow: /admin/
 
 # Sitemap
-Sitemap: https://aiblueprint.k12aiblueprint.com/sitemap.xml
+Sitemap: https://aiblueprint.educationaiblueprint.com/sitemap.xml

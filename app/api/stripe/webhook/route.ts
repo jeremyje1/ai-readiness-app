@@ -348,7 +348,7 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
       const userId = await createOrFindUserAndGrantAccess(userData);
 
       // Send access email
-      const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.higheredaiblueprint.com';
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.educationaiblueprint.com';
       await sendAssessmentAccessEmail(userData.email, userData.name, tier, baseUrl);
 
       // Send admin notification about new customer

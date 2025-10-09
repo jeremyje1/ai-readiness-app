@@ -98,6 +98,7 @@ function buildCheckoutUrls(returnTo?: string) {
 async function createCheckoutSession(params: CheckoutParams, user: User | null) {
   // Simple single-domain allowlist
   const allowedOrigins = [
+    'https://aiblueprint.educationaiblueprint.com',
     'https://aiblueprint.k12aiblueprint.com'
   ];
 
