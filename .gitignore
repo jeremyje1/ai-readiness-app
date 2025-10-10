@@ -41,3 +41,4 @@ build/
 Thumbs.db
 .env*.local
 .env.temp.fetch
+SECURITY_COMPLETION_SUMMARY.md
