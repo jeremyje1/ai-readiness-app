@@ -46,3 +46,4 @@ export-secrets-template.sh
 export-secrets.sh
 QUICK_VERCEL_SETUP_NO_1PASSWORD.md
 push-to-vercel.sh
+SENDGRID_VERCEL_SETUP.md
