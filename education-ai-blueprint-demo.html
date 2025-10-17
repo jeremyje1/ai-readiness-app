@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Readiness Assessment - Education AI Blueprint</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Discover your institution's AI readiness in under 10 minutes. Get personalized recommendations, quick wins, and a roadmap for responsible AI adoption.">
+    <meta name="keywords" content="AI readiness assessment, education AI, K-12 AI, higher education technology, AI governance, FERPA compliance">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Free AI Readiness Assessment for Educational Institutions">
+    <meta property="og:description" content="Get instant insights and actionable recommendations to advance your AI strategy.">
+    <meta property="og:type" content="website">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #7c3aed;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--gray-900);
+            line-height: 1.6;
+            background: var(--gray-50);
+        }
+        
+        .demo-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: clamp(1.125rem, 2.5vw, 1.25rem);
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+        
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--warning);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        /* Value Props */
+        .value-props {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .value-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .value-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .value-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .value-title {
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .value-text {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        /* Step Container */
+        .step-container {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        /* Progress Bar */
+        .progress-header {
+            margin-bottom: 2rem;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: var(--gray-200);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success) 0%, var(--accent) 100%);
+            transition: width 0.5s ease;
+            border-radius: 999px;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .required {
+            color: var(--error);
+        }
+        
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--gray-300);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: white;
+            color: var(--gray-900);
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        /* Question Styles */
+        .question-card {
+            margin-bottom: 2rem;
+        }
+        
+        .question-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gray-900);
+        }
+        
+        .question-category {
+            display: inline-block;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+        
+        .options-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .option-card {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .option-card:hover {
+            background: white;
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        
+        .option-card.selected {
+            background: #eff6ff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .option-emoji {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .option-content {
+            flex: 1;
+        }
+        
+        .option-label {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+        
+        .option-description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary:disabled {
+            background: var(--gray-300);
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--gray-200);
+        }
+        
+        .btn-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        /* Consent Box */
+        .consent-box {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .consent-box h4 {
+            margin-bottom: 0.75rem;
+            color: var(--gray-900);
+        }
+        
+        .consent-box ul {
+            margin: 0.75rem 0 0.75rem 1.5rem;
+            color: var(--gray-700);
+        }
+        
+        .consent-checkbox {
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+        
+        .consent-checkbox input[type="checkbox"] {
+            width: auto;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+        }
+        
+        .consent-note {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        /* Results Styles */
+        .results-hero {
+            background: linear-gradient(135deg, var(--success) 0%, var(--accent) 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .score-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .score-number-large {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .score-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .readiness-level {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .percentile {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        /* Category Scores */
+        .category-scores {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .category-item {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .category-score {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--accent);
+        }
+        
+        .category-bar {
+            height: 10px;
+            background: var(--gray-200);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        
+        .category-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+            border-radius: 999px;
+            transition: width 1s ease;
+        }
+        
+        /* Quick Wins */
+        .quick-wins-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .quick-win-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+        
+        .priority-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .priority-low {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .quick-win-title {
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            color: var(--gray-900);
+        }
+        
+        .quick-win-rationale {
+            color: var(--gray-600);
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .quick-win-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        /* Impact Box */
+        .impact-box {
+            background: #d1fae5;
+            border-left: 4px solid var(--success);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .impact-box h3 {
+            color: #065f46;
+            margin-bottom: 1rem;
+        }
+        
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .impact-item {
+            color: #047857;
+        }
+        
+        .impact-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .impact-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .cta-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--gray-900);
+        }
+        
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        
+        .cta-subtext {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 1rem;
+        }
+        
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mt-2 { margin-top: 1rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .demo-container {
+                padding: 1rem;
+            }
+            
+            .hero {
+                padding: 2.5rem 1.5rem;
+            }
+            
+            .step-container {
+                padding: 1.5rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .value-props {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container" id="demo-app">
+        <!-- Step 0: Landing/Hero -->
+        <div id="step-landing" class="step-content">
+            <div class="hero">
+                <h1>Discover Your Institution's AI Readiness in Under 10 Minutes</h1>
+                <p>Get a personalized roadmap to enhance learning outcomes, streamline operations, and responsibly adopt AI—no cost, no commitment, instant results.</p>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">10</div>
+                        <div class="stat-label">Minutes</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Questions</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">100+</div>
+                        <div class="stat-label">Institutions Assessed</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="value-props">
+                <div class="value-card">
+                    <div class="value-icon">📊</div>
+                    <div class="value-title">Personalized Score</div>
+                    <div class="value-text">Benchmark across 8 key categories</div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🎯</div>
+                    <div class="value-title">Actionable Quick Wins</div>
+                    <div class="value-text">Immediate steps for this month</div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">💰</div>
+                    <div class="value-title">Cost & Time Savings</div>
+                    <div class="value-text">Estimated ROI from AI optimization</div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🔒</div>
+                    <div class="value-title">FERPA-Compliant</div>
+                    <div class="value-text">Secure, education-focused</div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button class="btn btn-primary" onclick="app.nextStep()" style="font-size: 1.125rem; padding: 1rem 2.5rem;">
+                    Start Free Assessment →
+                </button>
+                <p class="mt-2" style="color: var(--gray-600); font-size: 0.875rem;">
+                    ✓ No credit card required ✓ Instant results ✓ Trusted by 100+ institutions
+                </p>
+            </div>
+        </div>
+        
+        <!-- Step 1: Lead Capture Form -->
+        <div id="step-form" class="step-content hidden">
+            <div class="step-container">
+                <h2 class="text-center mb-2">Let's Get Started</h2>
+                <p class="text-center mb-2" style="color: var(--gray-600);">
+                    Tell us a bit about yourself so we can personalize your results.
+                </p>
+                
+                <form id="lead-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name <span class="required">*</span></label>
+                            <input type="text" id="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name <span class="required">*</span></label>
+                            <input type="text" id="lastName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Work Email <span class="required">*</span></label>
+                        <input type="email" id="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="institutionName">Institution Name <span class="required">*</span></label>
+                        <input type="text" id="institutionName" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="institutionType">Institution Type <span class="required">*</span></label>
+                            <select id="institutionType" required>
+                                <option value="">Select type...</option>
+                                <option value="K-12 School District">K-12 School District</option>
+                                <option value="Community College">Community College</option>
+                                <option value="Four-Year College/University">Four-Year College/University</option>
+                                <option value="Graduate/Professional School">Graduate/Professional School</option>
+                                <option value="EdTech Company">EdTech Company</option>
+                                <option value="Education Nonprofit">Education Nonprofit</option>
+                                <option value="Other">Other Education Organization</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="role">Your Role <span class="required">*</span></label>
+                            <select id="role" required>
+                                <option value="">Select role...</option>
+                                <option value="Superintendent/President/Chancellor">Superintendent/President/Chancellor</option>
+                                <option value="Provost/Chief Academic Officer">Provost/Chief Academic Officer</option>
+                                <option value="CIO/CTO/Technology Director">CIO/CTO/Technology Director</option>
+                                <option value="Dean/Department Chair">Dean/Department Chair</option>
+                                <option value="Faculty Member">Faculty Member</option>
+                                <option value="Instructional Designer">Instructional Designer</option>
+                                <option value="IT Staff">IT Staff</option>
+                                <option value="Administrator">Administrator</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="consent-box">
+                        <h4>Before You Begin</h4>
+                        <p>By starting this assessment, you acknowledge that:</p>
+                        <ul>
+                            <li>Your responses and contact information will be used to generate personalized AI readiness recommendations</li>
+                            <li>You will receive your results via email at the address provided</li>
+                            <li>NorthPath Strategies may send you occasional updates about Education AI Blueprint (you can unsubscribe anytime)</li>
+                            <li>Your data will be stored securely and handled in compliance with FERPA and applicable privacy laws</li>
+                        </ul>
+                        
+                        <label class="consent-checkbox">
+                            <input type="checkbox" id="consent" required>
+                            <span>I agree to these terms and have read the <a href="https://educationaiblueprint.com/privacy" target="_blank">Privacy Policy</a></span>
+                        </label>
+                        
+                        <p class="consent-note">
+                            🔒 <strong>Your data is secure.</strong> We never sell or share your information with third parties for marketing purposes.
+                        </p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Begin Assessment →
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Step 2: Assessment Questions -->
+        <div id="step-assessment" class="step-content hidden">
+            <div class="step-container">
+                <div class="progress-header">
+                    <div class="progress-text">
+                        <span>Question <span id="current-question">1</span> of <span id="total-questions">12</span></span>
+                        <span><span id="progress-percent">8</span>% Complete</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 8%;"></div>
+                    </div>
+                </div>
+                
+                <div id="question-container">
+                    <!-- Questions dynamically loaded here -->
+                </div>
+                
+                <div class="btn-nav">
+                    <button class="btn btn-secondary" onclick="app.previousQuestion()" id="btn-previous" disabled>
+                        ← Previous
+                    </button>
+                    <button class="btn btn-primary" onclick="app.nextQuestion()" id="btn-next" disabled>
+                        Next →
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 3: Results -->
+        <div id="step-results" class="step-content hidden">
+            <div class="results-hero">
+                <h2 style="color: white; margin-bottom: 1.5rem;">Congratulations, <span id="result-name">there</span>!</h2>
+                <div class="score-circle">
+                    <div class="score-number-large" id="overall-score">67</div>
+                    <div class="score-label">Score</div>
+                </div>
+                <div class="readiness-level" id="readiness-level">Emerging Institution</div>
+                <div class="percentile" id="percentile">You're ahead of 58% of similar institutions</div>
+            </div>
+            
+            <div class="step-container">
+                <h3 style="margin-bottom: 1.5rem;">Your Readiness by Category</h3>
+                <div class="category-scores" id="category-scores">
+                    <!-- Category scores dynamically loaded -->
+                </div>
+                
+                <div class="impact-box">
+                    <h3>💡 Estimated Annual Impact</h3>
+                    <div class="impact-grid">
+                        <div class="impact-item">
+                            <div class="impact-label">Cost Savings</div>
+                            <div class="impact-value" id="cost-savings">$45K-$75K</div>
+                        </div>
+                        <div class="impact-item">
+                            <div class="impact-label">Time Saved</div>
+                            <div class="impact-value" id="time-saved">1,200+ hrs</div>
+                        </div>
+                        <div class="impact-item">
+                            <div class="impact-label">Efficiency Gain</div>
+                            <div class="impact-value" id="efficiency-gain">15-22%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 2rem 0 1rem;">🎯 Your Top Quick Wins</h3>
+                <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+                    Take these actions in the next 30 days to accelerate your AI readiness:
+                </p>
+                <div class="quick-wins-grid" id="quick-wins">
+                    <!-- Quick wins dynamically loaded -->
+                </div>
+                
+                <div class="cta-section">
+                    <h2>Ready to Transform Your AI Strategy?</h2>
+                    <p style="color: var(--gray-600); max-width: 600px; margin: 0 auto;">
+                        Schedule a personalized demo to see how Education AI Blueprint can accelerate your institution's AI readiness.
+                    </p>
+                    <div class="cta-buttons">
+                        <a href="https://calendly.com/jeremyestrella/30min" class="btn btn-primary" target="_blank">
+                            📅 Schedule Demo (30 min)
+                        </a>
+                        <a href="mailto:info@northpathstrategies.org" class="btn btn-secondary">
+                            ✉️ Email Questions
+                        </a>
+                    </div>
+                    <p class="cta-subtext">
+                        Check your email for your detailed results PDF • Central Time Zone
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const CONFIG = {
+            apiBaseUrl: 'https://aiblueprint.educationaiblueprint.com/api/demo',
+            sendgridWebhook: 'https://aiblueprint.educationaiblueprint.com/api/webhooks/sendgrid'
+        };
+        
+        // Assessment Questions
+        const QUESTIONS = [
+            {
+                id: 1,
+                category: 'Strategy & Vision',
+                text: 'How clearly has your institution defined its AI vision and strategic goals?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'No clarity', description: 'We haven\'t discussed AI strategy yet' },
+                    { value: 1, emoji: '🟠', label: 'Early discussions', description: 'Leadership is aware but no formal plan' },
+                    { value: 2, emoji: '🟡', label: 'Draft in progress', description: 'Working on AI strategy document' },
+                    { value: 3, emoji: '🟢', label: 'Well-defined', description: 'Clear AI vision integrated into strategic plan' },
+                    { value: 4, emoji: '🔵', label: 'Exemplary', description: 'Published AI strategy with measurable goals and timelines' }
+                ]
+            },
+            {
+                id: 2,
+                category: 'Strategy & Vision',
+                text: 'To what extent does AI align with your institutional mission and values?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'Not aligned', description: 'AI hasn\'t been evaluated against mission' },
+                    { value: 1, emoji: '🟠', label: 'Minimal alignment', description: 'Some discussion but no formal connection' },
+                    { value: 2, emoji: '🟡', label: 'Partially aligned', description: 'AI mentioned in some planning documents' },
+                    { value: 3, emoji: '🟢', label: 'Well aligned', description: 'AI initiatives clearly tied to mission goals' },
+                    { value: 4, emoji: '🔵', label: 'Fully integrated', description: 'AI is central to achieving institutional mission' }
+                ]
+            },
+            {
+                id: 3,
+                category: 'Leadership & Governance',
+                text: 'Do you have a cross-functional AI steering committee or task force?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'No committee', description: 'No formal AI oversight structure' },
+                    { value: 1, emoji: '🟠', label: 'Informal group', description: 'Ad-hoc discussions among interested parties' },
+                    { value: 2, emoji: '🟡', label: 'New committee', description: 'Recently formed, still defining scope' },
+                    { value: 3, emoji: '🟢', label: 'Active committee', description: 'Regular meetings with clear mandate' },
+                    { value: 4, emoji: '🔵', label: 'Mature governance', description: 'Committee with budget, authority, and reporting structure' }
+                ]
+            },
+            {
+                id: 4,
+                category: 'Leadership & Governance',
+                text: 'How clearly are AI-related roles, responsibilities, and decision rights defined?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'Undefined', description: 'No clarity on who makes AI decisions' },
+                    { value: 1, emoji: '🟠', label: 'Ambiguous', description: 'Multiple people involved but roles unclear' },
+                    { value: 2, emoji: '🟡', label: 'Partially defined', description: 'Some key roles identified' },
+                    { value: 3, emoji: '🟢', label: 'Clearly defined', description: 'Written RACI matrix for AI initiatives' },
+                    { value: 4, emoji: '🔵', label: 'Comprehensive', description: 'Full governance model with accountability frameworks' }
+                ]
+            },
+            {
+                id: 5,
+                category: 'Faculty & Staff Readiness',
+                text: 'What percentage of faculty/staff have received professional development on AI tools?',
+                options: [
+                    { value: 0, emoji: '🔴', label: '0-10%', description: 'Little to no AI training offered' },
+                    { value: 1, emoji: '🟠', label: '11-25%', description: 'Some early adopters have been trained' },
+                    { value: 2, emoji: '🟡', label: '26-50%', description: 'Growing training participation' },
+                    { value: 3, emoji: '🟢', label: '51-75%', description: 'Majority have received basic training' },
+                    { value: 4, emoji: '🔵', label: '76-100%', description: 'Comprehensive training program for all' }
+                ]
+            },
+            {
+                id: 6,
+                category: 'Faculty & Staff Readiness',
+                text: 'How comfortable are faculty/staff using AI tools in their work?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'Very uncomfortable', description: 'Significant resistance and anxiety' },
+                    { value: 1, emoji: '🟠', label: 'Somewhat uncomfortable', description: 'Concerns about job impact and complexity' },
+                    { value: 2, emoji: '🟡', label: 'Neutral', description: 'Mixed feelings, willing to try with support' },
+                    { value: 3, emoji: '🟢', label: 'Comfortable', description: 'Generally positive and exploring use cases' },
+                    { value: 4, emoji: '🔵', label: 'Very comfortable', description: 'Enthusiastic early adopters driving innovation' }
+                ]
+            },
+            {
+                id: 7,
+                category: 'Technology Infrastructure',
+                text: 'How integrated are your core systems (SIS, LMS, ERP, HR, etc.)?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'Siloed', description: 'Systems don\'t communicate; manual data transfer' },
+                    { value: 1, emoji: '🟠', label: 'Minimal integration', description: 'Some basic data sharing' },
+                    { value: 2, emoji: '🟡', label: 'Partially integrated', description: 'Key systems share data but with gaps' },
+                    { value: 3, emoji: '🟢', label: 'Well integrated', description: 'Most systems connected via APIs' },
+                    { value: 4, emoji: '🔵', label: 'Fully integrated', description: 'Comprehensive data ecosystem with real-time sync' }
+                ]
+            },
+            {
+                id: 8,
+                category: 'Technology Infrastructure',
+                text: 'What is your institution\'s cloud infrastructure maturity?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'On-premises only', description: 'No cloud adoption' },
+                    { value: 1, emoji: '🟠', label: 'Hybrid', description: 'Some cloud services but mostly on-prem' },
+                    { value: 2, emoji: '🟡', label: 'Cloud-first mindset', description: 'Actively migrating to cloud' },
+                    { value: 3, emoji: '🟢', label: 'Cloud-native', description: 'Most services in cloud (AWS/Azure/GCP)' },
+                    { value: 4, emoji: '🔵', label: 'Multi-cloud optimized', description: 'Strategic use of multiple cloud providers' }
+                ]
+            },
+            {
+                id: 9,
+                category: 'Data & Privacy',
+                text: 'Does your institution have policies governing AI use and student data privacy?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'No policies', description: 'AI use is unregulated' },
+                    { value: 1, emoji: '🟠', label: 'Informal guidelines', description: 'Verbal expectations but not documented' },
+                    { value: 2, emoji: '🟡', label: 'Draft policies', description: 'Policies in development' },
+                    { value: 3, emoji: '🟢', label: 'Published policies', description: 'Board-approved AI acceptable use policies' },
+                    { value: 4, emoji: '🔵', label: 'Comprehensive framework', description: 'Policies with enforcement, training, and audits' }
+                ]
+            },
+            {
+                id: 10,
+                category: 'Data & Privacy',
+                text: 'How confident are you in your institution\'s ability to comply with FERPA/COPPA regarding AI?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'Not confident', description: 'Significant compliance gaps' },
+                    { value: 1, emoji: '🟠', label: 'Somewhat concerned', description: 'Aware of requirements but uncertain' },
+                    { value: 2, emoji: '🟡', label: 'Moderately confident', description: 'Basic compliance but areas of concern' },
+                    { value: 3, emoji: '🟢', label: 'Confident', description: 'Strong compliance practices in place' },
+                    { value: 4, emoji: '🔵', label: 'Very confident', description: 'Regular audits, legal review, and training' }
+                ]
+            },
+            {
+                id: 11,
+                category: 'Curriculum & Pedagogy',
+                text: 'How extensively is AI integrated into your curricula and learning experiences?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'Not at all', description: 'AI not part of curriculum' },
+                    { value: 1, emoji: '🟠', label: 'Pilot programs', description: 'A few courses experimenting with AI' },
+                    { value: 2, emoji: '🟡', label: 'Growing adoption', description: 'Multiple departments using AI tools' },
+                    { value: 3, emoji: '🟢', label: 'Systematic integration', description: 'AI competencies in program outcomes' },
+                    { value: 4, emoji: '🔵', label: 'Institution-wide', description: 'AI literacy required for all students' }
+                ]
+            },
+            {
+                id: 12,
+                category: 'Analytics & Outcomes',
+                text: 'Do you use AI/analytics to track student performance and inform interventions?',
+                options: [
+                    { value: 0, emoji: '🔴', label: 'No analytics', description: 'Manual tracking or no tracking' },
+                    { value: 1, emoji: '🟠', label: 'Basic reporting', description: 'Standard LMS reports only' },
+                    { value: 2, emoji: '🟡', label: 'Some predictive analytics', description: 'Early alert systems in pilot' },
+                    { value: 3, emoji: '🟢', label: 'Advanced analytics', description: 'Predictive models for retention/success' },
+                    { value: 4, emoji: '🔵', label: 'AI-powered interventions', description: 'Automated, personalized student support' }
+                ]
+            }
+        ];
+        
+        // Application State
+        const app = {
+            currentStep: 0,
+            currentQuestion: 0,
+            leadId: null,
+            leadData: {},
+            responses: {},
+            
+            init() {
+                // Show landing page
+                this.showStep(0);
+                
+                // Load saved progress from localStorage
+                const saved = localStorage.getItem('ai_demo_progress');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.responses) {
+                        this.responses = data.responses;
+                    }
+                }
+                
+                // Setup form handler
+                document.getElementById('lead-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.submitLeadForm();
+                });
+            },
+            
+            showStep(stepIndex) {
+                // Hide all steps
+                document.querySelectorAll('.step-content').forEach(el => {
+                    el.classList.add('hidden');
+                });
+                
+                // Show current step
+                const steps = ['step-landing', 'step-form', 'step-assessment', 'step-results'];
+                document.getElementById(steps[stepIndex]).classList.remove('hidden');
+                
+                this.currentStep = stepIndex;
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+            },
+            
+            nextStep() {
+                if (this.currentStep < 3) {
+                    this.showStep(this.currentStep + 1);
+                    
+                    // If moving to assessment, load first question
+                    if (this.currentStep === 2) {
+                        this.loadQuestion(0);
+                    }
+                }
+            },
+            
+            async submitLeadForm() {
+                const form = document.getElementById('lead-form');
+                
+                // Get form data
+                this.leadData = {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    institutionName: document.getElementById('institutionName').value,
+                    institutionType: document.getElementById('institutionType').value,
+                    role: document.getElementById('role').value
+                };
+                
+                // Create lead in backend
+                try {
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/leads/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.leadData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.leadId = data.leadId;
+                        this.nextStep();
+                    } else {
+                        alert('Error saving your information. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Lead submission error:', error);
+                    // Continue anyway for demo purposes
+                    this.leadId = 'demo-' + Date.now();
+                    this.nextStep();
+                }
+            },
+            
+            loadQuestion(index) {
+                this.currentQuestion = index;
+                const question = QUESTIONS[index];
+                const totalQuestions = QUESTIONS.length;
+                
+                // Update progress
+                document.getElementById('current-question').textContent = index + 1;
+                document.getElementById('total-questions').textContent = totalQuestions;
+                const progress = Math.round(((index + 1) / totalQuestions) * 100);
+                document.getElementById('progress-percent').textContent = progress;
+                document.getElementById('progress-fill').style.width = progress + '%';
+                
+                // Render question
+                const container = document.getElementById('question-container');
+                container.innerHTML = `
+                    <div class="question-card">
+                        <div class="question-category">${question.category}</div>
+                        <div class="question-text">${question.text}</div>
+                        <div class="options-grid">
+                            ${question.options.map(option => `
+                                <div class="option-card ${this.responses[question.id] === option.value ? 'selected' : ''}" 
+                                     onclick="app.selectOption(${question.id}, ${option.value})">
+                                    <div class="option-emoji">${option.emoji}</div>
+                                    <div class="option-content">
+                                        <div class="option-label">${option.label}</div>
+                                        <div class="option-description">${option.description}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                // Update navigation buttons
+                document.getElementById('btn-previous').disabled = index === 0;
+                this.updateNextButton();
+            },
+            
+            selectOption(questionId, value) {
+                this.responses[questionId] = value;
+                
+                // Update UI
+                document.querySelectorAll('.option-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                event.currentTarget.classList.add('selected');
+                
+                // Save progress
+                this.saveProgress();
+                
+                // Enable next button
+                this.updateNextButton();
+                
+                // Auto-advance after brief delay
+                setTimeout(() => {
+                    if (this.currentQuestion < QUESTIONS.length - 1) {
+                        this.nextQuestion();
+                    } else {
+                        document.getElementById('btn-next').textContent = 'View Results →';
+                    }
+                }, 300);
+            },
+            
+            updateNextButton() {
+                const btn = document.getElementById('btn-next');
+                const currentQuestionId = QUESTIONS[this.currentQuestion].id;
+                const isAnswered = this.responses[currentQuestionId] !== undefined;
+                
+                btn.disabled = !isAnswered;
+                
+                if (this.currentQuestion === QUESTIONS.length - 1) {
+                    btn.textContent = 'View Results →';
+                } else {
+                    btn.textContent = 'Next →';
+                }
+            },
+            
+            previousQuestion() {
+                if (this.currentQuestion > 0) {
+                    this.loadQuestion(this.currentQuestion - 1);
+                }
+            },
+            
+            nextQuestion() {
+                if (this.currentQuestion < QUESTIONS.length - 1) {
+                    this.loadQuestion(this.currentQuestion + 1);
+                } else {
+                    // Submit assessment
+                    this.submitAssessment();
+                }
+            },
+            
+            saveProgress() {
+                localStorage.setItem('ai_demo_progress', JSON.stringify({
+                    responses: this.responses,
+                    leadData: this.leadData,
+                    lastUpdated: Date.now()
+                }));
+            },
+            
+            async submitAssessment() {
+                // Show loading state
+                const btn = document.getElementById('btn-next');
+                btn.innerHTML = '<div class="spinner"></div> Calculating...';
+                btn.disabled = true;
+                
+                try {
+                    const response = await fetch(`${CONFIG.apiBaseUrl}/assessment/submit`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            leadId: this.leadId,
+                            responses: this.responses
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.showResults(data.results);
+                    } else {
+                        throw new Error('Submission failed');
+                    }
+                } catch (error) {
+                    console.error('Assessment submission error:', error);
+                    // Show demo results anyway
+                    this.showResults(this.calculateDemoResults());
+                }
+            },
+            
+            calculateDemoResults() {
+                // Simple client-side calculation for demo
+                const categoryMap = {
+                    'Strategy & Vision': [1, 2],
+                    'Leadership & Governance': [3, 4],
+                    'Faculty & Staff Readiness': [5, 6],
+                    'Technology Infrastructure': [7, 8],
+                    'Data & Privacy': [9, 10],
+                    'Curriculum & Pedagogy': [11],
+                    'Analytics & Outcomes': [12]
+                };
+                
+                const categoryScores = {};
+                let totalScore = 0;
+                let count = 0;
+                
+                for (const [category, questions] of Object.entries(categoryMap)) {
+                    let sum = 0;
+                    let qCount = 0;
+                    questions.forEach(q => {
+                        if (this.responses[q] !== undefined) {
+                            sum += this.responses[q];
+                            qCount++;
+                        }
+                    });
+                    const score = qCount > 0 ? Math.round((sum / (qCount * 4)) * 100) : 0;
+                    categoryScores[category] = score;
+                    totalScore += score;
+                    count++;
+                }
+                
+                const overallScore = Math.round(totalScore / count);
+                
+                // Generate quick wins based on low scores
+                const quickWins = this.generateQuickWins(categoryScores);
+                
+                return {
+                    overallScore,
+                    readinessLevel: this.getReadinessLevel(overallScore),
+                    categoryScores,
+                    quickWins
+                };
+            },
+            
+            getReadinessLevel(score) {
+                if (score <= 25) return 'Beginning';
+                if (score <= 50) return 'Developing';
+                if (score <= 75) return 'Emerging';
+                if (score <= 90) return 'Advanced';
+                return 'Leading';
+            },
+            
+            generateQuickWins(categoryScores) {
+                const recommendations = {
+                    'Strategy & Vision': {
+                        title: 'Draft AI Strategic Vision Document',
+                        rationale: 'Establish clear direction and secure leadership buy-in',
+                        timeframe: '30 days',
+                        category: 'Strategy'
+                    },
+                    'Leadership & Governance': {
+                        title: 'Form Cross-Functional AI Task Force',
+                        rationale: 'Coordinate initiatives and avoid siloed implementations',
+                        timeframe: '2 weeks',
+                        category: 'Leadership'
+                    },
+                    'Faculty & Staff Readiness': {
+                        title: 'Launch Faculty AI Literacy Workshops',
+                        rationale: 'Build confidence and competence to drive adoption',
+                        timeframe: '30 days',
+                        category: 'Readiness'
+                    },
+                    'Technology Infrastructure': {
+                        title: 'Audit and Integrate Core Systems (SIS/LMS)',
+                        rationale: 'Enable data flow needed for AI/analytics',
+                        timeframe: 'This quarter',
+                        category: 'Infrastructure'
+                    },
+                    'Data & Privacy': {
+                        title: 'Publish AI Acceptable Use Policy',
+                        rationale: 'Establish guardrails and ensure FERPA compliance',
+                        timeframe: '30 days',
+                        category: 'Privacy'
+                    },
+                    'Curriculum & Pedagogy': {
+                        title: 'Pilot AI Tools in 2-3 High-Enrollment Courses',
+                        rationale: 'Demonstrate value and gather faculty feedback',
+                        timeframe: 'Next semester',
+                        category: 'Curriculum'
+                    },
+                    'Analytics & Outcomes': {
+                        title: 'Implement Early Alert System for At-Risk Students',
+                        rationale: 'Use predictive analytics to improve retention',
+                        timeframe: 'This quarter',
+                        category: 'Analytics'
+                    }
+                };
+                
+                // Sort categories by score (lowest first)
+                const sorted = Object.entries(categoryScores)
+                    .sort(([, a], [, b]) => a - b)
+                    .slice(0, 6);
+                
+                return sorted.map(([category, score], index) => {
+                    const rec = recommendations[category];
+                    return {
+                        ...rec,
+                        priority: index < 2 ? 'HIGH' : index < 4 ? 'MEDIUM' : 'LOW'
+                    };
+                });
+            },
+            
+            showResults(results) {
+                // Clear localStorage
+                localStorage.removeItem('ai_demo_progress');
+                
+                // Update results page
+                document.getElementById('result-name').textContent = this.leadData.firstName;
+                document.getElementById('overall-score').textContent = results.overallScore;
+                document.getElementById('readiness-level').textContent = results.readinessLevel + ' Institution';
+                
+                // Calculate percentile (mock)
+                const percentile = Math.min(95, Math.max(15, results.overallScore - 10));
+                document.getElementById('percentile').textContent = `You're ahead of ${percentile}% of similar institutions`;
+                
+                // Render category scores
+                const categoriesHTML = Object.entries(results.categoryScores)
+                    .map(([name, score]) => `
+                        <div class="category-item">
+                            <div class="category-header">
+                                <div class="category-name">${name}</div>
+                                <div class="category-score">${score}%</div>
+                            </div>
+                            <div class="category-bar">
+                                <div class="category-bar-fill" style="width: ${score}%;"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                document.getElementById('category-scores').innerHTML = categoriesHTML;
+                
+                // Calculate estimated impact
+                const costMin = Math.round(results.overallScore * 450);
+                const costMax = Math.round(results.overallScore * 750);
+                const timeSaved = Math.round(results.overallScore * 12);
+                const efficiency = Math.round(results.overallScore * 0.2);
+                
+                document.getElementById('cost-savings').textContent = `$${costMin.toLocaleString()}-$${costMax.toLocaleString()}`;
+                document.getElementById('time-saved').textContent = `${timeSaved.toLocaleString()}+ hrs`;
+                document.getElementById('efficiency-gain').textContent = `${efficiency}%`;
+                
+                // Render quick wins
+                const winsHTML = results.quickWins.map((win, index) => `
+                    <div class="quick-win-card">
+                        <div class="priority-badge priority-${win.priority.toLowerCase()}">${win.priority} Priority</div>
+                        <div class="quick-win-title">${index + 1}. ${win.title}</div>
+                        <div class="quick-win-rationale">${win.rationale}</div>
+                        <div class="quick-win-meta">
+                            <span>⏱️ ${win.timeframe}</span>
+                            <span>📂 ${win.category}</span>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('quick-wins').innerHTML = winsHTML;
+                
+                // Show results page
+                this.showStep(3);
+            }
+        };
+        
+        // Initialize app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => app.init());
+        } else {
+            app.init();
+        }
+    </script>
+</body>
+</html>

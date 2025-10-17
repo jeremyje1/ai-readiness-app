@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
             console.error("SENDGRID_API_KEY is not configured")
             return NextResponse.json(
                 { error: "Email service not configured" },
-                { 
+                {
                     status: 500,
                     headers: {
                         'Access-Control-Allow-Origin': '*',
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         if (missingFields.length > 0) {
             return NextResponse.json(
                 { error: `Missing required fields: ${missingFields.join(", ")}` },
-                { 
+                {
                     status: 400,
                     headers: {
                         'Access-Control-Allow-Origin': '*',
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         if (!emailRegex.test(formData.email)) {
             return NextResponse.json(
                 { error: "Invalid email format" },
-                { 
+                {
                     status: 400,
                     headers: {
                         'Access-Control-Allow-Origin': '*',
@@ -351,7 +351,7 @@ Reply directly to this email to respond to ${formData.firstName}.
         console.error("❌ Contact form submission error:", error)
         return NextResponse.json(
             { error: "Failed to process form submission" },
-            { 
+            {
                 status: 500,
                 headers: {
                     'Access-Control-Allow-Origin': '*',

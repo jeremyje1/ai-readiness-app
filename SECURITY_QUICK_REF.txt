@@ -1,5 +1,11 @@
-🔐 SECURITY QUICK REFERENCE
-═══════════════════════════════════════════════════════════
+🔐 SECURITY QUICK REFER4. UPDATE VERCEL (5 min)
+   Pull fresh values from 1Password → "AI Blueprint / Production Secrets"
+   • ADMIN_GRANT_TOKEN
+   • CRON_SECRET
+   • NEXTAUTH_SECRET
+   • JWT_SECRET
+   
+   Note: This project uses Supabase backend (no Railway deployment)══════════════════════════════════════════════════════════
 
 ✅ COMPLETED
 • Removed .env.temp.fetch from git
