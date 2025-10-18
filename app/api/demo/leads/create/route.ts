@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -83,8 +83,18 @@ export async function POST(request: NextRequest) {
             // Referer may not be a valid URL
         }
 
-        // Initialize Supabase client
-        const supabase = await createClient();
+        // Initialize Supabase admin client with service role key to bypass RLS
+        // This is needed because demo leads are public but RLS policies restrict regular client
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: false,
+                    persistSession: false
+                }
+            }
+        );
 
         // Check if lead already exists
         const { data: existingLead } = await supabase
