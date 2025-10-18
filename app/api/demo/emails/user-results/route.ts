@@ -3,39 +3,39 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 interface QuickWin {
-  priority: string;
-  title: string;
-  rationale: string;
-  timeframe: string;
-  category: string;
+    priority: string;
+    title: string;
+    rationale: string;
+    timeframe: string;
+    category: string;
 }
 
 interface Results {
-  overallScore: number;
-  readinessLevel: string;
-  categoryScores: Record<string, number>;
-  quickWins: QuickWin[];
-  estimatedImpact: {
-    costSavings: string;
-    timeSaved: string;
-    efficiencyGain: string;
-  };
-  percentile: number;
+    overallScore: number;
+    readinessLevel: string;
+    categoryScores: Record<string, number>;
+    quickWins: QuickWin[];
+    estimatedImpact: {
+        costSavings: string;
+        timeSaved: string;
+        efficiencyGain: string;
+    };
+    percentile: number;
 }
 
 interface LeadData {
-  first_name: string;
-  last_name: string;
-  email: string;
-  institution_name: string;
-  institution_type: string;
-  role: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    institution_name: string;
+    institution_type: string;
+    role: string;
 }
 
 function generateUserResultsHTML(leadData: LeadData, results: Results): string {
-  const topQuickWins = results.quickWins.slice(0, 3);
-  
-  return `
+    const topQuickWins = results.quickWins.slice(0, 3);
+
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -220,56 +220,56 @@ function generateUserResultsHTML(leadData: LeadData, results: Results): string {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const { leadData, results }: { leadData: LeadData; results: Results } = await request.json();
-    
-    const htmlContent = generateUserResultsHTML(leadData, results);
-    
-    // Send via SendGrid
-    const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        personalizations: [{
-          to: [{ email: leadData.email, name: `${leadData.first_name} ${leadData.last_name}` }],
-          subject: `Your AI Readiness Results: ${results.overallScore}% (${results.readinessLevel})`
-        }],
-        from: {
-          email: process.env.SENDGRID_FROM_EMAIL || 'info@northpathstrategies.org',
-          name: 'Jeremy Estrella - Education AI Blueprint'
-        },
-        reply_to: {
-          email: 'info@northpathstrategies.org',
-          name: 'NorthPath Strategies'
-        },
-        content: [{
-          type: 'text/html',
-          value: htmlContent
-        }]
-      })
-    });
-    
-    if (!sendGridResponse.ok) {
-      const errorText = await sendGridResponse.text();
-      console.error('SendGrid error:', errorText);
-      throw new Error('Failed to send email via SendGrid');
+    try {
+        const { leadData, results }: { leadData: LeadData; results: Results } = await request.json();
+
+        const htmlContent = generateUserResultsHTML(leadData, results);
+
+        // Send via SendGrid
+        const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                personalizations: [{
+                    to: [{ email: leadData.email, name: `${leadData.first_name} ${leadData.last_name}` }],
+                    subject: `Your AI Readiness Results: ${results.overallScore}% (${results.readinessLevel})`
+                }],
+                from: {
+                    email: process.env.SENDGRID_FROM_EMAIL || 'info@northpathstrategies.org',
+                    name: 'Jeremy Estrella - Education AI Blueprint'
+                },
+                reply_to: {
+                    email: 'info@northpathstrategies.org',
+                    name: 'NorthPath Strategies'
+                },
+                content: [{
+                    type: 'text/html',
+                    value: htmlContent
+                }]
+            })
+        });
+
+        if (!sendGridResponse.ok) {
+            const errorText = await sendGridResponse.text();
+            console.error('SendGrid error:', errorText);
+            throw new Error('Failed to send email via SendGrid');
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'User results email sent successfully'
+        });
+    } catch (error) {
+        console.error('Error sending user results email:', error);
+        return NextResponse.json(
+            {
+                success: false,
+                error: 'Failed to send user results email'
+            },
+            { status: 500 }
+        );
     }
-    
-    return NextResponse.json({
-      success: true,
-      message: 'User results email sent successfully'
-    });
-  } catch (error) {
-    console.error('Error sending user results email:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to send user results email'
-      },
-      { status: 500 }
-    );
-  }
 }

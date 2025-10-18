@@ -3,95 +3,95 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 interface QuickWin {
-  priority: string;
-  title: string;
-  rationale: string;
-  timeframe: string;
-  category: string;
+    priority: string;
+    title: string;
+    rationale: string;
+    timeframe: string;
+    category: string;
 }
 
 interface Results {
-  overallScore: number;
-  readinessLevel: string;
-  categoryScores: Record<string, number>;
-  quickWins: QuickWin[];
-  estimatedImpact: {
-    costSavings: string;
-    timeSaved: string;
-    efficiencyGain: string;
-  };
-  percentile: number;
+    overallScore: number;
+    readinessLevel: string;
+    categoryScores: Record<string, number>;
+    quickWins: QuickWin[];
+    estimatedImpact: {
+        costSavings: string;
+        timeSaved: string;
+        efficiencyGain: string;
+    };
+    percentile: number;
 }
 
 interface LeadData {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  institution_name: string;
-  institution_type: string;
-  role: string;
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  referrer?: string;
-  lead_qualification?: string;
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    institution_name: string;
+    institution_type: string;
+    role: string;
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    referrer?: string;
+    lead_qualification?: string;
 }
 
 function generateTalkingPoints(leadData: LeadData, results: Results): string[] {
-  const points: string[] = [];
-  
-  // Score-based talking points
-  if (results.overallScore >= 75) {
-    points.push(`Strong foundation - focus on advanced features and ROI acceleration`);
-  } else if (results.overallScore >= 50) {
-    points.push(`Mid-journey institution - emphasize structured roadmap and quick wins`);
-  } else {
-    points.push(`Early stage - position as comprehensive guidance from ground up`);
-  }
-  
-  // Category-specific talking points
-  const sortedCategories = Object.entries(results.categoryScores)
-    .sort(([, a], [, b]) => a - b)
-    .slice(0, 2);
-  
-  sortedCategories.forEach(([category, score]) => {
-    if (category === 'Strategy & Vision' && score < 50) {
-      points.push(`Needs help with AI strategic planning - discuss blueprint framework`);
+    const points: string[] = [];
+
+    // Score-based talking points
+    if (results.overallScore >= 75) {
+        points.push(`Strong foundation - focus on advanced features and ROI acceleration`);
+    } else if (results.overallScore >= 50) {
+        points.push(`Mid-journey institution - emphasize structured roadmap and quick wins`);
+    } else {
+        points.push(`Early stage - position as comprehensive guidance from ground up`);
     }
-    if (category === 'Leadership & Governance' && score < 50) {
-      points.push(`Governance gaps - emphasize cross-functional coordination tools`);
+
+    // Category-specific talking points
+    const sortedCategories = Object.entries(results.categoryScores)
+        .sort(([, a], [, b]) => a - b)
+        .slice(0, 2);
+
+    sortedCategories.forEach(([category, score]) => {
+        if (category === 'Strategy & Vision' && score < 50) {
+            points.push(`Needs help with AI strategic planning - discuss blueprint framework`);
+        }
+        if (category === 'Leadership & Governance' && score < 50) {
+            points.push(`Governance gaps - emphasize cross-functional coordination tools`);
+        }
+        if (category === 'Faculty & Staff Readiness' && score < 50) {
+            points.push(`Low faculty buy-in - highlight professional development resources`);
+        }
+        if (category === 'Technology Infrastructure' && score < 50) {
+            points.push(`Infrastructure concerns - discuss integration capabilities`);
+        }
+        if (category === 'Data & Privacy' && score < 50) {
+            points.push(`Privacy/compliance anxiety - emphasize FERPA-compliant policies`);
+        }
+    });
+
+    // Role-based talking points
+    if (leadData.role.includes('CIO') || leadData.role.includes('CTO')) {
+        points.push(`Technical decision-maker - focus on integrations, security, scalability`);
+    } else if (leadData.role.includes('President') || leadData.role.includes('Superintendent')) {
+        points.push(`C-suite leader - emphasize strategic outcomes and institutional impact`);
+    } else if (leadData.role.includes('Provost') || leadData.role.includes('Academic')) {
+        points.push(`Academic leader - highlight pedagogy and learning outcomes`);
     }
-    if (category === 'Faculty & Staff Readiness' && score < 50) {
-      points.push(`Low faculty buy-in - highlight professional development resources`);
-    }
-    if (category === 'Technology Infrastructure' && score < 50) {
-      points.push(`Infrastructure concerns - discuss integration capabilities`);
-    }
-    if (category === 'Data & Privacy' && score < 50) {
-      points.push(`Privacy/compliance anxiety - emphasize FERPA-compliant policies`);
-    }
-  });
-  
-  // Role-based talking points
-  if (leadData.role.includes('CIO') || leadData.role.includes('CTO')) {
-    points.push(`Technical decision-maker - focus on integrations, security, scalability`);
-  } else if (leadData.role.includes('President') || leadData.role.includes('Superintendent')) {
-    points.push(`C-suite leader - emphasize strategic outcomes and institutional impact`);
-  } else if (leadData.role.includes('Provost') || leadData.role.includes('Academic')) {
-    points.push(`Academic leader - highlight pedagogy and learning outcomes`);
-  }
-  
-  return points;
+
+    return points;
 }
 
 function generateSalesNotificationHTML(leadData: LeadData, results: Results): string {
-  const talkingPoints = generateTalkingPoints(leadData, results);
-  const qualification = leadData.lead_qualification || 'WARM';
-  const qualificationColor = qualification === 'HOT' ? '#ef4444' : qualification === 'WARM' ? '#f59e0b' : '#6b7280';
-  const qualificationEmoji = qualification === 'HOT' ? '🔥' : qualification === 'WARM' ? '⚡' : '❄️';
-  
-  return `
+    const talkingPoints = generateTalkingPoints(leadData, results);
+    const qualification = leadData.lead_qualification || 'WARM';
+    const qualificationColor = qualification === 'HOT' ? '#ef4444' : qualification === 'WARM' ? '#f59e0b' : '#6b7280';
+    const qualificationEmoji = qualification === 'HOT' ? '🔥' : qualification === 'WARM' ? '⚡' : '❄️';
+
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -281,63 +281,63 @@ function generateSalesNotificationHTML(leadData: LeadData, results: Results): st
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const { leadData, results }: { leadData: LeadData; results: Results } = await request.json();
-    
-    const htmlContent = generateSalesNotificationHTML(leadData, results);
-    const qualification = leadData.lead_qualification || 'WARM';
-    const qualificationEmoji = qualification === 'HOT' ? '🔥' : qualification === 'WARM' ? '⚡' : '❄️';
-    
-    // Send via SendGrid to sales team
-    const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        personalizations: [{
-          to: [
-            { 
-              email: process.env.SENDGRID_TO_EMAIL || 'info@northpathstrategies.org',
-              name: 'Jeremy Estrella'
-            }
-          ],
-          subject: `${qualificationEmoji} ${qualification} Lead: ${leadData.institution_name} - ${results.overallScore}% Ready (${results.readinessLevel})`
-        }],
-        from: {
-          email: process.env.SENDGRID_FROM_EMAIL || 'info@northpathstrategies.org',
-          name: 'Education AI Blueprint Demo System'
-        },
-        reply_to: {
-          email: leadData.email,
-          name: `${leadData.first_name} ${leadData.last_name}`
-        },
-        content: [{
-          type: 'text/html',
-          value: htmlContent
-        }]
-      })
-    });
-    
-    if (!sendGridResponse.ok) {
-      const errorText = await sendGridResponse.text();
-      console.error('SendGrid error:', errorText);
-      throw new Error('Failed to send sales notification via SendGrid');
+    try {
+        const { leadData, results }: { leadData: LeadData; results: Results } = await request.json();
+
+        const htmlContent = generateSalesNotificationHTML(leadData, results);
+        const qualification = leadData.lead_qualification || 'WARM';
+        const qualificationEmoji = qualification === 'HOT' ? '🔥' : qualification === 'WARM' ? '⚡' : '❄️';
+
+        // Send via SendGrid to sales team
+        const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                personalizations: [{
+                    to: [
+                        {
+                            email: process.env.SENDGRID_TO_EMAIL || 'info@northpathstrategies.org',
+                            name: 'Jeremy Estrella'
+                        }
+                    ],
+                    subject: `${qualificationEmoji} ${qualification} Lead: ${leadData.institution_name} - ${results.overallScore}% Ready (${results.readinessLevel})`
+                }],
+                from: {
+                    email: process.env.SENDGRID_FROM_EMAIL || 'info@northpathstrategies.org',
+                    name: 'Education AI Blueprint Demo System'
+                },
+                reply_to: {
+                    email: leadData.email,
+                    name: `${leadData.first_name} ${leadData.last_name}`
+                },
+                content: [{
+                    type: 'text/html',
+                    value: htmlContent
+                }]
+            })
+        });
+
+        if (!sendGridResponse.ok) {
+            const errorText = await sendGridResponse.text();
+            console.error('SendGrid error:', errorText);
+            throw new Error('Failed to send sales notification via SendGrid');
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'Sales notification email sent successfully'
+        });
+    } catch (error) {
+        console.error('Error sending sales notification email:', error);
+        return NextResponse.json(
+            {
+                success: false,
+                error: 'Failed to send sales notification email'
+            },
+            { status: 500 }
+        );
     }
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Sales notification email sent successfully'
-    });
-  } catch (error) {
-    console.error('Error sending sales notification email:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to send sales notification email'
-      },
-      { status: 500 }
-    );
-  }
 }
