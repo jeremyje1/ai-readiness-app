@@ -1656,20 +1656,25 @@
 
         const FORM_ENDPOINT = 'https://aiblueprint.educationaiblueprint.com/api/webhooks/sendgrid';
 
+        // Prevent any premature submissions
+        let isSubmitting = false;
+
         document.getElementById('contactForm').addEventListener('submit', async function (e) {
             e.preventDefault();
+            e.stopPropagation();
+            
+            // Prevent double submission
+            if (isSubmitting) {
+                console.log('⏸️ Form already submitting, ignoring duplicate');
+                return;
+            }
 
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             const btnIcon = document.getElementById('btnIcon');
             const formMessage = document.getElementById('formMessage');
 
-            // Disable button and show loading state
-            submitBtn.disabled = true;
-            btnText.textContent = 'Sending...';
-            btnIcon.innerHTML = '<div class="spinner"></div>';
-
-            // Gather form data
+            // Validate all required fields have values
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -1679,6 +1684,31 @@
             const interest = document.getElementById('interest').value;
             const message = document.getElementById('message').value.trim();
             const timeline = document.getElementById('timeline').value;
+
+            // Validate required fields
+            if (!firstName || !lastName || !email || !institution || !role || !institutionType || !interest || !message) {
+                formMessage.textContent = '✗ Please fill in all required fields.';
+                formMessage.className = 'form-message error show';
+                setTimeout(() => formMessage.classList.remove('show'), 5000);
+                return;
+            }
+
+            // Validate email format
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                formMessage.textContent = '✗ Please enter a valid email address.';
+                formMessage.className = 'form-message error show';
+                setTimeout(() => formMessage.classList.remove('show'), 5000);
+                return;
+            }
+
+            // Set submitting flag
+            isSubmitting = true;
+
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            btnText.textContent = 'Sending...';
+            btnIcon.innerHTML = '<div class="spinner"></div>';
 
             // SendGrid webhook payload
             const apiPayload = {
@@ -1733,7 +1763,8 @@
                 formMessage.textContent = '✗ Sorry, there was an error sending your message. Please email info@northpathstrategies.org directly.';
                 formMessage.className = 'form-message error show';
             } finally {
-                // Re-enable button
+                // Re-enable button and reset flag
+                isSubmitting = false;
                 submitBtn.disabled = false;
                 btnText.textContent = 'Send Message';
                 btnIcon.textContent = '📧';
