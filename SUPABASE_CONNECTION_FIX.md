@@ -31,29 +31,45 @@ Your SUPABASE_DB_URL is configured in GitHub Secrets but the workflow is still f
 ### Get Connection Info from Supabase
 
 1. In Supabase Dashboard → Settings → Database
-2. Find **"Connection Info"** section
-3. Look for **"Connection string"** → Select **"URI"** tab
-4. You'll see something like:
+2. Find **"Connection String"** section
+3. Click **"URI"** tab
+4. Under **"Method"**, select **"Direct connection"** (NOT Transaction pooler)
+5. You'll see:
 
 ```
-postgresql://postgres.jocigzsthcpspxfdfxae:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+postgresql://postgres:[YOUR_PASSWORD]@db.jocigzsthcpspxfdfxae.supabase.co:5432/postgres
 ```
 
-### CRITICAL: Change Port from 6543 to 5432
+This is your template! Just replace `[YOUR_PASSWORD]` with your actual password.
 
-The workflow needs **Direct Connection (Session mode)** not Transaction pooler.
+### CRITICAL: Use Direct Connection (not Pooler)
 
-**WRONG** (will fail for seeding):
+From Supabase Dashboard → Settings → Database → Connection String:
+1. Select **"URI"** tab
+2. Under **"Method"**, select **"Direct connection"**
+3. You'll see:
+
+```
+postgresql://postgres:[YOUR_PASSWORD]@db.jocigzsthcpspxfdfxae.supabase.co:5432/postgres
+```
+
+**This is the CORRECT format for seeding!**
+
+**WRONG** (Transaction pooler - has "pooler" in hostname):
 ```
 postgresql://postgres.jocigzsthcpspxfdfxae:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres
 ```
 
-**CORRECT** (use this):
+**CORRECT** (Direct connection):
 ```
-postgresql://postgres.jocigzsthcpspxfdfxae:password@aws-0-us-east-1.pooler.supabase.com:5432/postgres
+postgresql://postgres:[YOUR_PASSWORD]@db.jocigzsthcpspxfdfxae.supabase.co:5432/postgres
 ```
 
-Notice: **6543 → 5432** and remove `?pgbouncer=true`
+Key differences:
+- ✅ Host: `db.jocigzsthcpspxfdfxae.supabase.co` (direct)
+- ❌ Host: `aws-0-us-east-1.pooler.supabase.com` (pooler)
+- ✅ Port: `5432`
+- ❌ Port: `6543`
 
 ---
 
@@ -89,7 +105,7 @@ postgresql://postgres.jocigzsthcpspxfdfxae:MyP%40ssw0rd%21@aws-0-us-east-1.poole
 ### Add to .env.local
 
 ```bash
-SUPABASE_DB_URL="postgresql://postgres.jocigzsthcpspxfdfxae:[YOUR-ENCODED-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
+SUPABASE_DB_URL="postgresql://postgres:[YOUR-ENCODED-PASSWORD]@db.jocigzsthcpspxfdfxae.supabase.co:5432/postgres"
 ```
 
 ### Test it
@@ -148,14 +164,14 @@ The "Seed Production Policy Templates" workflow should now pass! ✅
 Use this template (replace the bracketed parts):
 
 ```
-postgresql://postgres.jocigzsthcpspxfdfxae:[URL-ENCODED-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:5432/postgres
+postgresql://postgres:[URL-ENCODED-PASSWORD]@db.jocigzsthcpspxfdfxae.supabase.co:5432/postgres
 ```
 
 **Key points:**
-- `postgres.jocigzsthcpspxfdfxae` = your project
+- `postgres` = database user
 - `[URL-ENCODED-PASSWORD]` = your password with special chars encoded
-- `aws-0-us-east-1.pooler.supabase.com` = your region host
-- `:5432` = Direct connection port (NOT 6543)
+- `db.jocigzsthcpspxfdfxae.supabase.co` = your direct connection host
+- `:5432` = Direct connection port
 - `/postgres` = database name
 
 ---
