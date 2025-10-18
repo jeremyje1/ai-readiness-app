@@ -70,6 +70,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS demo_leads_updated_at ON demo_leads;
 CREATE TRIGGER demo_leads_updated_at
   BEFORE UPDATE ON demo_leads
   FOR EACH ROW
@@ -79,6 +80,7 @@ CREATE TRIGGER demo_leads_updated_at
 ALTER TABLE demo_leads ENABLE ROW LEVEL SECURITY;
 
 -- Allow service role to do everything
+DROP POLICY IF EXISTS "Service role can do everything with demo_leads" ON demo_leads;
 CREATE POLICY "Service role can do everything with demo_leads"
   ON demo_leads
   FOR ALL
@@ -87,6 +89,7 @@ CREATE POLICY "Service role can do everything with demo_leads"
   WITH CHECK (true);
 
 -- Allow authenticated users to read their own leads (by email)
+DROP POLICY IF EXISTS "Users can read their own demo leads" ON demo_leads;
 CREATE POLICY "Users can read their own demo leads"
   ON demo_leads
   FOR SELECT
@@ -94,6 +97,7 @@ CREATE POLICY "Users can read their own demo leads"
   USING (email = (auth.jwt() -> 'email')::text);
 
 -- Allow anonymous users to create leads (for public demo form)
+DROP POLICY IF EXISTS "Anyone can create demo leads" ON demo_leads;
 CREATE POLICY "Anyone can create demo leads"
   ON demo_leads
   FOR INSERT
