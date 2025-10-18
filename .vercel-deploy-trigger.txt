@@ -1,1 +1,2 @@
 # Deployment Trigger - Sat Oct 18 13:33:55 CDT 2025
+# Testing SUPABASE_DB_URL connection - Sat Oct 18 14:11:55 CDT 2025
