@@ -1,0 +1,72 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 AUTOMATED SETUP - READY TO RUN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Run this command to set up Vercel automatically:
+
+    ./setup-vercel-supabase-auto.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 WHAT YOU'LL NEED:
+
+1. Supabase Access Token: sbp_68c159a93535bb77c50b74ecf4e200b4b6c05cf6
+   (You provided this - paste when prompted)
+
+2. Supabase Project Reference ID
+   (Get from your Supabase dashboard URL)
+
+3. Supabase API Keys
+   (Get from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api)
+   - anon public key
+   - service_role key
+
+4. SendGrid API Key (your NEW rotated key)
+   (Get from: https://app.sendgrid.com/settings/api_keys)
+
+5. Optional: OpenAI and Stripe credentials
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 THE SCRIPT WILL:
+
+✅ Securely prompt for each credential (hidden input)
+✅ Use Supabase CLI to validate your project
+✅ Add all variables to Vercel (production, preview, development)
+✅ Clear credentials from memory when done
+✅ NOT save anything to files or git
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏱️  ESTIMATED TIME: 3-5 minutes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 AFTER SETUP:
+
+1. Vercel will auto-deploy to:
+   https://aiblueprint.educationaiblueprint.com
+
+2. Test your demo at:
+   https://aiblueprint.educationaiblueprint.com/demo
+
+3. Delete the script:
+   rm setup-vercel-supabase-auto.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔒 SECURITY NOTES:
+
+• Script uses `read -s` for password-style hidden input
+• All values sent directly to Vercel API via CLI
+• Variables cleared from memory after setup
+• Script is in .gitignore (won't be committed)
+• No credentials saved to disk
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+▶️  START NOW:
+
+    ./setup-vercel-supabase-auto.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -1,0 +1,59 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔐 SECURE SETUP - QUICK START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ SAFE WAY - Run this command:
+
+    ./setup-vercel-env-secure.sh
+
+This script will:
+  • Prompt you for each value securely (input hidden)
+  • Send directly to Vercel API
+  • NOT save anything locally
+  • NOT commit anything to git
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 VALUES YOU'LL NEED:
+
+1. From Supabase Dashboard (https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api):
+   → Project URL
+   → anon public key
+   → service_role key
+
+2. From SendGrid (https://app.sendgrid.com/settings/api_keys):
+   → Your NEW API key (the one you just rotated)
+   → From email address
+   → From name
+
+3. Site Configuration:
+   → Production URL: https://aiblueprint.educationaiblueprint.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  AFTER SETUP:
+
+    rm setup-vercel-env-secure.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 THEN:
+
+Vercel will auto-deploy to: https://aiblueprint.educationaiblueprint.com
+
+Test your demo at: https://aiblueprint.educationaiblueprint.com/demo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ NEVER DO THIS:
+
+  • Don't paste credentials in git commits
+  • Don't hardcode in source files
+  • Don't commit .env.local
+  • Don't put in documentation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 Full Guide: SECURE_SETUP_GUIDE.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -1662,7 +1662,7 @@
         document.getElementById('contactForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             // Prevent double submission
             if (isSubmitting) {
                 console.log('⏸️ Form already submitting, ignoring duplicate');
