@@ -1,5 +1,7 @@
 import { AppBootstrap } from '@/components/AppBootstrap'
 import AuthNav from '@/components/AuthNav'
+import { DemoBanner } from '@/components/DemoBanner'
+import { DemoTour } from '@/components/DemoTour'
 import { PasswordSetupGuard } from '@/components/PasswordSetupGuard'
 import TutorialProvider from '@/components/TutorialProvider'
 import UserProvider from '@/components/UserProvider'
@@ -44,6 +46,8 @@ export default async function RootLayout({
         <AudienceProvider initialAudience={derivation.audience}>
           <UserProvider>
             <TutorialProvider>
+              <DemoBanner />
+              <DemoTour />
               <AuthNav />
               <PasswordSetupGuard>
                 <AppBootstrap />

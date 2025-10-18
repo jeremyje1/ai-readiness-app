@@ -26,7 +26,9 @@ jobs:
 
       - name: Check framework updates and generate redlines
         env:
+          # yamllint disable-line rule:line-length
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          # yamllint disable-line rule:line-length
           APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
         run: |
           BASE_URL="$APP_BASE_URL"
