@@ -91,12 +91,14 @@ If your password contains special characters, they **MUST** be URL-encoded:
 
 ### Example
 
-If your password is: `MyP@ssw0rd!`
+If your password is: `ExampleP@ss123!`
 
 Your connection string should be:
 ```
-postgresql://postgres.jocigzsthcpspxfdfxae:MyP%40ssw0rd%21@aws-0-us-east-1.pooler.supabase.com:5432/postgres
+postgresql://postgres:ExampleP%40ss123%21@db.your-project-ref.supabase.co:5432/postgres
 ```
+
+**Note:** Replace `your-project-ref` with your actual Supabase project reference.
 
 ---
 
