@@ -1,0 +1,2104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["auth", "public"]
+}
+
+model users {
+  id                                                           String                             @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  email                                                        String?
+  raw_user_meta_data                                           Json?
+  created_at                                                   DateTime?                          @default(now()) @db.Timestamptz(6)
+  ai_readiness_assessments                                     ai_readiness_assessments[]
+  ai_readiness_team_members                                    ai_readiness_team_members[]
+  ai_readiness_teams                                           ai_readiness_teams[]
+  approval_approvers                                           approval_approvers[]
+  approval_audit_logs                                          approval_audit_logs[]
+  approval_comments                                            approval_comments[]
+  approval_events                                              approval_events[]
+  approval_notifications                                       approval_notifications[]
+  approvals                                                    approvals[]
+  auth_password_setup_tokens                                   auth_password_setup_tokens[]
+  blueprint_comments_blueprint_comments_resolved_byTousers     blueprint_comments[]               @relation("blueprint_comments_resolved_byTousers")
+  blueprint_comments_blueprint_comments_user_idTousers         blueprint_comments[]               @relation("blueprint_comments_user_idTousers")
+  blueprint_goals                                              blueprint_goals[]
+  blueprints_blueprints_approved_byTousers                     blueprints[]                       @relation("blueprints_approved_byTousers")
+  blueprints_blueprints_user_idTousers                         blueprints[]                       @relation("blueprints_user_idTousers")
+  compliance_evidence_compliance_evidence_reviewed_byTousers   compliance_evidence[]              @relation("compliance_evidence_reviewed_byTousers")
+  compliance_evidence_compliance_evidence_uploaded_byTousers   compliance_evidence[]              @relation("compliance_evidence_uploaded_byTousers")
+  compliance_findings_compliance_findings_assigned_toTousers   compliance_findings[]              @relation("compliance_findings_assigned_toTousers")
+  compliance_findings_compliance_findings_identified_byTousers compliance_findings[]              @relation("compliance_findings_identified_byTousers")
+  compliance_findings_compliance_findings_resolved_byTousers   compliance_findings[]              @relation("compliance_findings_resolved_byTousers")
+  compliance_tracking_compliance_tracking_assigned_toTousers   compliance_tracking[]              @relation("compliance_tracking_assigned_toTousers")
+  compliance_tracking_compliance_tracking_created_byTousers    compliance_tracking[]              @relation("compliance_tracking_created_byTousers")
+  compliance_tracking_compliance_tracking_updated_byTousers    compliance_tracking[]              @relation("compliance_tracking_updated_byTousers")
+  document_analyses                                            document_analyses[]
+  gap_analysis_results                                         gap_analysis_results?
+  implementation_roadmaps                                      implementation_roadmaps[]
+  institution_memberships                                      institution_memberships[]
+  institutions                                                 institutions[]
+  policy_control_mappings                                      policy_control_mappings[]
+  streamlined_assessment_responses                             streamlined_assessment_responses[]
+  uploaded_documents                                           uploaded_documents[]
+  user_activity_log                                            user_activity_log[]
+  user_profiles                                                user_profiles?
+  vendor_profiles                                              vendor_profiles[]
+  vendor_vetting_audit                                         vendor_vetting_audit[]
+
+  @@schema("auth")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ai_policy_templates {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  policy_type          String
+  title                String
+  description          String?
+  template_content     String
+  stakeholders         String[]  @default([])
+  implementation_steps String[]  @default([])
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ai_readiness_assessments {
+  id                        String                      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  user_id                   String?                     @db.Uuid
+  institution_name          String?
+  institution_type          String?
+  institution_size          String?
+  contact_email             String?
+  contact_name              String?
+  tier                      String?
+  status                    String?                     @default("PENDING")
+  responses                 Json?                       @default("{}")
+  ai_readiness_score        Decimal?                    @db.Decimal(3, 2)
+  domain_scores             Json?                       @default("{}")
+  maturity_profile          Json?                       @default("{}")
+  policy_recommendations    Json?                       @default("[]")
+  custom_policies_generated Json?                       @default("[]")
+  implementation_frameworks Json?                       @default("[]")
+  ai_analysis               Json?                       @default("{}")
+  is_team_assessment        Boolean?                    @default(false)
+  team_members              Json?                       @default("[]")
+  team_analysis             Json?                       @default("{}")
+  open_ended_responses      Json?                       @default("{}")
+  created_at                DateTime?                   @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime?                   @default(now()) @db.Timestamptz(6)
+  submitted_at              DateTime?                   @db.Timestamptz(6)
+  analyzed_at               DateTime?                   @db.Timestamptz(6)
+  pdf_report_generated      Boolean?                    @default(false)
+  pdf_report_url            String?
+  users                     users?                      @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  ai_readiness_payments     ai_readiness_payments?
+  ai_readiness_team_members ai_readiness_team_members[]
+  ai_readiness_teams        ai_readiness_teams[]
+
+  @@index([ai_readiness_score], map: "idx_ai_readiness_assessments_ai_score")
+  @@index([created_at], map: "idx_ai_readiness_assessments_created_at")
+  @@index([institution_type], map: "idx_ai_readiness_assessments_institution_type")
+  @@index([status], map: "idx_ai_readiness_assessments_status")
+  @@index([tier], map: "idx_ai_readiness_assessments_tier")
+  @@index([user_id], map: "idx_ai_readiness_assessments_user_id")
+  @@index([domain_scores], map: "idx_ai_readiness_domain_scores", type: Gin)
+  @@index([policy_recommendations], map: "idx_ai_readiness_policy_recs", type: Gin)
+  @@index([responses], map: "idx_ai_readiness_responses", type: Gin)
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ai_readiness_payments {
+  id                       String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assessment_id            String?                   @unique
+  tier                     String
+  amount                   Decimal                   @db.Decimal(10, 2)
+  currency                 String?                   @default("USD")
+  payment_status           String?                   @default("pending")
+  stripe_session_id        String?
+  stripe_payment_intent_id String?
+  paid_at                  DateTime?                 @db.Timestamptz(6)
+  created_at               DateTime?                 @default(now()) @db.Timestamptz(6)
+  ai_readiness_assessments ai_readiness_assessments? @relation(fields: [assessment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([assessment_id], map: "idx_ai_readiness_payments_assessment_id")
+  @@index([payment_status], map: "idx_ai_readiness_payments_status")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ai_readiness_team_members {
+  id                       String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  team_id                  String?                   @db.Uuid
+  assessment_id            String?
+  user_id                  String?                   @db.Uuid
+  member_name              String?
+  member_email             String?
+  department               String?
+  role                     String?
+  responses                Json?                     @default("{}")
+  completed_at             DateTime?                 @db.Timestamptz(6)
+  created_at               DateTime?                 @default(now()) @db.Timestamptz(6)
+  ai_readiness_assessments ai_readiness_assessments? @relation(fields: [assessment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ai_readiness_teams       ai_readiness_teams?       @relation(fields: [team_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                    users?                    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([team_id, user_id])
+  @@index([assessment_id], map: "idx_ai_readiness_team_members_assessment_id")
+  @@index([team_id], map: "idx_ai_readiness_team_members_team_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model ai_readiness_teams {
+  id                        String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assessment_id             String?
+  team_name                 String
+  description               String?
+  created_by                String?                     @db.Uuid
+  created_at                DateTime?                   @default(now()) @db.Timestamptz(6)
+  ai_readiness_team_members ai_readiness_team_members[]
+  ai_readiness_assessments  ai_readiness_assessments?   @relation(fields: [assessment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                     users?                      @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([assessment_id], map: "idx_ai_readiness_teams_assessment_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model approval_approvers {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  approval_id            String    @db.Uuid
+  user_id                String    @db.Uuid
+  user_name              String?   @db.VarChar(255)
+  user_email             String?   @db.VarChar(255)
+  role                   String    @db.VarChar(100)
+  is_required            Boolean   @default(true)
+  has_approved           Boolean   @default(false)
+  approved_at            DateTime? @db.Timestamptz(6)
+  decision               String?   @db.VarChar(20)
+  comment                String?
+  e_signature_signed     Boolean?  @default(false)
+  e_signature_signed_at  DateTime? @db.Timestamptz(6)
+  e_signature_ip_address String?   @db.Inet
+  e_signature_user_agent String?
+  created_at             DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime? @default(now()) @db.Timestamptz(6)
+  approvals              approvals @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_approvers_approval")
+  users                  users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_approvers_user")
+
+  @@unique([approval_id, user_id])
+  @@index([approval_id], map: "idx_approval_approvers_approval_id")
+  @@index([decision], map: "idx_approval_approvers_decision")
+  @@index([has_approved], map: "idx_approval_approvers_has_approved")
+  @@index([user_id], map: "idx_approval_approvers_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model approval_audit_logs {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  approval_id String    @db.Uuid
+  user_id     String    @db.Uuid
+  action      String    @db.VarChar(50)
+  details     Json      @default("{}")
+  timestamp   DateTime? @default(now()) @db.Timestamptz(6)
+  ip_address  String?   @db.Inet
+  user_agent  String?
+  session_id  String?   @db.VarChar(255)
+  approvals   approvals @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_audit_logs_approval")
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_audit_logs_user")
+
+  @@index([action], map: "idx_approval_audit_logs_action")
+  @@index([approval_id], map: "idx_approval_audit_logs_approval_id")
+  @@index([timestamp], map: "idx_approval_audit_logs_timestamp")
+  @@index([user_id], map: "idx_approval_audit_logs_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model approval_comments {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  approval_id String    @db.Uuid
+  user_id     String    @db.Uuid
+  user_name   String?   @db.VarChar(255)
+  user_email  String?   @db.VarChar(255)
+  comment     String
+  timestamp   DateTime? @default(now()) @db.Timestamptz(6)
+  is_internal Boolean?  @default(false)
+  attachments Json?     @default("[]")
+  approvals   approvals @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_comments_approval")
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_comments_user")
+
+  @@index([approval_id], map: "idx_approval_comments_approval_id")
+  @@index([timestamp], map: "idx_approval_comments_timestamp")
+  @@index([user_id], map: "idx_approval_comments_user_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model approval_events {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  approval_id String    @db.Uuid
+  who         String    @db.Uuid
+  who_name    String?   @db.VarChar(255)
+  who_email   String?   @db.VarChar(255)
+  action      String    @db.VarChar(50)
+  comment     String?
+  timestamp   DateTime? @default(now()) @db.Timestamptz(6)
+  metadata    Json?     @default("{}")
+  approvals   approvals @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_events_approval")
+  users       users     @relation(fields: [who], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_events_who")
+
+  @@index([action], map: "idx_approval_events_action")
+  @@index([approval_id], map: "idx_approval_events_approval_id")
+  @@index([timestamp], map: "idx_approval_events_timestamp")
+  @@index([who], map: "idx_approval_events_who")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model approval_notifications {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type         String    @db.VarChar(50)
+  approval_id  String    @db.Uuid
+  recipient_id String    @db.Uuid
+  title        String    @db.VarChar(255)
+  message      String
+  sent         Boolean?  @default(false)
+  sent_at      DateTime? @db.Timestamptz(6)
+  read_at      DateTime? @db.Timestamptz(6)
+  action_url   String?
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  approvals    approvals @relation(fields: [approval_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_notifications_approval")
+  users        users     @relation(fields: [recipient_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approval_notifications_recipient")
+
+  @@index([approval_id], map: "idx_approval_notifications_approval_id")
+  @@index([recipient_id], map: "idx_approval_notifications_recipient_id")
+  @@index([sent], map: "idx_approval_notifications_sent")
+  @@index([type], map: "idx_approval_notifications_type")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model approvals {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subject_type           String                   @db.VarChar(20)
+  subject_id             String                   @db.VarChar(255)
+  subject_title          String?
+  subject_version        String?                  @db.VarChar(50)
+  status                 String                   @default("pending") @db.VarChar(20)
+  created_by             String                   @db.Uuid
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  due_date               DateTime?                @db.Timestamptz(6)
+  completed_at           DateTime?                @db.Timestamptz(6)
+  metadata               Json?                    @default("{}")
+  approval_approvers     approval_approvers[]
+  approval_audit_logs    approval_audit_logs[]
+  approval_comments      approval_comments[]
+  approval_events        approval_events[]
+  approval_notifications approval_notifications[]
+  users                  users                    @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_approvals_created_by")
+
+  @@index([created_at], map: "idx_approvals_created_at")
+  @@index([created_by], map: "idx_approvals_created_by")
+  @@index([due_date], map: "idx_approvals_due_date")
+  @@index([status], map: "idx_approvals_status")
+  @@index([subject_type, subject_id], map: "idx_approvals_subject")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model approved_tool_catalog {
+  id               String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  vendor_id        String         @unique @db.Uuid
+  tool_name        String         @db.VarChar(255)
+  category         String         @db.VarChar(100)
+  description      String?
+  usage_guidelines String?
+  restrictions     Json?          @default("[]")
+  tags             Json?          @default("[]")
+  approved_by      String         @db.VarChar(255)
+  approved_at      DateTime?      @default(now()) @db.Timestamptz(6)
+  valid_until      DateTime?      @db.Timestamptz(6)
+  usage_count      Int?           @default(0)
+  last_used_at     DateTime?      @db.Timestamptz(6)
+  is_active        Boolean?       @default(true)
+  review_frequency String?        @default("annually") @db.VarChar(50)
+  next_review_date DateTime?      @db.Timestamptz(6)
+  created_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  vendor_intakes   vendor_intakes @relation(fields: [vendor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([category], map: "idx_approved_tool_catalog_category")
+  @@index([is_active], map: "idx_approved_tool_catalog_is_active")
+  @@index([vendor_id], map: "idx_approved_tool_catalog_vendor_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model approved_tools_catalog {
+  id                        String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tool_id                   String?                 @db.Uuid
+  decision_brief_id         String?                 @db.Uuid
+  approval_date             DateTime                @db.Timestamptz(6)
+  approved_by               String
+  approval_type             String?                 @default("full")
+  expiration_date           DateTime?               @db.Timestamptz(6)
+  auto_renewal              Boolean?                @default(false)
+  approved_roles            String[]                @default([])
+  approved_subjects         String[]                @default([])
+  approved_grade_levels     String[]                @default([])
+  approved_use_cases        String[]                @default([])
+  usage_restrictions        String[]                @default([])
+  deployment_scope          String?                 @default("district_wide")
+  max_concurrent_users      Int?
+  seat_allocation           Json?                   @default("{}")
+  organizational_units      String[]                @default([])
+  compliance_status         String?                 @default("Compliant")
+  last_compliance_check     DateTime?               @db.Timestamptz(6)
+  next_compliance_review    DateTime?               @db.Timestamptz(6)
+  compliance_notes          String?
+  active_users_count        Int?                    @default(0)
+  total_sessions            Int?                    @default(0)
+  last_activity_date        DateTime?               @db.Timestamptz(6)
+  usage_trends              Json?                   @default("{}")
+  user_feedback_score       Decimal?                @db.Decimal(3, 2)
+  incidents_count           Int?                    @default(0)
+  last_incident_date        DateTime?               @db.Timestamptz(6)
+  incident_severity_history Json?                   @default("[]")
+  training_completion_rate  Decimal?                @default(0) @db.Decimal(5, 2)
+  support_tickets_count     Int?                    @default(0)
+  documentation_rating      Decimal?                @db.Decimal(3, 2)
+  license_type              String?
+  contract_start_date       DateTime?               @db.Timestamptz(6)
+  contract_end_date         DateTime?               @db.Timestamptz(6)
+  renewal_date              DateTime?               @db.Timestamptz(6)
+  contract_value            Decimal?                @db.Decimal(12, 2)
+  payment_schedule          String?
+  status                    String?                 @default("active")
+  status_reason             String?
+  last_updated_by           String?
+  change_log                Json?                   @default("[]")
+  created_at                DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime?               @default(now()) @db.Timestamptz(6)
+  decision_briefs           decision_briefs?        @relation(fields: [decision_brief_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  vendor_tools              vendor_tools?           @relation(fields: [tool_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  compliance_monitoring     compliance_monitoring[]
+  usage_analytics           usage_analytics[]
+
+  @@index([approval_date], map: "idx_approved_tools_approval_date")
+  @@index([compliance_status], map: "idx_approved_tools_compliance_status")
+  @@index([approved_grade_levels], map: "idx_approved_tools_grade_levels", type: Gin)
+  @@index([approved_roles], map: "idx_approved_tools_roles", type: Gin)
+  @@index([status], map: "idx_approved_tools_status")
+  @@index([approved_subjects], map: "idx_approved_tools_subjects", type: Gin)
+  @@index([tool_id], map: "idx_approved_tools_tool_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model artifacts {
+  id            String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  org_id        String       @db.Uuid
+  assessment_id String?      @db.Uuid
+  type          String       @db.VarChar(20)
+  format        String       @db.VarChar(10)
+  storage_key   String
+  version       Int?         @default(1)
+  metadata      Json?        @default("{}")
+  created_at    DateTime?    @default(now()) @db.Timestamptz(6)
+  assessments   assessments? @relation(fields: [assessment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  institutions  institutions @relation(fields: [org_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([assessment_id], map: "idx_artifacts_assessment")
+  @@index([created_at(sort: Desc)], map: "idx_artifacts_created")
+  @@index([org_id], map: "idx_artifacts_org")
+  @@index([type], map: "idx_artifacts_type")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assessment_metrics {
+  id           String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  metric_name  String    @db.VarChar(50)
+  metric_value BigInt    @default(0)
+  labels       Json?     @default("{}")
+  recorded_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([metric_name], map: "idx_metrics_name")
+  @@index([recorded_at(sort: Desc)], map: "idx_metrics_recorded")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assessments {
+  id               String             @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  org_id           String             @db.Uuid
+  scores           Json               @default("{\"AIBS\": 0, \"AICS\": 0, \"AIMS\": 0, \"AIPS\": 0, \"AIRS\": 0, \"AIRIX\": 0}")
+  findings         Json?              @default("[]")
+  recommendations  Json?              @default("[]")
+  evidence_doc_ids String[]           @default([]) @db.Uuid
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  artifacts        artifacts[]
+  institutions     institutions       @relation(fields: [org_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  framework_scores framework_scores[]
+
+  @@index([created_at(sort: Desc)], map: "idx_assessments_created")
+  @@index([org_id], map: "idx_assessments_org")
+  @@index([scores], map: "idx_assessments_scores", type: Gin)
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model auth_password_setup_tokens {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?   @db.Uuid
+  email      String
+  token      String    @unique
+  expires_at DateTime  @db.Timestamptz(6)
+  used_at    DateTime? @db.Timestamptz(6)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([token], map: "idx_password_setup_token")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model blueprint_comments {
+  id                                          String           @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  blueprint_id                                String?          @db.Uuid
+  task_id                                     String?          @db.Uuid
+  user_id                                     String           @db.Uuid
+  user_name                                   String
+  comment_text                                String
+  is_internal                                 Boolean?         @default(false)
+  is_resolved                                 Boolean?         @default(false)
+  resolved_by                                 String?          @db.Uuid
+  resolved_at                                 DateTime?        @db.Timestamptz(6)
+  created_at                                  DateTime?        @default(now()) @db.Timestamptz(6)
+  blueprints                                  blueprints?      @relation(fields: [blueprint_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_blueprint_comments_resolved_byTousers users?           @relation("blueprint_comments_resolved_byTousers", fields: [resolved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  blueprint_tasks                             blueprint_tasks? @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_blueprint_comments_user_idTousers     users            @relation("blueprint_comments_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model blueprint_goals {
+  id                               String                            @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  user_id                          String                            @db.Uuid
+  assessment_id                    String?                           @db.Uuid
+  primary_goals                    String[]
+  department_goals                 Json?                             @default("[]")
+  learning_objectives              Json?                             @default("[]")
+  implementation_style             String?
+  pilot_preference                 Boolean?                          @default(true)
+  training_capacity                Int?
+  timeline_preference              String
+  budget_range                     String
+  created_at                       DateTime?                         @default(now()) @db.Timestamptz(6)
+  updated_at                       DateTime?                         @default(now()) @db.Timestamptz(6)
+  streamlined_assessment_responses streamlined_assessment_responses? @relation(fields: [assessment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                            users                             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  blueprints                       blueprints[]
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model blueprint_phases {
+  id                  String            @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  blueprint_id        String?           @db.Uuid
+  phase_number        Int
+  title               String
+  description         String?
+  start_date          DateTime?         @db.Date
+  end_date            DateTime?         @db.Date
+  duration            String?
+  objectives          String[]
+  key_outcomes        String[]
+  success_criteria    Json?
+  budget              Decimal?          @db.Decimal
+  required_resources  Json?
+  status              String?           @default("not_started")
+  progress_percentage Int?              @default(0)
+  created_at          DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?         @default(now()) @db.Timestamptz(6)
+  blueprints          blueprints?       @relation(fields: [blueprint_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  blueprint_tasks     blueprint_tasks[]
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model blueprint_progress {
+  id                   String      @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  blueprint_id         String?     @unique @db.Uuid
+  overall_progress     Int?        @default(0)
+  phases_completed     Int?        @default(0)
+  tasks_completed      Int?        @default(0)
+  tasks_total          Int?        @default(0)
+  days_elapsed         Int?        @default(0)
+  days_remaining       Int?
+  is_on_track          Boolean?    @default(true)
+  budget_spent         Decimal?    @default(0) @db.Decimal
+  budget_remaining     Decimal?    @db.Decimal
+  milestones_completed Int?        @default(0)
+  next_milestone       String?
+  next_milestone_date  DateTime?   @db.Date
+  active_risks         Int?        @default(0)
+  open_issues          Int?        @default(0)
+  blockers             String[]
+  last_updated         DateTime?   @default(now()) @db.Timestamptz(6)
+  blueprints           blueprints? @relation(fields: [blueprint_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model blueprint_tasks {
+  id                    String               @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  blueprint_id          String?              @db.Uuid
+  phase_id              String?              @db.Uuid
+  task_title            String
+  task_description      String?
+  task_type             String?
+  priority              String?              @default("medium")
+  department            String?
+  assigned_to           String[]
+  owner_email           String?
+  start_date            DateTime?            @db.Date
+  due_date              DateTime?            @db.Date
+  estimated_hours       Int?
+  actual_hours          Int?
+  dependencies          String[]             @db.Uuid
+  blocks                String[]             @db.Uuid
+  resources_needed      Json?
+  deliverables          String[]
+  status                String?              @default("pending")
+  completion_percentage Int?                 @default(0)
+  completed_at          DateTime?            @db.Timestamptz(6)
+  notes                 String?
+  last_update           String?
+  updated_by            String?
+  created_at            DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime?            @default(now()) @db.Timestamptz(6)
+  blueprint_comments    blueprint_comments[]
+  blueprints            blueprints?          @relation(fields: [blueprint_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  blueprint_phases      blueprint_phases?    @relation(fields: [phase_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([blueprint_id], map: "idx_blueprint_tasks_blueprint_id")
+  @@index([status], map: "idx_blueprint_tasks_status")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model blueprint_templates {
+  id                String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name              String
+  slug              String    @unique
+  description       String?
+  category          String?
+  template_content  String
+  variables         Json?     @default("[]")
+  institution_types String[]
+  department_types  String[]
+  use_cases         String[]
+  prerequisites     String[]
+  author            String?
+  version           String?   @default("1.0")
+  is_premium        Boolean?  @default(false)
+  tier_required     String?   @default("free")
+  usage_count       Int?      @default(0)
+  rating            Decimal?  @db.Decimal(3, 2)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([category], map: "idx_blueprint_templates_category")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model blueprints {
+  id                                  String                            @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  user_id                             String                            @db.Uuid
+  organization_id                     String?                           @db.Uuid
+  assessment_id                       String?                           @db.Uuid
+  goals_id                            String?                           @db.Uuid
+  title                               String                            @default("AI Implementation Blueprint")
+  version                             Int?                              @default(1)
+  generated_at                        DateTime?                         @default(now()) @db.Timestamptz(6)
+  last_updated                        DateTime?                         @default(now()) @db.Timestamptz(6)
+  vision_statement                    String?
+  executive_summary                   String?
+  value_proposition                   Json?
+  readiness_scores                    Json
+  maturity_level                      String?
+  implementation_phases               Json[]
+  department_plans                    Json?                             @default("[]")
+  success_metrics                     Json?                             @default("[]")
+  kpi_targets                         Json?                             @default("{}")
+  risk_assessment                     Json?                             @default("[]")
+  mitigation_strategies               Json?                             @default("[]")
+  resource_allocation                 Json?
+  total_budget                        Decimal?                          @db.Decimal
+  quick_wins                          Json?                             @default("[]")
+  recommended_tools                   Json?                             @default("[]")
+  master_pdf_url                      String?
+  executive_pdf_url                   String?
+  department_pdfs                     Json?                             @default("{}")
+  status                              String?                           @default("draft")
+  approval_status                     String?                           @default("pending")
+  approved_by                         String?                           @db.Uuid
+  approved_at                         DateTime?                         @db.Timestamptz(6)
+  is_public                           Boolean?                          @default(false)
+  share_token                         String?                           @unique @default(dbgenerated("(gen_random_uuid())::text"))
+  shared_with                         String[]                          @default([]) @db.Uuid
+  blueprint_comments                  blueprint_comments[]
+  blueprint_phases                    blueprint_phases[]
+  blueprint_progress                  blueprint_progress?
+  blueprint_tasks                     blueprint_tasks[]
+  users_blueprints_approved_byTousers users?                            @relation("blueprints_approved_byTousers", fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  streamlined_assessment_responses    streamlined_assessment_responses? @relation(fields: [assessment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  blueprint_goals                     blueprint_goals?                  @relation(fields: [goals_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  organizations                       organizations?                    @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_blueprints_user_idTousers     users                             @relation("blueprints_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([assessment_id], map: "idx_blueprints_assessment_id")
+  @@index([status], map: "idx_blueprints_status")
+  @@index([user_id], map: "idx_blueprints_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model calendar_events {
+  id                    String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization          String                 @db.VarChar(255)
+  title                 String                 @db.VarChar(255)
+  description           String?
+  start_time            DateTime               @db.Timestamptz(6)
+  end_time              DateTime               @db.Timestamptz(6)
+  event_type            String?                @default("meeting") @db.VarChar(50)
+  location              String?                @db.VarChar(255)
+  attendees             Json?                  @default("[]")
+  phase_id              String?                @db.Uuid
+  created_by            String?                @db.Uuid
+  created_at            DateTime?              @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at            DateTime?              @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  team_members          team_members?          @relation(fields: [created_by], references: [id], onUpdate: NoAction)
+  implementation_phases implementation_phases? @relation(fields: [phase_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([organization], map: "idx_calendar_events_org")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model compliance_evidence {
+  id                                           String               @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  tracking_id                                  String?              @db.Uuid
+  title                                        String               @db.VarChar(255)
+  description                                  String?
+  evidence_type                                String               @db.VarChar(50)
+  file_url                                     String?
+  document_id                                  String?              @db.Uuid
+  external_reference                           String?
+  uploaded_by                                  String?              @db.Uuid
+  review_status                                String?              @default("pending") @db.VarChar(20)
+  expires_at                                   DateTime?            @db.Date
+  is_current                                   Boolean?             @default(true)
+  created_at                                   DateTime?            @default(now()) @db.Timestamptz(6)
+  reviewed_at                                  DateTime?            @db.Timestamptz(6)
+  reviewed_by                                  String?              @db.Uuid
+  users_compliance_evidence_reviewed_byTousers users?               @relation("compliance_evidence_reviewed_byTousers", fields: [reviewed_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  compliance_tracking                          compliance_tracking? @relation(fields: [tracking_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_compliance_evidence_uploaded_byTousers users?               @relation("compliance_evidence_uploaded_byTousers", fields: [uploaded_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([is_current, expires_at], map: "idx_evidence_current")
+  @@index([tracking_id], map: "idx_evidence_tracking")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model compliance_findings {
+  id                                             String               @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  tracking_id                                    String?              @db.Uuid
+  title                                          String               @db.VarChar(255)
+  description                                    String
+  finding_type                                   String               @db.VarChar(50)
+  severity                                       String               @db.VarChar(20)
+  remediation                                    String?
+  status                                         String?              @default("open") @db.VarChar(20)
+  identified_by                                  String?              @db.Uuid
+  assigned_to                                    String?              @db.Uuid
+  target_resolution_date                         DateTime?            @db.Date
+  identified_at                                  DateTime?            @default(now()) @db.Timestamptz(6)
+  resolved_at                                    DateTime?            @db.Timestamptz(6)
+  resolved_by                                    String?              @db.Uuid
+  users_compliance_findings_assigned_toTousers   users?               @relation("compliance_findings_assigned_toTousers", fields: [assigned_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_compliance_findings_identified_byTousers users?               @relation("compliance_findings_identified_byTousers", fields: [identified_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_compliance_findings_resolved_byTousers   users?               @relation("compliance_findings_resolved_byTousers", fields: [resolved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  compliance_tracking                            compliance_tracking? @relation(fields: [tracking_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([status, severity], map: "idx_findings_status")
+  @@index([tracking_id], map: "idx_findings_tracking")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model compliance_frameworks {
+  id                  String               @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name                String               @db.VarChar(255)
+  audience            String               @db.VarChar(20)
+  description         String?
+  regulatory_body     String?              @db.VarChar(255)
+  is_federal          Boolean?             @default(true)
+  is_active           Boolean?             @default(true)
+  review_cycle_months Int?                 @default(12)
+  created_at          DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?            @default(now()) @db.Timestamptz(6)
+  framework_controls  framework_controls[]
+
+  @@index([audience, is_active], map: "idx_frameworks_audience")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model compliance_monitoring {
+  id                            String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tool_id                       String?                 @db.Uuid
+  monitoring_date               DateTime?               @default(now()) @db.Timestamptz(6)
+  monitoring_type               String?
+  monitoring_period_start       DateTime?               @db.Timestamptz(6)
+  monitoring_period_end         DateTime?               @db.Timestamptz(6)
+  coppa_status                  String?                 @default("compliant")
+  coppa_findings                Json?                   @default("{}")
+  ferpa_status                  String?                 @default("compliant")
+  ferpa_findings                Json?                   @default("{}")
+  ppra_status                   String?                 @default("compliant")
+  ppra_findings                 Json?                   @default("{}")
+  usage_within_approved_scope   Boolean?                @default(true)
+  unauthorized_usage_incidents  Int?                    @default(0)
+  data_handling_compliance      Boolean?                @default(true)
+  consent_management_compliance Boolean?                @default(true)
+  security_controls_effective   Boolean?                @default(true)
+  data_encryption_verified      Boolean?                @default(true)
+  access_controls_verified      Boolean?                @default(true)
+  vulnerability_scan_results    Json?                   @default("{}")
+  privacy_policy_current        Boolean?                @default(true)
+  data_minimization_verified    Boolean?                @default(true)
+  retention_policy_followed     Boolean?                @default(true)
+  user_rights_requests_handled  Int?                    @default(0)
+  compliance_score              Int?
+  issues_identified             String[]                @default([])
+  corrective_actions_required   String[]                @default([])
+  recommendations               String[]                @default([])
+  follow_up_required            Boolean?                @default(false)
+  follow_up_date                DateTime?               @db.Timestamptz(6)
+  reviewed_by                   String?
+  review_date                   DateTime?               @db.Timestamptz(6)
+  approved_by                   String?
+  approval_date                 DateTime?               @db.Timestamptz(6)
+  created_at                    DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime?               @default(now()) @db.Timestamptz(6)
+  approved_tools_catalog        approved_tools_catalog? @relation(fields: [tool_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([monitoring_date], map: "idx_compliance_monitoring_date")
+  @@index([tool_id], map: "idx_compliance_monitoring_tool_id")
+  @@index([monitoring_type], map: "idx_compliance_monitoring_type")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model compliance_tracking {
+  id                                           String                @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  org_id                                       String                @db.Uuid
+  control_id                                   String?               @db.Uuid
+  assigned_to                                  String?               @db.Uuid
+  department                                   String?               @db.VarChar(100)
+  status                                       String                @default("pending") @db.VarChar(50)
+  priority                                     String                @default("medium") @db.VarChar(20)
+  risk_level                                   String?               @default("medium") @db.VarChar(20)
+  due_date                                     DateTime              @db.Date
+  completion_percentage                        Int?                  @default(0)
+  notes                                        String?
+  last_action                                  String?
+  next_action                                  String?
+  dependencies                                 String[]              @default([]) @db.Uuid
+  created_at                                   DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at                                   DateTime?             @default(now()) @db.Timestamptz(6)
+  created_by                                   String?               @db.Uuid
+  updated_by                                   String?               @db.Uuid
+  compliance_evidence                          compliance_evidence[]
+  compliance_findings                          compliance_findings[]
+  users_compliance_tracking_assigned_toTousers users?                @relation("compliance_tracking_assigned_toTousers", fields: [assigned_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  framework_controls                           framework_controls?   @relation(fields: [control_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_compliance_tracking_created_byTousers  users?                @relation("compliance_tracking_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_compliance_tracking_updated_byTousers  users?                @relation("compliance_tracking_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([assigned_to], map: "idx_tracking_assigned_to")
+  @@index([control_id], map: "idx_tracking_control")
+  @@index([due_date], map: "idx_tracking_due_date")
+  @@index([org_id, status], map: "idx_tracking_org_status")
+  @@index([priority], map: "idx_tracking_priority")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model decision_briefs {
+  id                         String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  risk_assessment_id         String?                  @db.Uuid
+  intake_form_id             String?                  @db.Uuid
+  brief_title                String
+  brief_date                 DateTime?                @default(now()) @db.Timestamptz(6)
+  prepared_by                String
+  review_board               String?                  @default("Technology Committee")
+  meeting_date               DateTime?                @db.Timestamptz(6)
+  executive_summary          String
+  recommendation             String
+  key_benefits               String[]                 @default([])
+  primary_concerns           String[]                 @default([])
+  risk_level_summary         String?
+  critical_risks             String[]                 @default([])
+  acceptable_risks           String[]                 @default([])
+  mitigation_plan            String?
+  compliance_summary         Json?                    @default("{}")
+  regulatory_considerations  String?
+  legal_review_required      Boolean?                 @default(false)
+  legal_review_status        String?
+  implementation_timeline    String?
+  pilot_program_recommended  Boolean?                 @default(false)
+  pilot_scope                String?
+  training_plan              String?
+  rollout_phases             Json?                    @default("[]")
+  monitoring_plan            String?
+  success_metrics            String[]                 @default([])
+  review_schedule            String?
+  escalation_procedures      String?
+  cost_benefit_analysis      String?
+  budget_impact              Decimal?                 @db.Decimal(12, 2)
+  alternative_costs          Json?                    @default("{}")
+  roi_projection             String?
+  board_decision             String?
+  decision_date              DateTime?                @db.Timestamptz(6)
+  decision_rationale         String?
+  voting_record              Json?                    @default("{}")
+  dissenting_opinions        String?
+  implementation_status      String?                  @default("pending")
+  implementation_start_date  DateTime?                @db.Timestamptz(6)
+  go_live_date               DateTime?                @db.Timestamptz(6)
+  actual_vs_planned_variance String?
+  document_version           Int?                     @default(1)
+  document_status            String?                  @default("draft")
+  attachments                Json?                    @default("[]")
+  related_documents          Json?                    @default("[]")
+  created_at                 DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime?                @default(now()) @db.Timestamptz(6)
+  approved_tools_catalog     approved_tools_catalog[]
+  vendor_intake_forms        vendor_intake_forms?     @relation(fields: [intake_form_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  risk_assessments           risk_assessments?        @relation(fields: [risk_assessment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([brief_date], map: "idx_decision_briefs_brief_date")
+  @@index([recommendation], map: "idx_decision_briefs_recommendation")
+  @@index([risk_assessment_id], map: "idx_decision_briefs_risk_assessment_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model document_analyses {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                 String    @db.Uuid
+  file_name               String
+  document_type           String?
+  key_themes              String[]  @default([])
+  ai_readiness_indicators String[]  @default([])
+  alignment_opportunities String[]  @default([])
+  gaps                    String[]  @default([])
+  recommendations         String[]  @default([])
+  confidence_score        Int?      @default(0)
+  analysis_data           Json?
+  analyzed_at             DateTime? @default(now()) @db.Timestamptz(6)
+  created_at              DateTime? @default(now()) @db.Timestamptz(6)
+  users                   users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([analyzed_at(sort: Desc)], map: "idx_document_analyses_analyzed_at")
+  @@index([user_id], map: "idx_document_analyses_user_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model document_sections {
+  id                 String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  document_id        String    @db.Uuid
+  section_type       String    @db.VarChar(20)
+  heading            String?
+  content            String
+  page_number        Int?
+  position_start     Int?
+  position_end       Int?
+  confidence         Decimal?  @default(0.0) @db.Decimal(3, 2)
+  framework_mappings Json?     @default("{}")
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  documents          documents @relation(fields: [document_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([document_id], map: "idx_sections_document")
+  @@index([page_number], map: "idx_sections_page")
+  @@index([section_type], map: "idx_sections_type")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model documents {
+  id                String              @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  org_id            String              @db.Uuid
+  name              String              @db.VarChar(255)
+  mime_type         String              @db.VarChar(100)
+  size              BigInt
+  storage_key       String
+  pii_flags         Json?               @default("[]")
+  ocr_text          String?
+  sections          Json?               @default("[]")
+  framework_tags    Json?               @default("{}")
+  status            String              @default("uploaded") @db.VarChar(20)
+  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  processed_at      DateTime?           @db.Timestamptz(6)
+  document_sections document_sections[]
+  institutions      institutions        @relation(fields: [org_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  pii_detections    pii_detections[]
+
+  @@index([created_at(sort: Desc)], map: "idx_documents_created")
+  @@index([framework_tags], map: "idx_documents_framework_tags", type: Gin)
+  @@index([org_id], map: "idx_documents_org")
+  @@index([status], map: "idx_documents_status")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model enterprise_algorithm_changelog {
+  version          String   @id
+  released_at      DateTime @default(now()) @db.Timestamptz(6)
+  summary          String
+  details          Json?
+  breaking_changes Boolean? @default(false)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model enterprise_algorithm_results {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assessment_id     String
+  user_id           String?  @db.Uuid
+  algorithm_version String
+  computed_at       DateTime @default(now()) @db.Timestamptz(6)
+  dsch              Json
+  crf               Json
+  lei               Json
+  oci               Json
+  hoci              Json
+  raw               Json
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([assessment_id, user_id, algorithm_version], map: "enterprise_algorithm_results_assessment_user_version_uidx")
+  @@index([assessment_id], map: "enterprise_algorithm_results_assessment_idx")
+  @@index([computed_at])
+  @@index([user_id], map: "enterprise_algorithm_results_user_idx")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model framework_changes {
+  id                          String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  framework_id                String                        @db.VarChar(100)
+  version                     String                        @db.VarChar(50)
+  change_type                 String                        @db.VarChar(20)
+  title                       String                        @db.VarChar(255)
+  description                 String?
+  affected_sections           String[]                      @default([])
+  impact_level                String?                       @default("medium") @db.VarChar(20)
+  effective_date              DateTime?                     @db.Timestamptz(6)
+  requires_redline            Boolean?                      @default(true)
+  created_at                  DateTime?                     @default(now()) @db.Timestamptz(6)
+  framework_metadata          framework_metadata            @relation(fields: [framework_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_framework_changes_framework")
+  policy_redline_packs        policy_redline_packs[]
+  policy_update_notifications policy_update_notifications[]
+
+  @@index([effective_date], map: "idx_framework_changes_effective_date")
+  @@index([framework_id], map: "idx_framework_changes_framework_id")
+  @@index([impact_level], map: "idx_framework_changes_impact_level")
+  @@index([requires_redline], map: "idx_framework_changes_requires_redline")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model framework_controls {
+  id                          String                        @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  framework_id                String?                       @db.Uuid
+  code                        String                        @db.VarChar(50)
+  title                       String                        @db.VarChar(500)
+  description                 String?
+  complexity_weight           Decimal?                      @default(1.0) @db.Decimal(3, 2)
+  is_required                 Boolean?                      @default(true)
+  impact_areas                String[]                      @default([])
+  typical_evidence            String[]                      @default([])
+  created_at                  DateTime?                     @default(now()) @db.Timestamptz(6)
+  compliance_tracking         compliance_tracking[]
+  compliance_frameworks       compliance_frameworks?        @relation(fields: [framework_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  policy_control_mappings     policy_control_mappings[]
+  vendor_control_dependencies vendor_control_dependencies[]
+
+  @@index([code], map: "idx_controls_code")
+  @@index([framework_id], map: "idx_controls_framework")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model framework_metadata {
+  id                          String                       @id @db.VarChar(100)
+  name                        String                       @db.VarChar(255)
+  version                     String                       @db.VarChar(50)
+  last_updated                DateTime                     @db.Timestamptz(6)
+  source_url                  String?
+  checksum                    String?                      @db.VarChar(64)
+  status                      String?                      @default("active") @db.VarChar(20)
+  changelog                   Json?                        @default("[]")
+  created_at                  DateTime?                    @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime?                    @default(now()) @db.Timestamptz(6)
+  framework_changes           framework_changes[]
+  framework_monitoring_config framework_monitoring_config?
+
+  @@index([status], map: "idx_framework_metadata_status")
+  @@index([updated_at], map: "idx_framework_metadata_updated")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model framework_monitoring_config {
+  id                     String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  framework_id           String             @unique @db.VarChar(100)
+  check_interval         Int?               @default(60)
+  enabled                Boolean?           @default(true)
+  auto_generate_redlines Boolean?           @default(true)
+  notify_approvers       Boolean?           @default(true)
+  impact_threshold       String?            @default("medium") @db.VarChar(20)
+  approvers              String[]           @default([])
+  last_checked           DateTime?          @db.Timestamptz(6)
+  next_check             DateTime?          @db.Timestamptz(6)
+  created_at             DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?          @default(now()) @db.Timestamptz(6)
+  framework_metadata     framework_metadata @relation(fields: [framework_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_monitoring_config_framework")
+
+  @@index([enabled], map: "idx_monitoring_config_enabled")
+  @@index([framework_id], map: "idx_monitoring_config_framework_id")
+  @@index([next_check], map: "idx_monitoring_config_next_check")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model framework_scores {
+  id               String      @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  assessment_id    String      @db.Uuid
+  framework        String      @db.VarChar(10)
+  category         String      @db.VarChar(50)
+  control_id       String      @db.VarChar(20)
+  score            Decimal     @db.Decimal(3, 2)
+  evidence_doc_ids String[]    @default([]) @db.Uuid
+  rationale        String?
+  created_at       DateTime?   @default(now()) @db.Timestamptz(6)
+  assessments      assessments @relation(fields: [assessment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([assessment_id, framework, control_id])
+  @@index([assessment_id], map: "idx_framework_scores_assessment")
+  @@index([framework], map: "idx_framework_scores_framework")
+  @@index([score(sort: Desc)], map: "idx_framework_scores_score")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model gap_analysis_results {
+  id                      String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  user_id                 String?   @unique(map: "idx_gap_analysis_user_id_unique") @db.Uuid
+  overall_score           Decimal?  @db.Decimal(5, 2)
+  maturity_level          String?
+  govern_score            Decimal?  @db.Decimal(5, 2)
+  govern_gaps             String[]
+  govern_strengths        String[]
+  govern_recommendations  String[]
+  map_score               Decimal?  @db.Decimal(5, 2)
+  map_gaps                String[]
+  map_strengths           String[]
+  map_recommendations     String[]
+  measure_score           Decimal?  @db.Decimal(5, 2)
+  measure_gaps            String[]
+  measure_strengths       String[]
+  measure_recommendations String[]
+  manage_score            Decimal?  @db.Decimal(5, 2)
+  manage_gaps             String[]
+  manage_strengths        String[]
+  manage_recommendations  String[]
+  priority_actions        String[]
+  quick_wins              String[]
+  analysis_date           DateTime? @default(now()) @db.Timestamptz(6)
+  created_at              DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime? @default(now()) @db.Timestamptz(6)
+  users                   users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_gap_analysis_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model implementation_phases {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization    String            @db.VarChar(255)
+  phase_name      String            @db.VarChar(255)
+  description     String?
+  start_date      DateTime?         @db.Date
+  end_date        DateTime?         @db.Date
+  status          String?           @default("planning") @db.VarChar(50)
+  budget          Decimal?          @db.Decimal(12, 2)
+  created_at      DateTime?         @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at      DateTime?         @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  calendar_events calendar_events[]
+  tasks           tasks[]
+
+  @@index([organization], map: "idx_implementation_phases_org")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model implementation_roadmaps {
+  id                    String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  user_id               String?   @db.Uuid
+  roadmap_type          String?
+  goals                 String[]
+  action_items          String[]
+  milestones            String[]
+  success_metrics       String[]
+  start_date            DateTime? @db.Date
+  end_date              DateTime? @db.Date
+  status                String?   @default("not_started")
+  completion_percentage Int?      @default(0)
+  created_at            DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @default(now()) @db.Timestamptz(6)
+  users                 users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_roadmaps_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model institution_memberships {
+  id             String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  institution_id String       @db.Uuid
+  user_id        String       @db.Uuid
+  role           String       @default("member")
+  active         Boolean      @default(true)
+  created_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamptz(6)
+  institutions   institutions @relation(fields: [institution_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users          users        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([institution_id, user_id])
+  @@index([active], map: "idx_institution_memberships_active")
+  @@index([institution_id], map: "idx_institution_memberships_institution")
+  @@index([user_id], map: "idx_institution_memberships_user")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model institutions {
+  id                      String                    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  slug                    String                    @unique
+  name                    String
+  headcount               Int?
+  budget                  Decimal?                  @db.Decimal(15, 2)
+  depth_mode              String?
+  owner_user_id           String?                   @db.Uuid
+  created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  deleted_at              DateTime?                 @db.Timestamptz(6)
+  org_type                String?
+  artifacts               artifacts[]
+  assessments             assessments[]
+  documents               documents[]
+  institution_memberships institution_memberships[]
+  users                   users?                    @relation(fields: [owner_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_profiles           user_profiles[]
+
+  @@schema("public")
+}
+
+model organizations {
+  id         String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name       String
+  domain     String?      @unique
+  created_at DateTime?    @default(now()) @db.Timestamptz(6)
+  blueprints blueprints[]
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model pii_detections {
+  id             String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  document_id    String    @db.Uuid
+  pii_type       String    @db.VarChar(20)
+  detected_text  String
+  redacted_text  String
+  position_start Int
+  position_end   Int
+  confidence     Decimal   @db.Decimal(3, 2)
+  detected_at    DateTime? @default(now()) @db.Timestamptz(6)
+  documents      documents @relation(fields: [document_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([detected_at(sort: Desc)], map: "idx_pii_detected")
+  @@index([document_id], map: "idx_pii_document")
+  @@index([pii_type], map: "idx_pii_type")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model policy_control_mappings {
+  id                  String              @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  control_id          String?             @db.Uuid
+  policy_title        String              @db.VarChar(500)
+  policy_url          String?
+  mapping_strength    String?             @default("full") @db.VarChar(20)
+  coverage_percentage Int?                @default(100)
+  mapped_by           String?             @db.Uuid
+  mapped_at           DateTime?           @default(now()) @db.Timestamptz(6)
+  last_verified       DateTime?           @default(now()) @db.Timestamptz(6)
+  framework_controls  framework_controls? @relation(fields: [control_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               users?              @relation(fields: [mapped_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([control_id], map: "idx_policy_mappings_control")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model policy_redline_packs {
+  id                          String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  policy_id                   String                        @db.VarChar(100)
+  original_version            String                        @db.VarChar(50)
+  updated_version             String                        @db.VarChar(50)
+  framework_change_id         String                        @db.Uuid
+  changes                     Json                          @default("[]")
+  approvers                   String[]                      @default([])
+  status                      String?                       @default("draft") @db.VarChar(30)
+  generated_by                String?                       @default("system") @db.VarChar(20)
+  created_at                  DateTime?                     @default(now()) @db.Timestamptz(6)
+  sent_at                     DateTime?                     @db.Timestamptz(6)
+  approved_at                 DateTime?                     @db.Timestamptz(6)
+  rejected_at                 DateTime?                     @db.Timestamptz(6)
+  rejection_reason            String?
+  framework_changes           framework_changes             @relation(fields: [framework_change_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_redline_packs_change")
+  policy_update_notifications policy_update_notifications[]
+
+  @@index([created_at], map: "idx_redline_packs_created_at")
+  @@index([framework_change_id], map: "idx_redline_packs_framework_change")
+  @@index([generated_by], map: "idx_redline_packs_generated_by")
+  @@index([policy_id], map: "idx_redline_packs_policy_id")
+  @@index([status], map: "idx_redline_packs_status")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model policy_update_job_logs {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_id             String    @unique @db.VarChar(100)
+  success            Boolean
+  frameworks_checked Int?      @default(0)
+  changes_detected   Int?      @default(0)
+  redlines_generated Int?      @default(0)
+  notifications_sent Int?      @default(0)
+  errors             String[]  @default([])
+  processing_time    Int?      @default(0)
+  executed_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([executed_at], map: "idx_job_logs_executed_at")
+  @@index([success], map: "idx_job_logs_success")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model policy_update_notifications {
+  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type                 String                @db.VarChar(30)
+  recipient_id         String                @db.VarChar(100)
+  recipient_email      String                @db.VarChar(255)
+  policy_id            String?               @db.VarChar(100)
+  redline_pack_id      String?               @db.Uuid
+  framework_change_id  String?               @db.Uuid
+  title                String                @db.VarChar(255)
+  message              String
+  action_url           String?
+  sent                 Boolean?              @default(false)
+  sent_at              DateTime?             @db.Timestamptz(6)
+  read_at              DateTime?             @db.Timestamptz(6)
+  created_at           DateTime?             @default(now()) @db.Timestamptz(6)
+  framework_changes    framework_changes?    @relation(fields: [framework_change_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_policy_notifications_change")
+  policy_redline_packs policy_redline_packs? @relation(fields: [redline_pack_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_policy_notifications_redline")
+
+  @@index([recipient_id], map: "idx_policy_notifications_recipient")
+  @@index([redline_pack_id], map: "idx_policy_notifications_redline_pack")
+  @@index([sent], map: "idx_policy_notifications_sent")
+  @@index([type], map: "idx_policy_notifications_type")
+  @@schema("public")
+}
+
+model recommendations_catalog {
+  id                     Int       @id @default(autoincrement())
+  code                   String    @unique
+  title                  String
+  category               String
+  subcategory            String?
+  description            String
+  implementation_guide   Json
+  estimated_effort       String?
+  estimated_duration     String?
+  estimated_cost_range   String?
+  prerequisites          String[]
+  required_capabilities  String[]
+  min_readiness_score    Decimal?  @db.Decimal(3, 2)
+  applicable_departments String[]
+  institution_types      String[]
+  expected_outcomes      String[]
+  success_metrics        String[]
+  related_tools          String[]
+  related_templates      String[]  @db.Uuid
+  external_resources     Json?
+  tags                   String[]
+  is_active              Boolean?  @default(true)
+  created_at             DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([category], map: "idx_recommendations_category")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model risk_assessments {
+  id                               String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  intake_form_id                   String?              @db.Uuid
+  tool_id                          String?              @db.Uuid
+  assessment_type                  String?              @default("initial")
+  assessment_date                  DateTime?            @default(now()) @db.Timestamptz(6)
+  assessor_name                    String?
+  assessor_role                    String?
+  overall_risk_score               Int?
+  risk_level                       String?
+  privacy_risk_score               Int?
+  security_risk_score              Int?
+  compliance_risk_score            Int?
+  pedagogical_risk_score           Int?
+  financial_risk_score             Int?
+  operational_risk_score           Int?
+  risk_factors                     Json?                @default("{}")
+  mitigation_measures              Json?                @default("{}")
+  residual_risks                   Json?                @default("{}")
+  coppa_assessment                 Json?                @default("{}")
+  ferpa_assessment                 Json?                @default("{}")
+  ppra_assessment                  Json?                @default("{}")
+  state_law_assessment             Json?                @default("{}")
+  accessibility_assessment         Json?                @default("{}")
+  data_encryption_status           String?
+  access_controls_rating           String?
+  vulnerability_assessment         Json?                @default("{}")
+  penetration_test_results         Json?                @default("{}")
+  security_certifications          String[]             @default([])
+  privacy_policy_review            Json?                @default("{}")
+  data_minimization_score          Int?
+  consent_mechanism_rating         String?
+  data_subject_rights_support      String?
+  cross_border_transfer_assessment Json?                @default("{}")
+  approval_recommendation          String?
+  recommended_restrictions         String[]             @default([])
+  monitoring_requirements          String[]             @default([])
+  training_requirements            String[]             @default([])
+  review_schedule                  String?
+  reviewed_by                      String?
+  review_date                      DateTime?            @db.Timestamptz(6)
+  review_notes                     String?
+  approved_by                      String?
+  approval_date                    DateTime?            @db.Timestamptz(6)
+  created_at                       DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at                       DateTime?            @default(now()) @db.Timestamptz(6)
+  decision_briefs                  decision_briefs[]
+  vendor_intake_forms              vendor_intake_forms? @relation(fields: [intake_form_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  vendor_tools                     vendor_tools?        @relation(fields: [tool_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([intake_form_id], map: "idx_risk_assessments_intake_form_id")
+  @@index([overall_risk_score], map: "idx_risk_assessments_overall_score")
+  @@index([risk_level], map: "idx_risk_assessments_risk_level")
+  @@index([tool_id], map: "idx_risk_assessments_tool_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model roi_metrics {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization     String    @db.VarChar(255)
+  metric_name      String    @db.VarChar(255)
+  baseline_value   Decimal?  @db.Decimal(12, 2)
+  target_value     Decimal?  @db.Decimal(12, 2)
+  current_value    Decimal?  @db.Decimal(12, 2)
+  unit             String?   @db.VarChar(50)
+  category         String?   @db.VarChar(100)
+  measurement_date DateTime? @default(dbgenerated("CURRENT_DATE")) @db.Date
+  created_at       DateTime? @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at       DateTime? @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@index([organization], map: "idx_roi_metrics_org")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model streamlined_assessment_responses {
+  id                          String            @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  ai_journey_stage            String?
+  ai_roadmap                  String?
+  biggest_challenge           String?
+  completed_at                DateTime?         @db.Timestamptz(6)
+  contact_email               String?
+  contact_name                String?
+  contact_role                String?
+  created_at                  DateTime?         @default(now()) @db.Timestamptz(6)
+  implementation_timeline     String?
+  institution_size            String?
+  institution_state           String?
+  institution_type            String?
+  preferred_consultation_time String?
+  readiness_level             String?           @db.VarChar(50)
+  responses                   Json?
+  scores                      Json?
+  special_considerations      String?
+  top_priorities              String[]
+  updated_at                  DateTime?         @default(now()) @db.Timestamptz(6)
+  user_id                     String?           @db.Uuid
+  blueprint_goals             blueprint_goals[]
+  blueprints                  blueprints[]
+  users                       users?            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([completed_at(sort: Desc)], map: "idx_assessment_completed")
+  @@index([readiness_level], map: "idx_assessment_readiness_level")
+  @@index([user_id], map: "idx_streamlined_assessment_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tasks {
+  id                    String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization          String                 @db.VarChar(255)
+  phase_id              String?                @db.Uuid
+  assigned_to           String?                @db.Uuid
+  title                 String                 @db.VarChar(255)
+  description           String?
+  status                String?                @default("todo") @db.VarChar(50)
+  priority              String?                @default("medium") @db.VarChar(20)
+  due_date              DateTime?              @db.Date
+  completed_at          DateTime?              @db.Timestamptz(6)
+  created_at            DateTime?              @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at            DateTime?              @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  team_members          team_members?          @relation(fields: [assigned_to], references: [id], onUpdate: NoAction)
+  implementation_phases implementation_phases? @relation(fields: [phase_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([organization], map: "idx_tasks_org")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model team_members {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organization    String            @db.VarChar(255)
+  name            String            @db.VarChar(255)
+  email           String            @db.VarChar(255)
+  role            String            @db.VarChar(50)
+  department      String?           @db.VarChar(100)
+  avatar_url      String?
+  created_at      DateTime?         @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at      DateTime?         @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  calendar_events calendar_events[]
+  tasks           tasks[]
+
+  @@index([organization], map: "idx_team_members_org")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model teams {
+  id          String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  org_id      String    @db.Uuid
+  name        String    @db.VarChar(255)
+  audience    String    @db.VarChar(20)
+  description String?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([org_id, audience], map: "idx_teams_org_audience")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model uploaded_documents {
+  id                String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  user_id           String?   @db.Uuid
+  document_type     String?
+  file_name         String
+  file_path         String?
+  file_size         Int?
+  file_url          String?
+  mime_type         String?
+  processing_status String?   @default("pending")
+  processed_at      DateTime? @db.Timestamptz(6)
+  analysis_result   Json?
+  upload_date       DateTime? @default(now()) @db.Timestamptz(6)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+  users             users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_uploaded_documents_user_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model usage_analytics {
+  id                       String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tool_id                  String?                 @db.Uuid
+  analytics_date           DateTime                @db.Date
+  period_type              String?                 @default("daily")
+  active_users             Int?                    @default(0)
+  new_users                Int?                    @default(0)
+  sessions_count           Int?                    @default(0)
+  total_session_duration   Int?                    @default(0)
+  average_session_duration Decimal?                @default(0) @db.Decimal(8, 2)
+  teacher_users            Int?                    @default(0)
+  student_users            Int?                    @default(0)
+  admin_users              Int?                    @default(0)
+  parent_users             Int?                    @default(0)
+  usage_by_grade           Json?                   @default("{}")
+  usage_by_subject         Json?                   @default("{}")
+  usage_by_department      Json?                   @default("{}")
+  features_used            Json?                   @default("{}")
+  most_popular_features    String[]                @default([])
+  system_uptime            Decimal?                @default(100) @db.Decimal(5, 2)
+  response_time_avg        Decimal?                @db.Decimal(8, 2)
+  error_rate               Decimal?                @default(0) @db.Decimal(5, 4)
+  user_rating              Decimal?                @db.Decimal(3, 2)
+  feedback_count           Int?                    @default(0)
+  support_tickets          Int?                    @default(0)
+  content_created_count    Int?                    @default(0)
+  data_processed_volume    Decimal?                @db.Decimal(12, 2)
+  storage_used             Decimal?                @db.Decimal(12, 2)
+  created_at               DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime?               @default(now()) @db.Timestamptz(6)
+  approved_tools_catalog   approved_tools_catalog? @relation(fields: [tool_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tool_id, analytics_date, period_type])
+  @@index([analytics_date], map: "idx_usage_analytics_date")
+  @@index([period_type], map: "idx_usage_analytics_period_type")
+  @@index([tool_id], map: "idx_usage_analytics_tool_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_activity_log {
+  id            String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  user_id       String?   @db.Uuid
+  activity_type String
+  activity_data Json?
+  ip_address    String?
+  user_agent    String?
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  users         users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at(sort: Desc)], map: "idx_activity_log_created_at")
+  @@index([user_id], map: "idx_activity_log_user_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model user_payments {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id            String?   @db.Uuid
+  email              String    @db.VarChar(255)
+  name               String    @db.VarChar(255)
+  organization       String?   @db.VarChar(255)
+  tier               String    @db.VarChar(100)
+  stripe_customer_id String    @db.VarChar(255)
+  stripe_session_id  String    @unique @db.VarChar(255)
+  payment_amount     Int
+  payment_status     String?   @default("completed") @db.VarChar(50)
+  access_granted     Boolean?  @default(true)
+  access_revoked_at  DateTime? @db.Timestamptz(6)
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @default(now()) @db.Timestamptz(6)
+  is_test            Boolean?  @default(false)
+  role               String?   @default("viewer") @db.VarChar(50)
+  department         String?   @db.VarChar(100)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_profiles {
+  id                   String        @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  user_id              String        @unique @db.Uuid
+  full_name            String?
+  email                String
+  phone                String?
+  job_title            String?
+  department           String?
+  institution_id       String?       @db.Uuid
+  institution_name     String?
+  institution_type     String?
+  institution_size     String?
+  student_count        Int?
+  faculty_count        Int?
+  staff_count          Int?
+  annual_budget        Decimal?      @db.Decimal(15, 2)
+  city                 String?
+  state                String?
+  country              String?       @default("US")
+  timezone             String?       @default("America/New_York")
+  preferred_mode       String?       @default("quick")
+  assessment_context   Json?         @default("{}")
+  onboarding_completed Boolean?      @default(false)
+  onboarding_step      Int?          @default(0)
+  onboarding_data      Json?         @default("{}")
+  subscription_tier    String?
+  subscription_status  String?       @default("inactive")
+  trial_ends_at        DateTime?     @db.Timestamptz(6)
+  created_at           DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?     @default(now()) @db.Timestamptz(6)
+  last_login_at        DateTime?     @db.Timestamptz(6)
+  preferences          Json?         @default("{}")
+  metadata             Json?         @default("{}")
+  institutions         institutions? @relation(fields: [institution_id], references: [id], onUpdate: NoAction)
+  users                users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([email], map: "idx_user_profiles_email")
+  @@index([institution_id], map: "idx_user_profiles_institution_id")
+  @@index([institution_type], map: "idx_user_profiles_institution_type")
+  @@index([subscription_status], map: "idx_user_profiles_subscription_status")
+  @@index([user_id], map: "idx_user_profiles_user_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_assessments {
+  id               String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  vendor_id        String         @db.Uuid
+  section          String         @db.VarChar(50)
+  question_id      String         @db.VarChar(100)
+  response         Json
+  risk_weight      Int?           @default(0)
+  compliance_flags Json?          @default("[]")
+  created_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  vendor_intakes   vendor_intakes @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([vendor_id, section, question_id])
+  @@index([section], map: "idx_vendor_assessments_section")
+  @@index([vendor_id], map: "idx_vendor_assessments_vendor_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_audit_logs {
+  id                String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  vendor_id         String         @db.Uuid
+  event_type        String         @db.VarChar(50)
+  event_description String
+  user_id           String         @db.VarChar(255)
+  user_email        String?        @db.VarChar(255)
+  ip_address        String?        @db.Inet
+  user_agent        String?
+  session_id        String?        @db.VarChar(255)
+  before_state      Json?
+  after_state       Json?
+  metadata          Json?          @default("{}")
+  created_at        DateTime?      @default(now()) @db.Timestamptz(6)
+  vendor_intakes    vendor_intakes @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at], map: "idx_vendor_audit_logs_created_at")
+  @@index([event_type], map: "idx_vendor_audit_logs_event_type")
+  @@index([user_id], map: "idx_vendor_audit_logs_user_id")
+  @@index([vendor_id], map: "idx_vendor_audit_logs_vendor_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_control_dependencies {
+  id                 String              @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  control_id         String?             @db.Uuid
+  vendor_name        String              @db.VarChar(255)
+  dependency_type    String              @db.VarChar(50)
+  risk_impact        String?             @default("medium") @db.VarChar(20)
+  notes              String?
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  framework_controls framework_controls? @relation(fields: [control_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([control_id], map: "idx_vendor_dependencies_control")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_data_flows {
+  id                 String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  vendor_id          String         @db.Uuid
+  flow_type          String         @db.VarChar(20)
+  data_types         Json?          @default("[]")
+  frequency          String?        @db.VarChar(20)
+  volume             String?        @db.VarChar(20)
+  encryption_enabled Boolean?       @default(false)
+  retention_period   String?        @db.VarChar(100)
+  created_at         DateTime?      @default(now()) @db.Timestamptz(6)
+  vendor_intakes     vendor_intakes @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([flow_type], map: "idx_vendor_data_flows_flow_type")
+  @@index([vendor_id], map: "idx_vendor_data_flows_vendor_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_decision_briefs {
+  id                    String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  vendor_id             String         @db.Uuid
+  brief_data            Json
+  pdf_url               String?
+  generated_by          String         @db.VarChar(255)
+  generated_at          DateTime?      @default(now()) @db.Timestamptz(6)
+  recommendation        String         @db.VarChar(20)
+  risk_summary          Json?          @default("{}")
+  mitigation_summary    Json?          @default("[]")
+  approval_requirements Json?          @default("[]")
+  vendor_intakes        vendor_intakes @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([generated_at], map: "idx_vendor_decision_briefs_generated_at")
+  @@index([vendor_id], map: "idx_vendor_decision_briefs_vendor_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_intake_forms {
+  id                        String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assessment_id             String?            @db.Uuid
+  institution_id            String?            @db.Uuid
+  submitted_by              String
+  submitter_email           String?
+  submitter_role            String?
+  requesting_department     String?
+  submission_date           DateTime?          @default(now()) @db.Timestamptz(6)
+  priority_level            String?            @default("normal")
+  tool_name                 String
+  vendor_name               String
+  tool_description          String?
+  tool_url                  String?
+  requested_use_case        String?
+  educational_objectives    String[]
+  target_users              String[]           @default([])
+  estimated_user_count      Int?
+  min_age                   Int?               @default(13)
+  max_age                   Int?               @default(18)
+  grade_levels              String[]           @default([])
+  subject_areas             String[]           @default([])
+  usage_frequency           String?
+  concurrent_users_expected Int?
+  hosting_location          String?            @default("United States")
+  data_center_location      String?
+  cloud_provider            String?
+  model_provider            String?
+  api_integrations          String[]           @default([])
+  authentication_method     String?
+  single_sign_on_support    Boolean?           @default(false)
+  data_collected            String[]           @default([])
+  pii_collected             Boolean?           @default(false)
+  data_sharing              Boolean?           @default(false)
+  data_sharing_partners     String[]           @default([])
+  data_retention_period     String?            @default("1 year")
+  data_deletion_policy      String?
+  training_on_user_data     Boolean?           @default(false)
+  opt_out_available         Boolean?           @default(false)
+  data_portability          Boolean?           @default(false)
+  age_gate_implemented      Boolean?           @default(false)
+  parental_consent_required Boolean?           @default(false)
+  coppa_compliant           Boolean?           @default(false)
+  ferpa_compliant           Boolean?           @default(false)
+  ppra_compliant            Boolean?           @default(false)
+  gdpr_compliant            Boolean?           @default(false)
+  accessibility_compliant   Boolean?           @default(false)
+  content_filtering         Boolean?           @default(false)
+  moderation_features       String[]           @default([])
+  pricing_model             String?
+  estimated_annual_cost     Decimal?           @default(0) @db.Decimal(12, 2)
+  contract_length           String?            @default("1 year")
+  trial_available           Boolean?           @default(false)
+  trial_duration_days       Int?               @default(0)
+  pilot_program_requested   Boolean?           @default(false)
+  assigned_reviewer         String?
+  review_status             String?            @default("submitted")
+  review_priority           String?            @default("normal")
+  expected_completion_date  DateTime?          @db.Timestamptz(6)
+  business_justification    String?
+  alternatives_considered   String[]
+  stakeholder_input         String?
+  special_requirements      String?
+  attachments               Json?              @default("[]")
+  notes                     String?
+  created_at                DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime?          @default(now()) @db.Timestamptz(6)
+  decision_briefs           decision_briefs[]
+  risk_assessments          risk_assessments[]
+
+  @@index([assessment_id], map: "idx_intake_forms_assessment_id")
+  @@index([assigned_reviewer], map: "idx_intake_forms_assigned_reviewer")
+  @@index([review_status], map: "idx_intake_forms_status")
+  @@index([submission_date], map: "idx_intake_forms_submission_date")
+  @@index([submitted_by], map: "idx_intake_forms_submitted_by")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_intakes {
+  id                     String                   @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  status                 String                   @default("pending") @db.VarChar(20)
+  vendor_name            String                   @db.VarChar(255)
+  vendor_url             String?
+  vendor_description     String?
+  vendor_category        String?                  @db.VarChar(100)
+  contact_email          String?                  @db.VarChar(255)
+  contact_name           String?                  @db.VarChar(255)
+  business_justification String?
+  assessment_data        Json                     @default("{}")
+  risk_score             Int?                     @default(0)
+  risk_level             String?                  @default("low") @db.VarChar(20)
+  risk_flags             Json?                    @default("[]")
+  decision_outcome       String?                  @db.VarChar(20)
+  decision_reason        String?
+  decision_conditions    Json?                    @default("[]")
+  decision_approver      String?                  @db.VarChar(255)
+  decision_approved_at   DateTime?                @db.Timestamptz(6)
+  decision_valid_until   DateTime?                @db.Timestamptz(6)
+  created_by             String                   @db.VarChar(255)
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  reviewed_by            String?                  @db.VarChar(255)
+  reviewed_at            DateTime?                @db.Timestamptz(6)
+  requested_urgency      String?                  @default("medium") @db.VarChar(20)
+  expected_launch_date   DateTime?                @db.Timestamptz(6)
+  request_notes          String?
+  approved_tool_catalog  approved_tool_catalog?
+  vendor_assessments     vendor_assessments[]
+  vendor_audit_logs      vendor_audit_logs[]
+  vendor_data_flows      vendor_data_flows[]
+  vendor_decision_briefs vendor_decision_briefs[]
+  vendor_mitigations     vendor_mitigations[]
+
+  @@index([created_at], map: "idx_vendor_intakes_created_at")
+  @@index([created_by], map: "idx_vendor_intakes_created_by")
+  @@index([risk_level], map: "idx_vendor_intakes_risk_level")
+  @@index([status], map: "idx_vendor_intakes_status")
+  @@index([vendor_name], map: "idx_vendor_intakes_vendor_name")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_mitigations {
+  id              String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  vendor_id       String         @db.Uuid
+  risk_flag       String         @db.VarChar(20)
+  title           String         @db.VarChar(255)
+  description     String
+  mitigation_type String         @db.VarChar(20)
+  status          String?        @default("pending") @db.VarChar(20)
+  assignee        String?        @db.VarChar(255)
+  due_date        DateTime?      @db.Timestamptz(6)
+  evidence        String?
+  notes           String?
+  created_at      DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?      @default(now()) @db.Timestamptz(6)
+  vendor_intakes  vendor_intakes @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([risk_flag], map: "idx_vendor_mitigations_risk_flag")
+  @@index([status], map: "idx_vendor_mitigations_status")
+  @@index([vendor_id], map: "idx_vendor_mitigations_vendor_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_profiles {
+  id                         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  vendor_name                String         @unique
+  website_url                String?
+  headquarters_location      String?
+  business_model             String?
+  size_category              String?
+  industry_focus             String[]
+  established_year           Int?
+  privacy_contact_email      String?
+  security_contact_email     String?
+  support_email              String?
+  data_protection_officer    String?
+  privacy_policy_url         String?
+  terms_of_service_url       String?
+  security_documentation_url String?
+  certification_status       Json?          @default("{}")
+  compliance_frameworks      String[]       @default([])
+  audit_history              Json?          @default("[]")
+  created_at                 DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime?      @default(now()) @db.Timestamptz(6)
+  created_by                 String?        @db.Uuid
+  last_reviewed_at           DateTime?      @db.Timestamptz(6)
+  review_status              String?        @default("pending")
+  risk_score                 Int?           @default(50)
+  trust_level                String?        @default("unverified")
+  users                      users?         @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  vendor_tools               vendor_tools[]
+
+  @@index([created_at], map: "idx_vendor_profiles_created_at")
+  @@index([vendor_name], map: "idx_vendor_profiles_name")
+  @@index([risk_score], map: "idx_vendor_profiles_risk_score")
+  @@index([review_status], map: "idx_vendor_profiles_status")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_tools {
+  id                       String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  vendor_id                String?                  @db.Uuid
+  tool_name                String
+  tool_description         String?
+  tool_category            String?
+  tool_url                 String?
+  primary_function         String?
+  target_audience          String[]
+  age_range_min            Int?                     @default(13)
+  age_range_max            Int?                     @default(18)
+  grade_levels             String[]                 @default([])
+  subject_areas            String[]                 @default([])
+  technical_requirements   Json?                    @default("{}")
+  integration_capabilities String[]                 @default([])
+  api_availability         Boolean?                 @default(false)
+  offline_capability       Boolean?                 @default(false)
+  mobile_support           Boolean?                 @default(true)
+  browser_requirements     String[]                 @default([])
+  accessibility_features   String[]                 @default([])
+  languages_supported      String[]                 @default(["English"])
+  pricing_model            String?
+  cost_structure           Json?                    @default("{}")
+  free_tier_available      Boolean?                 @default(false)
+  trial_period_days        Int?                     @default(0)
+  contract_requirements    String?
+  minimum_contract_length  String?
+  cancellation_policy      String?
+  data_residency           String?                  @default("United States")
+  hosting_provider         String?
+  encryption_standards     String[]                 @default([])
+  backup_procedures        String?
+  disaster_recovery_plan   String?
+  uptime_guarantee         Decimal?                 @db.Decimal(5, 2)
+  support_channels         String[]                 @default([])
+  training_provided        Boolean?                 @default(false)
+  documentation_quality    String?                  @default("basic")
+  onboarding_support       Boolean?                 @default(false)
+  created_at               DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime?                @default(now()) @db.Timestamptz(6)
+  status                   String?                  @default("pending")
+  risk_assessment_id       String?                  @db.Uuid
+  approval_date            DateTime?                @db.Timestamptz(6)
+  last_compliance_review   DateTime?                @db.Timestamptz(6)
+  next_review_due          DateTime?                @db.Timestamptz(6)
+  active_users_count       Int?                     @default(0)
+  usage_statistics         Json?                    @default("{}")
+  incident_history         Json?                    @default("[]")
+  approved_tools_catalog   approved_tools_catalog[]
+  risk_assessments         risk_assessments[]
+  vendor_profiles          vendor_profiles?         @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([vendor_id, tool_name])
+  @@index([tool_category], map: "idx_vendor_tools_category")
+  @@index([grade_levels], map: "idx_vendor_tools_grade_levels", type: Gin)
+  @@index([tool_name], map: "idx_vendor_tools_name")
+  @@index([status], map: "idx_vendor_tools_status")
+  @@index([subject_areas], map: "idx_vendor_tools_subject_areas", type: Gin)
+  @@index([vendor_id], map: "idx_vendor_tools_vendor_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model vendor_vetting_audit {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entity_type        String
+  entity_id          String    @db.Uuid
+  action_type        String
+  action_description String?
+  user_id            String?   @db.Uuid
+  user_name          String?
+  user_role          String?
+  action_timestamp   DateTime? @default(now()) @db.Timestamptz(6)
+  field_changed      String?
+  old_value          Json?
+  new_value          Json?
+  change_reason      String?
+  session_id         String?
+  ip_address         String?   @db.Inet
+  user_agent         String?
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  users              users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([action_type], map: "idx_vendor_vetting_audit_action_type")
+  @@index([entity_type, entity_id], map: "idx_vendor_vetting_audit_entity")
+  @@index([action_timestamp], map: "idx_vendor_vetting_audit_timestamp")
+  @@index([user_id], map: "idx_vendor_vetting_audit_user")
+  @@schema("public")
+}

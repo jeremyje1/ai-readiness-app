@@ -16,14 +16,25 @@ node_modules/
 *.env
 *.sh
 
-# Sensitive files
+# Sensitive files and API keys
 *.key
 *.pem
 *.p12
-.temp-*
-temp-*
-secrets.json
+*.p8
+*-key.json
+service-account.json
 credentials.json
+secrets.json
+.secrets
+.vault
+secrets/
+
+# Scripts that may contain secrets
+*-env.sh
+*-secrets.sh
+add-*-env.sh
+setup-*-env.sh
+deploy-with-secrets.sh
 
 # Build files
 dist/

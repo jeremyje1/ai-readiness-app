@@ -130,8 +130,12 @@ export default function LoginPage() {
           console.log('🔐 Using Chrome workaround with direct API call...');
           try {
             // Use hardcoded URL as fallback since env vars might not be available in browser
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://jocigzsthcpspxfdfxae.supabase.co';
-            const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvY2lnenN0aGNwc3B4ZmRmeGFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMzExNzYsImV4cCI6MjA2ODgwNzE3Nn0.krJk0mzZQ3wmo_isokiYkm5eCTfMpIZcGP6qfSKYrHA';
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+            
+            if (!supabaseUrl || !supabaseKey) {
+              throw new Error('Missing Supabase environment variables');
+            }
 
             console.log('🔐 Using Supabase URL:', supabaseUrl);
 

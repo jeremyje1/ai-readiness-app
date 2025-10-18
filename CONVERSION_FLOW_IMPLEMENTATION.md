@@ -9,7 +9,7 @@ This document outlines the implementation of a conversion flow that guides users
 ### 1. Stripe Configuration
 
 - **Price ID**: `price_1SDnhlRMpSG47vNmDQr1WeJ3` ($199/month platform access)
-- **Publishable Key**: `pk_live_51Rxag5RMpSG47vNmE0GkLZ6xVBlXC2D8TS5FUSDI4VoKc5mJOzZu8JOKzmMMYMLtAONF7wJUfz6Wi4jKpbS2rBEi00tkzmeJgx`
+- **Publishable Key**: `pk_live_XXXXXXXXXXXXXXXXXXXX` (configured in Vercel environment variables)
 - **Webhook Endpoint**: `https://aiblueprint.k12aiblueprint.com/api/stripe/webhook`
 - **Secret Key**: Set in Vercel environment as `STRIPE_SECRET_KEY`
 
