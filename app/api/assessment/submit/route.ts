@@ -2,6 +2,9 @@ import { buildNistAlignment, buildRiskHotspots } from '@/lib/analysis/gap-insigh
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { calculateEnterpriseMetrics, persistEnterpriseMetrics } from '@/lib/algorithms';
+import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
+import type { OrganizationOperationalMetrics, AlgorithmInputResponse } from '@/types/algorithm';
 
 // Initialize OpenAI client only if API key is available
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
@@ -56,6 +59,78 @@ function getReadinessLevel(percentage: number): string {
     if (percentage >= 60) return 'Developing';
     if (percentage >= 40) return 'Emerging';
     return 'Beginning';
+}
+
+// Helper: Build algorithm responses from NIST 20-question assessment
+function buildNISTAlgorithmResponses(
+    answers: Record<number, number>,
+    scores: Record<string, { score: number; maxScore: number; percentage: number }>
+): AlgorithmInputResponse[] {
+    const algorithmResponses: AlgorithmInputResponse[] = [];
+    
+    // NIST categories mapping
+    const categories = {
+        GOVERN: { range: [0, 4], tags: ['governance', 'policy', 'leadership', 'strategy'] },
+        MAP: { range: [5, 9], tags: ['mapping', 'inventory', 'technology', 'systems'] },
+        MEASURE: { range: [10, 14], tags: ['measurement', 'metrics', 'monitoring', 'analytics'] },
+        MANAGE: { range: [15, 19], tags: ['management', 'risk', 'security', 'compliance'] }
+    };
+
+    Object.entries(categories).forEach(([category, config]) => {
+        for (let i = config.range[0]; i <= config.range[1]; i++) {
+            if (answers[i] !== undefined) {
+                algorithmResponses.push({
+                    prompt: `NIST ${category} Question ${i + 1}`,
+                    section: category,
+                    value: answers[i] + 1, // Convert 0-3 scale to 1-4 Likert equivalent
+                    tags: config.tags
+                });
+            }
+        }
+    });
+
+    return algorithmResponses;
+}
+
+// Helper: Derive organizational metrics from NIST scores
+function deriveNISTOrgMetrics(
+    scores: Record<string, { score: number; maxScore: number; percentage: number }>
+): OrganizationOperationalMetrics {
+    // Normalize NIST scores to 0-1 scale
+    const normalize = (category: string) => scores[category].percentage / 100;
+
+    const govern = normalize('GOVERN');
+    const map = normalize('MAP');
+    const measure = normalize('MEASURE');
+    const manage = normalize('MANAGE');
+    const overall = normalize('OVERALL');
+
+    return {
+        // Strategic & Leadership (GOVERN focus)
+        digitalMaturity: (map + measure) / 2,
+        systemIntegration: map,
+        collaborationIndex: (govern + map) / 2,
+        innovationCapacity: govern * 0.9,
+        strategicAgility: govern,
+        leadershipEffectiveness: govern,
+        decisionLatency: 1 - govern, // Inverse
+        communicationEfficiency: (govern + manage) / 2,
+        
+        // Operational & Culture (MEASURE focus)
+        employeeEngagement: (govern + measure) / 2,
+        changeReadiness: (govern + map) / 2,
+        futureReadiness: (govern + measure) / 2,
+        
+        // Process & Technology (MAP + MANAGE focus)
+        processComplexity: 1 - (map + manage) / 2, // Inverse
+        operationalRisk: 1 - manage, // Inverse
+        technologicalRisk: 1 - map, // Inverse
+        cybersecurityLevel: manage,
+        
+        // Execution (MEASURE + MANAGE focus)
+        resourceUtilization: (measure + map) / 2,
+        taskAutomationLevel: measure
+    };
 }
 
 async function generateAIRoadmap(scores: any, answers: Record<number, number>) {
@@ -176,7 +251,48 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Failed to save assessment' }, { status: 500 });
         }
 
-        console.log('✅ Assessment saved, creating gap analysis...');
+        console.log('✅ Assessment saved');
+        
+        console.log('🧮 Calculating patent-pending enterprise algorithms (DSCH, CRF, LEI, OCI, HOCI)...');
+        
+        // Build assessment data for enterprise algorithms
+        const assessmentData = {
+            id: assessment.id,
+            responses: buildNISTAlgorithmResponses(answers, scores)
+        };
+
+        // Derive organizational metrics from NIST assessment scores
+        const orgMetrics: OrganizationOperationalMetrics = deriveNISTOrgMetrics(scores);
+
+        // Calculate enterprise algorithms
+        let enterpriseMetrics;
+        let aiReadinessMetrics;
+        try {
+            enterpriseMetrics = await calculateEnterpriseMetrics(assessmentData, orgMetrics);
+            aiReadinessMetrics = await calculateAIReadinessMetrics(assessmentData);
+            
+            console.log('✅ Enterprise algorithms calculated:', {
+                DSCH: enterpriseMetrics.dsch.overallScore,
+                CRF: enterpriseMetrics.crf.overallScore,
+                LEI: enterpriseMetrics.lei.overallScore,
+                OCI: enterpriseMetrics.oci.overallScore,
+                HOCI: enterpriseMetrics.hoci.overallScore,
+                AIRIX: aiReadinessMetrics.airix.overallScore
+            });
+
+            // Add user ID to metadata for RLS
+            (enterpriseMetrics as any).meta.userId = userId;
+
+            // Persist to database
+            await persistEnterpriseMetrics(assessment.id, enterpriseMetrics);
+            console.log('💾 Enterprise metrics persisted to database');
+        } catch (algError) {
+            console.error('⚠️ Algorithm calculation failed (continuing without):', algError);
+            enterpriseMetrics = null;
+            aiReadinessMetrics = null;
+        }
+
+        console.log('Creating gap analysis...');
 
         // Also create gap_analysis_results for dashboard
         // Extract recommendations from roadmap (database expects ARRAY[] not TEXT)

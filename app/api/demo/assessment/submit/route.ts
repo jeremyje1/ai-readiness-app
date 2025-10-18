@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { calculateEnterpriseMetrics, persistEnterpriseMetrics } from '@/lib/algorithms';
+import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
+import type { OrganizationOperationalMetrics, AlgorithmInputResponse } from '@/types/algorithm';
 
 export const dynamic = 'force-dynamic';
 
@@ -275,6 +278,138 @@ function resolveBaseUrl(request?: NextRequest) {
         : 'http://localhost:3000';
 }
 
+// Helper: Build algorithm responses from quick assessment
+function buildAlgorithmResponses(
+    quickAssessment: { governance: number; training: number; funding: number },
+    categoryScores: Record<string, number>
+): AlgorithmInputResponse[] {
+    return [
+        {
+            prompt: 'Governance and policy framework',
+            section: 'Leadership & Governance',
+            value: quickAssessment.governance,
+            tags: ['governance', 'policy', 'leadership', 'strategy']
+        },
+        {
+            prompt: 'Staff training and readiness',
+            section: 'Faculty & Staff Readiness',
+            value: quickAssessment.training,
+            tags: ['training', 'staff', 'capability', 'change']
+        },
+        {
+            prompt: 'Funding and measurement capacity',
+            section: 'Analytics & Outcomes',
+            value: quickAssessment.funding,
+            tags: ['funding', 'measurement', 'analytics', 'outcomes']
+        }
+    ];
+}
+
+// Helper: Build algorithm responses from full 12-question assessment
+function buildAlgorithmResponsesFromFull(
+    responses: Record<number, number>,
+    categoryScores: Record<string, number>
+): AlgorithmInputResponse[] {
+    const algorithmResponses: AlgorithmInputResponse[] = [];
+    
+    // Map each question to algorithm input
+    const questionMap: Record<number, { section: string; tags: string[] }> = {
+        1: { section: 'Strategy & Vision', tags: ['strategy', 'vision', 'leadership'] },
+        2: { section: 'Strategy & Vision', tags: ['strategy', 'planning', 'alignment'] },
+        3: { section: 'Leadership & Governance', tags: ['leadership', 'governance', 'oversight'] },
+        4: { section: 'Leadership & Governance', tags: ['governance', 'policy', 'framework'] },
+        5: { section: 'Faculty & Staff Readiness', tags: ['staff', 'training', 'capability'] },
+        6: { section: 'Faculty & Staff Readiness', tags: ['readiness', 'change', 'adoption'] },
+        7: { section: 'Technology Infrastructure', tags: ['technology', 'infrastructure', 'integration'] },
+        8: { section: 'Technology Infrastructure', tags: ['systems', 'digital', 'platform'] },
+        9: { section: 'Data & Privacy', tags: ['data', 'privacy', 'security'] },
+        10: { section: 'Data & Privacy', tags: ['compliance', 'governance', 'protection'] },
+        11: { section: 'Curriculum & Pedagogy', tags: ['curriculum', 'pedagogy', 'innovation'] },
+        12: { section: 'Analytics & Outcomes', tags: ['analytics', 'outcomes', 'measurement'] }
+    };
+
+    Object.entries(responses).forEach(([qId, value]) => {
+        const questionNum = parseInt(qId);
+        const mapping = questionMap[questionNum];
+        if (mapping) {
+            algorithmResponses.push({
+                prompt: `Question ${questionNum}`,
+                section: mapping.section,
+                value: value + 1, // Convert 0-4 scale to 1-5 Likert
+                tags: mapping.tags
+            });
+        }
+    });
+
+    return algorithmResponses;
+}
+
+// Helper: Derive organizational metrics from assessment scores
+function deriveOrgMetrics(
+    overallScore: number,
+    categoryScores: Record<string, number>,
+    isDemoQuick: boolean = false
+): OrganizationOperationalMetrics {
+    // Normalize scores to 0-1 scale
+    const normalize = (score: number) => score / 100;
+
+    if (isDemoQuick) {
+        // Quick assessment - derive from 3 categories
+        const governance = normalize(categoryScores['Governance & Policy'] || 50);
+        const training = normalize(categoryScores['Staff Training & Enablement'] || 50);
+        const funding = normalize(categoryScores['Funding & Measurement'] || 50);
+
+        return {
+            digitalMaturity: (training + funding) / 2,
+            systemIntegration: funding * 0.8,
+            collaborationIndex: training * 0.7,
+            innovationCapacity: (governance + training) / 2,
+            strategicAgility: governance * 0.8,
+            leadershipEffectiveness: governance,
+            decisionLatency: 1 - governance, // Inverse
+            communicationEfficiency: (governance + training) / 2,
+            employeeEngagement: training,
+            changeReadiness: training * 0.9,
+            futureReadiness: (governance + funding) / 2,
+            processComplexity: 1 - governance * 0.6, // Inverse
+            operationalRisk: 1 - normalize(overallScore), // Inverse
+            technologicalRisk: 1 - funding * 0.7, // Inverse
+            cybersecurityLevel: governance * 0.6,
+            resourceUtilization: funding,
+            taskAutomationLevel: funding * 0.5
+        };
+    }
+
+    // Full assessment - derive from 7 categories
+    const strategy = normalize(categoryScores['Strategy & Vision'] || 50);
+    const leadership = normalize(categoryScores['Leadership & Governance'] || 50);
+    const staff = normalize(categoryScores['Faculty & Staff Readiness'] || 50);
+    const tech = normalize(categoryScores['Technology Infrastructure'] || 50);
+    const data = normalize(categoryScores['Data & Privacy'] || 50);
+    const curriculum = normalize(categoryScores['Curriculum & Pedagogy'] || 50);
+    const analytics = normalize(categoryScores['Analytics & Outcomes'] || 50);
+
+    return {
+        digitalMaturity: (tech + data) / 2,
+        systemIntegration: tech,
+        collaborationIndex: (staff + curriculum) / 2,
+        innovationCapacity: (strategy + curriculum) / 2,
+        strategicAgility: strategy,
+        leadershipEffectiveness: leadership,
+        decisionLatency: 1 - leadership, // Inverse
+        communicationEfficiency: (leadership + staff) / 2,
+        employeeEngagement: staff,
+        changeReadiness: staff,
+        futureReadiness: (strategy + analytics) / 2,
+        processComplexity: 1 - (tech + data) / 2, // Inverse
+        operationalRisk: 1 - normalize(overallScore), // Inverse
+        technologicalRisk: 1 - tech, // Inverse
+        cybersecurityLevel: data,
+        resourceUtilization: (tech + staff) / 2,
+        taskAutomationLevel: analytics
+    };
+}
+
 async function sendResultsEmail(
     request: NextRequest,
     leadData: any,
@@ -349,7 +484,7 @@ export async function POST(request: NextRequest) {
         // For demo quick assessments, use simpler scoring
         let categoryScores: Record<string, number>;
         let overallScore: number;
-        
+
         if (body.isDemoQuickAssessment && body.quickAssessment) {
             // Simple 3-category scoring for demo form
             categoryScores = {
@@ -386,7 +521,7 @@ export async function POST(request: NextRequest) {
         }
 
         const readinessLevel = getReadinessLevel(overallScore);
-        const categoryScoresData = body.isDemoQuickAssessment ? 
+        const categoryScoresData = body.isDemoQuickAssessment ?
             Object.entries(categoryScores).map(([name, score]) => ({ name, score, questionCount: 1 })) :
             Object.entries(calculateCategoryScores(body.responses)).map(([name, data]) => data);
         const quickWins = generateQuickWins(
@@ -403,6 +538,48 @@ export async function POST(request: NextRequest) {
             estimatedImpact,
             percentile
         };
+
+        console.log('🧮 Calculating patent-pending enterprise algorithms (DSCH, CRF, LEI, OCI, HOCI)...');
+        
+        // Build assessment data for enterprise algorithms
+        const assessmentData = {
+            id: `demo-${body.leadId}`,
+            responses: body.isDemoQuickAssessment && body.quickAssessment ? 
+                buildAlgorithmResponses(body.quickAssessment, categoryScores) :
+                buildAlgorithmResponsesFromFull(body.responses, categoryScores)
+        };
+
+        // Derive organizational metrics from category scores
+        const orgMetrics: OrganizationOperationalMetrics = deriveOrgMetrics(
+            overallScore, 
+            categoryScores,
+            body.isDemoQuickAssessment
+        );
+
+        // Calculate enterprise algorithms
+        let enterpriseMetrics;
+        let aiReadinessMetrics;
+        try {
+            enterpriseMetrics = await calculateEnterpriseMetrics(assessmentData, orgMetrics);
+            aiReadinessMetrics = await calculateAIReadinessMetrics(assessmentData);
+            
+            console.log('✅ Enterprise algorithms calculated:', {
+                DSCH: enterpriseMetrics.dsch.overallScore,
+                CRF: enterpriseMetrics.crf.overallScore,
+                LEI: enterpriseMetrics.lei.overallScore,
+                OCI: enterpriseMetrics.oci.overallScore,
+                HOCI: enterpriseMetrics.hoci.overallScore,
+                AIRIX: aiReadinessMetrics.airix.overallScore
+            });
+
+            // Persist to database
+            await persistEnterpriseMetrics(assessmentData.id, enterpriseMetrics);
+            console.log('💾 Enterprise metrics persisted to database');
+        } catch (algError) {
+            console.error('⚠️ Algorithm calculation failed (continuing without):', algError);
+            enterpriseMetrics = null;
+            aiReadinessMetrics = null;
+        }
 
         // Initialize Supabase admin client with service role key to bypass RLS
         const supabase = createClient(
