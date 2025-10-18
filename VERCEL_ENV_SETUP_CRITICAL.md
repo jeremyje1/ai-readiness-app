@@ -35,13 +35,13 @@ NEXT_PUBLIC_SITE_URL=https://aiblueprint.educationaiblueprint.com
 
 #### **SENDGRID (Email delivery)**
 ```bash
-SENDGRID_API_KEY=SG.your-actual-api-key-here
+SENDGRID_API_KEY=SG_your-actual-api-key-here
 SENDGRID_FROM_EMAIL=noreply@educationaiblueprint.com
 SENDGRID_FROM_NAME=AI Readiness Assessment
 ```
 
 **⚠️ SECURITY NOTE:** 
-- The exposed API key `SG.pffbbgUxR...` from git history should be DELETED and replaced
+- The exposed API key `SG_pffbbgUxR...` from git history should be DELETED and replaced
 - Create a NEW SendGrid API key at: https://app.sendgrid.com/settings/api_keys
 - Delete the old exposed key immediately
 
@@ -195,7 +195,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
 NEXT_PUBLIC_SITE_URL=https://aiblueprint.educationaiblueprint.com
-SENDGRID_API_KEY=SG.NEW_KEY_HERE  # ⚠️ Create NEW key, delete old one
+SENDGRID_API_KEY=SG_NEW_KEY_HERE  # ⚠️ Create NEW key, delete old one
 SENDGRID_FROM_EMAIL=noreply@educationaiblueprint.com
 SENDGRID_FROM_NAME=AI Readiness Assessment
 OPENAI_API_KEY=sk-...

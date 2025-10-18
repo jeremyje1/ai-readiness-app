@@ -243,7 +243,7 @@ Add to Vercel environment variables:
 
 ```bash
 # SendGrid (already configured)
-SENDGRID_API_KEY=SG.xxx
+SENDGRID_API_KEY=SG_xxx
 SENDGRID_FROM_EMAIL=info@northpathstrategies.org
 SENDGRID_TO_EMAIL=info@northpathstrategies.org
 

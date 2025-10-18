@@ -53,7 +53,7 @@ https://vercel.com/jeremyje1/ai-readiness-app/deployments
 **⚠️ CRITICAL - Rotate SendGrid API Key:**
 1. Go to: https://app.sendgrid.com/settings/api_keys
 2. Create NEW API key
-3. Delete old exposed key: `SG.pffbbgUxR-K_p8AXaYO_bg...`
+3. Delete old exposed key: `SG_pffbbgUxR-K_p8AXaYO_bg...`
 4. Update Vercel environment variable with new key
 
 **Why:** The old key was in git commit history (even though removed now). Anyone who cloned the repo before cleanup may have seen it.

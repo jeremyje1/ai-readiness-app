@@ -18,7 +18,8 @@ export default function DemoPage() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
 
                 const data = await response.json();

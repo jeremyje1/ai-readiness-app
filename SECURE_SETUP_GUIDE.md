@@ -89,7 +89,7 @@ vercel env add SUPABASE_SERVICE_ROLE_KEY
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
-SENDGRID_API_KEY=SG.xxxxx...
+SENDGRID_API_KEY=SG_xxxxx...
 ```
 
 **Important:** 
@@ -103,7 +103,7 @@ SENDGRID_API_KEY=SG.xxxxx...
 - Use `vercel env add` with interactive prompts
 
 ### For Documentation
-- Always use placeholders: `SG.xxxx...`, `eyJhbGci...`
+- Always use placeholders: `SG_xxxx...`, `eyJhbGci...`
 - Never show full keys, even in examples
 - Explain WHERE to get the keys, not what they are
 

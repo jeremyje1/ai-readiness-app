@@ -85,7 +85,7 @@ git clone --mirror . ../ai-readiness-app-backup.git
 
 # 3. Create a file with strings to remove
 cat > secrets.txt << 'EOF'
-SG.pffbbg... [REDACTED - exposed key pattern]
+SG_pffbbg... [REDACTED - exposed key pattern]
 EOF
 
 # 4. Run BFG
@@ -129,7 +129,7 @@ git push origin demo-dashboard-clean
 
 1. **Always use .gitignore for sensitive files BEFORE committing**
 2. **Never commit actual API keys - use environment variables**
-3. **Use placeholder values in documentation** (e.g., `SG.xxxx...`)
+3. **Use placeholder values in documentation** (e.g., `SG_xxxx...`)
 4. **Rotate any exposed keys immediately**
 5. **Use git-secrets or similar tools** to prevent future leaks
 

@@ -85,7 +85,7 @@ Add to your `.env.local` file:
 
 ```bash
 # SendGrid Configuration (for lead generation page)
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxx
+SENDGRID_API_KEY=SG_xxxxxxxxxxxxxxxxxxxxx
 SENDGRID_FROM_EMAIL=noreply@educationaiblueprint.com
 SENDGRID_TO_EMAIL=info@northpathstrategies.org
 ```

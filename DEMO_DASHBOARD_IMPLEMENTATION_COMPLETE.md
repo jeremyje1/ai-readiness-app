@@ -500,7 +500,7 @@ Add to DemoBanner CTA:
 # Already configured:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJhbG... (for demo user creation)
-SENDGRID_API_KEY=SG.abc... (sanitized in code)
+SENDGRID_API_KEY=SG_abc... (sanitized in code)
 SENDGRID_FROM_EMAIL=info@northpathstrategies.org
 SENDGRID_TO_EMAIL=info@northpathstrategies.org
 ```

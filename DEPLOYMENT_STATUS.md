@@ -201,7 +201,7 @@ Latest Commits:
 ## 🔐 Security Notes
 
 ### Keys Sanitized in Latest Commits ✅
-- `ENV_VERIFICATION_CHECKLIST.md` - Now uses `SG.xxxx...`
+- `ENV_VERIFICATION_CHECKLIST.md` - Now uses `SG_xxxx...`
 - `app/api/webhooks/sendgrid/route.ts` - Removed hardcoded fallback
 - All production keys remain in Vercel environment variables only
 

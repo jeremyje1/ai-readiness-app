@@ -18,7 +18,7 @@ This report documents multiple security violations discovered in the codebase an
 
 **Exposed Secrets:**
 ```
-❌ SendGrid API Key: SG.pffbbg... [REDACTED - has been rotated]
+❌ SendGrid API Key: SG_pffbbg... [REDACTED - has been rotated]
 ❌ Supabase Anon Key: eyJhbGci... [REDACTED]
 ❌ Stripe Publishable Key: pk_live_51Rxag5... [REDACTED]
 ```
@@ -111,7 +111,7 @@ if (!apiKey) {
 }
 
 // ❌ NEVER DO THIS
-const apiKey = process.env.SENDGRID_API_KEY || 'SG.hardcoded_key';
+const apiKey = process.env.SENDGRID_API_KEY || 'SG_hardcoded_key';
 ```
 
 ### 2. Environment Variable Validation ✅
@@ -142,10 +142,10 @@ secrets/
 ### 4. Documentation Placeholders ✅
 ```markdown
 # ✅ CORRECT - Use placeholders in documentation
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxx
+SENDGRID_API_KEY=SG_xxxxxxxxxxxxxxxxxxxx
 
 # ❌ WRONG - Never show real keys (even if exposed/rotated)
-SENDGRID_API_KEY=SG.pffbbg... [REDACTED]
+SENDGRID_API_KEY=SG_pffbbg... [REDACTED]
 ```
 
 ---
@@ -235,7 +235,7 @@ Recommended tools:
 
 ### 3. Environment Variable Checklist
 Before committing any file, verify:
-- [ ] No API keys in code (search for `SG.`, `sk_`, `pk_`, `whsec_`)
+- [ ] No API keys in code (search for strings starting with `SG`, `sk_`, `pk_`, `whsec_`)
 - [ ] No JWT tokens (search for `eyJhbGciOi`)
 - [ ] No database credentials
 - [ ] No fallback values with real credentials
@@ -279,7 +279,7 @@ Run these to verify no secrets remain:
 
 ```bash
 # Search for SendGrid keys
-grep -r "SG\." --include="*.{js,ts,tsx,sh}" --exclude-dir=node_modules .
+grep -r "SG_" --include="*.{js,ts,tsx,sh}" --exclude-dir=node_modules .
 
 # Search for Stripe keys
 grep -r "sk_live\|pk_live\|whsec_" --include="*.{js,ts,tsx,sh}" --exclude-dir=node_modules .

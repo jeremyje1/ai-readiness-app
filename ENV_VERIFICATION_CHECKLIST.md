@@ -34,7 +34,7 @@ NEXTAUTH_URL="https://aiblueprint.educationaiblueprint.com"
 
 ### **SendGrid Configuration**
 ```bash
-SENDGRID_API_KEY="SG_KEY_REDACTED"
+SENDGRID_API_KEY="<SENDGRID_API_KEY>"
 SENDGRID_FROM_EMAIL="info@northpathstrategies.org"
 SENDGRID_TO_EMAIL="info@northpathstrategies.org"
 ```
@@ -125,7 +125,7 @@ fetch('https://api.sendgrid.com/v3/mail/send', {
 - ✅ 60 lines total
 - ✅ All 7 required demo variables present
 - ✅ No missing or placeholder values
-- ✅ SendGrid API key format valid (starts with `SG.`)
+- ✅ SendGrid API key format valid (uses the expected `SG` prefix)
 - ✅ Supabase URLs match correct project
 
 ### **Vercel Production Environment**

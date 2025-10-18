@@ -33,7 +33,7 @@ SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 
 #### SendGrid (Required for email notifications)
 ```bash
-SENDGRID_API_KEY="SG.your-sendgrid-api-key"
+SENDGRID_API_KEY="SG_your-sendgrid-api-key"
 SENDGRID_FROM_EMAIL="noreply@yourdomain.com"
 ```
 

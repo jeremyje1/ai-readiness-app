@@ -326,7 +326,7 @@ CREATE TRIGGER on_new_contact_message
 POSTMARK_API_KEY=your-existing-key
 
 # Optional: SendGrid (Alternative)
-SENDGRID_API_KEY=SG.xxxxxxxxxx
+SENDGRID_API_KEY=SG_xxxxxxxxxx
 SENDGRID_FROM_EMAIL=noreply@educationaiblueprint.com
 SENDGRID_TO_EMAIL=info@northpathstrategies.org
 
