@@ -93,6 +93,67 @@ function deriveLeadQualification(averageScore: number | null, interestAreas: str
     return "COLD"
 }
 
+function buildAssessmentResponses(quickAssessment?: QuickAssessment | null) {
+    if (!quickAssessment) return null
+
+    const normalize = (value: number | undefined) => {
+        if (typeof value !== "number" || Number.isNaN(value)) return 2
+        const clamped = Math.max(1, Math.min(5, Math.round(value)))
+        return clamped - 1
+    }
+
+    const governance = normalize(quickAssessment.governance)
+    const training = normalize(quickAssessment.training)
+    const funding = normalize(quickAssessment.funding)
+
+    return {
+        1: governance,
+        2: governance,
+        3: governance,
+        4: governance,
+        5: training,
+        6: training,
+        7: funding,
+        8: funding,
+        9: governance,
+        10: governance,
+        11: training,
+        12: funding
+    }
+}
+
+async function triggerAssessmentSubmit(
+    request: Request,
+    leadId: string,
+    quickAssessment?: QuickAssessment | null
+) {
+    const responses = buildAssessmentResponses(quickAssessment)
+    if (!responses) return
+
+    try {
+        const submitUrl = new URL("/api/demo/assessment/submit", request.url)
+        const response = await fetch(submitUrl.toString(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                leadId,
+                responses
+            })
+        })
+
+        if (!response.ok) {
+            const errorBody = await response.text().catch(() => "")
+            console.error("Failed to trigger assessment submit", {
+                status: response.status,
+                statusText: response.statusText,
+                errorBody
+            })
+        }
+    } catch (error) {
+        console.error("Error triggering assessment submit", error)
+    }
+}
+
 export async function POST(request: Request) {
     try {
         const payload: RegisterLeadRequest = await request.json()
@@ -233,6 +294,8 @@ export async function POST(request: Request) {
                 { status: 500 }
             )
         }
+
+        await triggerAssessmentSubmit(request, leadId, quickAssessment)
 
         const response = NextResponse.json({
             success: true,
