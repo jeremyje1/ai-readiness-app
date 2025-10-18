@@ -246,9 +246,33 @@ async function sendResultsEmail(
     results: AssessmentResults
 ): Promise<void> {
     try {
+        // Resolve a dependable base URL so server-side fetch calls work in every environment
+        const baseUrl = (() => {
+            const sanitize = (value?: string | null) => value?.trim().replace(/\/$/, '');
+
+            const envBase = sanitize(process.env.NEXT_PUBLIC_BASE_URL);
+            if (envBase) {
+                return envBase.startsWith('http') ? envBase : `https://${envBase}`;
+            }
+
+            const vercelUrl = sanitize(process.env.VERCEL_URL);
+            if (vercelUrl) {
+                return `https://${vercelUrl}`;
+            }
+
+            const vercelBranchUrl = sanitize(process.env.VERCEL_BRANCH_URL);
+            if (vercelBranchUrl) {
+                return `https://${vercelBranchUrl}`;
+            }
+
+            return process.env.NODE_ENV === 'production'
+                ? 'https://aiblueprint.educationaiblueprint.com'
+                : 'http://localhost:3000';
+        })();
+
         // Send results to user
         const userEmailResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/demo/emails/user-results`,
+            `${baseUrl}/api/demo/emails/user-results`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -257,12 +281,17 @@ async function sendResultsEmail(
         );
 
         if (!userEmailResponse.ok) {
-            console.error('Failed to send user results email');
+            const errorBody = await userEmailResponse.text().catch(() => '');
+            console.error('Failed to send user results email', {
+                status: userEmailResponse.status,
+                statusText: userEmailResponse.statusText,
+                errorBody
+            });
         }
 
         // Send sales notification
         const salesEmailResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/demo/emails/sales-notification`,
+            `${baseUrl}/api/demo/emails/sales-notification`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -271,7 +300,12 @@ async function sendResultsEmail(
         );
 
         if (!salesEmailResponse.ok) {
-            console.error('Failed to send sales notification email');
+            const errorBody = await salesEmailResponse.text().catch(() => '');
+            console.error('Failed to send sales notification email', {
+                status: salesEmailResponse.status,
+                statusText: salesEmailResponse.statusText,
+                errorBody
+            });
         }
     } catch (error) {
         console.error('Error sending emails:', error);
