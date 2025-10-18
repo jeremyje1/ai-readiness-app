@@ -1,8 +1,8 @@
+import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
+import { calculateEnterpriseMetrics, persistEnterpriseMetrics } from '@/lib/algorithms';
+import type { AlgorithmInputResponse, OrganizationOperationalMetrics } from '@/types/algorithm';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import { calculateEnterpriseMetrics, persistEnterpriseMetrics } from '@/lib/algorithms';
-import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
-import type { OrganizationOperationalMetrics, AlgorithmInputResponse } from '@/types/algorithm';
 
 export const dynamic = 'force-dynamic';
 
@@ -311,7 +311,7 @@ function buildAlgorithmResponsesFromFull(
     categoryScores: Record<string, number>
 ): AlgorithmInputResponse[] {
     const algorithmResponses: AlgorithmInputResponse[] = [];
-    
+
     // Map each question to algorithm input
     const questionMap: Record<number, { section: string; tags: string[] }> = {
         1: { section: 'Strategy & Vision', tags: ['strategy', 'vision', 'leadership'] },
@@ -540,18 +540,18 @@ export async function POST(request: NextRequest) {
         };
 
         console.log('🧮 Calculating patent-pending enterprise algorithms (DSCH, CRF, LEI, OCI, HOCI)...');
-        
+
         // Build assessment data for enterprise algorithms
         const assessmentData = {
             id: `demo-${body.leadId}`,
-            responses: body.isDemoQuickAssessment && body.quickAssessment ? 
+            responses: body.isDemoQuickAssessment && body.quickAssessment ?
                 buildAlgorithmResponses(body.quickAssessment, categoryScores) :
                 buildAlgorithmResponsesFromFull(body.responses, categoryScores)
         };
 
         // Derive organizational metrics from category scores
         const orgMetrics: OrganizationOperationalMetrics = deriveOrgMetrics(
-            overallScore, 
+            overallScore,
             categoryScores,
             body.isDemoQuickAssessment
         );
@@ -562,7 +562,7 @@ export async function POST(request: NextRequest) {
         try {
             enterpriseMetrics = await calculateEnterpriseMetrics(assessmentData, orgMetrics);
             aiReadinessMetrics = await calculateAIReadinessMetrics(assessmentData);
-            
+
             console.log('✅ Enterprise algorithms calculated:', {
                 DSCH: enterpriseMetrics.dsch.overallScore,
                 CRF: enterpriseMetrics.crf.overallScore,

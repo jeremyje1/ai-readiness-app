@@ -67,14 +67,24 @@ function generateUserResultsHTML(leadData: LeadData, results: Results): string {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center">
-                    <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); width: 180px; height: 180px; border-radius: 50%; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                      <div style="color: #ffffff; font-size: 64px; font-weight: 800; line-height: 1;">
-                        ${results.overallScore}
-                      </div>
-                      <div style="color: #ffffff; font-size: 14px; opacity: 0.9;">
-                        Overall Score
-                      </div>
-                    </div>
+                    <table cellpadding="0" cellspacing="0" style="margin: 0 auto 20px;">
+                      <tr>
+                        <td align="center" valign="middle" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); width: 180px; height: 180px; border-radius: 90px;">
+                          <table width="100%" height="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td align="center" valign="middle">
+                                <div style="color: #ffffff; font-size: 64px; font-weight: 800; line-height: 1; margin-bottom: 5px;">
+                                  ${results.overallScore}
+                                </div>
+                                <div style="color: #ffffff; font-size: 14px; opacity: 0.9;">
+                                  Overall Score
+                                </div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
                 <tr>
@@ -112,6 +122,118 @@ function generateUserResultsHTML(leadData: LeadData, results: Results): string {
                   </div>
                 </div>
               `).join('')}
+            </td>
+          </tr>
+          
+          <!-- Patent-Pending Algorithm Scores -->
+          <tr>
+            <td style="padding: 0 40px 40px 40px;">
+              <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 12px; padding: 25px; margin-bottom: 10px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center">
+                      <div style="background: #fbbf24; color: #78350f; display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px;">
+                        ✨ Patent-Pending Technology
+                      </div>
+                      <h3 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 800;">
+                        Advanced Algorithm Analysis
+                      </h3>
+                      <p style="color: #dbeafe; margin: 0 0 20px 0; font-size: 13px; opacity: 0.9;">
+                        Your results include analysis from our proprietary Enterprise Algorithm Suite & AIRIX Framework
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                
+                <!-- Enterprise Algorithm Suite -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
+                  <tr>
+                    <td style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 15px;">
+                      <div style="color: #fbbf24; font-size: 12px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase;">
+                        🏆 Enterprise Algorithm Suite
+                      </div>
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Digital Strategy & Capability Health (DSCH)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                          <td style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Change Readiness Framework (CRF)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Leadership Effectiveness Index (LEI)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                          <td style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Organizational Culture Index (OCI)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td colspan="2" style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Hybrid Operating Capability Index (HOCI)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                
+                <!-- AIRIX Framework -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 15px;">
+                      <div style="color: #60a5fa; font-size: 12px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase;">
+                        🎯 AIRIX Framework (6 Dimensions)
+                      </div>
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Infrastructure Readiness (AIRS)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                          <td style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Capability Score (AICS)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Maturity Score (AIMS)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                          <td style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Policy & Ethics (AIPS)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td colspan="2" style="padding: 5px 0;">
+                            <span style="color: #bfdbfe; font-size: 12px;">Benefits & ROI Score (AIBS)</span>
+                            <div style="color: #ffffff; font-size: 16px; font-weight: 700;">Analyzed ✓</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 15px;">
+                  <tr>
+                    <td align="center">
+                      <p style="color: #dbeafe; margin: 0; font-size: 11px; opacity: 0.85; line-height: 1.5;">
+                        These proprietary algorithms provide deeper institutional insights than standard assessments.<br>
+                        <strong>Schedule your demo to see your complete algorithm analysis.</strong>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </td>
           </tr>
           
@@ -167,6 +289,82 @@ function generateUserResultsHTML(leadData: LeadData, results: Results): string {
                   </div>
                 </div>
               `).join('')}
+            </td>
+          </tr>
+          
+          <!-- Investor Opportunity Value -->
+          <tr>
+            <td style="padding: 0 40px 40px 40px;">
+              <div style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); border-radius: 12px; padding: 25px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center">
+                      <div style="background: #fbbf24; color: #78350f; display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px;">
+                        💎 Investment Opportunity
+                      </div>
+                      <h3 style="color: #ffffff; margin: 0 0 8px 0; font-size: 20px; font-weight: 800;">
+                        Strategic Value Proposition
+                      </h3>
+                      <p style="color: #ede9fe; margin: 0 0 20px 0; font-size: 13px; opacity: 0.95;">
+                        Education AI Blueprint combines cutting-edge technology with proven market demand
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding: 0 0 15px 0;">
+                      <div style="background: rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 15px;">
+                        <div style="color: #fbbf24; font-size: 14px; font-weight: 700; margin-bottom: 8px;">
+                          🛡️ IP Protection
+                        </div>
+                        <p style="color: #ede9fe; margin: 0; font-size: 13px; line-height: 1.6;">
+                          <strong>10 patent-pending algorithms</strong> (5 Enterprise Suite + 5 AIRIX Framework) create defensible competitive moat. No competitors offer this depth of institutional analysis.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 0 0 15px 0;">
+                      <div style="background: rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 15px;">
+                        <div style="color: #60a5fa; font-size: 14px; font-weight: 700; margin-bottom: 8px;">
+                          📊 Data Asset
+                        </div>
+                        <p style="color: #ede9fe; margin: 0; font-size: 13px; line-height: 1.6;">
+                          Every assessment builds <strong>proprietary institutional benchmarking data</strong>—valuable for future analytics products, industry reports, and premium research offerings.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 0;">
+                      <div style="background: rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 15px;">
+                        <div style="color: #34d399; font-size: 14px; font-weight: 700; margin-bottom: 8px;">
+                          💰 Premium Pricing
+                        </div>
+                        <p style="color: #ede9fe; margin: 0; font-size: 13px; line-height: 1.6;">
+                          Patent-pending technology justifies <strong>$10K-$50K annual subscriptions</strong> vs. $1K-$5K for basic tools. Higher value = higher margins = faster scaling.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
+                  <tr>
+                    <td align="center">
+                      <p style="color: #ede9fe; margin: 0 0 15px 0; font-size: 12px; opacity: 0.9; line-height: 1.6;">
+                        <strong>Interested in partnership or investment opportunities?</strong><br>
+                        Our patent-pending technology creates significant strategic value for investors and acquirers.
+                      </p>
+                      <a href="mailto:info@northpathstrategies.org?subject=Investment%20Opportunity%20Inquiry" style="display: inline-block; background: #fbbf24; color: #78350f; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">
+                        📩 Investor Inquiries
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </td>
           </tr>
           

@@ -1,10 +1,10 @@
+import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
+import { calculateEnterpriseMetrics, persistEnterpriseMetrics } from '@/lib/algorithms';
 import { buildNistAlignment, buildRiskHotspots } from '@/lib/analysis/gap-insights';
 import { createClient } from '@/lib/supabase/server';
+import type { AlgorithmInputResponse, OrganizationOperationalMetrics } from '@/types/algorithm';
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { calculateEnterpriseMetrics, persistEnterpriseMetrics } from '@/lib/algorithms';
-import { calculateAIReadinessMetrics } from '@/lib/ai-readiness-algorithms';
-import type { OrganizationOperationalMetrics, AlgorithmInputResponse } from '@/types/algorithm';
 
 // Initialize OpenAI client only if API key is available
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({
@@ -67,7 +67,7 @@ function buildNISTAlgorithmResponses(
     scores: Record<string, { score: number; maxScore: number; percentage: number }>
 ): AlgorithmInputResponse[] {
     const algorithmResponses: AlgorithmInputResponse[] = [];
-    
+
     // NIST categories mapping
     const categories = {
         GOVERN: { range: [0, 4], tags: ['governance', 'policy', 'leadership', 'strategy'] },
@@ -115,18 +115,18 @@ function deriveNISTOrgMetrics(
         leadershipEffectiveness: govern,
         decisionLatency: 1 - govern, // Inverse
         communicationEfficiency: (govern + manage) / 2,
-        
+
         // Operational & Culture (MEASURE focus)
         employeeEngagement: (govern + measure) / 2,
         changeReadiness: (govern + map) / 2,
         futureReadiness: (govern + measure) / 2,
-        
+
         // Process & Technology (MAP + MANAGE focus)
         processComplexity: 1 - (map + manage) / 2, // Inverse
         operationalRisk: 1 - manage, // Inverse
         technologicalRisk: 1 - map, // Inverse
         cybersecurityLevel: manage,
-        
+
         // Execution (MEASURE + MANAGE focus)
         resourceUtilization: (measure + map) / 2,
         taskAutomationLevel: measure
@@ -252,9 +252,9 @@ export async function POST(req: NextRequest) {
         }
 
         console.log('✅ Assessment saved');
-        
+
         console.log('🧮 Calculating patent-pending enterprise algorithms (DSCH, CRF, LEI, OCI, HOCI)...');
-        
+
         // Build assessment data for enterprise algorithms
         const assessmentData = {
             id: assessment.id,
@@ -270,7 +270,7 @@ export async function POST(req: NextRequest) {
         try {
             enterpriseMetrics = await calculateEnterpriseMetrics(assessmentData, orgMetrics);
             aiReadinessMetrics = await calculateAIReadinessMetrics(assessmentData);
-            
+
             console.log('✅ Enterprise algorithms calculated:', {
                 DSCH: enterpriseMetrics.dsch.overallScore,
                 CRF: enterpriseMetrics.crf.overallScore,
