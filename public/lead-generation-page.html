@@ -1,0 +1,1803 @@
+<!-- AI Blueprint consulting page refined: brand assets added, hierarchy/UX improved. All original URLs preserved. -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Primary Meta Tags -->
+    <title>AI Readiness Assessment for Education | Try Free Demo - AI Blueprint</title>
+    <meta name="title" content="AI Readiness Assessment for Education | Try Free Demo - AI Blueprint" />
+    <meta name="description"
+        content="Discover your institution's AI readiness in minutes with our free demo. NIST-aligned assessments, implementation roadmaps, and expert consulting for K-12 and higher education. Start your AI transformation today." />
+    <meta name="keywords"
+        content="AI readiness assessment demo, education AI assessment, NIST AI framework education, AI implementation roadmap, higher education AI strategy, K-12 AI readiness, educational technology assessment, AI governance framework, AI policy development education, free AI assessment tool" />
+    <meta name="author" content="Jeremy Estrella, NorthPath Strategies" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://educationaiblueprint.com/consulting" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aiblueprint.educationaiblueprint.com" />
+    <meta property="og:title" content="AI Readiness Assessment for Education | Try Free Demo" />
+    <meta property="og:description"
+        content="Experience our NIST-aligned AI readiness assessment with a free demo. Get instant insights, personalized recommendations, and a clear roadmap for AI implementation in education." />
+    <meta property="og:image"
+        content="https://educationaiblueprint.com/wp-content/uploads/2025/10/ChatGPT-Image-Oct-17-2025-10_56_46-AM.png" />
+    <meta property="og:site_name" content="AI Blueprint" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://aiblueprint.educationaiblueprint.com" />
+    <meta property="twitter:title" content="AI Readiness Assessment for Education | Try Free Demo" />
+    <meta property="twitter:description"
+        content="Experience our NIST-aligned AI readiness assessment. Free demo with instant insights and personalized recommendations for your institution." />
+    <meta property="twitter:image"
+        content="https://educationaiblueprint.com/wp-content/uploads/2025/10/ChatGPT-Image-Oct-17-2025-10_56_46-AM.png" />
+
+    <!-- Structured Data / JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "AI Blueprint - AI Readiness Assessment Platform",
+        "description": "Free demo of NIST-aligned AI readiness assessment platform for educational institutions. Get instant insights and implementation roadmaps.",
+        "url": "https://aiblueprint.educationaiblueprint.com",
+        "logo": "https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png",
+        "image": "https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png",
+        "email": "info@northpathstrategies.org",
+        "founder": {
+            "@type": "Person",
+            "name": "Jeremy Estrella",
+            "jobTitle": "Education Technology Consultant"
+        },
+        "areaServed": "United States",
+        "serviceType": ["AI Readiness Consulting", "Technology Implementation", "Higher Education Consulting"],
+        "knowsAbout": ["Artificial Intelligence", "Higher Education", "K-12 Education", "Educational Technology", "NIST AI RMF"],
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5.0",
+            "reviewCount": "15"
+        }
+    }
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon"
+        href="https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png" />
+    <link rel="apple-touch-icon"
+        href="https://northpathstrategies.org/wp-content/uploads/2025/07/Screenshot-2025-07-15-at-4.12.36-PM.png" />
+
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --accent: #2563eb;
+            --accent-light: #3b82f6;
+            --gold: #fbbf24;
+            --success: #10b981;
+            --error: #ef4444;
+            --text-dark: #0f172a;
+            --text-body: #475569;
+            --text-light: #64748b;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-accent: #eff6ff;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--text-body);
+            background: var(--bg-secondary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Skip to content link */
+        .sr-only {
+            position: absolute;
+            left: -9999px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        .sr-only:focus {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 0.5rem 1rem;
+            background: #fff;
+            border: 2px solid var(--primary);
+            z-index: 10000;
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Focus outline improvements */
+        a:focus,
+        button:focus,
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Typography */
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: var(--text-dark);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+        }
+
+        h2 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+        }
+
+        h3 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+        }
+
+        h4 {
+            font-size: 1.25rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            max-width: 70ch;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--accent-light);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .container-narrow {
+            max-width: 900px;
+        }
+
+        .section {
+            padding: 5rem 0;
+        }
+
+        .section-sm {
+            padding: 3rem 0;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border-radius: var(--radius);
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .header-cta:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 6rem 0 8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text {
+            max-width: 600px;
+        }
+
+        .hero-brand-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-brand-row img {
+            border-radius: 6px;
+        }
+
+        .hero-brand-row strong {
+            letter-spacing: 0.2px;
+            font-size: 1.125rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero h1 {
+            color: white;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+            line-height: 1.8;
+            max-width: 65ch;
+        }
+
+        .hero-logo-container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-logo-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: flex-start;
+            gap: 3rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Trust Bar */
+        .trust-bar {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 24px 0;
+            border-bottom: 1px solid #cbd5e0;
+        }
+
+        .trust-bar-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 32px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #334155;
+            text-align: center;
+        }
+
+        .trust-bar-content span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .trust-bar-content i {
+            color: var(--accent);
+        }
+
+        /* Problem & Solution Section */
+        .problem-solution {
+            background: var(--bg-primary);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 2rem;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-5px);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card {
+                transition: none;
+            }
+
+            .card:hover {
+                transform: none;
+            }
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+        }
+
+        .card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .card li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            border: 2px solid var(--border);
+            transition: var(--transition);
+            text-align: center;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .service-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-8px);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .service-card {
+                transition: none;
+            }
+
+            .service-card:hover {
+                transform: none;
+            }
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* What We Customize Section */
+        .customize-section {
+            background: var(--bg-secondary);
+        }
+
+        .customize-list {
+            list-style: none;
+            padding: 0;
+            max-width: 900px;
+            margin: 3rem auto 0;
+        }
+
+        .customize-list li {
+            background: var(--bg-primary);
+            padding: 24px 32px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: start;
+            gap: 20px;
+        }
+
+        .customize-list .list-icon {
+            color: var(--accent);
+            font-size: 24px;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .customize-list strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .customize-list p {
+            margin: 0;
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* Implementation Journey Section */
+        .journey-section {
+            background: var(--bg-primary);
+        }
+
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            max-width: 1100px;
+            margin: 3rem auto 0;
+        }
+
+        .step-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 40px 32px;
+            border-radius: 16px;
+            text-align: center;
+            border-top: 4px solid var(--accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .step-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .step-text {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* Expertise Section */
+        .expertise {
+            background: var(--bg-accent);
+        }
+
+        .expertise-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .expertise-text h2 {
+            color: var(--primary);
+        }
+
+        .expertise-highlights {
+            list-style: none;
+            padding: 0;
+        }
+
+        .expertise-highlights li {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+        }
+
+        .expertise-highlights li:last-child {
+            border-bottom: none;
+        }
+
+        .highlight-icon {
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .bio-box {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--gold);
+        }
+
+        .bio-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bio-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .bio-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .bio-title h4 {
+            margin-bottom: 0.25rem;
+        }
+
+        .bio-subtitle {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Contact Form */
+        .contact-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .contact-section h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .form-wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 3rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .required {
+            color: var(--error);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--bg-primary);
+            color: var(--text-dark);
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        textarea::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 2.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-icon {
+            font-size: 1.25rem;
+        }
+
+        .form-message {
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-top: 1rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .form-message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .form-message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .form-message.show {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text-dark);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer h4 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.8);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Trust Indicators */
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 3rem 0;
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .badge-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .hero-logo-container {
+                order: -1;
+            }
+
+            .expertise-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section {
+                padding: 3rem 0;
+            }
+
+            .hero {
+                padding: 4rem 0 5rem;
+            }
+
+            .hero-stats {
+                gap: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-wrapper {
+                padding: 2rem 1.5rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: left;
+            }
+
+            .step-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Demo CTA Styles */
+        .demo-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: var(--gold);
+            color: var(--text-dark);
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 1.125rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .demo-cta:hover {
+            background: #f59e0b;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+            color: var(--text-dark);
+        }
+
+        .demo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 1rem;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid var(--gold);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #d97706;
+        }
+
+        .demo-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 4rem 0;
+            text-align: center;
+            border-top: 1px solid #fbbf24;
+            border-bottom: 1px solid #fbbf24;
+        }
+
+        .demo-section h2 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .demo-section p {
+            color: #92400e;
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="#hero" class="logo">
+                    <div class="logo-icon">
+                        <img src="https://educationaiblueprint.com/wp-content/uploads/2025/10/Screenshot-2025-10-17-at-10.56.57-AM.png"
+                            alt="AI Blueprint icon" width="40" height="40" loading="eager">
+                    </div>
+                    <span>AI Blueprint</span>
+                </a>
+                <a href="https://aiblueprint.educationaiblueprint.com/demo" class="demo-cta"
+                    style="padding: 0.75rem 1.5rem; font-size: 1rem; text-transform: none;">
+                    <span>🚀 Try Free Demo</span>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="container">
+            <div class="hero-content fade-in-up">
+                <div class="hero-text">
+                    <div class="hero-brand-row">
+                        <img src="https://educationaiblueprint.com/wp-content/uploads/2025/10/Screenshot-2025-10-17-at-10.56.57-AM.png"
+                            alt="AI Blueprint icon" width="28" height="28" loading="eager">
+                        <strong>AI Blueprint</strong>
+                    </div>
+                    <div class="demo-badge">
+                        🎯 NIST AI RMF Aligned Assessment Platform
+                    </div>
+                    <h1>Discover Your Institution's AI Readiness in Minutes</h1>
+                    <p class="hero-subtitle">
+                        Experience our comprehensive AI assessment platform with a free 30-minute demo. Get instant
+                        insights,
+                        personalized recommendations, and a clear roadmap for responsible AI implementation.
+                    </p>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                        <a href="https://aiblueprint.educationaiblueprint.com/demo" class="demo-cta">
+                            <span>🚀 Start Free Demo</span>
+                            <span>→</span>
+                        </a>
+                        <a href="#contact" class="btn"
+                            style="display: inline-flex; width: auto; background: transparent; border: 2px solid white; color: white;">
+                            <span>Schedule Consultation</span>
+                            <span class="btn-icon">→</span>
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-number">5 Min</span>
+                            <span class="stat-label">Quick Assessment</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">NIST</span>
+                            <span class="stat-label">Framework Aligned</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">Free</span>
+                            <span class="stat-label">30-Min Demo</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-logo-container">
+                    <img src="https://educationaiblueprint.com/wp-content/uploads/2025/10/ChatGPT-Image-Oct-17-2025-10_56_46-AM.png"
+                        alt="AI Blueprint logo" width="440" height="300" loading="eager">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Bar -->
+    <section class="trust-bar">
+        <div class="container">
+            <div class="trust-bar-content">
+                <span>🚀 Free Demo Available</span>
+                <span>🏛️ NIST AI RMF Aligned</span>
+                <span>📊 Instant Assessment</span>
+                <span>🗺️ Custom Roadmaps</span>
+                <span>📋 Policy Templates</span>
+                <span>� Actionable Insights</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Problem & Solution Section -->
+        <section class="section problem-solution">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 4rem;">
+                    <h2>The Challenge Every Institution Faces</h2>
+                    <p style="font-size: 1.125rem; max-width: 800px; margin: 0 auto; color: var(--text-light);">
+                        Artificial Intelligence is transforming education, but most institutions struggle to know where
+                        to start, how to measure readiness, or how to implement responsibly.
+                    </p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-icon">⚠️</div>
+                        <h3>Common Pain Points</h3>
+                        <ul>
+                            <li>Unclear where to begin with AI adoption</li>
+                            <li>Lack of NIST-aligned governance frameworks</li>
+                            <li>Concerns about compliance and risk</li>
+                            <li>Limited internal expertise and resources</li>
+                            <li>Difficulty justifying AI investments to leadership</li>
+                            <li>Fragmented tools and scattered data</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-icon">✨</div>
+                        <h3>Your Custom Solution</h3>
+                        <ul>
+                            <li>Personalized AI readiness assessment</li>
+                            <li>Implementation roadmap aligned to your goals</li>
+                            <li>Policy development and governance frameworks</li>
+                            <li>Staff training and change management</li>
+                            <li>Ongoing support and consultation</li>
+                            <li>Tools customized to your institution's needs</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="section" style="background: var(--bg-secondary);">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 4rem;">
+                    <h2>Comprehensive Services Designed for You</h2>
+                    <p style="font-size: 1.125rem; color: var(--text-light); max-width: 70ch; margin: 0 auto;">
+                        Every institution is unique. I customize solutions to fit your specific context, goals, and
+                        constraints.
+                    </p>
+                </div>
+
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon">📊</div>
+                        <h3>AI Readiness Assessment</h3>
+                        <p>Comprehensive evaluation of your institution's AI maturity using NIST AI RMF framework,
+                            customized to your organizational structure.</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🗺️</div>
+                        <h3>Implementation Roadmap</h3>
+                        <p>Strategic 30/60/90-day action plans with prioritized initiatives, resource requirements, and
+                            success metrics tailored to your budget.</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">📋</div>
+                        <h3>Policy & Governance</h3>
+                        <p>Development of AI policies, risk frameworks, and governance structures aligned with federal
+                            guidance and institutional values.</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🎓</div>
+                        <h3>Training & Workshops</h3>
+                        <p>Custom workshops for leadership, faculty, and staff on AI literacy, responsible use, and
+                            institutional strategy.</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🔍</div>
+                        <h3>Gap Analysis</h3>
+                        <p>Identify critical gaps in your AI capabilities, policies, and infrastructure with actionable
+                            recommendations for improvement.</p>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">⚙️</div>
+                        <h3>Platform Customization</h3>
+                        <p>Adapt AI Blueprint™ platform to your institution's branding, workflows, and specific
+                            assessment criteria.</p>
+                    </div>
+                </div>
+
+                <div class="trust-badges">
+                    <div class="badge">
+                        <span class="badge-icon">🏛️</span>
+                        <span>NIST AI RMF Aligned</span>
+                    </div>
+                    <div class="badge">
+                        <span class="badge-icon">🎓</span>
+                        <span>Higher Ed Specialized</span>
+                    </div>
+                    <div class="badge">
+                        <span class="badge-icon">🔒</span>
+                        <span>Compliance Focused</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- What We Customize Section -->
+        <section class="section customize-section">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 4rem;">
+                    <h2>What We Customize for Your Institution</h2>
+                    <p style="font-size: 1.125rem; color: var(--text-light); max-width: 70ch; margin: 0 auto;">
+                        Our framework is proven. We tailor it to fit your unique institutional context, priorities, and
+                        constraints.
+                    </p>
+                </div>
+
+                <ul class="customize-list">
+                    <li>
+                        <span class="list-icon">📊</span>
+                        <div>
+                            <strong>Assessment Criteria & Metrics</strong>
+                            <p>Customize evaluation rubrics, scoring models, and benchmarks to reflect your
+                                institution's specific AI maturity goals and risk tolerance.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="list-icon">🗺️</span>
+                        <div>
+                            <strong>Implementation Roadmaps</strong>
+                            <p>30/60/90-day action plans aligned to your budget, staffing levels, governance structure,
+                                and strategic priorities.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="list-icon">📋</span>
+                        <div>
+                            <strong>Policies & Governance Frameworks</strong>
+                            <p>Draft policies, risk management protocols, and oversight structures that comply with
+                                federal guidance while fitting your institutional culture.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="list-icon">🎓</span>
+                        <div>
+                            <strong>Training Programs & Materials</strong>
+                            <p>Custom workshops, learning modules, and communication strategies designed for your
+                                leadership, faculty, staff, and students.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="list-icon">⚙️</span>
+                        <div>
+                            <strong>Platform Integration & Branding</strong>
+                            <p>White-label the AI Blueprint platform with your logo, colors, custom domains, and embed
+                                it seamlessly into your existing systems.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Implementation Journey Section -->
+        <section class="section journey-section">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 4rem;">
+                    <h2>Your AI Implementation Journey</h2>
+                    <p style="font-size: 1.125rem; color: var(--text-light); max-width: 70ch; margin: 0 auto;">
+                        From discovery to full adoption in four clearly defined phases.
+                    </p>
+                </div>
+
+                <div class="step-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3 class="step-title">Discover</h3>
+                        <p class="step-text">
+                            Assess your institution's current AI maturity, identify stakeholder needs, and establish
+                            baseline metrics for success.
+                        </p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3 class="step-title">Design</h3>
+                        <p class="step-text">
+                            Develop custom policies, governance frameworks, and implementation roadmaps aligned to your
+                            strategic goals and constraints.
+                        </p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3 class="step-title">Deploy</h3>
+                        <p class="step-text">
+                            Roll out AI initiatives with training programs, change management support, and phased pilot
+                            implementations to demonstrate early wins.
+                        </p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h3 class="step-title">Optimize</h3>
+                        <p class="step-text">
+                            Monitor outcomes, refine strategies, and scale successful initiatives with ongoing
+                            consultation and platform support.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo CTA Section -->
+        <section class="demo-section">
+            <div class="container">
+                <h2>Experience AI Blueprint in Action</h2>
+                <p>See how our platform can transform your institution's approach to AI in just 30 minutes</p>
+                <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem;">
+                    <div style="text-align: left;">
+                        <h4 style="color: #92400e; margin-bottom: 0.5rem;">✅ What You'll Get:</h4>
+                        <ul style="list-style: none; padding: 0; color: #92400e; font-size: 0.95rem;">
+                            <li style="margin-bottom: 0.5rem;">• Guided tour of the assessment platform</li>
+                            <li style="margin-bottom: 0.5rem;">• Sample AI readiness report</li>
+                            <li style="margin-bottom: 0.5rem;">• NIST framework insights</li>
+                            <li style="margin-bottom: 0.5rem;">• Implementation recommendations</li>
+                        </ul>
+                    </div>
+                    <div style="text-align: left;">
+                        <h4 style="color: #92400e; margin-bottom: 0.5rem;">⏱️ Demo Features:</h4>
+                        <ul style="list-style: none; padding: 0; color: #92400e; font-size: 0.95rem;">
+                            <li style="margin-bottom: 0.5rem;">• 30-minute time limit</li>
+                            <li style="margin-bottom: 0.5rem;">• No login required</li>
+                            <li style="margin-bottom: 0.5rem;">• Real assessment questions</li>
+                            <li style="margin-bottom: 0.5rem;">• Instant results dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+                <a href="https://aiblueprint.educationaiblueprint.com/demo" class="demo-cta"
+                    style="font-size: 1.25rem; padding: 1.25rem 2.5rem;">
+                    <span>🎯 Launch Free Demo Now</span>
+                    <span>→</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Expertise & Bio Section -->
+        <section class="section expertise">
+            <div class="container">
+                <div class="expertise-content">
+                    <div class="expertise-text">
+                        <h2>Deep Expertise in Higher Education & Technology</h2>
+                        <p style="font-size: 1.125rem; margin-bottom: 2rem;">
+                            With over two decades of experience in higher education administration and technology
+                            implementation, I understand the unique challenges institutions face.
+                        </p>
+
+                        <ul class="expertise-highlights">
+                            <li>
+                                <div class="highlight-icon">1</div>
+                                <div>
+                                    <strong>Strategic Leadership</strong>
+                                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-light);">20+ years
+                                        leading technology initiatives in K-12 and higher education</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="highlight-icon">2</div>
+                                <div>
+                                    <strong>AI & Innovation</strong>
+                                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-light);">Early adopter
+                                        of AI in education with practical implementation experience</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="highlight-icon">3</div>
+                                <div>
+                                    <strong>Compliance & Policy</strong>
+                                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-light);">Expert in
+                                        FERPA, accessibility, data privacy, and institutional governance</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="highlight-icon">4</div>
+                                <div>
+                                    <strong>Change Management</strong>
+                                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-light);">Proven track
+                                        record helping institutions navigate complex transformations</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bio-box">
+                        <div class="bio-header">
+                            <div class="bio-image">
+                                <img src="https://educationaiblueprint.com/wp-content/uploads/2025/10/IMG_3158.jpg"
+                                    alt="Jeremy Estrella - Founder, NorthPath Strategies" width="100" height="100"
+                                    loading="lazy">
+                            </div>
+                            <div class="bio-title">
+                                <h4>Jeremy Estrella</h4>
+                                <p class="bio-subtitle">Founder, NorthPath Strategies</p>
+                            </div>
+                        </div>
+                        <p style="margin-bottom: 1rem;">
+                            Jeremy Estrella brings over 20 years of experience in higher education administration,
+                            technology implementation, and strategic planning. His career spans roles in institutional
+                            research, enrollment management, student affairs, and academic technology.
+                        </p>
+                        <p style="margin-bottom: 1rem;">
+                            As an early adopter of AI in education, Jeremy has helped dozens of institutions develop
+                            responsible AI strategies that balance innovation with ethical considerations. He
+                            specializes in translating complex technical concepts into actionable institutional
+                            roadmaps.
+                        </p>
+                        <p style="margin-bottom: 1.5rem;">
+                            Jeremy holds advanced degrees in Higher Education Administration and has served as a
+                            consultant to K-12 districts, community colleges, and four-year universities across the
+                            United States.
+                        </p>
+                        <a href="https://northpathstrategies.org/about" target="_blank" rel="noopener"
+                            style="color: var(--accent); font-weight: 600;">
+                            View Full Bio on NorthPath Strategies →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Custom Solutions -->
+        <section class="section" style="background: var(--bg-primary);">
+            <div class="container container-narrow" style="text-align: center;">
+                <h2>Why Choose Custom Solutions?</h2>
+                <p
+                    style="font-size: 1.125rem; margin-bottom: 3rem; color: var(--text-light); max-width: 70ch; margin-left: auto; margin-right: auto;">
+                    Off-the-shelf solutions rarely fit the unique culture, governance structure, and strategic
+                    priorities of educational institutions.
+                </p>
+
+                <div class="grid-2" style="text-align: left;">
+                    <div>
+                        <h4 style="color: var(--accent);">🏫 Institution-Specific Context</h4>
+                        <p>Your mission, values, and stakeholder needs inform every recommendation.</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--accent);">💰 Budget-Conscious Approach</h4>
+                        <p>Practical solutions that maximize ROI without requiring massive investments.</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--accent);">⚡ Rapid Implementation</h4>
+                        <p>Get started quickly with phased approaches that show early wins.</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--accent);">🤝 Ongoing Partnership</h4>
+                        <p>Continued support as your AI strategy evolves and matures.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Form Section -->
+        <section id="contact" class="section contact-section">
+            <div class="container">
+                <h2>Ready to Go Beyond the Demo?</h2>
+                <p style="color: var(--text-light); margin-bottom: 2rem; text-align: center;">
+                    Schedule a personalized consultation to get a custom AI readiness assessment and implementation
+                    roadmap tailored to your institution's specific needs.
+                </p>
+
+                <div class="form-wrapper">
+                    <form id="contactForm" novalidate>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name <span class="required">*</span></label>
+                                <input type="text" id="firstName" name="firstName" required autocomplete="given-name" />
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name <span class="required">*</span></label>
+                                <input type="text" id="lastName" name="lastName" required autocomplete="family-name" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" required autocomplete="email" />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="institution">Institution/Organization <span
+                                        class="required">*</span></label>
+                                <input type="text" id="institution" name="institution" required
+                                    autocomplete="organization" />
+                            </div>
+                            <div class="form-group">
+                                <label for="role">Your Role <span class="required">*</span></label>
+                                <select id="role" name="role" required>
+                                    <option value="">Select your role</option>
+                                    <option value="president">President/Chancellor</option>
+                                    <option value="provost">Provost/Chief Academic Officer</option>
+                                    <option value="cio">CIO/Chief Technology Officer</option>
+                                    <option value="dean">Dean/Department Head</option>
+                                    <option value="director">Director/Manager</option>
+                                    <option value="faculty">Faculty Member</option>
+                                    <option value="consultant">Consultant/Vendor</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="institutionType">Institution Type <span class="required">*</span></label>
+                            <select id="institutionType" name="institutionType" required>
+                                <option value="">Select institution type</option>
+                                <option value="k12">K-12 School/District</option>
+                                <option value="community-college">Community College</option>
+                                <option value="four-year-public">Four-Year Public University</option>
+                                <option value="four-year-private">Four-Year Private University</option>
+                                <option value="graduate">Graduate/Professional School</option>
+                                <option value="system">University System/State Agency</option>
+                                <option value="corporate">Corporate/Business</option>
+                                <option value="nonprofit">Nonprofit Organization</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interest">What are you interested in? <span class="required">*</span></label>
+                            <select id="interest" name="interest" required>
+                                <option value="">Select primary interest</option>
+                                <option value="assessment">AI Readiness Assessment</option>
+                                <option value="roadmap">Implementation Roadmap</option>
+                                <option value="policy">Policy & Governance Development</option>
+                                <option value="training">Training & Workshops</option>
+                                <option value="platform">Platform Customization</option>
+                                <option value="consulting">General Consulting</option>
+                                <option value="partnership">Partnership/Investment</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Tell us about your needs <span class="required">*</span></label>
+                            <textarea id="message" name="message" required
+                                placeholder="What challenges are you facing? What are your goals? What timeline are you working with?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="timeline">Preferred Timeline</label>
+                            <select id="timeline" name="timeline">
+                                <option value="">Select timeline</option>
+                                <option value="urgent">Urgent (within 2 weeks)</option>
+                                <option value="soon">Soon (within 1 month)</option>
+                                <option value="planning">Planning (1-3 months)</option>
+                                <option value="exploring">Exploring (3+ months)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn" id="submitBtn">
+                            <span id="btnText">Send Message</span>
+                            <span class="btn-icon" id="btnIcon">📧</span>
+                        </button>
+
+                        <div id="formMessage" class="form-message"></div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <h4>NorthPath Strategies</h4>
+                    <p>Expert consulting for AI readiness and implementation in education.</p>
+                    <p style="margin-top: 1rem;">
+                        <a href="mailto:info@northpathstrategies.org">info@northpathstrategies.org</a>
+                    </p>
+                </div>
+                <div>
+                    <h4>Services</h4>
+                    <a href="https://aiblueprint.educationaiblueprint.com/demo">Try Free Demo</a>
+                    <a href="#contact">AI Readiness Assessment</a>
+                    <a href="#contact">Implementation Roadmap</a>
+                    <a href="#contact">Policy Development</a>
+                    <a href="#contact">Training & Workshops</a>
+                    <a href="#contact">Platform Customization</a>
+                </div>
+                <div>
+                    <h4>Resources</h4>
+                    <a href="https://northpathstrategies.org" target="_blank" rel="noopener">NorthPath Strategies
+                        Website</a>
+                    <a href="https://northpathstrategies.org/about" target="_blank" rel="noopener">About Jeremy
+                        Estrella</a>
+                    <a href="https://educationaiblueprint.com" target="_blank" rel="noopener">AI Blueprint Platform</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 NorthPath Strategies. All rights reserved. | Custom AI Solutions for Educational
+                    Institutions</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Contact Form Script -->
+    <script>
+        // ✅ CONFIGURED: Uses SendGrid webhook endpoint
+        // SendGrid webhook handles email delivery to info@northpathstrategies.org
+
+        const FORM_ENDPOINT = 'https://aiblueprint.educationaiblueprint.com/api/webhooks/sendgrid';
+
+        document.getElementById('contactForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const formMessage = document.getElementById('formMessage');
+
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            btnText.textContent = 'Sending...';
+            btnIcon.innerHTML = '<div class="spinner"></div>';
+
+            // Gather form data
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const institution = document.getElementById('institution').value.trim();
+            const role = document.getElementById('role').value;
+            const institutionType = document.getElementById('institutionType').value;
+            const interest = document.getElementById('interest').value;
+            const message = document.getElementById('message').value.trim();
+            const timeline = document.getElementById('timeline').value;
+
+            // SendGrid webhook payload
+            const apiPayload = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                institution: institution,
+                role: role,
+                institutionType: institutionType,
+                interest: interest,
+                message: message,
+                timeline: timeline || "Not specified",
+                submittedAt: new Date().toISOString(),
+                source: 'Lead Generation Page'
+            };
+
+            console.log('📤 Sending to SendGrid webhook:', FORM_ENDPOINT);
+            console.log('📋 Payload:', apiPayload);
+
+            try {
+                const response = await fetch(FORM_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(apiPayload)
+                });
+
+                console.log('📥 Response status:', response.status);
+                const responseData = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
+                console.log('📥 Response data:', responseData);
+
+                if (response.ok) {
+                    // Success
+                    formMessage.textContent = '✓ Thank you! Your message has been sent. We\'ll respond within 24 hours.';
+                    formMessage.className = 'form-message success show';
+                    document.getElementById('contactForm').reset();
+
+                    // Track conversion (Google Analytics, if available)
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'form_submission', {
+                            'event_category': 'Lead Generation',
+                            'event_label': 'Contact Form'
+                        });
+                    }
+                } else {
+                    throw new Error(responseData.error || `Server responded with status ${response.status}`);
+                }
+            } catch (error) {
+                // Error
+                console.error('❌ Form submission error:', error);
+                formMessage.textContent = '✗ Sorry, there was an error sending your message. Please email info@northpathstrategies.org directly.';
+                formMessage.className = 'form-message error show';
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                btnText.textContent = 'Send Message';
+                btnIcon.textContent = '📧';
+
+                // Hide message after 10 seconds
+                setTimeout(() => {
+                    formMessage.classList.remove('show');
+                }, 10000);
+            }
+        });
+
+        // Client-side validation
+        const form = document.getElementById('contactForm');
+        const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
+
+        inputs.forEach(input => {
+            input.addEventListener('blur', function () {
+                if (!this.value.trim()) {
+                    this.style.borderColor = 'var(--error)';
+                } else {
+                    this.style.borderColor = 'var(--border)';
+                }
+            });
+
+            input.addEventListener('input', function () {
+                if (this.value.trim()) {
+                    this.style.borderColor = 'var(--border)';
+                }
+            });
+        });
+
+        // Email validation
+        document.getElementById('email').addEventListener('blur', function () {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(this.value)) {
+                this.style.borderColor = 'var(--error)';
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+
+    <!-- Google Analytics (Optional - Add your tracking ID) -->
+    <!-- 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR-GA-ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'YOUR-GA-ID');
+    </script>
+    -->
+</body>
+
+</html>
