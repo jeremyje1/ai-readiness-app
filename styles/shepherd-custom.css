@@ -1,0 +1,294 @@
+/* Custom Shepherd.js Tour Styling for Education AI Blueprint Demo */
+
+/* Override default Shepherd theme with purple/indigo brand colors */
+.shepherd-theme-custom {
+    z-index: 9999;
+}
+
+.shepherd-theme-custom .shepherd-content {
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shepherd-theme-custom .shepherd-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    padding: 20px 24px;
+    border-radius: 12px 12px 0 0;
+}
+
+.shepherd-theme-custom .shepherd-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.shepherd-theme-custom .shepherd-cancel-icon {
+    color: white;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.shepherd-theme-custom .shepherd-cancel-icon:hover {
+    opacity: 1;
+}
+
+.shepherd-theme-custom .shepherd-text {
+    padding: 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #374151;
+}
+
+.shepherd-theme-custom .shepherd-text p {
+    margin: 0 0 12px 0;
+}
+
+.shepherd-theme-custom .shepherd-text p:last-child {
+    margin-bottom: 0;
+}
+
+.shepherd-theme-custom .shepherd-text strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.shepherd-theme-custom .shepherd-text ul {
+    margin: 8px 0;
+    padding-left: 0;
+}
+
+.shepherd-theme-custom .shepherd-text li {
+    margin: 4px 0;
+}
+
+.shepherd-theme-custom .shepherd-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-radius: 0 0 12px 12px;
+}
+
+.shepherd-theme-custom .shepherd-button {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shepherd-theme-custom .shepherd-button:hover {
+    background: #6d28d9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shepherd-theme-custom .shepherd-button:active {
+    transform: translateY(0);
+}
+
+.shepherd-theme-custom .shepherd-button-secondary {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.shepherd-theme-custom .shepherd-button-secondary:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Arrow styling */
+.shepherd-theme-custom.shepherd-element[data-popper-placement^="top"] .shepherd-arrow::before {
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+}
+
+.shepherd-theme-custom.shepherd-element[data-popper-placement^="bottom"] .shepherd-arrow::before {
+    background: white;
+}
+
+.shepherd-theme-custom.shepherd-element[data-popper-placement^="left"] .shepherd-arrow::before {
+    background: white;
+}
+
+.shepherd-theme-custom.shepherd-element[data-popper-placement^="right"] .shepherd-arrow::before {
+    background: white;
+}
+
+/* Modal overlay */
+.shepherd-modal-overlay-container {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+/* Highlight effect for tour elements */
+.shepherd-target {
+    animation: shepherd-pulse 2s infinite;
+}
+
+@keyframes shepherd-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(124, 58, 237, 0);
+    }
+}
+
+/* Special styling for code blocks in tour text */
+.shepherd-theme-custom .shepherd-text code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    color: #7c3aed;
+}
+
+/* Special background colors for different tour steps */
+.shepherd-theme-custom .bg-yellow-50 {
+    background-color: #fefce8;
+    border: 1px solid #fde047;
+    border-left: 4px solid #eab308;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.shepherd-theme-custom .bg-blue-50 {
+    background-color: #eff6ff;
+    border: 1px solid #93c5fd;
+    border-left: 4px solid #3b82f6;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .shepherd-theme-custom .shepherd-content {
+        max-width: 90vw;
+    }
+
+    .shepherd-theme-custom .shepherd-header {
+        padding: 16px 20px;
+    }
+
+    .shepherd-theme-custom .shepherd-title {
+        font-size: 16px;
+    }
+
+    .shepherd-theme-custom .shepherd-text {
+        padding: 20px;
+        font-size: 14px;
+    }
+
+    .shepherd-theme-custom .shepherd-footer {
+        flex-direction: column;
+        padding: 12px 20px;
+    }
+
+    .shepherd-theme-custom .shepherd-button {
+        width: 100%;
+    }
+}
+
+/* Animation for tour appearance */
+.shepherd-theme-custom {
+    animation: shepherd-fade-in 0.3s ease-out;
+}
+
+@keyframes shepherd-fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Progress indicator (if added) */
+.shepherd-progress {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    padding: 8px 0;
+}
+
+.shepherd-progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d5db;
+    transition: all 0.2s;
+}
+
+.shepherd-progress-dot.active {
+    background: #7c3aed;
+    width: 24px;
+    border-radius: 4px;
+}
+
+/* Special styling for space-y utility in tour text */
+.shepherd-theme-custom .space-y-3>*+* {
+    margin-top: 12px;
+}
+
+.shepherd-theme-custom .space-y-1>*+* {
+    margin-top: 4px;
+}
+
+/* List styling inside tour text */
+.shepherd-theme-custom .list-disc {
+    list-style-type: disc;
+}
+
+.shepherd-theme-custom .list-inside {
+    list-style-position: inside;
+}
+
+/* Text color utilities */
+.shepherd-theme-custom .text-purple-600 {
+    color: #7c3aed;
+}
+
+.shepherd-theme-custom .text-yellow-800 {
+    color: #854d0e;
+}
+
+.shepherd-theme-custom .text-yellow-700 {
+    color: #a16207;
+}
+
+.shepherd-theme-custom .text-gray-600 {
+    color: #6b7280;
+}
+
+.shepherd-theme-custom .text-sm {
+    font-size: 14px;
+}
+
+.shepherd-theme-custom .text-xs {
+    font-size: 12px;
+}
+
+.shepherd-theme-custom .font-semibold {
+    font-weight: 600;
+}
+
+.shepherd-theme-custom .font-medium {
+    font-weight: 500;
+}

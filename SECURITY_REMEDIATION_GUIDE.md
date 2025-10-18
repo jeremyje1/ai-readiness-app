@@ -1,4 +1,10 @@
-# 🔒 SECURITY REMEDIATION GUIDE
+# 🔒 SECURITY REM## 🔐 NEW CRYPTOGRAPHIC SECRETS GENERATED
+
+**IMPORTANT:** Use the fre**Use the new values from the secure vault:**
+
+- Vercel: update `ADMIN_GRANT_TOKEN`, `CRON_SECRET`, `NEXTAUTH_SECRET`, and `JWT_SECRET` with the entries labeled **"Production – Internal Secrets (Rotated <DATE>)"** for all environments (Production, Preview, Development). generated values stored in the secure vault (1Password → "AI Blueprint / Production Secrets") to replace the compromised ones in Vercel. Do **not** commit secret values to git.
+
+**Note:** This project uses **Supabase** as the backend (PostgreSQL + Auth). There is no Railway deployment.ATION GUIDE
 **Date:** October 10, 2025  
 **Status:** ✅ Git cleanup complete - Credential rotation needed
 
@@ -37,7 +43,6 @@
 7. Copy new webhook secret: `whsec_...`
 
 **Update in:**
-- Railway: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 - Vercel: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 
 ---
@@ -54,7 +59,6 @@
 5. Copy new key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 
 **Update in:**
-- Railway: `SUPABASE_SERVICE_ROLE_KEY`
 - Vercel: `SUPABASE_SERVICE_ROLE_KEY`
 
 **Note:** The `NEXT_PUBLIC_SUPABASE_ANON_KEY` is public-safe and doesn't need rotation.
@@ -74,7 +78,6 @@
 6. Copy new token
 
 **Update in:**
-- Railway: `POSTMARK_API_TOKEN`, `POSTMARK_SERVER_TOKEN`
 - Vercel: `POSTMARK_API_TOKEN`, `POSTMARK_SERVER_TOKEN`
 
 ---
@@ -105,21 +108,6 @@
 
 ## 📋 STEP-BY-STEP CREDENTIAL UPDATE PROCESS
 
-### For Railway:
-
-```bash
-# 1. Open Railway dashboard
-open https://railway.app
-
-# 2. Navigate to your project
-# 3. Go to Variables tab
-# 4. Update each variable one by one:
-#    - Click on variable
-#    - Replace with new value
-#    - Click "Save"
-# 5. Railway will auto-redeploy after changes
-```
-
 ### For Vercel:
 
 ```bash
@@ -146,10 +134,7 @@ After updating all credentials, verify everything works:
 
 ### 1. Test Deployments
 ```bash
-# Check Railway
-curl https://your-railway-app.up.railway.app/api/health
-
-# Check Vercel
+# Check Vercel deployment
 curl https://aiblueprint.educationaiblueprint.com/api/health
 ```
 
@@ -264,11 +249,10 @@ chmod +x .git/hooks/pre-commit
 - **Stripe rotation:** 5 minutes
 - **Supabase rotation:** 3 minutes
 - **Postmark rotation:** 3 minutes
-- **Update Railway variables:** 5 minutes
 - **Update Vercel variables:** 5 minutes
 - **Verification testing:** 10 minutes
 
-**Total:** ~30 minutes
+**Total:** ~20 minutes
 
 ---
 
@@ -297,11 +281,10 @@ If you encounter issues during rotation:
 - [ ] Stripe webhook secret rotated
 - [ ] Supabase service role key rotated
 - [ ] Postmark API token rotated
-- [ ] ADMIN_GRANT_TOKEN updated in Railway & Vercel
-- [ ] CRON_SECRET updated in Railway & Vercel
-- [ ] NEXTAUTH_SECRET updated in Railway & Vercel
-- [ ] JWT_SECRET updated in Railway & Vercel
-- [ ] Railway redeployed successfully
+- [ ] ADMIN_GRANT_TOKEN updated in Vercel
+- [ ] CRON_SECRET updated in Vercel
+- [ ] NEXTAUTH_SECRET updated in Vercel
+- [ ] JWT_SECRET updated in Vercel
 - [ ] Vercel redeployed successfully
 - [ ] All verification tests passed
 - [ ] Git pre-commit hook installed (optional)
