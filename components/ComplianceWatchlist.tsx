@@ -44,7 +44,11 @@ interface ComplianceMetrics {
   complianceScore: number
 }
 
-export default function ComplianceWatchlist() {
+interface ComplianceWatchlistProps {
+  demoMode?: boolean
+}
+
+export default function ComplianceWatchlist({ demoMode = false }: ComplianceWatchlistProps) {
   const [filter, setFilter] = useState<string>('all')
   const { user, institution, loading } = useUserContext()
 
@@ -295,6 +299,15 @@ ${complianceItems.filter(item => item.daysUntilDue >= 0 && item.daysUntilDue <= 
           </Button>
         </div>
       </div>
+
+      {demoMode && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <p className="font-medium">Demo Preview</p>
+          <p className="mt-1">
+            These compliance items mirror real district activity across policies, vendors, and audits. Update filters and sorting to explore how leaders stay ahead of deadlines.
+          </p>
+        </div>
+      )}
 
       {/* Metrics Overview */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">

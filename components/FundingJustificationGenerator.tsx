@@ -14,7 +14,11 @@ import {
   FileText,
   Target
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+interface FundingJustificationGeneratorProps {
+  demoMode?: boolean
+}
 
 interface FundingOpportunity {
   id: string
@@ -38,7 +42,7 @@ interface DistrictRecommendation {
   priority: 'high' | 'medium' | 'low'
 }
 
-export default function FundingJustificationGenerator() {
+export default function FundingJustificationGenerator({ demoMode = false }: FundingJustificationGeneratorProps) {
   const [selectedOpportunity, setSelectedOpportunity] = useState<string>('')
   const [generatedNarrative, setGeneratedNarrative] = useState<string>('')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -177,10 +181,13 @@ export default function FundingJustificationGenerator() {
     }
   ]
 
-  const generateNarrative = async (opportunityId: string) => {
+  const generateNarrative = async (opportunityId: string, options?: { instant?: boolean }) => {
     setIsGenerating(true)
     const opportunity = fundingOpportunities.find(o => o.id === opportunityId)
-    if (!opportunity) return
+    if (!opportunity) {
+      setIsGenerating(false)
+      return
+    }
 
     // Get matching recommendations
     const matchingRecommendations = districtRecommendations.filter(rec =>
@@ -193,7 +200,9 @@ export default function FundingJustificationGenerator() {
     const highPriorityItems = matchingRecommendations.filter(rec => rec.priority === 'high')
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    if (!options?.instant) {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
 
     const narrative = `
 **GRANT NARRATIVE: ${opportunity.program}**
@@ -261,6 +270,17 @@ ${institutionName} is committed to responsible AI integration that enhances educ
     setIsGenerating(false)
   }
 
+  useEffect(() => {
+    if (demoMode && !selectedOpportunity) {
+      const defaultId = fundingOpportunities[0]?.id
+      if (defaultId) {
+        setSelectedOpportunity(defaultId)
+        generateNarrative(defaultId, { instant: true })
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoMode, selectedOpportunity])
+
   const downloadNarrative = () => {
     const element = document.createElement('a')
     const file = new Blob([generatedNarrative], { type: 'text/plain' })
@@ -281,6 +301,16 @@ ${institutionName} is committed to responsible AI integration that enhances educ
           </p>
         </div>
       </div>
+
+      {demoMode && (
+        <div className="rounded-lg border border-purple-200 bg-purple-50 p-4 text-sm text-purple-900">
+          <p className="font-medium">Demo Preview</p>
+          <p className="mt-1">
+            Preloaded opportunities, recommendations, and a sample grant narrative show exactly what districts receive.
+            Modify anything and regenerate to explore the full workflow without saving changes.
+          </p>
+        </div>
+      )}
 
       <Tabs defaultValue="opportunities" className="w-full">
         <TabsList className="grid w-full grid-cols-3">

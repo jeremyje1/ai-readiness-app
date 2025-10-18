@@ -26,11 +26,12 @@ import {
   Users,
   Zap
 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface DocumentPolicyEngineProps {
   institutionType: 'K12' | 'HigherEd';
   onPolicyGenerated?: (policies: PolicyOutput[]) => void;
+  demoMode?: boolean;
 }
 
 interface PolicyOutput {
@@ -166,11 +167,11 @@ const SAMPLE_OUTPUTS = {
   ]
 };
 
-export default function DocumentPolicyEngine({ institutionType, onPolicyGenerated }: DocumentPolicyEngineProps) {
+export default function DocumentPolicyEngine({ institutionType, onPolicyGenerated, demoMode = false }: DocumentPolicyEngineProps) {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [processing, setProcessing] = useState(false);
-  const [generatedPolicies, setGeneratedPolicies] = useState<PolicyOutput[]>([]);
-  const [step, setStep] = useState<'upload' | 'processing' | 'results'>('upload');
+  const [generatedPolicies, setGeneratedPolicies] = useState<PolicyOutput[]>(demoMode ? SAMPLE_OUTPUTS[institutionType] : []);
+  const [step, setStep] = useState<'upload' | 'processing' | 'results'>(demoMode ? 'results' : 'upload');
 
   const handleFilesSelected = useCallback((files: File[]) => {
     setUploadedFiles(prev => [...prev, ...files]);
@@ -183,6 +184,15 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
     setStep('processing');
 
     try {
+      if (demoMode) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const samplePolicies = SAMPLE_OUTPUTS[institutionType];
+        setGeneratedPolicies(samplePolicies);
+        setStep('results');
+        onPolicyGenerated?.(samplePolicies);
+        return;
+      }
+
       // Create FormData for file upload
       const formData = new FormData();
       uploadedFiles.forEach(file => {
@@ -255,6 +265,15 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
     }
   };
 
+  // Ensure demo mode stays in results view with sample data
+  useEffect(() => {
+    if (demoMode) {
+      const samplePolicies = SAMPLE_OUTPUTS[institutionType];
+      setGeneratedPolicies(samplePolicies);
+      setStep('results');
+    }
+  }, [demoMode, institutionType]);
+
   const getFrameworkText = () => {
     return institutionType === 'K12'
       ? 'COPPA/FERPA and State Education AI Guidance'
@@ -280,6 +299,16 @@ export default function DocumentPolicyEngine({ institutionType, onPolicyGenerate
           and generate board-ready policies, compliance scorecards, and implementation plans.
         </p>
       </div>
+
+      {demoMode && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+          <p className="font-medium">Demo Preview</p>
+          <p className="mt-1">
+            Sample district documents are pre-processed so you can review the full policy output package instantly.
+            Upload functionality remains available, but no files are stored when you are in demo mode.
+          </p>
+        </div>
+      )}
 
       {/* Algorithm Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

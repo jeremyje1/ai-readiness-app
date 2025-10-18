@@ -55,6 +55,7 @@ interface PolicyPackLibraryProps {
   institutionType: 'K12' | 'HigherEd'
   institutionName: string
   state: string
+  demoMode?: boolean
 }
 
 const categoryIcons = {
@@ -81,11 +82,150 @@ const riskColors = {
   High: 'bg-red-100 text-red-800'
 }
 
+const DEMO_TEMPLATES: PolicyTemplate[] = [
+  {
+    id: 'policy-ai-governance',
+    category: 'governance',
+    title: 'AI Governance Framework (Board Policy)',
+    description: 'Defines board-level oversight, ethical guardrails, and transparency requirements for AI tools.',
+    institutionType: 'Both',
+    sourceAuthority: 'NIST AI RMF + State AI Guidance 2025',
+    sourceUrl: 'https://example.com/nist-ai-governance',
+    sourceDocument: 'NIST AI RMF Core Document',
+    lastSourceUpdate: '2025-09-01',
+    templateContent: undefined,
+    version: '2.4',
+    lastRedlineUpdate: '2025-09-12',
+    complianceFrameworks: ['NIST AI RMF', 'State AI Governance Guidance', 'FERPA'],
+    riskLevel: 'High',
+    implementationComplexity: 'Moderate'
+  },
+  {
+    id: 'policy-ai-classroom',
+    category: 'teaching',
+    title: 'AI Use in Classroom Instruction Guidelines',
+    description: 'Provides teacher-facing guardrails for responsible AI adoption in classroom workflows.',
+    institutionType: 'K12',
+    sourceAuthority: 'US DOE Fact Sheet – AI in Schools',
+    sourceUrl: 'https://example.com/usdoe-ai-instruction',
+    sourceDocument: 'USDOE_AI_Instruction.pdf',
+    lastSourceUpdate: '2025-08-25',
+    templateContent: undefined,
+    version: '1.8',
+    lastRedlineUpdate: '2025-09-08',
+    complianceFrameworks: ['US DOE AI Guidance', 'ISTE Standards'],
+    riskLevel: 'Medium',
+    implementationComplexity: 'Simple'
+  },
+  {
+    id: 'policy-ai-privacy',
+    category: 'privacy',
+    title: 'AI Data Privacy Addendum',
+    description: 'Extends existing privacy policy to cover AI vendors, retention, and parent notifications.',
+    institutionType: 'Both',
+    sourceAuthority: 'COPPA / FERPA',
+    sourceUrl: 'https://example.com/coppa-ferpa-ai',
+    sourceDocument: 'COPPA_FERPA_AI_Addendum.docx',
+    lastSourceUpdate: '2025-07-30',
+    templateContent: undefined,
+    version: '3.1',
+    lastRedlineUpdate: '2025-09-05',
+    complianceFrameworks: ['FERPA', 'COPPA', 'State Student Data Privacy'],
+    riskLevel: 'High',
+    implementationComplexity: 'Complex'
+  },
+  {
+    id: 'policy-state-alignment',
+    category: 'state',
+    title: 'State AI Readiness Compliance Checklist',
+    description: 'Tracks state-mandated AI reporting, parental notices, and teacher credential updates.',
+    institutionType: 'Both',
+    sourceAuthority: 'California AB 3023 Draft',
+    sourceUrl: 'https://example.com/ca-ab3023',
+    sourceDocument: 'CA_AB3023_AI.docx',
+    lastSourceUpdate: '2025-09-10',
+    templateContent: undefined,
+    version: '0.9 (Draft)',
+    lastRedlineUpdate: '2025-09-15',
+    complianceFrameworks: ['CA AB 3023', 'State AI Disclosure Requirements'],
+    riskLevel: 'Medium',
+    implementationComplexity: 'Moderate'
+  },
+  {
+    id: 'policy-communications-kit',
+    category: 'communications',
+    title: 'AI Implementation Communications Kit',
+    description: 'Includes parent letters, staff FAQs, and board briefing scripts tailored to AI rollouts.',
+    institutionType: 'Both',
+    sourceAuthority: 'NorthPath Communications Lab',
+    sourceUrl: 'https://example.com/np-communications-kit',
+    sourceDocument: 'AI_Communications_Toolkit.pdf',
+    lastSourceUpdate: '2025-09-04',
+    templateContent: undefined,
+    version: '1.3',
+    lastRedlineUpdate: '2025-09-11',
+    complianceFrameworks: ['Public Engagement Best Practices'],
+    riskLevel: 'Low',
+    implementationComplexity: 'Simple'
+  },
+  {
+    id: 'policy-syllabus-updates',
+    category: 'syllabus',
+    title: 'Higher Education Syllabus AI Disclosure Clause',
+    description: 'Standard language for faculty syllabi describing permitted AI tool usage and citation expectations.',
+    institutionType: 'HigherEd',
+    sourceAuthority: 'AAC&U Ethical AI Guidelines',
+    sourceUrl: 'https://example.com/aacu-ai-syllabus',
+    sourceDocument: 'AACU_AI_Syllabus_Template.docx',
+    lastSourceUpdate: '2025-08-18',
+    templateContent: undefined,
+    version: '2.0',
+    lastRedlineUpdate: '2025-09-09',
+    complianceFrameworks: ['AAC&U Ethical AI', 'Institutional Academic Integrity'],
+    riskLevel: 'Medium',
+    implementationComplexity: 'Simple'
+  }
+]
+
+const DEMO_REDLINES: PolicyChange[] = [
+  {
+    id: 'redline-privacy-2025-09',
+    version: '3.1',
+    changeDate: '2025-09-10',
+    changeType: 'Legal Requirement',
+    sourceReference: 'COPPA Rulemaking Update (September 2025)',
+    summary: 'Added parental opt-out workflow and AI vendor retention policy language.',
+    approvalStatus: 'Pending',
+    impactLevel: 'Major'
+  },
+  {
+    id: 'redline-governance-2025-09',
+    version: '2.4',
+    changeDate: '2025-09-12',
+    changeType: 'Best Practice',
+    sourceReference: 'NIST RMF Community of Practice Bulletin',
+    summary: 'Updated risk committee charter to include quarterly AI model inventory review.',
+    approvalStatus: 'Pending',
+    impactLevel: 'Moderate'
+  },
+  {
+    id: 'redline-communications-2025-09',
+    version: '1.3',
+    changeDate: '2025-09-08',
+    changeType: 'User Feedback',
+    sourceReference: 'Pilot District Feedback Session',
+    summary: 'Added Spanish-language family outreach templates and FAQ translations.',
+    approvalStatus: 'Approved',
+    impactLevel: 'Minor'
+  }
+]
+
 export default function PolicyPackLibrary({
   assessmentId,
   institutionType,
   institutionName,
-  state
+  state,
+  demoMode = false
 }: PolicyPackLibraryProps) {
   const [templates, setTemplates] = useState<PolicyTemplate[]>([])
   const [selectedTemplates, setSelectedTemplates] = useState<string[]>([])
@@ -103,6 +243,11 @@ export default function PolicyPackLibrary({
   const actualState = profile?.state || state || '[State - Please complete your profile]'
 
   const loadTemplates = useCallback(async () => {
+    if (demoMode) {
+      setTemplates(DEMO_TEMPLATES)
+      setLoading(false)
+      return
+    }
     try {
       const response = await fetch(`/api/policy-packs?action=getAvailableTemplates&institutionType=${actualInstitutionType}`)
       const data = await response.json()
@@ -113,11 +258,17 @@ export default function PolicyPackLibrary({
     } catch (error) {
       console.error('Error loading templates:', error)
     } finally {
-      setLoading(false)
+      if (!demoMode) {
+        setLoading(false)
+      }
     }
-  }, [actualInstitutionType])
+  }, [actualInstitutionType, demoMode])
 
   const loadRedlines = useCallback(async () => {
+    if (demoMode) {
+      setRedlines(DEMO_REDLINES)
+      return
+    }
     try {
       const response = await fetch('/api/policy-packs', {
         method: 'POST',
@@ -132,12 +283,19 @@ export default function PolicyPackLibrary({
     } catch (error) {
       console.error('Error loading redlines:', error)
     }
-  }, [])
+  }, [demoMode])
 
   useEffect(() => {
+    if (demoMode) {
+      setTemplates(DEMO_TEMPLATES)
+      setRedlines(DEMO_REDLINES)
+      setLoading(false)
+      return
+    }
+
     loadTemplates()
     loadRedlines()
-  }, [loadTemplates, loadRedlines])
+  }, [demoMode, loadTemplates, loadRedlines])
 
   const generatePolicyPack = async () => {
     if (selectedTemplates.length === 0) {
@@ -147,26 +305,31 @@ export default function PolicyPackLibrary({
 
     setGenerating(true)
     try {
-      const response = await fetch('/api/policy-packs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'generatePolicyPack',
-          assessmentId,
-          institutionType: actualInstitutionType,
-          institutionName: actualInstitutionName,
-          state,
-          selectedPolicies: selectedTemplates
-        })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        alert('Policy pack generated successfully!')
-        // In production, would trigger download or redirect to policy pack view
+      if (demoMode) {
+        await new Promise(resolve => setTimeout(resolve, 800))
+        alert('Demo Mode: Generated sample policy pack bundle. Download links unlocked in production accounts.')
       } else {
-        throw new Error(data.error)
+        const response = await fetch('/api/policy-packs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'generatePolicyPack',
+            assessmentId,
+            institutionType: actualInstitutionType,
+            institutionName: actualInstitutionName,
+            state,
+            selectedPolicies: selectedTemplates
+          })
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          alert('Policy pack generated successfully!')
+          // In production, would trigger download or redirect to policy pack view
+        } else {
+          throw new Error(data.error)
+        }
       }
     } catch (error) {
       console.error('Error generating policy pack:', error)
@@ -179,22 +342,27 @@ export default function PolicyPackLibrary({
   const generateCommunicationKit = async () => {
     setGenerating(true)
     try {
-      const response = await fetch('/api/policy-packs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'generateCommunicationKit',
-          institutionType,
-          institutionName
+      if (demoMode) {
+        await new Promise(resolve => setTimeout(resolve, 600))
+        alert('Demo Mode: Generated sample communications kit preview. Full exports are available for customers.')
+      } else {
+        const response = await fetch('/api/policy-packs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'generateCommunicationKit',
+            institutionType,
+            institutionName
+          })
         })
-      })
 
-      const data = await response.json()
+        const data = await response.json()
 
-      if (data.success) {
-        // In production, would display or download the communication kit
-        console.log('Communication Kit:', data.communicationKit)
-        alert('Communication kit generated successfully!')
+        if (data.success) {
+          // In production, would display or download the communication kit
+          console.log('Communication Kit:', data.communicationKit)
+          alert('Communication kit generated successfully!')
+        }
       }
     } catch (error) {
       console.error('Error generating communication kit:', error)
@@ -239,6 +407,17 @@ export default function PolicyPackLibrary({
           Ready for {actualInstitutionType} institutions in {actualState}
         </p>
       </div>
+
+      {demoMode && (
+        <Card className="border border-blue-200 bg-blue-50 text-blue-900">
+          <CardContent className="p-4">
+            <p className="font-semibold">Demo Preview</p>
+            <p className="text-sm mt-1">
+              Explore curated policy templates, monthly redlines, and the messaging toolkit. Downloads are simulated here but live accounts export DOCX, PDF, and PPTX bundles instantly.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Monthly Redlines Alert */}
       {redlines.length > 0 && (
