@@ -227,6 +227,8 @@ export async function POST(request: NextRequest) {
 
     // Sanitize SendGrid API key (remove quotes/whitespace from .env)
     const apiKey = process.env.SENDGRID_API_KEY?.trim().replace(/^["']|["']$/g, '');
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL?.trim() || 'info@northpathstrategies.org';
+    const replyToEmail = 'info@northpathstrategies.org';
 
     // Send via SendGrid
     const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
@@ -241,11 +243,11 @@ export async function POST(request: NextRequest) {
           subject: `Your AI Readiness Results: ${results.overallScore}% (${results.readinessLevel})`
         }],
         from: {
-          email: process.env.SENDGRID_FROM_EMAIL || 'info@northpathstrategies.org',
+          email: fromEmail,
           name: 'Jeremy Estrella - Education AI Blueprint'
         },
         reply_to: {
-          email: 'info@northpathstrategies.org',
+          email: replyToEmail,
           name: 'NorthPath Strategies'
         },
         content: [{

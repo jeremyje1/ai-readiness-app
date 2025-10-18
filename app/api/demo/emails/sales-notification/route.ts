@@ -288,8 +288,10 @@ export async function POST(request: NextRequest) {
     const qualification = leadData.lead_qualification || 'WARM';
     const qualificationEmoji = qualification === 'HOT' ? '🔥' : qualification === 'WARM' ? '⚡' : '❄️';
 
-    // Sanitize SendGrid API key (remove quotes/whitespace from .env)
+    // Sanitize SendGrid API key and email addresses (remove quotes/whitespace from .env)
     const apiKey = process.env.SENDGRID_API_KEY?.trim().replace(/^["']|["']$/g, '');
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL?.trim() || 'info@northpathstrategies.org';
+    const toEmail = process.env.SENDGRID_TO_EMAIL?.trim() || 'info@northpathstrategies.org';
 
     // Send via SendGrid to sales team
     const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
@@ -302,14 +304,14 @@ export async function POST(request: NextRequest) {
         personalizations: [{
           to: [
             {
-              email: process.env.SENDGRID_TO_EMAIL || 'info@northpathstrategies.org',
+              email: toEmail,
               name: 'Jeremy Estrella'
             }
           ],
           subject: `${qualificationEmoji} ${qualification} Lead: ${leadData.institution_name} - ${results.overallScore}% Ready (${results.readinessLevel})`
         }],
         from: {
-          email: process.env.SENDGRID_FROM_EMAIL || 'info@northpathstrategies.org',
+          email: fromEmail,
           name: 'Education AI Blueprint Demo System'
         },
         reply_to: {

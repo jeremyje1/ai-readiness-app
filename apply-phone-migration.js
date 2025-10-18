@@ -45,7 +45,7 @@ async function applyMigration() {
         if (error) {
             // If RPC doesn't exist, try direct approach
             console.log('⚠️  RPC method not available, trying direct execution...\n');
-            
+
             // Split into individual statements
             const statements = sql
                 .split(';')
@@ -54,7 +54,7 @@ async function applyMigration() {
 
             for (const statement of statements) {
                 console.log(`Executing: ${statement.substring(0, 100)}...`);
-                
+
                 // For ALTER TABLE, we'll use a different approach
                 if (statement.includes('ALTER TABLE demo_leads')) {
                     // Check if column already exists

@@ -1,9 +1,9 @@
 /* Thin Radix Select wrapper with typed helpers */
-import * as Radix from '@radix-ui/react-select'
 import { cn } from '@/lib/utils'
+import * as Radix from '@radix-ui/react-select'
 import { ChevronDown } from 'lucide-react'
 
-export const Select      = Radix.Root
+export const Select = Radix.Root
 export const SelectValue = Radix.Value
 
 export const SelectTrigger = ({ className, children, ...rest }: Radix.SelectTriggerProps) => (
