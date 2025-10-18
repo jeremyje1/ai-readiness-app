@@ -33,11 +33,15 @@ jobs:
         run: |
           BASE_URL="$APP_BASE_URL"
           if [ -z "$BASE_URL" ]; then
-            echo "BASE_URL secret (APP_BASE_URL) not set" >&2
+            echo "⚠️  APP_BASE_URL secret not configured in GitHub Secrets" >&2
+            echo "📋 To configure: https://github.com/${{ github.repository }}/settings/secrets/actions" >&2
+            echo "📖 See SECRETS_QUICKSTART.md for setup instructions" >&2
             exit 1
           fi
           if [ -z "$CRON_SECRET" ]; then
-            echo "CRON_SECRET GitHub secret not set" >&2
+            echo "⚠️  CRON_SECRET GitHub secret not configured" >&2
+            echo "📋 To configure: https://github.com/${{ github.repository }}/settings/secrets/actions" >&2
+            echo "📖 See SECRETS_QUICKSTART.md for setup instructions" >&2
             exit 1
           fi
 
@@ -62,18 +66,20 @@ jobs:
           payload="{\"dryRun\":$dry_run_bool,\"forceRedlines\":$force_redlines_bool}"
 
           # Call policy updates endpoint
+          echo "📡 Calling $BASE_URL/api/cron/policy-updates/refresh"
           http_code=$(curl -s -o response.json -w '%{http_code}' -X POST "$BASE_URL/api/cron/policy-updates/refresh" \
             -H "x-cron-secret: $CRON_SECRET" \
             -H "content-type: application/json" \
             -d "$payload")
 
-          echo "HTTP Status: $http_code"
-          echo "Response:" && cat response.json && echo
+          echo "📊 HTTP Status: $http_code"
+          echo "📄 Response:" && cat response.json && echo
 
           if [ "$http_code" -ge 300 ]; then
-            echo "❌ Policy updates job failed with status $http_code"
+            echo "❌ Policy updates job failed with status $http_code" >&2
             exit 1
           fi
+          echo "✅ Policy updates request successful"
 
       - name: Validate response and report results
         run: |

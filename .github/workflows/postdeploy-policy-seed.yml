@@ -32,15 +32,26 @@ jobs:
         run: npm ci --omit=dev
 
       - name: Seed AI policy templates
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           if [ -z "${SUPABASE_DB_URL:-}" ]; then
-            echo "Supabase connection string (SUPABASE_DB_URL) is not configured. Add it as an environment variable." >&2
-            exit 1
+            echo "⚠️  SUPABASE_DB_URL is not configured in GitHub Secrets." >&2
+            echo "📋 To configure: https://github.com/${{ github.repository }}/settings/secrets/actions" >&2
+            echo "📖 See SECRETS_QUICKSTART.md for setup instructions" >&2
+            echo "⏭️  Skipping policy seeding until secret is configured." >&2
+            exit 0
           fi
           npm run seed:policies
 
       - name: Verify policy template count
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "⏭️  Skipping verification (SUPABASE_DB_URL not configured)" >&2
+            exit 0
+          fi
           node - <<'NODE'
           const { Client } = require('pg');
 
