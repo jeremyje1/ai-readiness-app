@@ -41,8 +41,40 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Parse form data
-        const formData: ContactFormData = await request.json()
+        // Parse form data with error handling
+        let formData: ContactFormData
+        try {
+            formData = await request.json()
+        } catch (parseError) {
+            console.error("❌ Invalid JSON payload received")
+            return NextResponse.json(
+                { error: "Invalid request payload" },
+                {
+                    status: 400,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                    }
+                }
+            )
+        }
+
+        // Early validation - reject completely empty submissions (likely bots)
+        if (!formData || typeof formData !== 'object') {
+            console.warn("⚠️ Rejected empty/invalid payload")
+            return NextResponse.json(
+                { error: "Invalid request payload" },
+                {
+                    status: 400,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                    }
+                }
+            )
+        }
 
         console.log("📨 Received form submission:", {
             name: `${formData.firstName} ${formData.lastName}`,
