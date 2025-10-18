@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS demo_leads (
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   email TEXT NOT NULL,
+  phone TEXT,
   institution_name TEXT NOT NULL,
   institution_type TEXT NOT NULL,
   role TEXT NOT NULL,
