@@ -1,0 +1,45 @@
+🔐 SECURITY QUICK REFER4. UPDATE VERCEL (5 min)
+   Pull fresh values from 1Password → "AI Blueprint / Production Secrets"
+   • ADMIN_GRANT_TOKEN
+   • CRON_SECRET
+   • NEXTAUTH_SECRET
+   • JWT_SECRET
+   
+   Note: This project uses Supabase backend (no Railway deployment)══════════════════════════════════════════════════════════
+
+✅ COMPLETED
+• Removed .env.temp.fetch from git
+• Deleted local credential files
+• Generated new application secrets
+• All tests passing
+
+🚨 ACTION REQUIRED - ROTATE THESE NOW:
+
+1. STRIPE (5 min)
+   → https://dashboard.stripe.com/apikeys
+   → Roll Secret Key & Webhook Secret
+   
+2. SUPABASE (3 min)
+   → https://supabase.com/dashboard/project/jocigzsthcpspxfdfxae/settings/api
+   → Reset service_role key
+   
+3. POSTMARK (3 min)
+   → https://account.postmarkapp.com/servers
+   → Regenerate API Token
+
+4. UPDATE RAILWAY & VERCEL (10 min)
+   Pull fresh values from 1Password → “AI Blueprint / Production Secrets”
+   • ADMIN_GRANT_TOKEN
+   • CRON_SECRET
+   • NEXTAUTH_SECRET
+   • JWT_SECRET
+
+📋 VERIFICATION TESTS
+• curl https://aiblueprint.educationaiblueprint.com/api/health
+• Test login/signup
+• Test Stripe checkout
+• Test email delivery
+
+⏱️  TOTAL TIME: ~30 minutes
+
+📖 Full Guide: SECURITY_REMEDIATION_GUIDE.md

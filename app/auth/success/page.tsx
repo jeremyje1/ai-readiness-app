@@ -1,92 +1,73 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/lib/supabase/client';
+import { useSubscription } from '@/hooks/useSubscription';
+import { createClient } from '@/lib/supabase/browser-client';
+import type { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function AuthSuccessPage() {
-    const [user, setUser] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const subscription = useSubscription();
+    const [user, setUser] = useState<User | null>(null);
+    const [loadingUser, setLoadingUser] = useState(true);
+    const supabase = useMemo(() => createClient(), []);
 
     useEffect(() => {
-        let isMounted = true;
+        let cancelled = false;
 
-        const checkUser = async () => {
-            const supabase = createClient();
-            const { data: { user }, error } = await supabase.auth.getUser();
-            if (error) {
-                console.error('Error getting user:', error);
-                if (isMounted) {
-                    setLoading(false);
+        const loadUser = async () => {
+            try {
+                const { data, error } = await supabase.auth.getUser();
+                if (error) {
+                    console.error('[AuthSuccess] Failed to load user:', error.message);
                 }
-                return;
-            }
 
-            if (isMounted) {
-                setUser(user);
-            }
+                if (!cancelled) {
+                    setUser(data?.user ?? null);
+                }
 
-            if (!user) {
-                console.warn('No authenticated user found on auth success page');
-                router.push('/auth/login');
-                return;
-            }
-
-            const isTrial = user?.user_metadata?.subscription_status === 'trial' ||
-                user?.user_metadata?.subscription_status === 'trialing';
-
-            if (isTrial) {
-                console.log('Trial user detected, redirecting to dashboard...');
-                router.push('/dashboard/personalized');
-                return;
-            }
-
-            if (user?.user_metadata?.payment_verified || user?.user_metadata?.tier) {
-                console.log('User has paid subscription (metadata), redirecting to dashboard...');
-                router.push('/dashboard/personalized');
-                return;
-            }
-
-            const { data: payment } = await supabase
-                .from('user_payments')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('payment_status', 'completed')
-                .maybeSingle();
-
-            if (payment) {
-                console.log('User has paid subscription (payment record), redirecting to dashboard...');
-
-                await supabase.auth.updateUser({
-                    data: {
-                        payment_verified: true,
-                        tier: payment.tier || 'platform-monthly'
-                    }
-                });
-
-                router.push('/dashboard/personalized');
-                return;
-            }
-
-            console.log('No payment found, showing free user options...');
-            if (isMounted) {
-                setLoading(false);
+                if (!data?.user) {
+                    console.warn('[AuthSuccess] No authenticated user, redirecting to login');
+                    router.replace('/auth/login');
+                    return;
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    console.error('[AuthSuccess] Unexpected user load error:', error);
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoadingUser(false);
+                }
             }
         };
 
-        void checkUser();
+        void loadUser();
 
         return () => {
-            isMounted = false;
+            cancelled = true;
         };
-    }, [router]);
+    }, [router, supabase]);
+
+    useEffect(() => {
+        if (loadingUser || subscription.isLoading) {
+            return;
+        }
+
+        if (subscription.hasPremiumAccess || subscription.hasActiveSubscription) {
+            const timeout = setTimeout(() => {
+                router.replace('/dashboard/personalized');
+            }, 2000);
+
+            return () => clearTimeout(timeout);
+        }
+    }, [loadingUser, subscription.hasActiveSubscription, subscription.hasPremiumAccess, subscription.isLoading, router]);
 
     const handleSignOut = async () => {
-        const supabase = createClient();
         await supabase.auth.signOut();
-        router.push('/auth/login');
+        router.replace('/auth/login');
     };
 
     const navigateToAssessment = () => {
@@ -97,12 +78,34 @@ export default function AuthSuccessPage() {
         router.push('/pricing');
     };
 
-    if (loading) {
+    const isLoading = loadingUser || subscription.isLoading;
+    const showPremiumSuccess = !isLoading && (subscription.hasPremiumAccess || subscription.hasActiveSubscription);
+
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
                 <div className="bg-white shadow rounded-lg p-8 max-w-md w-full text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                     <p className="text-gray-600">Checking your payment status...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (showPremiumSuccess) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
+                <div className="bg-white shadow rounded-lg p-8 max-w-2xl w-full text-center space-y-6">
+                    <h1 className="text-3xl font-bold">🎉 Subscription Activated!</h1>
+                    <p className="text-gray-600">
+                        You now have full access to AI Blueprint premium features. We&rsquo;ll take you to your dashboard in just a moment.
+                    </p>
+                    <Button onClick={() => router.replace('/dashboard/premium')} size="lg" className="mx-auto">
+                        Go to Premium Dashboard
+                    </Button>
+                    <p className="text-xs text-gray-400">
+                        If the page doesn&rsquo;t refresh automatically, use the button above.
+                    </p>
                 </div>
             </div>
         );
@@ -124,8 +127,7 @@ export default function AuthSuccessPage() {
                     <div className="p-6 bg-gray-50 rounded-lg">
                         <h2 className="text-xl font-semibold mb-3">✅ Login Successful!</h2>
                         <p className="text-gray-600 mb-4">
-                            You&rsquo;ve successfully logged in. Since you don&rsquo;t have a paid subscription yet,
-                            you can explore the following options:
+                            You&rsquo;re all set. Take the AI readiness assessment and explore our premium plans when you&rsquo;re ready.
                         </p>
 
                         <div className="space-y-3">

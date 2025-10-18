@@ -6,7 +6,8 @@ import { NextResponse } from 'next/server';
 const REQUIRED_ENV = [
   'STRIPE_SECRET_KEY',
   'STRIPE_PRICE_TEAM_MONTHLY',
-  'STRIPE_PRICE_TEAM_YEARLY'
+  'STRIPE_PRICE_TEAM_YEARLY',
+  'STRIPE_PRICE_JEREMY_CONSULTATION'
 ];
 
 export async function GET() {

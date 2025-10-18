@@ -1,443 +1,186 @@
-'use client';
+import { Metadata } from "next"
+import Link from "next/link"
+import { redirect } from "next/navigation"
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { createClient } from '@/lib/supabase/client';
-import { motion } from 'framer-motion';
-import {
-    ArrowRight,
-    BarChart3,
-    BookOpen,
-    CheckCircle2,
-    FileText,
-    Settings,
-    Sparkles,
-    Target,
-    Users
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { createClient } from "@/lib/supabase/server"
+import { ArrowRight, BarChart3, CheckCircle2, FileText, Sparkles } from "lucide-react"
 
-export default function WelcomePage() {
-    const router = useRouter();
-    const supabase = useMemo(() => createClient(), []);
-    const [user, setUser] = useState<any>(null);
-    const [profile, setProfile] = useState<any>(null);
-    const [currentStep, setCurrentStep] = useState(0);
+export const metadata: Metadata = {
+    title: "Welcome | AI Blueprint",
+    description: "Complete onboarding to unlock your personalized AI readiness plan"
+}
 
-    useEffect(() => {
-        const loadUser = async () => {
-            try {
-                console.log('🔍 Welcome page: Loading user...');
-                const { data: { user }, error: userError } = await supabase.auth.getUser();
-                if (userError || !user) {
-                    console.log('❌ No user found, redirecting to get-started', userError);
-                    router.push('/get-started');
-                    return;
-                }
-                console.log('✅ User loaded:', user.email);
-                setUser(user);
+const MS_PER_DAY = 1000 * 60 * 60 * 24
 
-                // Load user profile with retries (profile might be created asynchronously)
-                let attempts = 0;
-                const maxAttempts = 3; // Reduced from 5 to 3
+function safeDaysRemaining(trialEndsAt?: string | null) {
+    if (!trialEndsAt) return null
+    const remaining = Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / MS_PER_DAY)
+    return Number.isFinite(remaining) ? Math.max(remaining, 0) : null
+}
 
-                while (attempts < maxAttempts) {
-                    console.log(`🔄 Attempt ${attempts + 1}/${maxAttempts}: Loading profile...`);
-                    const { data: profileData, error } = await supabase
-                        .from('user_profiles')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .maybeSingle(); // Use maybeSingle instead of single
+export default async function WelcomePage() {
+    const supabase = await createClient()
+    const {
+        data: { session }
+    } = await supabase.auth.getSession()
 
-                    if (profileData) {
-                        console.log('✅ Profile loaded:', profileData);
-                        setProfile(profileData);
-                        return;
-                    }
-
-                    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-                        console.error('❌ Error loading profile:', error);
-                    }
-
-                    // Wait 500ms before retrying (faster retry)
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    attempts++;
-                }
-
-                // If profile still doesn't exist after retries, create one
-                console.log('⚠️ Profile not found after retries, creating minimal profile...');
-
-                // First, check if user has an institution
-                const { data: existingMembership } = await supabase
-                    .from('institution_memberships')
-                    .select('*, institutions(*)')
-                    .eq('user_id', user.id)
-                    .eq('active', true)
-                    .single();
-
-                let institutionId = existingMembership?.institution_id;
-
-                // If no institution, create a default one for the user
-                if (!institutionId) {
-                    const orgName = user.user_metadata?.organization || user.email?.split('@')[1]?.split('.')[0] || 'My Institution';
-                    const { data: newInstitution } = await supabase
-                        .from('institutions')
-                        .insert({
-                            name: orgName,
-                            slug: orgName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
-                            headcount: 500,
-                            budget: 1000000,
-                            org_type: user.user_metadata?.institution_type || 'K12'
-                        })
-                        .select()
-                        .single();
-
-                    if (newInstitution) {
-                        institutionId = newInstitution.id;
-
-                        // Create membership
-                        await supabase
-                            .from('institution_memberships')
-                            .insert({
-                                user_id: user.id,
-                                institution_id: institutionId,
-                                role: 'admin',
-                                active: true
-                            });
-                    }
-                }
-
-                const { data: newProfile, error: createError } = await supabase
-                    .from('user_profiles')
-                    .upsert({
-                        user_id: user.id,
-                        email: user.email,
-                        full_name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                        institution_id: institutionId || null,
-                        institution_name: user.user_metadata?.organization || '',
-                        institution_type: user.user_metadata?.institution_type || 'K12',
-                        job_title: user.user_metadata?.title || '',
-                        phone: user.user_metadata?.phone || '',
-                        subscription_tier: 'trial',
-                        subscription_status: 'trial',
-                        trial_ends_at: user.user_metadata?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-                        onboarding_completed: false
-                    }, {
-                        onConflict: 'user_id'
-                    })
-                    .select()
-                    .single();
-
-                if (newProfile) {
-                    console.log('✅ Profile created:', newProfile);
-                    setProfile(newProfile);
-                } else {
-                    console.error('❌ Failed to create profile:', createError);
-                    // Continue without profile data - allow user to proceed
-                    setProfile({
-                        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-                        organization: user.user_metadata?.organization || '',
-                        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-                    });
-                }
-            } catch (error) {
-                console.error('❌ Error in loadUser:', error);
-                // Set minimal profile to allow user to continue
-                setProfile({
-                    name: 'User',
-                    organization: '',
-                    trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-                });
-            }
-        };
-        loadUser();
-    }, [router, supabase]);
-
-    const onboardingSteps = [
-        {
-            title: 'Welcome to AI Blueprint!',
-            description: 'Let\'s get you started with a quick tour',
-            icon: <Sparkles className="h-6 w-6" />,
-            action: 'Next'
-        },
-        {
-            title: 'Take Your AI Readiness Assessment',
-            description: 'Evaluate your institution\'s current AI capabilities',
-            icon: <FileText className="h-6 w-6" />,
-            action: 'Start Assessment',
-            route: '/assessment'
-        },
-        {
-            title: 'Explore Your Dashboard',
-            description: 'View personalized insights and recommendations',
-            icon: <BarChart3 className="h-6 w-6" />,
-            action: 'View Dashboard',
-            route: '/dashboard/personalized'
-        },
-        {
-            title: 'Access Resources',
-            description: 'Download templates, guides, and best practices',
-            icon: <BookOpen className="h-6 w-6" />,
-            action: 'Browse Resources',
-            route: '/resources/templates'
-        }
-    ];
-
-    const handleStepAction = () => {
-        const currentStepData = onboardingSteps[currentStep];
-        if (currentStepData.route) {
-            router.push(currentStepData.route);
-        } else if (currentStep < onboardingSteps.length - 1) {
-            setCurrentStep(currentStep + 1);
-        }
-    };
-
-    const skipToChDashboard = () => {
-        router.push('/dashboard/personalized');
-    };
-
-    if (!user) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Card className="max-w-md">
-                    <CardContent className="pt-6">
-                        <div className="flex flex-col items-center space-y-4">
-                            <div className="animate-pulse">Loading your account...</div>
-                            <Button
-                                variant="outline"
-                                onClick={() => router.push('/dashboard/personalized')}
-                            >
-                                Continue Anyway <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
+    if (!session) {
+        redirect("/get-started")
     }
 
-    // If profile doesn't exist yet, show a simpler welcome screen with continue option
-    if (!profile) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
-                <Card className="max-w-md">
-                    <CardHeader>
-                        <CardTitle>Welcome to AI Blueprint! 🎉</CardTitle>
-                        <CardDescription>
-                            Setting up your account...
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            <div className="animate-pulse flex items-center space-x-2">
-                                <div className="h-4 w-4 bg-indigo-600 rounded-full"></div>
-                                <span>Creating your profile...</span>
-                            </div>
-                            <Button onClick={() => router.push('/assessment')} className="w-full">
-                                Start Assessment <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                onClick={() => router.push('/dashboard/personalized')}
-                                className="w-full"
-                            >
-                                Go to Dashboard
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    }
+    const userId = session.user.id
 
-    const trialEndDate = new Date(profile.trial_ends_at);
-    const daysRemaining = Math.ceil((trialEndDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    const [profileResult, assessmentsResult, roadmapResult, documentsResult] = await Promise.all([
+        supabase
+            .from("user_profiles")
+            .select("full_name, institution_name, trial_ends_at, onboarding_completed")
+            .eq("user_id", userId)
+            .maybeSingle(),
+        supabase
+            .from("streamlined_assessment_responses")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId),
+        supabase
+            .from("implementation_roadmaps")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId),
+        supabase
+            .from("uploaded_documents")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId)
+    ])
+
+    const profile = profileResult.data ?? null
+    const daysRemaining = safeDaysRemaining(profile?.trial_ends_at)
+    const assessmentsCompleted = (assessmentsResult.count ?? 0) > 0
+    const roadmapsCreated = (roadmapResult.count ?? 0) > 0
+    const documentsUploaded = (documentsResult.count ?? 0) > 0
+
+    const steps = [
+        {
+            title: "Complete your AI readiness assessment",
+            description: "Answer 18 streamlined prompts to capture governance, curriculum, and measurement maturity.",
+            href: "/assessment",
+            icon: <FileText className="h-5 w-5" />,
+            completed: assessmentsCompleted
+        },
+        {
+            title: "Review your personalized roadmap",
+            description: "Turn assessment results into 30/60/90 day priorities aligned to NIST and Department of Education guidance.",
+            href: "/dashboard/personalized",
+            icon: <BarChart3 className="h-5 w-5" />,
+            completed: roadmapsCreated
+        },
+        {
+            title: "Upload your critical policies and plans",
+            description: "Let the AI analyst highlight policy gaps, risk hotspots, and recommended updates for leadership review.",
+            href: "/documents",
+            icon: <Sparkles className="h-5 w-5" />,
+            completed: documentsUploaded
+        }
+    ]
+
+    const nextStep = steps.find((step) => !step.completed)
+    const greetingName = profile?.full_name?.split(" ")[0] ?? session.user.email?.split("@")[0] ?? "there"
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
-            {/* Header */}
-            <div className="bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-indigo-600">AI Blueprint for Education</h1>
-                    <Button variant="ghost" onClick={skipToChDashboard}>
-                        Skip to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-
-            <div className="max-w-4xl mx-auto px-4 py-12">
-                {/* Welcome Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-8"
-                >
-                    <h2 className="text-4xl font-bold text-gray-900 mb-2">
-                        Welcome, {profile.name?.split(' ')[0]}! 🎉
-                    </h2>
-                    <p className="text-xl text-gray-600">
-                        Your 7-day trial at {profile.organization} has begun
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-white">
+            <div className="mx-auto w-full max-w-5xl px-4 py-16">
+                <header className="mb-10 space-y-3 text-center">
+                    <p className="text-sm uppercase tracking-wide text-indigo-600">Welcome to AI Blueprint</p>
+                    <h1 className="text-4xl font-semibold text-slate-900 sm:text-5xl">Hi {greetingName}, let's launch your AI program</h1>
+                    <p className="mx-auto max-w-2xl text-lg text-slate-600">
+                        Follow the guided onboarding below to capture your baseline, generate a roadmap, and activate AI governance across your institution.
                     </p>
-                    <div className="flex items-center justify-center space-x-2 mt-4 text-sm">
-                        <div className="flex items-center space-x-1 text-green-600">
-                            <CheckCircle2 className="h-4 w-4" />
-                            <span>Account created successfully</span>
-                        </div>
-                        <span className="text-gray-400">•</span>
-                        <span className="text-gray-600">{daysRemaining} days remaining in trial</span>
-                    </div>
-                </motion.div>
+                </header>
 
-                {/* Progress Bar */}
-                <div className="mb-8">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600">Onboarding Progress</span>
-                        <span className="text-sm text-gray-600">{currentStep + 1} of {onboardingSteps.length}</span>
+                <section className="mb-10 grid gap-6 rounded-2xl border border-indigo-100 bg-white/90 p-6 shadow-sm sm:grid-cols-2">
+                    <div>
+                        <p className="text-sm font-medium text-slate-600">Trial status</p>
+                        <p className="mt-2 text-2xl font-semibold text-slate-900">Active trial</p>
+                        {daysRemaining !== null ? (
+                            <p className="mt-1 text-sm text-slate-600">{daysRemaining} day{daysRemaining === 1 ? "" : "s"} remaining</p>
+                        ) : (
+                            <p className="mt-1 text-sm text-slate-600">We'll remind you before your trial ends.</p>
+                        )}
                     </div>
-                    <Progress value={(currentStep + 1) / onboardingSteps.length * 100} className="h-2" />
-                </div>
+                    <div>
+                        <p className="text-sm font-medium text-slate-600">Institution</p>
+                        <p className="mt-2 text-base text-slate-900">{profile?.institution_name ?? "Your organization"}</p>
+                        <p className="mt-1 text-sm text-slate-600">Invite colleagues from this organization once onboarding is complete.</p>
+                    </div>
+                </section>
 
-                {/* Current Step Card */}
-                <motion.div
-                    key={currentStep}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                >
-                    <Card className="mb-8">
-                        <CardHeader>
-                            <div className="flex items-center space-x-3 mb-4">
-                                <div className="p-3 bg-indigo-100 rounded-lg text-indigo-600">
-                                    {onboardingSteps[currentStep].icon}
-                                </div>
-                                <div>
-                                    <CardTitle>{onboardingSteps[currentStep].title}</CardTitle>
-                                    <CardDescription>{onboardingSteps[currentStep].description}</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            <Button onClick={handleStepAction} size="lg" className="w-full">
-                                {onboardingSteps[currentStep].action}
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                            <Button
-                                onClick={skipToChDashboard}
-                                variant="ghost"
-                                className="w-full"
+                <section className="space-y-4">
+                    <h2 className="text-xl font-semibold text-slate-900">Your onboarding checklist</h2>
+                    <div className="space-y-3">
+                        {steps.map((step) => (
+                            <div
+                                key={step.title}
+                                className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-sm transition hover:border-indigo-200 hover:shadow"
                             >
-                                Skip Tour → Go to Dashboard
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                {/* Quick Links */}
-                <div className="grid md:grid-cols-3 gap-4">
-                    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/assessment')}>
-                        <CardHeader>
-                            <div className="flex items-center space-x-3">
-                                <Target className="h-5 w-5 text-indigo-600" />
-                                <h3 className="font-semibold">AI Assessment</h3>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Evaluate your readiness
-                            </p>
-                        </CardHeader>
-                    </Card>
-
-                    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/pricing')}>
-                        <CardHeader>
-                            <div className="flex items-center space-x-3">
-                                <Settings className="h-5 w-5 text-indigo-600" />
-                                <h3 className="font-semibold">Upgrade Plan</h3>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                                View pricing options
-                            </p>
-                        </CardHeader>
-                    </Card>
-
-                    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/resources/templates')}>
-                        <CardHeader>
-                            <div className="flex items-center space-x-3">
-                                <Users className="h-5 w-5 text-indigo-600" />
-                                <h3 className="font-semibold">Get Support</h3>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Contact our team
-                            </p>
-                        </CardHeader>
-                    </Card>
-                </div>
-
-                {/* Institution Type Specific Content */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-12"
-                >
-                    <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
-                        <CardHeader>
-                            <CardTitle>
-                                {profile.institution_type === 'HigherEd' ? 'Higher Education' : 'K-12'} Quick Start Guide
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <h4 className="font-semibold mb-2">Recommended First Steps:</h4>
-                                    <ul className="space-y-2">
-                                        {profile.institution_type === 'HigherEd' ? (
-                                            <>
-                                                <li className="flex items-start space-x-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                                                    <span className="text-sm">Complete faculty readiness survey</span>
-                                                </li>
-                                                <li className="flex items-start space-x-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                                                    <span className="text-sm">Review academic integrity policies</span>
-                                                </li>
-                                                <li className="flex items-start space-x-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                                                    <span className="text-sm">Explore research integration tools</span>
-                                                </li>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <li className="flex items-start space-x-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                                                    <span className="text-sm">Assess teacher AI readiness</span>
-                                                </li>
-                                                <li className="flex items-start space-x-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                                                    <span className="text-sm">Review student safety protocols</span>
-                                                </li>
-                                                <li className="flex items-start space-x-2">
-                                                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
-                                                    <span className="text-sm">Download curriculum guides</span>
-                                                </li>
-                                            </>
-                                        )}
-                                    </ul>
+                                <div className="flex items-start gap-4">
+                                    <span
+                                        className={`mt-1 flex h-10 w-10 items-center justify-center rounded-full border ${step.completed
+                                                ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                                                : "border-indigo-200 bg-indigo-50 text-indigo-600"
+                                            }`}
+                                    >
+                                        {step.completed ? <CheckCircle2 className="h-5 w-5" /> : step.icon}
+                                    </span>
+                                    <div className="flex-1">
+                                        <p className="text-base font-semibold text-slate-900">{step.title}</p>
+                                        <p className="mt-1 text-sm text-slate-600">{step.description}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-semibold mb-2">Resources Available:</h4>
-                                    <ul className="space-y-2">
-                                        <li className="text-sm text-gray-600">• Policy templates library</li>
-                                        <li className="text-sm text-gray-600">• Implementation roadmaps</li>
-                                        <li className="text-sm text-gray-600">• Best practices guides</li>
-                                        <li className="text-sm text-gray-600">• Community forum access</li>
-                                    </ul>
+                                <div className="flex items-center justify-between border-t border-slate-200 pt-4 text-sm">
+                                    <span className={step.completed ? "text-emerald-600" : "text-indigo-600"}>
+                                        {step.completed ? "Completed" : "Ready when you are"}
+                                    </span>
+                                    <Link
+                                        href={step.href}
+                                        className="inline-flex items-center gap-2 rounded-full border border-indigo-200 px-4 py-2 text-sm font-medium text-indigo-600 transition hover:border-indigo-300 hover:text-indigo-700"
+                                    >
+                                        {step.completed ? "Review" : "Start now"}
+                                        <ArrowRight className="h-4 w-4" />
+                                    </Link>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                        ))}
+                    </div>
+                </section>
+
+                {nextStep && (
+                    <section className="mt-12 rounded-2xl border border-slate-200 bg-slate-900 p-6 text-slate-50">
+                        <h3 className="text-lg font-semibold">Next best action</h3>
+                        <p className="mt-2 text-sm text-slate-200">Jump back in where you left off to keep momentum.</p>
+                        <div className="mt-4 flex flex-col gap-3 rounded-xl bg-slate-800/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-base font-medium">{nextStep.title}</p>
+                                <p className="text-sm text-slate-300">{nextStep.description}</p>
+                            </div>
+                            <Link
+                                href={nextStep.href}
+                                className="inline-flex items-center gap-2 rounded-full bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                            >
+                                Resume <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </div>
+                    </section>
+                )}
+
+                <section className="mt-12 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+                    <h3 className="text-lg font-semibold text-slate-900">Need a hand?</h3>
+                    <p className="mt-2 text-sm text-slate-600">
+                        We're here to help with policy reviews, roadmap planning, and stakeholder workshops. Email
+                        {" "}
+                        <a href="mailto:hello@educationaiblueprint.com" className="text-indigo-600 hover:text-indigo-500">
+                            hello@educationaiblueprint.com
+                        </a>
+                        {" "}or book a working session from your dashboard once onboarding is complete.
+                    </p>
+                </section>
             </div>
         </div>
-    );
+    )
 }

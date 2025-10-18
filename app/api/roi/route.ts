@@ -1,3 +1,4 @@
+import { getOrganizationForUser, hasPremiumAccess } from '@/lib/payments/access';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
@@ -13,19 +14,31 @@ export async function GET(request: Request) {
         const url = new URL(request.url);
         const period = url.searchParams.get('period') || '30d';
 
-        // Get user's organization from user_payments
-        const { data: payment } = await supabase
-            .from('user_payments')
-            .select('organization')
-            .eq('user_id', user.id)
-            .eq('access_granted', true)
-            .single();
+        const {
+            organization: organizationFromPayment,
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+        } = await getOrganizationForUser(supabase, user.id);
 
-        if (!payment || !payment.organization) {
-            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
+        const hasAccess = hasPremiumAccess(
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+            user.created_at
+        );
+
+        if (!hasAccess) {
+            return NextResponse.json({ error: 'Active subscription required' }, { status: 403 });
         }
 
-        const organization = payment.organization;
+        const organization =
+            organizationFromPayment ||
+            user.user_metadata?.organization ||
+            (user.email ? user.email.split('@')[1] : null) ||
+            `premium-${user.id.slice(0, 8)}`;
 
         // Calculate date ranges
         const now = new Date();
@@ -127,19 +140,31 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { metric_type, metric_value, category, description } = body;
 
-        // Get user's organization from user_payments
-        const { data: payment } = await supabase
-            .from('user_payments')
-            .select('organization')
-            .eq('user_id', user.id)
-            .eq('access_granted', true)
-            .single();
+        const {
+            organization: organizationFromPayment,
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+        } = await getOrganizationForUser(supabase, user.id);
 
-        if (!payment || !payment.organization) {
-            return NextResponse.json({ error: 'No premium access found' }, { status: 404 });
+        const hasAccess = hasPremiumAccess(
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+            user.created_at
+        );
+
+        if (!hasAccess) {
+            return NextResponse.json({ error: 'Active subscription required' }, { status: 403 });
         }
 
-        const organization = payment.organization;
+        const organization =
+            organizationFromPayment ||
+            user.user_metadata?.organization ||
+            (user.email ? user.email.split('@')[1] : null) ||
+            `premium-${user.id.slice(0, 8)}`;
 
         // Check if user has permission to add metrics
         const { data: membership } = await supabase

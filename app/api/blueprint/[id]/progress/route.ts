@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 // GET: Get blueprint progress
@@ -9,7 +8,7 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const supabase = createRouteHandlerClient({ cookies });
+        const supabase = await createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {
@@ -74,7 +73,7 @@ export async function POST(
 ) {
     try {
         const { id } = await params;
-        const supabase = createRouteHandlerClient({ cookies });
+        const supabase = await createClient();
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         if (authError || !user) {

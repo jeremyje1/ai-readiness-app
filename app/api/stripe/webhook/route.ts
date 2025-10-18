@@ -28,12 +28,17 @@ const tierMapping: Record<string, string> = {
 };
 
 interface UserData {
-  email: string; // original casing from Stripe
+  email: string; // login email we should associate with the account
+  billingEmail: string; // email supplied to Stripe during checkout
   name: string;
   organization?: string;
   tier: string;
   stripeCustomerId: string;
   stripeSessionId: string;
+  stripeSubscriptionId?: string;
+  subscriptionStatus?: string;
+  trialEndsAt?: string | null;
+  userIdFromMetadata?: string | null;
 }
 
 async function createPasswordSetupToken(userId: string, email: string) {
@@ -56,39 +61,51 @@ async function createPasswordSetupToken(userId: string, email: string) {
 async function createOrFindUserAndGrantAccess(userData: UserData): Promise<string> {
   if (!supabaseAdmin) throw new Error('Supabase admin client not available - check environment variables');
 
-  const normalizedEmail = userData.email.toLowerCase();
-  let userId: string | null = null;
+  const normalizedLoginEmail = userData.email?.toLowerCase() || '';
+  const normalizedBillingEmail = userData.billingEmail?.toLowerCase() || normalizedLoginEmail;
+  let resolvedUser: any | null = null;
 
-  // 1. First, try to find existing user (they should have been created during registration)
-  const { data: list } = await supabaseAdmin.auth.admin.listUsers();
-  const existing = list?.users?.find((u: any) => u.email?.toLowerCase() === normalizedEmail);
-
-  if (existing) {
-    userId = existing.id;
-    console.log(`ℹ️  Found existing user for email ${normalizedEmail}: ${userId}`);
-
-    // Update the existing user's metadata with payment info
-    const { error: updateErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-      user_metadata: {
-        ...existing.user_metadata,
-        tier: userData.tier,
-        stripe_customer_id: userData.stripeCustomerId,
-        stripe_session_id: userData.stripeSessionId,
-        payment_verified: true,
-        access_granted_at: new Date().toISOString(),
+  if (userData.userIdFromMetadata) {
+    try {
+      const { data, error } = await supabaseAdmin.auth.admin.getUserById(userData.userIdFromMetadata);
+      if (error) {
+        console.warn('Unable to fetch user by metadata user_id:', error.message);
+      } else if (data?.user) {
+        resolvedUser = data.user;
+        console.log(`ℹ️  Resolved user by metadata user_id ${userData.userIdFromMetadata}`);
       }
-    });
-
-    if (updateErr) {
-      console.error('Failed to update user metadata:', updateErr);
-    } else {
-      console.log(`✅ Updated user ${userId} with payment info`);
+    } catch (error) {
+      console.warn('Error fetching user by metadata user_id:', error);
     }
-  } else {
-    // Only create a new user if they don't exist (fallback for direct Stripe payments)
-    console.warn(`⚠️  No existing user found for ${normalizedEmail}, creating new user`);
+  }
+
+  let listedUsers: any[] = [];
+  if (!resolvedUser) {
+    const { data: list, error: listErr } = await supabaseAdmin.auth.admin.listUsers();
+    if (listErr) {
+      console.error('Failed to list users while resolving Stripe checkout:', listErr.message);
+    } else {
+      listedUsers = list?.users ?? [];
+    }
+
+    if (!resolvedUser && normalizedLoginEmail) {
+      resolvedUser = listedUsers.find((u: any) => u.email?.toLowerCase() === normalizedLoginEmail) || null;
+    }
+
+    if (!resolvedUser && normalizedBillingEmail) {
+      resolvedUser = listedUsers.find((u: any) => u.email?.toLowerCase() === normalizedBillingEmail) || null;
+    }
+  }
+
+  if (!resolvedUser) {
+    const emailToUse = normalizedLoginEmail || normalizedBillingEmail;
+    if (!emailToUse) {
+      throw new Error('Unable to resolve login email for Stripe checkout completion');
+    }
+
+    console.warn(`⚠️  No existing user found for ${emailToUse}, creating new user`);
     const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-      email: normalizedEmail,
+      email: emailToUse,
       email_confirm: true,
       user_metadata: {
         name: userData.name,
@@ -96,9 +113,12 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
         tier: userData.tier,
         stripe_customer_id: userData.stripeCustomerId,
         stripe_session_id: userData.stripeSessionId,
+        stripe_subscription_id: userData.stripeSubscriptionId,
+        subscription_status: userData.subscriptionStatus,
         payment_verified: true,
         access_granted_at: new Date().toISOString(),
-        created_via: 'stripe_webhook' // Mark as created via webhook without password
+        billing_email: normalizedBillingEmail,
+        created_via: 'stripe_webhook'
       }
     });
 
@@ -106,12 +126,16 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
       console.error('Failed to create user:', createErr);
       throw createErr;
     } else if (created?.user?.id) {
-      userId = created.user.id;
-      console.log(`✅ User account created: ${userId}`);
+      resolvedUser = created.user;
+      console.log(`✅ User account created: ${resolvedUser.id}`);
     }
   }
 
-  if (!userId) throw new Error('User ID unresolved');
+  if (!resolvedUser) {
+    throw new Error('User ID unresolved');
+  }
+
+  const userId = resolvedUser.id as string;
 
   // 2. Upsert payment record idempotently (by stripe_session_id)
   const { data: existingPayment, error: findPaymentErr } = await supabaseAdmin
@@ -123,20 +147,26 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
     console.warn('Payment lookup failed (non-fatal):', findPaymentErr.message);
   }
 
+  const paymentPayload = {
+    user_id: userId,
+    email: normalizedLoginEmail || normalizedBillingEmail,
+    name: userData.name,
+    organization: userData.organization,
+    tier: userData.tier,
+    stripe_customer_id: userData.stripeCustomerId,
+    stripe_subscription_id: userData.stripeSubscriptionId,
+    stripe_session_id: userData.stripeSessionId,
+    payment_amount: getTierPrice(userData.tier),
+    payment_status: userData.subscriptionStatus || 'active',
+    access_granted: true,
+    updated_at: new Date().toISOString()
+  } as const;
+
   if (!existingPayment || existingPayment.length === 0) {
     const { error: insertErr } = await supabaseAdmin
       .from('user_payments')
       .insert({
-        user_id: userId,
-        email: normalizedEmail,
-        name: userData.name,
-        organization: userData.organization,
-        tier: userData.tier,
-        stripe_customer_id: userData.stripeCustomerId,
-        stripe_session_id: userData.stripeSessionId,
-        payment_amount: getTierPrice(userData.tier),
-        payment_status: 'completed',
-        access_granted: true,
+        ...paymentPayload,
         created_at: new Date().toISOString()
       });
     if (insertErr) {
@@ -145,7 +175,41 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
       console.log(`💾 Payment row inserted for user ${userId}`);
     }
   } else {
-    console.log(`↩️  Payment row already exists for session ${userData.stripeSessionId}`);
+    const targetId = existingPayment[0].id;
+    const { error: updatePaymentErr } = await supabaseAdmin
+      .from('user_payments')
+      .update(paymentPayload)
+      .eq('id', targetId);
+    if (updatePaymentErr) {
+      console.error('Failed to update payment row:', updatePaymentErr);
+    } else {
+      console.log(`🔄 Payment row updated for session ${userData.stripeSessionId}`);
+    }
+  }
+
+  // Update the existing user's metadata with payment info
+  const mergedMetadata = {
+    ...resolvedUser.user_metadata,
+    tier: userData.tier,
+    stripe_customer_id: userData.stripeCustomerId,
+    stripe_session_id: userData.stripeSessionId,
+    stripe_subscription_id: userData.stripeSubscriptionId,
+    payment_verified: true,
+    access_granted_at: new Date().toISOString(),
+    subscription_status: userData.subscriptionStatus,
+    trial_ends_at: userData.trialEndsAt,
+    billing_email: normalizedBillingEmail,
+    login_email: normalizedLoginEmail || (typeof resolvedUser.email === 'string' ? resolvedUser.email.toLowerCase() : undefined)
+  };
+
+  const { error: updateErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+    user_metadata: mergedMetadata
+  });
+
+  if (updateErr) {
+    console.error('Failed to update user metadata:', updateErr);
+  } else {
+    console.log(`✅ Updated user ${userId} with payment info`);
   }
 
   // 3. Update user_profiles with subscription status
@@ -153,11 +217,12 @@ async function createOrFindUserAndGrantAccess(userData: UserData): Promise<strin
     .from('user_profiles')
     .upsert({
       user_id: userId,
-      email: normalizedEmail,
+      email: normalizedLoginEmail || normalizedBillingEmail,
       institution_name: userData.organization,
-      subscription_status: 'active',
+      subscription_status: userData.subscriptionStatus || 'active',
       subscription_tier: userData.tier,
       stripe_customer_id: userData.stripeCustomerId,
+      trial_ends_at: userData.trialEndsAt,
       updated_at: new Date().toISOString()
     }, {
       onConflict: 'user_id'
@@ -244,26 +309,52 @@ const handlers: Record<string, (event: Stripe.Event) => Promise<void>> = {
         }
       }
 
+      let subscriptionStatus: string | undefined;
+      let trialEndsAt: string | null = null;
+      const subscriptionId = typeof session.subscription === 'string' ? session.subscription : undefined;
+
+      if (subscriptionId) {
+        try {
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          subscriptionStatus = subscription.status;
+          if (subscription.trial_end) {
+            trialEndsAt = new Date(subscription.trial_end * 1000).toISOString();
+          }
+        } catch (error) {
+          console.warn('Unable to retrieve subscription details for status sync:', error);
+        }
+      }
+
+      const metadataLoginEmail = session.metadata?.login_email ? String(session.metadata.login_email).toLowerCase() : '';
+      const billingEmail = String(session.customer_details.email || '').toLowerCase();
+      const resolvedLoginEmail = metadataLoginEmail || billingEmail;
+      const metadataUserId = session.metadata?.user_id ? String(session.metadata.user_id) : undefined;
+
       const userData: UserData = {
-        email: session.customer_details.email,
+        email: resolvedLoginEmail,
+        billingEmail,
         name: session.customer_details.name || 'Customer',
         organization: session.metadata?.organization,
         tier,
         stripeCustomerId: session.customer as string,
-        stripeSessionId: session.id
+        stripeSessionId: session.id,
+        stripeSubscriptionId: subscriptionId,
+        subscriptionStatus,
+        trialEndsAt,
+        userIdFromMetadata: metadataUserId
       };
 
       // Create user account and grant access
       const userId = await createOrFindUserAndGrantAccess(userData);
 
       // Send access email
-      const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.higheredaiblueprint.com';
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://aiblueprint.educationaiblueprint.com';
       await sendAssessmentAccessEmail(userData.email, userData.name, tier, baseUrl);
 
       // Send admin notification about new customer
       try {
         await emailService.sendNewCustomerNotification({
-          customerEmail: userData.email,
+          customerEmail: userData.billingEmail || userData.email,
           customerName: userData.name,
           tier: tier,
           organization: userData.organization,

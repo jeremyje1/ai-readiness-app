@@ -119,15 +119,15 @@ class EmailService {
         case 'K12':
           return 'https://k12aiblueprint.com';
         case 'HigherEd':
-          return 'https://aiblueprint.k12aiblueprint.com';
+          return 'https://aiblueprint.educationaiblueprint.com';
         default:
           // Fallback based on domain context string
           if (domainContext === 'k12') {
             return 'https://k12aiblueprint.com';
           } else if (domainContext === 'higher-ed') {
-            return 'https://aiblueprint.k12aiblueprint.com';
+            return 'https://aiblueprint.educationaiblueprint.com';
           }
-          return process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com';
+          return process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.educationaiblueprint.com';
       }
     };
 
@@ -220,7 +220,7 @@ class EmailService {
             AI Transformation Specialists</p>
         </div>
         <div class="footer">
-            <p><strong>Need help?</strong> Reply to this email or visit <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com'}/contact">our contact page</a>.</p>
+            <p><strong>Need help?</strong> Reply to this email or visit <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.educationaiblueprint.com'}/contact">our contact page</a>.</p>
             <p>This email was sent regarding your AI Blueprint assessment for ${institutionName}</p>
         </div>
     </div>
@@ -329,15 +329,15 @@ class EmailService {
         case 'K12':
           return 'https://k12aiblueprint.com';
         case 'HigherEd':
-          return 'https://aiblueprint.k12aiblueprint.com';
+          return 'https://aiblueprint.educationaiblueprint.com';
         default:
           // Fallback based on domain context string
           if (domainContext === 'k12') {
             return 'https://k12aiblueprint.com';
           } else if (domainContext === 'higher-ed') {
-            return 'https://aiblueprint.k12aiblueprint.com';
+            return 'https://aiblueprint.educationaiblueprint.com';
           }
-          return process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com';
+          return process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.educationaiblueprint.com';
       }
     };
 
@@ -415,7 +415,7 @@ class EmailService {
             <strong>The ${brandedTitle} Team</strong></p>
         </div>
         <div class="footer">
-            <p><strong>Need help?</strong> Visit <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com'}/contact">our contact page</a> or reply to this email.</p>
+            <p><strong>Need help?</strong> Visit <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.educationaiblueprint.com'}/contact">our contact page</a> or reply to this email.</p>
             <p>AI Blueprint by NorthPath Strategies</p>
         </div>
     </div>
@@ -498,7 +498,7 @@ class EmailService {
     const subject = `🎉 New Customer: ${customerName} (${tier})`;
 
     const tierDisplay = tier.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://aiblueprint.k12aiblueprint.com';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://aiblueprint.educationaiblueprint.com';
     const adminDashboard = dashboardUrl || `${baseUrl}/admin/dashboard`;
 
     const htmlBody = `

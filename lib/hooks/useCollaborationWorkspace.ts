@@ -1,6 +1,7 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { getOrganizationForUser, hasPremiumAccess } from "@/lib/payments/access";
+import { createClient } from "@/lib/supabase/browser-client";
 import type {
     CollaborationRoom,
     ImplementationPhase,
@@ -9,6 +10,7 @@ import type {
     TeamDocument,
     TeamMember,
 } from "@/types/collaboration";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface UseCollaborationWorkspaceOptions {
@@ -46,7 +48,7 @@ interface UseCollaborationWorkspaceReturn {
     addDocument: (payload: { title: string; description?: string; link: string; tags?: string[] }) => Promise<void>;
     updateRoomContent: (content: string) => void;
     roomSaving: boolean;
-    refreshWorkspace: () => Promise<void>;
+    refreshWorkspace: (organizationOverride?: string | null) => Promise<void>;
 }
 
 export const STATUS_ORDER: Array<ImplementationTask["status"]> = [
@@ -152,8 +154,9 @@ export function useCollaborationWorkspace(
 
     const summary = useMemo<WorkspaceSummary>(() => buildWorkspaceSummary(phases, teamMembers), [phases, teamMembers]);
 
-    const refreshWorkspace = useCallback(async () => {
-        if (!organization) {
+    const refreshWorkspace = useCallback(async (organizationOverride?: string | null) => {
+        const targetOrganization = organizationOverride ?? organization;
+        if (!targetOrganization) {
             return;
         }
 
@@ -162,7 +165,7 @@ export function useCollaborationWorkspace(
                 supabase
                     .from("team_members")
                     .select("id,user_id,full_name,email,role,department,avatar_url,status,last_active_at")
-                    .eq("organization", organization)
+                    .eq("organization", targetOrganization)
                     .order("full_name", { ascending: true }),
                 supabase
                     .from("implementation_phases")
@@ -172,22 +175,22 @@ export function useCollaborationWorkspace(
                id, organization, phase_id, task_title, description, status, priority, due_date, assigned_to, created_at, updated_at
              )`
                     )
-                    .eq("organization", organization)
+                    .eq("organization", targetOrganization)
                     .order("phase_order", { ascending: true }),
                 supabase
                     .from("task_comments")
                     .select("id, organization, task_id, author_id, content, created_at, updated_at")
-                    .eq("organization", organization)
+                    .eq("organization", targetOrganization)
                     .order("created_at", { ascending: true }),
                 supabase
                     .from("team_documents")
                     .select("id, organization, title, description, storage_path, tags, created_at, last_modified_at, last_modified_by")
-                    .eq("organization", organization)
+                    .eq("organization", targetOrganization)
                     .order("last_modified_at", { ascending: false }),
                 supabase
                     .from("collaboration_rooms")
                     .select("id, organization, slug, title, content, last_editor, updated_at, created_at")
-                    .eq("organization", organization)
+                    .eq("organization", targetOrganization)
                     .eq("slug", defaultRoomSlug)
                     .maybeSingle(),
             ]);
@@ -215,7 +218,7 @@ export function useCollaborationWorkspace(
                 const { data: newRoom, error: createRoomError } = await supabase
                     .from("collaboration_rooms")
                     .insert({
-                        organization,
+                        organization: targetOrganization,
                         slug: defaultRoomSlug,
                         title: "Real-time Strategic Notes",
                         content: "",
@@ -252,28 +255,38 @@ export function useCollaborationWorkspace(
                     throw new Error("Authentication required to access collaborative workspace");
                 }
 
-                const { data: payment, error: paymentError } = await supabase
-                    .from("user_payments")
-                    .select("organization, role")
-                    .eq("user_id", user.id)
-                    .eq("access_granted", true)
-                    .order("updated_at", { ascending: false })
-                    .maybeSingle();
+                const {
+                    organization: paymentOrganization,
+                    payment,
+                    subscriptionStatus,
+                    subscriptionTier,
+                    trialEndsAt,
+                } = await getOrganizationForUser(supabase, user.id);
 
-                if (paymentError) {
-                    throw paymentError;
-                }
+                const hasAccess = hasPremiumAccess(
+                    payment,
+                    subscriptionStatus,
+                    subscriptionTier,
+                    trialEndsAt,
+                    user.created_at
+                );
 
-                if (!payment || !payment.organization) {
+                if (!hasAccess) {
                     throw new Error("Active premium subscription required to access collaborative workspace");
                 }
 
+                const resolvedOrganization =
+                    paymentOrganization ||
+                    user.user_metadata?.organization ||
+                    (user.email ? user.email.split("@")[1] : null) ||
+                    `premium-${user.id.slice(0, 8)}`;
+
                 if (!active) return;
 
-                setOrganization(payment.organization);
-                setRole(payment.role || null);
+                setOrganization(resolvedOrganization);
+                setRole(payment?.role || null);
 
-                await refreshWorkspace();
+                await refreshWorkspace(resolvedOrganization);
 
                 if (!active) return;
 
@@ -281,7 +294,7 @@ export function useCollaborationWorkspace(
                 const { data: memberRecord } = await supabase
                     .from("team_members")
                     .select("id,user_id,full_name,email,role,department,avatar_url,status,last_active_at")
-                    .eq("organization", payment.organization)
+                    .eq("organization", resolvedOrganization)
                     .eq("user_id", user.id)
                     .maybeSingle();
 
@@ -323,7 +336,7 @@ export function useCollaborationWorkspace(
                     table: "collaboration_rooms",
                     filter: `id=eq.${room.id}`,
                 },
-                (payload) => {
+                (payload: RealtimePostgresChangesPayload<CollaborationRoom>) => {
                     const updated = payload.new as CollaborationRoom;
                     setRoom((prev) => (prev ? { ...prev, content: updated.content, updated_at: updated.updated_at, last_editor: updated.last_editor } : updated));
                 }

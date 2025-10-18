@@ -1,21 +1,16 @@
+import { AppBootstrap } from '@/components/AppBootstrap'
 import AuthNav from '@/components/AuthNav'
+import { DemoBanner } from '@/components/DemoBanner'
+import { DemoTour } from '@/components/DemoTour'
 import { PasswordSetupGuard } from '@/components/PasswordSetupGuard'
 import TutorialProvider from '@/components/TutorialProvider'
 import UserProvider from '@/components/UserProvider'
 import { AudienceProvider } from '@/lib/audience/AudienceContext'
 import { deriveAudience } from '@/lib/audience/deriveAudience'
-import { initializeAuthValidation } from '@/lib/auth-utils'
-import { initializeCacheBust } from '@/lib/cache-bust-force'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { headers } from 'next/headers'
 import './globals.css'
-
-// Initialize cache bust and auth validation immediately
-if (typeof window !== 'undefined') {
-  initializeCacheBust();
-  initializeAuthValidation();
-}
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -40,7 +35,7 @@ export default async function RootLayout({
   const referer = headersList.get('referer') || undefined;
 
   const derivation = deriveAudience({ host, referer });
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.k12aiblueprint.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aiblueprint.educationaiblueprint.com';
 
   return (
     <html lang="en">
@@ -51,8 +46,11 @@ export default async function RootLayout({
         <AudienceProvider initialAudience={derivation.audience}>
           <UserProvider>
             <TutorialProvider>
+              <DemoBanner />
+              <DemoTour />
               <AuthNav />
               <PasswordSetupGuard>
+                <AppBootstrap />
                 {children}
               </PasswordSetupGuard>
             </TutorialProvider>

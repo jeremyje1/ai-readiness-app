@@ -1,5 +1,8 @@
+import { buildSiteUrl, getStripeServerClient } from '@/lib/stripe/server';
+import { createClient } from '@/lib/supabase/server';
+import type { User } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 // Supported product definitions. Add additional products and billing cycles here.
 // Each entry maps billing interval -> Stripe Price ID (from environment variables)
@@ -27,17 +30,6 @@ const PRODUCT_PRICE_ENV: Record<string, Record<string, string | undefined>> = {
     annual: cleanEnvVar(process.env.STRIPE_PRICE_PLATFORM_MONTHLY, 'price_1SDnhlRMpSG47vNmDQr1WeJ3')
   }
 };
-
-let stripe: Stripe | null = null;
-function getStripeClient(): Stripe {
-  if (!stripe) {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('Stripe secret key not configured');
-    }
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-06-30.basil' });
-  }
-  return stripe;
-}
 
 interface CheckoutParams {
   product: string;
@@ -79,10 +71,7 @@ function resolvePriceId(product: string, billing: string): string | null {
   return productConfig[normalizedBilling] || null;
 }
 
-function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
-  // Simple single-domain approach
-  const canonical = (process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://aiblueprint.educationaiblueprint.com').trim();
-
+function buildCheckoutUrls(returnTo?: string) {
   // Map return_to shorthand values to paths
   const destination = (() => {
     switch (returnTo) {
@@ -101,15 +90,15 @@ function buildCheckoutUrls(returnTo?: string, request?: NextRequest) {
   })();
 
   return {
-    // Include session_id placeholder for post-checkout bootstrap
-    success: `${canonical}${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`,
-    cancel: `${canonical}/ai-readiness?checkout=cancelled`
+    success: buildSiteUrl(`${destination}?checkout=success&session_id={CHECKOUT_SESSION_ID}&auto=1`),
+    cancel: buildSiteUrl('/ai-readiness?checkout=cancelled')
   };
 }
 
-async function createCheckoutSession(params: CheckoutParams, request?: NextRequest) {
+async function createCheckoutSession(params: CheckoutParams, user: User | null) {
   // Simple single-domain allowlist
   const allowedOrigins = [
+    'https://aiblueprint.educationaiblueprint.com',
     'https://aiblueprint.k12aiblueprint.com'
   ];
 
@@ -127,7 +116,10 @@ async function createCheckoutSession(params: CheckoutParams, request?: NextReque
   }
 
   const isSubscription = true; // unified checkout uses subscriptions (supports trial days)
-  const redirect = buildCheckoutUrls(params.returnTo, request);
+  const redirect = buildCheckoutUrls(params.returnTo);
+
+  const normalizedLoginEmail = (user?.email || params.contactEmail || '').toLowerCase();
+  const checkoutUserId = user?.id || params.userId || '';
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: isSubscription ? 'subscription' : 'payment',
@@ -145,17 +137,26 @@ async function createCheckoutSession(params: CheckoutParams, request?: NextReque
       tier: params.tier || params.product,
       billing_interval: params.billing,
       contact_name: params.contactName || '',
-      user_id: params.userId || '',
-      service: 'unified-checkout'
+      user_id: checkoutUserId,
+      service: 'unified-checkout',
+      login_email: normalizedLoginEmail
     }
   };
 
-  if (params.contactEmail) {
+  if (user?.email) {
+    sessionParams.customer_email = user.email;
+  } else if (params.contactEmail) {
     sessionParams.customer_email = params.contactEmail;
   }
 
   if (isSubscription) {
-    sessionParams.subscription_data = { metadata: { product: params.product } };
+    sessionParams.subscription_data = {
+      metadata: {
+        product: params.product,
+        user_id: checkoutUserId,
+        login_email: normalizedLoginEmail
+      }
+    };
     if (params.trialDays && params.trialDays > 0) {
       // Stripe enforces max trial days via dashboard configuration; still limit to 30 here as a safety net.
       const cappedTrial = Math.min(params.trialDays, 30);
@@ -166,7 +167,7 @@ async function createCheckoutSession(params: CheckoutParams, request?: NextReque
     }
   }
 
-  return getStripeClient().checkout.sessions.create(sessionParams);
+  return getStripeServerClient().checkout.sessions.create(sessionParams);
 }
 
 function capitalize(s: string) {
@@ -184,7 +185,14 @@ async function handler(request: NextRequest) {
       return NextResponse.json({ error: 'Missing billing parameter' }, { status: 400 });
     }
 
-    const session = await createCheckoutSession(params, request);
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.warn('Unified checkout requested without authenticated user context');
+    }
+
+    const session = await createCheckoutSession(params, user ?? null);
     return NextResponse.redirect(session.url!, { status: 303 });
   } catch (error: any) {
     console.error('Unified checkout error:', error);

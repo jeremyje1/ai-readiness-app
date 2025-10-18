@@ -24,6 +24,7 @@ describe('TeamWorkspacePage', () => {
         mockUseSubscription.mockReturnValue({
             isLoading: false,
             hasActiveSubscription: false,
+            hasPremiumAccess: false,
             isTrialUser: false,
             trialEndsAt: null,
             daysLeftInTrial: 0,
@@ -41,6 +42,7 @@ describe('TeamWorkspacePage', () => {
         mockUseSubscription.mockReturnValue({
             isLoading: false,
             hasActiveSubscription: false,
+            hasPremiumAccess: true,
             isTrialUser: true,
             trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             daysLeftInTrial: 7,

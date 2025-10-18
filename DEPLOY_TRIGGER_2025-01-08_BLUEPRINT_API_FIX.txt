@@ -13,7 +13,7 @@ CRITICAL ISSUE FIXED
 **API Endpoint:** POST /api/blueprint/goals
 
 **Root Cause:**
-Blueprint API routes were using the old `@supabase/auth-helpers-nextjs` package's `createRouteHandlerClient` which is no longer compatible with our current Supabase setup.
+Blueprint API routes were still using the old `createRouteHandlerClient` helper, which is no longer compatible with our current Supabase setup.
 
 WHAT WAS FIXED
 ==============
@@ -22,12 +22,11 @@ WHAT WAS FIXED
    **File:** app/api/blueprint/goals/route.ts
    
    **Before:**
-   ```typescript
-   import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-   import { cookies } from 'next/headers';
-   
-   const supabase = createRouteHandlerClient({ cookies });
-   ```
+  ```typescript
+  // Deprecated helper usage
+  import { cookies } from 'next/headers';
+  const supabase = createRouteHandlerClient({ cookies });
+  ```
    
    **After:**
    ```typescript
@@ -46,7 +45,7 @@ WHAT WAS FIXED
    **File:** app/api/blueprint/generate/route.ts
    
    **Same fix applied:**
-   - Changed from createRouteHandlerClient to createClient
+  - Changed from the legacy helper to createClient
    - Now properly authenticates users
    - Blueprint generation will work correctly
 
@@ -54,7 +53,7 @@ TECHNICAL DETAILS
 =================
 
 **Why This Happened:**
-The application underwent a migration from the old `@supabase/auth-helpers-nextjs` package to the newer `@supabase/ssr` package. Some blueprint API routes were missed during this migration and continued using the old authentication method.
+The application migrated to the shared `@/lib/supabase/server` helper, but some blueprint API routes were missed during the transition and continued using the old authentication method.
 
 **Authentication Flow Now:**
 1. User clicks "Create Blueprint"

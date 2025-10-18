@@ -10,13 +10,21 @@ export async function POST(req: Request) {
 
         // Also allow email to be passed in the request body for manual sync
         const body = await req.json().catch(() => ({}));
-        const requestEmail = body.email;
+        const requestEmail = body.email as string | undefined;
 
         // Get the authenticated user
         const { data: { user }, error: authError } = await supabase.auth.getUser();
 
         // Determine which email to use
-        const emailToSync = requestEmail || user?.email;
+        const metadataBillingEmail = typeof user?.user_metadata?.billing_email === 'string'
+            ? user.user_metadata.billing_email
+            : undefined;
+
+        const candidateEmails = [requestEmail, user?.email, metadataBillingEmail]
+            .map((value) => (typeof value === 'string' ? value.trim() : ''))
+            .filter((value) => value.length > 0);
+
+        const emailToSync = candidateEmails[0];
 
         if (!emailToSync) {
             return NextResponse.json({ error: 'No email provided' }, { status: 400 });
@@ -25,20 +33,26 @@ export async function POST(req: Request) {
         console.log('Syncing subscription for email:', emailToSync);
 
         // Search for customer in Stripe by email
-        const customers = await stripe.customers.list({
-            email: emailToSync,
-            limit: 10
-        });
+        let customer = null;
+        for (const emailCandidate of candidateEmails) {
+            const customers = await stripe.customers.list({
+                email: emailCandidate,
+                limit: 10
+            });
 
-        if (!customers.data.length) {
+            if (customers.data.length) {
+                customer = customers.data[0];
+                console.log('Found Stripe customer via email:', emailCandidate, '→', customer.id);
+                break;
+            }
+        }
+
+        if (!customer) {
             return NextResponse.json({
                 error: 'No Stripe customer found',
                 email: emailToSync
             }, { status: 404 });
         }
-
-        const customer = customers.data[0];
-        console.log('Found Stripe customer:', customer.id);
 
         // Get active subscriptions
         const subscriptions = await stripe.subscriptions.list({
@@ -61,6 +75,10 @@ export async function POST(req: Request) {
 
         // Get the user ID from the email if not authenticated
         let userId = user?.id;
+
+        if (!userId && user) {
+            userId = user.id;
+        }
 
         if (!userId && emailToSync) {
             // Look up user by email
@@ -85,7 +103,7 @@ export async function POST(req: Request) {
             .from('user_payments')
             .upsert({
                 user_id: userId,
-                email: emailToSync,
+                email: user?.email || emailToSync,
                 stripe_customer_id: customer.id,
                 stripe_subscription_id: subscription.id,
                 stripe_price_id: priceId,

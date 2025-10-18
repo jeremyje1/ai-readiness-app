@@ -1,22 +1,22 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import type { Session } from '@supabase/auth-helpers-nextjs';
-import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
+import { createClient as createSupabaseClient } from '@/lib/supabase/browser-client';
+import type { Session } from '@supabase/supabase-js';
 import {
-  Brain,
-  FileText,
-  Users,
+  ArrowRight,
   BarChart3,
-  Settings,
-  TrendingUp,
-  Clock,
-  Target,
   BookOpen,
+  Brain,
+  Clock,
   Download,
+  FileText,
   Plus,
-  ArrowRight
+  Settings,
+  Target,
+  TrendingUp,
+  Users
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 // All client-side dashboard components
 function WelcomeBanner({ user }: { user: Pick<Session['user'], 'email' | 'user_metadata'> }) {
@@ -41,28 +41,28 @@ function QuickActions() {
     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8 border border-white/20">
       <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button 
+        <button
           onClick={() => window.location.href = '/assessment/onboarding'}
           className="p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/20 transition-colors"
         >
           <FileText className="h-6 w-6 text-white mb-2" />
           <span className="text-white text-sm">New Assessment</span>
         </button>
-        <button 
+        <button
           onClick={() => window.location.href = '/results'}
           className="p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/20 transition-colors"
         >
           <BarChart3 className="h-6 w-6 text-white mb-2" />
           <span className="text-white text-sm">View Reports</span>
         </button>
-        <button 
+        <button
           onClick={() => window.location.href = '/settings'}
           className="p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/20 transition-colors"
         >
           <Settings className="h-6 w-6 text-white mb-2" />
           <span className="text-white text-sm">Settings</span>
         </button>
-        <button 
+        <button
           onClick={() => window.location.href = '/secure/workspaces'}
           className="p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/20 transition-colors"
         >
@@ -149,15 +149,17 @@ function StatsOverview() {
 }
 
 function DashboardContent() {
-  const [supabase] = useState(() => createPagesBrowserClient());
+  const [supabase] = useState(() => createSupabaseClient());
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then((response: Awaited<ReturnType<typeof supabase.auth.getSession>>) => {
+        setSession(response.data.session ?? null);
+        setLoading(false);
+      });
   }, [supabase]);
 
   if (loading) {
@@ -177,7 +179,7 @@ function DashboardContent() {
       email: 'demo@northpathstrategies.org',
       user_metadata: { name: 'Demo User' }
     };
-    
+
     return (
       <main className="min-h-screen hero-background text-white px-4 lg:px-8 py-20">
         <div className="max-w-7xl mx-auto">

@@ -153,11 +153,11 @@ After deployment, new signups should show these logs:
 ### Old Auth Helper → New Supabase Client
 
 ```typescript
-// BEFORE:
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+// BEFORE (deprecated helper):
+import { cookies } from 'next/headers';
 const supabase = createRouteHandlerClient({ cookies });
 
-// AFTER:
+// AFTER (shared helper):
 import { createClient } from '@/lib/supabase/server';
 const supabase = await createClient();
 ```

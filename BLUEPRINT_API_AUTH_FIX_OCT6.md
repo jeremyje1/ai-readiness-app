@@ -16,7 +16,7 @@ This caused a loop where:
 6. User stuck in loading/error state
 
 ## Root Cause
-Blueprint API routes were using the deprecated `createRouteHandlerClient` from `@supabase/auth-helpers-nextjs` which has known authentication issues in Next.js 15+.
+Blueprint API routes were using the deprecated `createRouteHandlerClient` helper that shipped with the legacy Supabase auth toolkit, which has known authentication issues in Next.js 15+.
 
 Meanwhile, the blueprint **generation** route (`/api/blueprint/generate/route.ts`) was correctly using `createClient` from `@/lib/supabase/server`.
 
@@ -25,7 +25,7 @@ Meanwhile, the blueprint **generation** route (`/api/blueprint/generate/route.ts
 ### 1. `/app/api/blueprint/route.ts` ✅
 **BEFORE:**
 ```typescript
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+// Deprecated pattern that relied on the old Supabase auth helper.
 import { cookies } from 'next/headers';
 
 export async function GET(request: Request) {
@@ -45,16 +45,9 @@ export async function GET(request: Request) {
 ### 2. `/app/api/blueprint/[id]/route.ts` ✅
 **BEFORE (3 instances):**
 ```typescript
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+// Deprecated helper usage in GET / PUT / DELETE handlers
 import { cookies } from 'next/headers';
 
-// GET handler
-const supabase = createRouteHandlerClient({ cookies });
-
-// PUT handler  
-const supabase = createRouteHandlerClient({ cookies });
-
-// DELETE handler
 const supabase = createRouteHandlerClient({ cookies });
 ```
 

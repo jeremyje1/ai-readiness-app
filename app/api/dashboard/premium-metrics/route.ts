@@ -1,37 +1,59 @@
+import { getLatestGrantedPayment, hasActivePayment, hasPremiumAccess } from '@/lib/payments/access';
+import { resolveServerUser } from '@/lib/supabase/resolve-user';
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
         const supabase = await createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const { user, error: authError } = await resolveServerUser(supabase, request);
 
-        if (authError || !user) {
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         // Get user profile
         const { data: profile } = await supabase
             .from('user_profiles')
-            .select('institution_name, subscription_status')
+            .select('institution_name, subscription_status, subscription_tier, trial_ends_at')
             .eq('user_id', user.id)
             .single();
 
-        // Check payment status in user_payments table
-        const { data: payment } = await supabase
-            .from('user_payments')
-            .select('payment_status, access_granted')
-            .eq('user_id', user.id)
-            .in('payment_status', ['active', 'completed', 'premium'])
-            .eq('access_granted', true)
-            .single();
+        const payment = await getLatestGrantedPayment(supabase, user.id);
 
-        // Check if premium user (check both tables for compatibility)
-        const hasPremiumAccess =
-            profile?.subscription_status === 'active' ||
-            payment?.access_granted === true;
+        let subscriptionStatus = profile?.subscription_status ?? null;
+        let subscriptionTier = profile?.subscription_tier ?? null;
+        let trialEndsAt = profile?.trial_ends_at ?? null;
 
-        if (!hasPremiumAccess) {
+        if (!trialEndsAt && user.created_at) {
+            const createdAtDate = new Date(user.created_at);
+            if (!Number.isNaN(createdAtDate.getTime())) {
+                const fallbackTrialEnd = new Date(createdAtDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+                if (fallbackTrialEnd.getTime() > Date.now()) {
+                    trialEndsAt = fallbackTrialEnd.toISOString();
+                }
+            }
+        }
+
+        if (!subscriptionStatus && trialEndsAt) {
+            const parsedTrialEnd = new Date(trialEndsAt);
+            if (!Number.isNaN(parsedTrialEnd.getTime()) && parsedTrialEnd.getTime() > Date.now()) {
+                subscriptionStatus = 'trialing';
+                if (!subscriptionTier) {
+                    subscriptionTier = 'trial';
+                }
+            }
+        }
+
+        const hasAccess = hasPremiumAccess(
+            payment,
+            subscriptionStatus,
+            subscriptionTier,
+            trialEndsAt,
+            user.created_at
+        );
+
+        if (!hasAccess) {
             return NextResponse.json({ error: 'Premium subscription required' }, { status: 403 });
         }
 
@@ -94,8 +116,9 @@ export async function GET(request: Request) {
             upcomingEvents,
             roiMetrics,
             subscription: {
-                status: 'active',
-                tier: 'premium',
+                status: subscriptionStatus || (hasActivePayment(payment) ? payment?.payment_status ?? 'active' : 'inactive'),
+                tier: subscriptionTier || payment?.plan_type || payment?.tier || 'premium',
+                trialEndsAt,
                 monthlyValue: 199
             }
         });

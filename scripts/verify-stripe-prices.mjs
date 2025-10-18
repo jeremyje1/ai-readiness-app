@@ -9,6 +9,7 @@
  *   STRIPE_SECRET_KEY
  *   STRIPE_PRICE_EDU_MONTHLY_199
  *   STRIPE_PRICE_EDU_YEARLY_1990
+ *   STRIPE_PRICE_JEREMY_CONSULTATION
  *
  * Usage:
  *   node scripts/verify-stripe-prices.mjs
@@ -33,7 +34,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-06-
 
 const PRICE_ENV_MAP = {
   EDU_MONTHLY_199: process.env.STRIPE_PRICE_EDU_MONTHLY_199,
-  EDU_YEARLY_1990: process.env.STRIPE_PRICE_EDU_YEARLY_1990
+  EDU_YEARLY_1990: process.env.STRIPE_PRICE_EDU_YEARLY_1990,
+  JEREMY_CONSULTATION: process.env.STRIPE_PRICE_JEREMY_CONSULTATION
 };
 
 async function fetchPrice(priceId) {

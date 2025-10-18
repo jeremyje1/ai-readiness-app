@@ -26,7 +26,9 @@ jobs:
 
       - name: Check framework updates and generate redlines
         env:
+          # yamllint disable-line rule:line-length
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          # yamllint disable-line rule:line-length
           APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
         run: |
           BASE_URL="$APP_BASE_URL"
@@ -43,11 +45,27 @@ jobs:
           echo "DRY_RUN: $DRY_RUN"
           echo "FORCE_REDLINES: $FORCE_REDLINES"
 
+          lowercase_dry_run=$(echo "$DRY_RUN" | tr '[:upper:]' '[:lower:]')
+          lowercase_force=$(echo "$FORCE_REDLINES" | tr '[:upper:]' '[:lower:]')
+
+          dry_run_bool=false
+          force_redlines_bool=false
+
+          if [ "$lowercase_dry_run" = "true" ]; then
+            dry_run_bool=true
+          fi
+
+          if [ "$lowercase_force" = "true" ]; then
+            force_redlines_bool=true
+          fi
+
+          payload="{\"dryRun\":$dry_run_bool,\"forceRedlines\":$force_redlines_bool}"
+
           # Call policy updates endpoint
           http_code=$(curl -s -o response.json -w '%{http_code}' -X POST "$BASE_URL/api/cron/policy-updates/refresh" \
             -H "x-cron-secret: $CRON_SECRET" \
             -H "content-type: application/json" \
-            -d '{}')
+            -d "$payload")
 
           echo "HTTP Status: $http_code"
           echo "Response:" && cat response.json && echo

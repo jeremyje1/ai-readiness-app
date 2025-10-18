@@ -1,6 +1,6 @@
 'use client';
 
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/browser-client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -131,8 +131,8 @@ export default function PasswordSetupSimple() {
 
           {status && (
             <div className={`p-3 rounded ${status.includes('error') || status.includes('do not match') || status.includes('must be')
-                ? 'bg-red-100 text-red-700'
-                : 'bg-blue-100 text-blue-700'
+              ? 'bg-red-100 text-red-700'
+              : 'bg-blue-100 text-blue-700'
               }`}>
               {status}
             </div>

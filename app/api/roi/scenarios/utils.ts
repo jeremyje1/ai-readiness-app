@@ -1,6 +1,8 @@
+import { getOrganizationForUser, hasPremiumAccess } from '@/lib/payments/access';
+import { resolveServerUser } from '@/lib/supabase/resolve-user';
 import { createClient } from '@/lib/supabase/server';
 import type { User } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export const SCENARIO_EDITOR_ROLES = new Set(['owner', 'admin', 'editor', 'member']);
 
@@ -23,35 +25,47 @@ export type TeamMembership = {
     role: string | null;
 };
 
-export async function getAuthContext(): Promise<AuthContextResult> {
+export async function getAuthContext(request?: NextRequest): Promise<AuthContextResult> {
     const supabase = await createClient();
-    const {
-        data: { user },
-        error,
-    } = await supabase.auth.getUser();
+    const { user, error } = await resolveServerUser(supabase, request);
 
-    if (error || !user) {
+    if (!user) {
         return {
             ok: false,
             response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
         };
     }
 
-    const { data: payment, error: paymentError } = await supabase
-        .from('user_payments')
-        .select('organization')
-        .eq('user_id', user.id)
-        .eq('access_granted', true)
-        .single();
+    const {
+        organization: organizationFromPayment,
+        payment,
+        subscriptionStatus,
+        subscriptionTier,
+        trialEndsAt,
+    } = await getOrganizationForUser(supabase, user.id);
 
-    if (paymentError || !payment?.organization) {
+    const hasAccess = hasPremiumAccess(
+        payment,
+        subscriptionStatus,
+        subscriptionTier,
+        trialEndsAt,
+        user.created_at
+    );
+
+    if (!hasAccess) {
         return {
             ok: false,
-            response: NextResponse.json({ error: 'No premium access found' }, { status: 404 }),
+            response: NextResponse.json({ error: 'Active subscription required' }, { status: 403 }),
         };
     }
 
-    return { ok: true, supabase, user, organization: payment.organization };
+    const organization =
+        organizationFromPayment ||
+        user.user_metadata?.organization ||
+        (user.email ? user.email.split('@')[1] : null) ||
+        `premium-${user.id.slice(0, 8)}`;
+
+    return { ok: true, supabase, user, organization };
 }
 
 export async function getTeamMembership(

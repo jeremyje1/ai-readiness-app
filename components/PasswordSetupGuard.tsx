@@ -1,8 +1,11 @@
 'use client';
 
-import { createClient } from '@/lib/supabase/client';
+import { ensureAuthFetchPatched } from '@/lib/auth/fetch-auth';
+import { createClient } from '@/lib/supabase/browser-client';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
+const PUBLIC_GUARD_PATHS = ['/auth/', '/login', '/get-started', '/pricing', '/privacy', '/terms', '/contact', '/welcome'];
 
 interface PasswordSetupGuardProps {
     children: React.ReactNode;
@@ -13,19 +16,33 @@ interface PasswordSetupGuardProps {
  * and redirects them to the password setup page if needed.
  */
 export function PasswordSetupGuard({ children }: PasswordSetupGuardProps) {
+    ensureAuthFetchPatched();
     const [isChecking, setIsChecking] = useState(true);
     const [needsSetup, setNeedsSetup] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
-    const supabase = useMemo(() => createClient(), []);
 
     // Don't check on auth-related pages and public pages to avoid redirect loops
-    const publicPaths = ['/auth/', '/login', '/get-started', '/pricing', '/privacy', '/terms', '/contact', '/welcome'];
-    const isPublicPage = publicPaths.some(path => pathname?.startsWith(path)) || pathname === '/';
+    const isPublicPage = useMemo(
+        () => PUBLIC_GUARD_PATHS.some(path => pathname?.startsWith(path)) || pathname === '/',
+        [pathname]
+    );
+
+    const supabase = useMemo(() => {
+        if (isPublicPage) {
+            return null;
+        }
+
+        return createClient();
+    }, [isPublicPage]);
     const isPasswordSetupPage = pathname === '/auth/password/setup';
 
     const checkPasswordSetupRequired = useCallback(async () => {
         try {
+            if (!supabase) {
+                setIsChecking(false);
+                return;
+            }
             // Get current session with increased timeout (15 seconds)
             const sessionPromise = supabase.auth.getSession();
             const timeoutPromise = new Promise((_, reject) =>

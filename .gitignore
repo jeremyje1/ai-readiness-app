@@ -40,3 +40,10 @@ build/
 .DS_Store
 Thumbs.db
 .env*.local
+.env.temp.fetch
+SECURITY_COMPLETION_SUMMARY.md
+export-secrets-template.sh
+export-secrets.sh
+QUICK_VERCEL_SETUP_NO_1PASSWORD.md
+push-to-vercel.sh
+SENDGRID_VERCEL_SETUP.md
