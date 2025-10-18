@@ -127,11 +127,19 @@ async function triggerAssessmentSubmit(
     leadId: string,
     quickAssessment?: QuickAssessment | null
 ) {
+    console.log('🎯 triggerAssessmentSubmit called', { leadId, hasQuickAssessment: !!quickAssessment })
+    
     const responses = buildAssessmentResponses(quickAssessment)
-    if (!responses) return
+    if (!responses) {
+        console.log('⚠️  No responses built from quick assessment - email will not be sent')
+        return
+    }
 
     try {
         const submitUrl = new URL("/api/demo/assessment/submit", request.url)
+        console.log('📧 Calling assessment submit endpoint:', submitUrl.toString())
+        console.log('📋 Payload:', { leadId, responses })
+        
         const response = await fetch(submitUrl.toString(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -143,14 +151,17 @@ async function triggerAssessmentSubmit(
 
         if (!response.ok) {
             const errorBody = await response.text().catch(() => "")
-            console.error("Failed to trigger assessment submit", {
+            console.error("❌ Failed to trigger assessment submit", {
                 status: response.status,
                 statusText: response.statusText,
                 errorBody
             })
+        } else {
+            const successBody = await response.json().catch(() => null)
+            console.log('✅ Assessment submit succeeded', successBody)
         }
     } catch (error) {
-        console.error("Error triggering assessment submit", error)
+        console.error("💥 Error triggering assessment submit", error)
     }
 }
 
