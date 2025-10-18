@@ -241,34 +241,42 @@ function qualifyLead(
     return 'COLD';
 }
 
+function resolveBaseUrl(request?: NextRequest) {
+    const sanitize = (value?: string | null) => value?.trim().replace(/\/$/, '');
+
+    const requestOrigin = sanitize(request?.nextUrl?.origin ?? undefined);
+    if (requestOrigin) {
+        return requestOrigin;
+    }
+
+    const envBase = sanitize(process.env.NEXT_PUBLIC_BASE_URL);
+    if (envBase) {
+        return envBase.startsWith('http') ? envBase : `https://${envBase}`;
+    }
+
+    const vercelUrl = sanitize(process.env.VERCEL_URL);
+    if (vercelUrl) {
+        return `https://${vercelUrl}`;
+    }
+
+    const vercelBranchUrl = sanitize(process.env.VERCEL_BRANCH_URL);
+    if (vercelBranchUrl) {
+        return `https://${vercelBranchUrl}`;
+    }
+
+    return process.env.NODE_ENV === 'production'
+        ? 'https://aiblueprint.educationaiblueprint.com'
+        : 'http://localhost:3000';
+}
+
 async function sendResultsEmail(
+    request: NextRequest,
     leadData: any,
     results: AssessmentResults
 ): Promise<void> {
     try {
-        // Resolve a dependable base URL so server-side fetch calls work in every environment
-        const baseUrl = (() => {
-            const sanitize = (value?: string | null) => value?.trim().replace(/\/$/, '');
-
-            const envBase = sanitize(process.env.NEXT_PUBLIC_BASE_URL);
-            if (envBase) {
-                return envBase.startsWith('http') ? envBase : `https://${envBase}`;
-            }
-
-            const vercelUrl = sanitize(process.env.VERCEL_URL);
-            if (vercelUrl) {
-                return `https://${vercelUrl}`;
-            }
-
-            const vercelBranchUrl = sanitize(process.env.VERCEL_BRANCH_URL);
-            if (vercelBranchUrl) {
-                return `https://${vercelBranchUrl}`;
-            }
-
-            return process.env.NODE_ENV === 'production'
-                ? 'https://aiblueprint.educationaiblueprint.com'
-                : 'http://localhost:3000';
-        })();
+        const baseUrl = resolveBaseUrl(request);
+        console.log('📬 sendResultsEmail using base URL:', baseUrl);
 
         // Send results to user
         const userEmailResponse = await fetch(
@@ -431,7 +439,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Send emails asynchronously (don't block response)
-        sendResultsEmail(leadData, results).catch(err => {
+        sendResultsEmail(request, leadData, results).catch(err => {
             console.error('Email sending failed:', err);
         });
 
