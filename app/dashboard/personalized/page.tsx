@@ -16,7 +16,7 @@ export default async function PersonalizedDashboard() {
   } = await supabase.auth.getSession()
 
   if (!session) {
-    redirect("/get-started")
+    redirect("/demo")
   }
 
   const userId = session.user.id

@@ -24,8 +24,9 @@ export default async function WelcomePage() {
         data: { session }
     } = await supabase.auth.getSession()
 
+    // No session - redirect to demo for new users
     if (!session) {
-        redirect("/get-started")
+        redirect("/demo")
     }
 
     const userId = session.user.id
@@ -122,8 +123,8 @@ export default async function WelcomePage() {
                                 <div className="flex items-start gap-4">
                                     <span
                                         className={`mt-1 flex h-10 w-10 items-center justify-center rounded-full border ${step.completed
-                                                ? "border-emerald-200 bg-emerald-50 text-emerald-600"
-                                                : "border-indigo-200 bg-indigo-50 text-indigo-600"
+                                            ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                                            : "border-indigo-200 bg-indigo-50 text-indigo-600"
                                             }`}
                                     >
                                         {step.completed ? <CheckCircle2 className="h-5 w-5" /> : step.icon}
