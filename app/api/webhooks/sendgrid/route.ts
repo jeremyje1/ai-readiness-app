@@ -22,7 +22,7 @@ interface ContactFormData {
 export async function POST(request: NextRequest) {
     try {
         // SendGrid Configuration
-        const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || "SG_KEY_REDACTED"
+        const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY
         const FROM_EMAIL = "info@northpathstrategies.org"
         const TO_EMAIL = "info@northpathstrategies.org"
 
