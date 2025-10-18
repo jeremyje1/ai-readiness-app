@@ -1,67 +1,122 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 export default function DemoPage() {
+    const router = useRouter();
+    const [status, setStatus] = useState<'loading' | 'redirecting' | 'error'>('loading');
+    const [errorMessage, setErrorMessage] = useState('');
+
+    useEffect(() => {
+        async function initializeDemo() {
+            try {
+                setStatus('loading');
+
+                // Call demo login endpoint
+                const response = await fetch('/api/demo/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to initialize demo');
+                }
+
+                setStatus('redirecting');
+
+                // Redirect to dashboard with demo mode and tour enabled
+                setTimeout(() => {
+                    router.push(data.redirectUrl);
+                }, 1000);
+
+            } catch (error) {
+                console.error('Demo initialization error:', error);
+                setStatus('error');
+                setErrorMessage(error instanceof Error ? error.message : 'Failed to start demo');
+            }
+        }
+
+        initializeDemo();
+    }, [router]);
+
+    if (status === 'error') {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+                <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+                    <div className="text-center mb-6">
+                        <div className="text-6xl mb-4">⚠️</div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                            Demo Unavailable
+                        </h1>
+                        <p className="text-gray-600">
+                            {errorMessage}
+                        </p>
+                    </div>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                        >
+                            Try Again
+                        </button>
+                        <a
+                            href="/contact"
+                            className="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors text-center"
+                        >
+                            Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-5xl mx-auto">
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                        See AI Blueprint™ in Action
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+            <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+                <div className="text-center mb-6">
+                    <div className="text-6xl mb-4 animate-bounce">🚀</div>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                        {status === 'loading' ? 'Preparing Your Demo...' : 'Launching Dashboard...'}
                     </h1>
-                    <p className="text-xl text-gray-600">
-                        Watch how our platform helps educational institutions assess AI readiness and create implementation plans
+                    <p className="text-gray-600 mb-6">
+                        {status === 'loading'
+                            ? 'Setting up your 30-minute demo environment with sample data'
+                            : 'Redirecting to your personalized dashboard'
+                        }
                     </p>
+
+                    {/* Loading spinner */}
+                    <div className="flex justify-center mb-6">
+                        <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                    </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-8 shadow-lg mb-8">
-                    <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center mb-6">
-                        <div className="text-center">
-                            <div className="text-6xl mb-4">🎬</div>
-                            <div className="text-2xl font-semibold text-gray-700">Demo Video Coming Soon</div>
-                            <p className="text-gray-600 mt-2">We&rsquo;re preparing a comprehensive video walkthrough</p>
+                {/* Test Environment Warning */}
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+                    <div className="flex items-start">
+                        <div className="text-yellow-400 text-xl mr-3">⚡</div>
+                        <div className="text-sm">
+                            <p className="font-semibold text-yellow-800 mb-1">Test Environment</p>
+                            <ul className="text-yellow-700 space-y-1">
+                                <li>• 30-minute session with pre-loaded data</li>
+                                <li>• Full platform access (no credit card)</li>
+                                <li>• Changes won't be saved</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-white rounded-xl p-6 shadow-lg">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-3">📊 Assessment Process</h3>
-                        <ul className="space-y-2 text-gray-700">
-                            <li>• 5-minute NIST framework evaluation</li>
-                            <li>• Comprehensive readiness scoring</li>
-                            <li>• Detailed gap analysis</li>
-                            <li>• Personalized recommendations</li>
-                        </ul>
-                    </div>
-                    <div className="bg-white rounded-xl p-6 shadow-lg">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-3">🚀 Blueprint Generation</h3>
-                        <ul className="space-y-2 text-gray-700">
-                            <li>• AI-powered plan creation</li>
-                            <li>• Phased implementation strategy</li>
-                            <li>• Department-specific recommendations</li>
-                            <li>• Real-time progress tracking</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white text-center">
-                    <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
-                    <p className="text-lg mb-6 opacity-90">
-                        Experience AI Blueprint™ firsthand with our free 14-day trial
-                    </p>
-                    <div className="flex gap-4 justify-center flex-wrap">
-                        <a
-                            href="/get-started"
-                            className="inline-block bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-                        >
-                            Start Free Trial
-                        </a>
-                        <a
-                            href="/contact"
-                            className="inline-block bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition-colors"
-                        >
-                            Schedule a Call
-                        </a>
-                    </div>
-                </div>
+                <p className="text-center text-gray-500 text-xs mt-4">
+                    By using the demo, you agree to our{' '}
+                    <a href="/terms" className="text-purple-600 hover:underline">Terms</a> and{' '}
+                    <a href="/privacy" className="text-purple-600 hover:underline">Privacy Policy</a>
+                </p>
             </div>
         </div>
     );
