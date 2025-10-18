@@ -1,8 +1,9 @@
 name: Seed Production Policy Templates
 
 on:
-  push:
-    branches: ["main"]
+  # Disabled until SUPABASE_DB_URL is configured
+  # push:
+  #   branches: ["main"]
   workflow_dispatch:
     inputs:
       skip_seed:
