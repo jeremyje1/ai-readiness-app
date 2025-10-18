@@ -1,10 +1,9 @@
 name: Policy Updates Refresh
 
 on:
-  # Disabled until CRON_SECRET and APP_BASE_URL are configured
-  # schedule:
-  #   # Runs every 6 hours to check for framework updates
-  #   - cron: '0 */6 * * *'
+  schedule:
+    # Runs every 6 hours to check for framework updates
+    - cron: '0 */6 * * *'
   workflow_dispatch: 
     inputs:
       dry_run:
