@@ -6,6 +6,12 @@ export const dynamic = 'force-dynamic';
 interface AssessmentSubmission {
     leadId: string;
     responses: Record<number, number>; // questionId -> value (0-4)
+    isDemoQuickAssessment?: boolean;
+    quickAssessment?: {
+        governance: number;
+        training: number;
+        funding: number;
+    };
 }
 
 interface CategoryScore {
@@ -340,31 +346,52 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validate responses
-        if (!body.responses || Object.keys(body.responses).length < 12) {
-            return NextResponse.json(
-                { success: false, error: 'Incomplete assessment responses' },
-                {
-                    status: 400,
-                    headers: {
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                        'Access-Control-Allow-Headers': 'Content-Type'
-                    }
-                }
+        // For demo quick assessments, use simpler scoring
+        let categoryScores: Record<string, number>;
+        let overallScore: number;
+        
+        if (body.isDemoQuickAssessment && body.quickAssessment) {
+            // Simple 3-category scoring for demo form
+            categoryScores = {
+                'Governance & Policy': Math.round(body.quickAssessment.governance * 20),
+                'Staff Training & Enablement': Math.round(body.quickAssessment.training * 20),
+                'Funding & Measurement': Math.round(body.quickAssessment.funding * 20)
+            };
+            overallScore = Math.round(
+                (body.quickAssessment.governance + body.quickAssessment.training + body.quickAssessment.funding) / 3 * 20
             );
+        } else {
+            // Validate responses for full assessment
+            if (!body.responses || Object.keys(body.responses).length < 12) {
+                return NextResponse.json(
+                    { success: false, error: 'Incomplete assessment responses' },
+                    {
+                        status: 400,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                            'Access-Control-Allow-Headers': 'Content-Type'
+                        }
+                    }
+                );
+            }
+
+            // Calculate scores for full 12-question assessment
+            const categoryScoresData = calculateCategoryScores(body.responses);
+            categoryScores = {};
+            Object.entries(categoryScoresData).forEach(([name, data]) => {
+                categoryScores[name] = data.score;
+            });
+            overallScore = calculateOverallScore(categoryScoresData);
         }
 
-        // Calculate scores
-        const categoryScoresData = calculateCategoryScores(body.responses);
-        const categoryScores: Record<string, number> = {};
-        Object.entries(categoryScoresData).forEach(([name, data]) => {
-            categoryScores[name] = data.score;
-        });
-
-        const overallScore = calculateOverallScore(categoryScoresData);
         const readinessLevel = getReadinessLevel(overallScore);
-        const quickWins = generateQuickWins(categoryScoresData);
+        const categoryScoresData = body.isDemoQuickAssessment ? 
+            Object.entries(categoryScores).map(([name, score]) => ({ name, score, questionCount: 1 })) :
+            Object.entries(calculateCategoryScores(body.responses)).map(([name, data]) => data);
+        const quickWins = generateQuickWins(
+            Object.fromEntries(categoryScoresData.map(cat => [cat.name, cat]))
+        );
         const estimatedImpact = calculateEstimatedImpact(overallScore);
         const percentile = Math.round(calculatePercentile(overallScore));
 

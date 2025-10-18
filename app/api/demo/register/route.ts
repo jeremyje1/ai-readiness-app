@@ -138,14 +138,16 @@ async function triggerAssessmentSubmit(
     try {
         const submitUrl = new URL("/api/demo/assessment/submit", request.url)
         console.log('📧 Calling assessment submit endpoint:', submitUrl.toString())
-        console.log('📋 Payload:', { leadId, responses })
+        console.log('📋 Payload:', { leadId, responses, isDemoQuickAssessment: true })
         
         const response = await fetch(submitUrl.toString(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 leadId,
-                responses
+                responses,
+                isDemoQuickAssessment: true,
+                quickAssessment
             })
         })
 
